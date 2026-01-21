@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D 5e Adventure Builder - DMG-Faithful</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                    <h1>D&D 5e Adventure Builder</h1>
+                    <p class="intro">Follow the Dungeon Master's Guide principles to build adventures as situations, not fixed plots. Players are co-authors.</p>
+                </div>
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+            <div class="warning-box">
+                <strong>⚠️ Critical Principle:</strong> Adventures are situations, not fixed plots. Players are co-authors. Avoid single-outcome design.
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" onclick="switchTab('manual')" id="tab-manual">
+                Manual Builder
+            </button>
+            <button class="tab-btn" onclick="switchTab('ai')" id="tab-ai">
+                AI Assistant
+            </button>
+        </div>
+
+        <!-- AI Assistant Tab Content -->
+        <section id="ai-assistant-section" class="tab-content" style="display: none;">
+            <div class="ai-assistant-container">
+                <h2>AI Adventure Generator</h2>
+                <p class="help-text">Generate a prompt for AI to create your adventure, then paste the AI's response to auto-fill the form.</p>
+
+                <!-- Prompt Generator Panel -->
+                <div class="form-section">
+                    <h3>1. Customize & Generate AI Prompt</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ai-party-level">Party Level *</label>
+                            <input type="number" id="ai-party-level" min="1" max="20" value="3" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ai-party-size">Party Size</label>
+                            <input type="number" id="ai-party-size" min="1" max="10" value="4">
+                        </div>
+                        <div class="form-group">
+                            <label for="ai-tone">Tone</label>
+                            <select id="ai-tone">
+                                <option value="">Any</option>
+                                <option value="Heroic">Heroic</option>
+                                <option value="Grimdark">Grimdark</option>
+                                <option value="Mystery">Mystery</option>
+                                <option value="Horror">Horror</option>
+                                <option value="Comedy">Comedy</option>
+                                <option value="Political">Political</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ai-adventure-length">Adventure Length</label>
+                            <select id="ai-adventure-length">
+                                <option value="One-shot">One-shot (1 session)</option>
+                                <option value="Short (2-3 sessions)">Short (2-3 sessions)</option>
+                                <option value="Medium (4-6 sessions)" selected>Medium (4-6 sessions)</option>
+                                <option value="Long (7+ sessions)">Long (7+ sessions)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="ai-hook-preference">Hook Type Preference</label>
+                            <select id="ai-hook-preference">
+                                <option value="Any">Any</option>
+                                <option value="Patron">Patron</option>
+                                <option value="Supernatural">Supernatural</option>
+                                <option value="Happenstance">Happenstance</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn-primary" onclick="generateAIPrompt()">Generate AI Prompt</button>
+                    </div>
+
+                    <div class="form-group" id="ai-prompt-output" style="display: none;">
+                        <label>Generated Prompt (copy this and paste into ChatGPT, Claude, etc.)</label>
+                        <textarea id="ai-prompt-text" rows="15" readonly></textarea>
+                        <button type="button" class="btn-secondary" onclick="copyAIPrompt()" style="margin-top: 0.5rem;">Copy Prompt</button>
+                    </div>
+                </div>
+
+                <!-- AI Response Parser Panel -->
+                <div class="form-section">
+                    <h3>2. Paste AI Response & Fill Form</h3>
+                    <p class="help-text">After the AI generates the adventure, paste its JSON response below and click "Parse & Fill Form" to automatically populate all fields.</p>
+                    
+                    <div class="form-group">
+                        <label for="ai-response-input">AI Response (JSON)</label>
+                        <textarea id="ai-response-input" rows="20" placeholder='Paste the AI\'s JSON response here. It should start with { and end with }.'></textarea>
+                    </div>
+
+                    <div id="ai-parse-errors" class="error-box" style="display: none;"></div>
+                    <div id="ai-parse-success" class="warning-box" style="display: none; background-color: #d4edda; border-color: #28a745; color: #155724;">
+                        <strong>✓ Success!</strong> <span id="ai-parse-message"></span>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn-primary" onclick="parseAIResponse()">Parse & Fill Form</button>
+                        <button type="button" class="btn-secondary" onclick="clearAIResponse()">Clear</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Guidance Sections (Collapsible) -->
+        <section class="guidance-section">
+            <h2>DMG Adventure-Building Guidelines</h2>
+            
+            <div class="guidance-item">
+                <button class="guidance-toggle" onclick="toggleGuidance(this)">
+                    <span>Premise (Situation)</span>
+                    <span class="toggle-icon">▼</span>
+                </button>
+                <div class="guidance-content">
+                    <p>An adventure is a <strong>situation</strong>, not a plot. The situation includes:</p>
+                    <ul>
+                        <li><strong>Situation</strong>: What's happening in the world</li>
+                        <li><strong>Conflict</strong>: The problem that needs heroes</li>
+                        <li><strong>What's Unique and Fun</strong>: What makes this adventure special</li>
+                        <li><strong>Stakes</strong>: What happens if ignored or if heroes fail/succeed</li>
+                        <li><strong>Time Pressure</strong>: Any urgency that drives the adventure forward</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="guidance-item">
+                <button class="guidance-toggle" onclick="toggleGuidance(this)">
+                    <span>Draw In the Players (Hook Types)</span>
+                    <span class="toggle-icon">▼</span>
+                </button>
+                <div class="guidance-content">
+                    <p>The DMG identifies three hook types:</p>
+                    <ul>
+                        <li><strong>Patron</strong>: Someone with authority or resources asks the party to act</li>
+                        <li><strong>Supernatural</strong>: Mysterious events, omens, or magical phenomena draw attention</li>
+                        <li><strong>Happenstance</strong>: The party stumbles upon the situation by chance</li>
+                    </ul>
+                    <p>Consider why this party specifically cares, per-character motivations, and what happens if they refuse.</p>
+                </div>
+            </div>
+
+            <div class="guidance-item">
+                <button class="guidance-toggle" onclick="toggleGuidance(this)">
+                    <span>Leads and Threads</span>
+                    <span class="toggle-icon">▼</span>
+                </button>
+                <div class="guidance-content">
+                    <p>DMG recommends <strong>2-3 investigatable options</strong> at once so choices matter. Each thread should:</p>
+                    <ul>
+                        <li>Be something players can investigate</li>
+                        <li>Point to a location, encounter, or NPC</li>
+                        <li>Have a cost if ignored (consequence for not pursuing)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="guidance-item">
+                <button class="guidance-toggle" onclick="toggleGuidance(this)">
+                    <span>Plan Encounters</span>
+                    <span class="toggle-icon">▼</span>
+                </button>
+                <div class="guidance-content">
+                    <p>Every encounter requires:</p>
+                    <ul>
+                        <li><strong>Objective</strong>: What players want to accomplish (required)</li>
+                        <li><strong>Obstacle</strong>: What stands in their way (required)</li>
+                        <li><strong>What It Accomplishes</strong>: What this encounter achieves in the story</li>
+                        <li><strong>Information Revealed</strong>: What clue/info is revealed (chains to next lead/thread)</li>
+                    </ul>
+                    <p>Mix <strong>Exploration, Social, and Combat</strong> scene types. Always include fail-forward consequences that move the story forward.</p>
+                </div>
+            </div>
+
+            <div class="guidance-item">
+                <button class="guidance-toggle" onclick="toggleGuidance(this)">
+                    <span>Bring It to an End</span>
+                    <span class="toggle-icon">▼</span>
+                </button>
+                <div class="guidance-content">
+                    <p>Plan multiple outcomes:</p>
+                    <ul>
+                        <li>Expected ending (what you think will happen)</li>
+                        <li>Alternative endings (2+) based on player choices</li>
+                        <li>What if the villain dies early? (contingency plan)</li>
+                    </ul>
+                    <p>Rewards should be level-appropriate (treasure, magic items, XP/milestone).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Manual Builder Tab Content -->
+        <section id="manual-builder-section" class="tab-content">
+        <!-- Interactive Form Section -->
+        <form id="adventure-form">
+            <!-- Section 1: Premise -->
+            <section class="form-section" id="section-premise">
+                <h2>1. Premise (Situation)</h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="party-level">Party Level *</label>
+                        <input type="number" id="party-level" name="partyLevel" min="1" max="20" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="party-size">Party Size</label>
+                        <input type="number" id="party-size" name="partySize" min="1" max="10" value="4">
+                    </div>
+                    <div class="form-group">
+                        <label for="tone">Tone</label>
+                        <select id="tone" name="tone">
+                            <option value="">Select tone...</option>
+                            <option value="Heroic">Heroic</option>
+                            <option value="Grimdark">Grimdark</option>
+                            <option value="Mystery">Mystery</option>
+                            <option value="Horror">Horror</option>
+                            <option value="Comedy">Comedy</option>
+                            <option value="Political">Political</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <input type="text" id="tone-other" name="toneOther" placeholder="Specify tone" style="display:none;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Primary Location</label>
+                    <input type="text" id="location" name="location" placeholder="e.g., Village of Barovia, Waterdeep, etc.">
+                </div>
+
+                <div class="form-group">
+                    <label for="situation">Situation *</label>
+                    <textarea id="situation" name="situation" rows="3" required placeholder="What's happening in the world?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="conflict">Conflict *</label>
+                    <textarea id="conflict" name="conflict" rows="3" required placeholder="What problem needs heroes?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="what-makes-unique">What Makes It Unique and Fun</label>
+                    <textarea id="what-makes-unique" name="whatMakesItUnique" rows="2" placeholder="What makes this adventure special and memorable?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="stakes">Stakes</label>
+                    <textarea id="stakes" name="stakes" rows="2" placeholder="What happens if ignored? If heroes fail? If they succeed?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="time-pressure">Time Pressure</label>
+                    <textarea id="time-pressure" name="timePressure" rows="2" placeholder="Any urgency? Deadlines? Consequences of delay?"></textarea>
+                </div>
+            </section>
+
+            <!-- Section 2: Draw In the Players -->
+            <section class="form-section" id="section-hook">
+                <h2>2. Draw In the Players (Hook)</h2>
+
+                <div class="form-group">
+                    <label>Hook Type *</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="hookType" value="Patron" required> Patron</label>
+                        <label><input type="radio" name="hookType" value="Supernatural" required> Supernatural</label>
+                        <label><input type="radio" name="hookType" value="Happenstance" required> Happenstance</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="hook-details">Hook Details</label>
+                    <div class="button-group">
+                        <button type="button" id="roll-hook-btn" class="btn-secondary" onclick="rollHookTable()">🎲 Roll DMG Table Suggestion</button>
+                    </div>
+                    <textarea id="hook-details" name="hookDetails" rows="3" placeholder="Details of how the party gets involved (auto-filled by Roll or enter manually)"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="why-party-cares">Why This Party Cares</label>
+                    <textarea id="why-party-cares" name="whyPartyCares" rows="3" placeholder="Why does this specific party get involved?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Per-Character Motivation</label>
+                    <div id="pc-motivation-list"></div>
+                    <button type="button" class="btn-secondary" onclick="addPCMotivation()">+ Add PC Motivation</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="refusal-plan">Refusal Plan</label>
+                    <textarea id="refusal-plan" name="refusalPlan" rows="2" placeholder="What happens if the party says no?"></textarea>
+                </div>
+            </section>
+
+            <!-- Section 3: Leads and Threads -->
+            <section class="form-section" id="section-threads">
+                <h2>3. Leads and Threads</h2>
+                <p class="help-text">DMG recommends 2-3 things to pursue at once so choices matter.</p>
+                
+                <div id="threads-list"></div>
+                <button type="button" class="btn-secondary" onclick="addThread()">+ Add Thread</button>
+            </section>
+
+            <!-- Section 4: Plan Encounters -->
+            <section class="form-section" id="section-encounters">
+                <h2>4. Plan Encounters</h2>
+                <p class="help-text">Aim for 3-5 encounters, mixing exploration, social, and combat.</p>
+                
+                <div id="encounters-list"></div>
+                <button type="button" class="btn-secondary" onclick="addEncounter()">+ Add Encounter</button>
+            </section>
+
+            <!-- Section 5: NPCs -->
+            <section class="form-section" id="section-npcs">
+                <h2>5. NPCs</h2>
+                
+                <div id="npcs-list"></div>
+                <button type="button" class="btn-secondary" onclick="addNPC()">+ Add NPC</button>
+            </section>
+
+            <!-- Section 6: Locations -->
+            <section class="form-section" id="section-locations">
+                <h2>6. Locations</h2>
+                
+                <div id="locations-list"></div>
+                <button type="button" class="btn-secondary" onclick="addLocation()">+ Add Location</button>
+            </section>
+
+            <!-- Section 7: Bring It to an End -->
+            <section class="form-section" id="section-ending">
+                <h2>7. Bring It to an End</h2>
+
+                <div class="form-group">
+                    <label for="expected-ending">Expected Ending</label>
+                    <textarea id="expected-ending" name="expectedEnding" rows="3" placeholder="What you think will happen"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="alt-ending-1">Alternative Ending 1</label>
+                    <textarea id="alt-ending-1" name="altEnding1" rows="2" placeholder="First alternative based on player choices"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="alt-ending-2">Alternative Ending 2</label>
+                    <textarea id="alt-ending-2" name="altEnding2" rows="2" placeholder="Second alternative based on player choices"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="villain-dies-early">If Villain Dies Early</label>
+                    <textarea id="villain-dies-early" name="villainDiesEarlyPlan" rows="2" placeholder="Contingency plan if the main threat is eliminated early"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Rewards</label>
+                    <div id="rewards-list">
+                        <div class="form-group">
+                            <label for="rewards-treasure">Treasure</label>
+                            <textarea id="rewards-treasure" name="rewardsTreasure" rows="2" placeholder="Gold, gems, art objects, etc."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="rewards-magic-items">Magic Items</label>
+                            <textarea id="rewards-magic-items" name="rewardsMagicItems" rows="2" placeholder="Magic items appropriate to party level"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="rewards-xp">Experience Points</label>
+                                <input type="number" id="rewards-xp" name="rewardsXP" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="rewards-milestone" name="rewardsMilestone"> Milestone Leveling
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="rewards-other">Other Rewards</label>
+                            <textarea id="rewards-other" name="rewardsOther" rows="2" placeholder="Reputation, allies, story resources, etc."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid var(--border);">
+                    <label for="title">Adventure Title *</label>
+                    <p class="help-text" style="margin-top: 0.25rem; margin-bottom: 0.75rem;">Decide on the title after you've developed your adventure based on all the details above.</p>
+                    <input type="text" id="title" name="title" required placeholder="e.g., The Curse of Strahd, Lost Mine of Phandelver, etc.">
+                </div>
+            </section>
+        </form>
+
+        <!-- Output Section -->
+        <section class="output-section">
+            <h2>Generate Template</h2>
+
+            <div class="form-group">
+                <label>Template Type</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="templateType" value="build" checked> Build Prompt (Generate Adventure Content)</label>
+                    <label><input type="radio" name="templateType" value="run"> Run Prompt (Act as DM at Table)</label>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" id="generate-btn" class="btn-primary" onclick="generateTemplate()">Generate Template</button>
+                <button type="button" id="copy-btn" class="btn-secondary" onclick="copyToClipboard()" disabled>Copy to Clipboard</button>
+                <button type="button" id="export-run-prompt-btn" class="btn-primary" onclick="exportRunPrompt()">Export DM Prompt (Paste to AI)</button>
+                <button type="button" id="export-json-btn" class="btn-secondary" onclick="exportJSON()">Export JSON</button>
+                <button type="button" id="import-json-btn" class="btn-secondary" onclick="document.getElementById('import-file').click()">Import JSON</button>
+                <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importJSON(event)">
+                <button type="button" id="clear-btn" class="btn-secondary" onclick="clearForm()">Clear Form</button>
+            </div>
+            
+            <div class="help-text" style="margin-top: 0.5rem; margin-bottom: 1rem;">
+                <strong>💡 To run this adventure with AI:</strong> Select "Run Prompt" above, click "Generate Template", then "Copy to Clipboard" OR use "Export DM Prompt" to save as a file. Paste the generated prompt directly into ChatGPT/Claude - it will start DMing immediately. Do NOT paste raw JSON files - use the generated Run Prompt instead.
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="live-preview" onchange="toggleLivePreview()"> Live Preview (debounced)
+                </label>
+            </div>
+
+            <div id="validation-errors" class="error-box" style="display:none;"></div>
+            <div id="validation-warnings" class="warning-box" style="display:none;"></div>
+
+            <div class="form-group">
+                <label for="template-output">Generated Template</label>
+                <textarea id="template-output" name="templateOutput" rows="20" readonly placeholder="Generated template will appear here..."></textarea>
+            </div>
+        </section>
+        </section> <!-- End Manual Builder Tab Content -->
+    </div>
+
+    <script src="theme.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D 5e Combat Turn Helper</title>
+    <style>
+        :root {
+            --primary-color: #1a472a;
+            --primary-light: #2d5a3d;
+            --secondary-color: #8b4513;
+            --accent-color: #d4af37;
+            --background: #f5f5f5;
+            --surface: #ffffff;
+            --text: #333333;
+            --text-light: #666666;
+            --border: #dddddd;
+            --error: #dc3545;
+            --warning: #ffc107;
+            --success: #28a745;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --shadow-hover: rgba(0, 0, 0, 0.15);
+        }
+
+        /* Dark Mode CSS Variables */
+        .dark-mode {
+            --primary-color: #4a9b5f;
+            --primary-light: #5cb377;
+            --secondary-color: #a67c52;
+            --accent-color: #f4d03f;
+            --background: #1a1a1a;
+            --surface: #2d2d2d;
+            --text: #e0e0e0;
+            --text-light: #b0b0b0;
+            --border: #404040;
+            --error: #ff6b7a;
+            --warning: #ffd54f;
+            --success: #66bb6a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --shadow-hover: rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--background);
+            padding: 1rem;
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: var(--surface);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow);
+            min-height: calc(100vh - 2rem);
+            transition: background-color 0.3s ease;
+        }
+
+
+        /* Turn Tracker */
+        .turn-tracker {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        /* Reaction Widget (NOT YOUR TURN Screen) */
+        .reaction-widget-large {
+            background-color: rgba(0, 0, 0, 0.05);
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .dark-mode .reaction-widget-large {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .reaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .reaction-label-large {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--text);
+        }
+
+        .reaction-status-large {
+            min-width: 120px;
+            text-align: center;
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+        }
+
+        .reaction-hint {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        /* Reactions Reference */
+        .reactions-reference {
+            background-color: rgba(0, 0, 0, 0.03);
+            border-left: 4px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .dark-mode .reactions-reference {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .reactions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .reaction-item {
+            font-size: 0.875rem;
+            color: var(--text);
+            padding: 0.5rem;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 4px;
+        }
+
+        .dark-mode .reaction-item {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+
+        .tracker-item {
+            text-align: center;
+        }
+
+        .tracker-label {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            font-size: 0.8rem;
+        }
+
+        .tracker-status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background-color: rgba(255, 255, 255, 0.2);
+            font-size: 0.75rem;
+        }
+
+        .tracker-status.available {
+            background-color: var(--success);
+            cursor: pointer;
+        }
+
+        .tracker-status.available:hover {
+            opacity: 0.8;
+        }
+
+        .tracker-status.used {
+            background-color: var(--error);
+            cursor: pointer;
+        }
+
+        .tracker-status.used:hover {
+            opacity: 0.8;
+        }
+
+        .tracker-status.reserved {
+            background-color: var(--warning);
+            color: var(--text);
+            cursor: not-allowed;
+        }
+
+        /* Reaction tracker clickable */
+        #tracker-reaction.available,
+        #tracker-reaction.used {
+            cursor: pointer;
+        }
+
+        #tracker-reaction.available:hover,
+        #tracker-reaction.used:hover {
+            opacity: 0.8;
+        }
+
+        /* Screen Views */
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* End Turn Container */
+        .end-turn-container {
+            background-color: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        .headline {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        /* End Turn screen specific spacing */
+        #screen-end-turn .headline {
+            margin-bottom: 1rem;
+        }
+
+        .headline.not-your-turn {
+            color: var(--text-light);
+        }
+
+        /* Button Grid */
+        .button-grid {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* End Turn screen - reduce button grid spacing */
+        #screen-end-turn .button-grid {
+            margin-bottom: 0;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 1.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-light);
+            box-shadow: 0 4px 8px var(--shadow-hover);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #6b3410;
+            box-shadow: 0 4px 8px var(--shadow-hover);
+        }
+
+        .btn-accent {
+            background-color: var(--accent-color);
+            color: var(--text);
+        }
+
+        .btn-accent:hover {
+            background-color: #c19d2e;
+            box-shadow: 0 4px 8px var(--shadow-hover);
+        }
+
+        .btn-danger {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            box-shadow: 0 4px 8px var(--shadow-hover);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            box-shadow: 0 4px 8px var(--shadow-hover);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            min-height: 44px;
+        }
+
+        /* DM Panel */
+
+        /* Detail Content */
+        .detail-content {
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .detail-content p {
+            margin-bottom: 1rem;
+        }
+
+        .detail-content ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Modal Body (used in attack tree) */
+        .modal-body {
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .modal-body p {
+            margin-bottom: 0.75rem;
+        }
+
+        .modal-body ul {
+            margin-left: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .modal-body li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Attack Tree */
+        .attack-tree {
+            display: none;
+        }
+
+        .attack-tree.active {
+            display: block;
+        }
+
+        .attack-step {
+            display: none;
+        }
+
+        .attack-step.active {
+            display: block;
+        }
+
+        .help-text {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            font-style: italic;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .dark-mode .help-text {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* End Turn Checklist */
+        .checklist-screen {
+            list-style: none;
+            margin-bottom: 1rem;
+            padding: 0;
+        }
+
+        /* End Turn screen - reduce checklist spacing */
+        #screen-end-turn .checklist-screen {
+            margin-bottom: 0.5rem;
+        }
+
+        .checklist-screen li {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background-color: rgba(0, 0, 0, 0.03);
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .dark-mode .checklist-screen li {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .checklist-screen .status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .status.used {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .status.unused {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .status.available {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .status.reserved {
+            background-color: var(--warning);
+            color: var(--text);
+        }
+
+        /* Navigation */
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .nav-buttons .btn {
+            flex: 1;
+        }
+
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0.75rem;
+            }
+
+            .headline {
+                font-size: 1.5rem;
+            }
+
+            .btn {
+                font-size: 1rem;
+                padding: 0.875rem 1.25rem;
+            }
+
+            .turn-tracker {
+                grid-template-columns: repeat(2, 1fr);
+                font-size: 0.75rem;
+            }
+
+            .tracker-label {
+                font-size: 0.75rem;
+            }
+
+            #bonus-action-label::after {
+                content: " Action";
+            }
+        }
+
+        /* Dash Active Note */
+        .dash-note {
+            background-color: rgba(74, 155, 95, 0.1);
+            border-left: 4px solid var(--primary-color);
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .dark-mode .dash-note {
+            background-color: rgba(74, 155, 95, 0.2);
+        }
+
+        /* Dark mode specific adjustments */
+        .dark-mode .tracker-status.reserved {
+            color: var(--background);
+        }
+
+        /* DM Panel (compact) */
+        .dm-panel-compact {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background-color: rgba(212, 175, 55, 0.1);
+            border-left: 3px solid var(--accent-color);
+            border-radius: 4px;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        .dark-mode .dm-panel-compact {
+            background-color: rgba(244, 208, 63, 0.1);
+        }
+
+        .dm-panel-compact .dm-label {
+            font-weight: 600;
+            color: var(--secondary-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .dark-mode .dm-panel-compact .dm-label {
+            color: var(--accent-color);
+        }
+
+        .dm-panel-compact .dm-resources {
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .dm-panel-compact .dm-resource-item {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .dark-mode .dm-panel-compact .dm-resource-item {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Character Setup (compact) */
+        .character-setup-compact {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background-color: rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .dark-mode .character-setup-compact {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .setup-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .setup-row label {
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+        }
+
+        .setup-row select {
+            flex: 1;
+            padding: 0.45rem 0.6rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: var(--surface);
+            color: var(--text);
+        }
+
+        .setup-toggles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+
+        .setup-toggles label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            -webkit-user-select: none;
+            user-select: none;
+            color: var(--text);
+        }
+
+        .setup-toggles input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--error);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Reset Confirm Dialog */
+        .reset-dialog {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .reset-dialog.active {
+            display: flex;
+        }
+
+        .reset-dialog-content {
+            background-color: var(--surface);
+            padding: 1.5rem;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .reset-dialog-message {
+            margin-bottom: 1.5rem;
+            font-size: 1.125rem;
+        }
+
+        .reset-dialog-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* Default hidden elements (JS will reveal when needed) */
+        #dash-note {
+            display: none;
+        }
+
+        /* Used buttons grid */
+        .used-grid {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn.used {
+            background-color: rgba(0, 0, 0, 0.1);
+            opacity: 0.8;
+        }
+
+        .dark-mode .btn.used {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn.used:hover {
+            opacity: 0.9;
+        }
+
+        /* Common utility classes (avoid inline styles) */
+        .start-turn-grid {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            margin-bottom: 0.75rem;
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        .hint-text {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .tight-top {
+            margin-top: 0.5rem;
+        }
+
+        .muted-center {
+            text-align: center;
+            color: var(--text-light);
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Turn Tracker -->
+        <div class="turn-tracker">
+            <div class="tracker-item">
+                <div class="tracker-label">🏃 Movement</div>
+                <div class="tracker-status" id="tracker-movement">Available</div>
+            </div>
+            <div class="tracker-item">
+                <div class="tracker-label">⚔️ Action</div>
+                <div class="tracker-status" id="tracker-action">Available</div>
+            </div>
+            <div class="tracker-item">
+                <div class="tracker-label" id="bonus-action-label">✨ Bonus</div>
+                <div class="tracker-status" id="tracker-bonus-action">Available</div>
+            </div>
+            <div class="tracker-item">
+                <div class="tracker-label">🤏 Interaction</div>
+                <div class="tracker-status" id="tracker-interaction">Available</div>
+            </div>
+            <div class="tracker-item">
+                <div class="tracker-label">⚡ Reaction</div>
+                <div class="tracker-status" id="tracker-reaction" onclick="toggleReaction()" title="Click to toggle (can be used during other creatures' turns)">Available</div>
+            </div>
+        </div>
+
+        <!-- Reaction Status (Separate) -->
+        <!-- Home Screen -->
+        <div class="screen active" id="screen-home">
+            <!-- Dash Note -->
+            <div class="dash-note" id="dash-note">
+                💨 Extra movement granted this turn (Dash active)
+            </div>
+
+            <div id="home-available" class="button-grid"></div>
+            <div id="home-used" class="button-grid used-grid"></div>
+
+            <!-- DM Panel (compact) -->
+            <div class="dm-panel-compact">
+                <div class="dm-label">DM said: Anything else?</div>
+                <div class="dm-resources" id="dm-resources-list">
+                    <span>All set.</span>
+                </div>
+            </div>
+
+            <!-- Character Setup (compact) -->
+            <div class="character-setup-compact">
+                <div class="setup-row">
+                    <label for="class-select">⚙️ Class</label>
+                    <select id="class-select">
+                        <option value="">(Select)</option>
+                        <option value="barbarian">Barbarian</option>
+                        <option value="bard">Bard</option>
+                        <option value="cleric">Cleric</option>
+                        <option value="fighter">Fighter</option>
+                        <option value="monk">Monk</option>
+                        <option value="paladin">Paladin</option>
+                        <option value="ranger">Ranger</option>
+                        <option value="rogue">Rogue</option>
+                        <option value="sorcerer">Sorcerer</option>
+                        <option value="warlock">Warlock</option>
+                        <option value="wizard">Wizard</option>
+                        <option value="other">Other / None</option>
+                    </select>
+                </div>
+                <div class="setup-toggles">
+                    <label title="Show Healing Word option">
+                        <input type="checkbox" id="toggle-healing-word" />
+                        💚 Healing Word
+                    </label>
+                    <label title="Show offhand attack option">
+                        <input type="checkbox" id="toggle-offhand-attack" />
+                        🗡️ Offhand
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- NOT YOUR TURN Screen -->
+        <div class="screen" id="screen-not-your-turn">
+            <h1 class="headline not-your-turn">⏸️ NOT YOUR TURN</h1>
+            
+            <div class="button-grid start-turn-grid">
+                <button class="btn btn-primary" onclick="handleStartTurn()">▶️ START TURN</button>
+            </div>
+            
+            <!-- Reaction Widget -->
+            <div class="reaction-widget-large">
+                <div class="reaction-header">
+                    <div class="reaction-label-large">⚡ Reaction</div>
+                    <div class="tracker-status reaction-status-large" onclick="toggleReaction()" title="Click to toggle when you use your reaction" id="reaction-widget-status-2">Available</div>
+                </div>
+                <p class="reaction-hint">Click the status above to mark when you use your reaction</p>
+            </div>
+
+            <!-- Common Reactions Reference -->
+            <div class="reactions-reference">
+                <h3 class="section-title">Common Reactions:</h3>
+                <div class="reactions-list">
+                    <div class="reaction-item">⚔️ <strong>Opportunity Attack</strong> - When enemy leaves your reach</div>
+                    <div class="reaction-item">🛡️ <strong>Shield</strong> - When hit by an attack (+5 AC)</div>
+                    <div class="reaction-item">✨ <strong>Counterspell</strong> - When enemy casts a spell</div>
+                    <div class="reaction-item">⚡ <strong>Absorb Elements</strong> - When hit by elemental damage</div>
+                    <div class="reaction-item">⏳ <strong>Ready Action</strong> - Use your readied action (if reserved)</div>
+                </div>
+            </div>
+
+            <p class="hint-text">
+                You can use your reaction during other creatures' turns.
+            </p>
+        </div>
+
+        <!-- INTERACT Screen -->
+        <div class="screen" id="screen-interact">
+            <h1 class="headline">🤏 Simple Interaction</h1>
+            <div class="button-grid">
+                <button class="btn btn-primary" onclick="handleInteract('draw-stow')">🗡️ Draw/Stow Weapon</button>
+                <button class="btn btn-primary" onclick="handleInteract('door')">🚪 Open/Close Door</button>
+                <button class="btn btn-primary" onclick="handleInteract('pickup-drop')">📦 Pick Up / Drop Item</button>
+                <button class="btn btn-primary" onclick="handleInteract('move-object')">🪑 Move Small Object</button>
+                <button class="btn btn-secondary" onclick="showScreen('screen-home')">← Back</button>
+            </div>
+        </div>
+
+        <!-- ACTION Screen -->
+        <div class="screen" id="screen-action">
+            <h1 class="headline">⚔️ Choose Action</h1>
+            <div class="button-grid">
+                <button class="btn btn-primary" onclick="showActionDetail('search')">🔍 Search</button>
+                <button class="btn btn-primary" onclick="showActionDetail('ready')">⏳ Ready</button>
+                <button class="btn btn-primary" onclick="showActionDetail('help')">🤝 Help</button>
+                <button class="btn btn-primary" onclick="showActionDetail('dodge')">🛡️ Dodge</button>
+                <button class="btn btn-primary" onclick="showActionDetail('disengage')">🏃‍♂️ Disengage</button>
+                <button class="btn btn-primary" onclick="showActionDetail('hide')">🥷 Hide</button>
+                <button class="btn btn-primary" onclick="showActionDetail('use-object')">🔧 Use Object</button>
+                <button class="btn btn-primary" onclick="showActionDetail('cast-spell')">✨ Cast a Spell</button>
+                <button class="btn btn-primary" onclick="showActionDetail('shove')">💪 Shove</button>
+                <button class="btn btn-primary" onclick="showActionDetail('grapple')">🤼 Grapple</button>
+                <button class="btn btn-accent" onclick="showAttackTree()">⚔️ Attack</button>
+                <button class="btn btn-secondary" onclick="showScreen('screen-home')">← Back</button>
+            </div>
+        </div>
+
+        <!-- Attack Decision Tree -->
+        <div class="screen" id="screen-attack">
+            <h1 class="headline">⚔️ Attack</h1>
+            <div class="attack-tree" id="attack-step-1">
+                <div class="button-grid">
+                    <button class="btn btn-primary" onclick="attackStep(2, 'weapon')">🗡️ Weapon Attack</button>
+                    <button class="btn btn-primary" onclick="attackStep(2, 'spell')">✨ Spell Attack</button>
+                    <button class="btn btn-primary" onclick="attackStep(2, 'save')">🎲 Target Makes a Save</button>
+                    <button class="btn btn-secondary" onclick="showScreen('screen-action')">← Back</button>
+                </div>
+            </div>
+
+            <!-- Weapon Attack Flow -->
+            <div class="attack-tree" id="attack-weapon-type">
+                <div class="button-grid">
+                    <button class="btn btn-primary" onclick="attackStep(3, 'weapon-melee')">⚔️ Melee</button>
+                    <button class="btn btn-primary" onclick="attackStep(3, 'weapon-ranged')">🏹 Ranged</button>
+                    <button class="btn btn-secondary" onclick="attackStep(1)">← Back</button>
+                </div>
+            </div>
+
+            <div class="attack-tree" id="attack-weapon-melee">
+                <div class="modal-body">
+                    <p><strong>Roll d20 + Strength modifier (or Dexterity for finesse)</strong></p>
+                    <div class="help-text">
+                        <div>Advantage/Disadvantage?</div>
+                        <div>Nat 20 = crit (double dice)</div>
+                    </div>
+                </div>
+                <div class="button-grid">
+                    <button class="btn btn-success" onclick="attackStep(4, 'hit')">✅ Hit</button>
+                    <button class="btn btn-danger" onclick="attackStep(4, 'miss')">❌ Miss</button>
+                    <button class="btn btn-secondary" onclick="attackStep(2, 'weapon')">← Back</button>
+                </div>
+            </div>
+
+            <div class="attack-tree" id="attack-weapon-ranged">
+                <div class="modal-body">
+                    <p><strong>Roll d20 + Dexterity modifier</strong></p>
+                    <div class="help-text">
+                        <div>Advantage/Disadvantage?</div>
+                        <div>Cover may add +2/+5 AC vs ranged</div>
+                        <div>Within 5 feet: Disadvantage (unless Crossbow Expert)</div>
+                        <div>Nat 20 = crit (double dice)</div>
+                    </div>
+                </div>
+                <div class="button-grid">
+                    <button class="btn btn-success" onclick="attackStep(4, 'hit')">✅ Hit</button>
+                    <button class="btn btn-danger" onclick="attackStep(4, 'miss')">❌ Miss</button>
+                    <button class="btn btn-secondary" onclick="attackStep(2, 'weapon')">← Back</button>
+                </div>
+            </div>
+
+            <!-- Spell Attack Flow -->
+            <div class="attack-tree" id="attack-spell">
+                <div class="modal-body">
+                    <p><strong>Roll d20 + spellcasting ability modifier + proficiency bonus</strong></p>
+                    <div class="help-text">
+                        <div>Advantage/Disadvantage?</div>
+                        <div>Cover may add +2/+5 AC</div>
+                        <div>Nat 20 = crit (double dice)</div>
+                    </div>
+                </div>
+                <div class="button-grid">
+                    <button class="btn btn-success" onclick="attackStep(4, 'hit')">Hit</button>
+                    <button class="btn btn-danger" onclick="attackStep(4, 'miss')">Miss</button>
+                    <button class="btn btn-secondary" onclick="attackStep(1)">Back</button>
+                </div>
+            </div>
+
+            <!-- Save Flow -->
+            <div class="attack-tree" id="attack-save-type">
+                <div class="button-grid">
+                    <button class="btn btn-primary" onclick="attackStep(3, 'save-str')">STR</button>
+                    <button class="btn btn-primary" onclick="attackStep(3, 'save-dex')">DEX</button>
+                    <button class="btn btn-primary" onclick="attackStep(3, 'save-con')">CON</button>
+                    <button class="btn btn-primary" onclick="attackStep(3, 'save-int')">INT</button>
+                    <button class="btn btn-primary" onclick="attackStep(3, 'save-wis')">WIS</button>
+                    <button class="btn btn-primary" onclick="attackStep(3, 'save-cha')">CHA</button>
+                    <button class="btn btn-secondary" onclick="attackStep(1)">Back</button>
+                </div>
+            </div>
+
+            <div class="attack-tree" id="attack-save-result">
+                <div class="modal-body">
+                    <p><strong>DM rolls d20 + target's <span id="save-type-name"></span> modifier vs your spell save DC</strong></p>
+                    <p>Spell save DC = 8 + proficiency bonus + spellcasting ability modifier</p>
+                </div>
+                <div class="button-grid">
+                    <button class="btn btn-success" onclick="attackStep(4, 'save-succeeds')">✅ Save Succeeds</button>
+                    <button class="btn btn-danger" onclick="attackStep(4, 'save-fails')">❌ Save Fails</button>
+                    <button class="btn btn-secondary" onclick="attackStep(2, 'save')">← Back</button>
+                </div>
+            </div>
+
+            <!-- Hit/Miss Results -->
+            <div class="attack-tree" id="attack-hit">
+                <div class="modal-body">
+                    <p><strong>Roll damage dice + modifier</strong></p>
+                </div>
+                <div class="button-grid">
+                    <button class="btn btn-primary" onclick="confirmAttackAction()">✅ Confirm Action</button>
+                    <button class="btn btn-secondary" onclick="attackStep(3)">← Back</button>
+                </div>
+            </div>
+
+            <div class="attack-tree" id="attack-miss">
+                <div class="modal-body">
+                    <p><strong>Miss!</strong></p>
+                    <p><strong>Follow-up suggestions:</strong></p>
+                    <ul>
+                        <li>Move to better position or cover</li>
+                        <li>Help an ally on your next turn</li>
+                        <li>Try Shove to push or knock prone</li>
+                        <li>Try Grapple to restrain target</li>
+                        <li>Use environment (close door, tip table for cover)</li>
+                    </ul>
+                </div>
+                <div class="button-grid">
+                    <button class="btn btn-primary" onclick="confirmAttackAction()">✅ Confirm Action</button>
+                    <button class="btn btn-secondary" onclick="attackStep(3)">← Back</button>
+                </div>
+            </div>
+
+            <div class="attack-tree" id="attack-save-succeeds">
+                <div class="modal-body">
+                    <p><strong>Save Succeeds:</strong> Reduced or no effect (as per spell)</p>
+                </div>
+                <div class="button-grid">
+                    <button class="btn btn-primary" onclick="confirmAction()">Confirm Action</button>
+                    <button class="btn btn-secondary" onclick="attackStep(3)">Back</button>
+                </div>
+            </div>
+
+            <div class="attack-tree" id="attack-save-fails">
+                <div class="modal-body">
+                    <p><strong>Save Fails:</strong> Full effect applied</p>
+                </div>
+                <div class="button-grid">
+                    <button class="btn btn-primary" onclick="confirmAttackAction()">✅ Confirm Action</button>
+                    <button class="btn btn-secondary" onclick="attackStep(3)">← Back</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- BONUS ACTION Screen -->
+        <div class="screen" id="screen-bonus-action">
+            <h1 class="headline">✨ Bonus Action</h1>
+            <div class="button-grid" id="bonus-action-options"></div>
+            <div class="button-grid tight-top">
+                <button class="btn btn-secondary" onclick="showScreen('screen-home')">← Back</button>
+            </div>
+        </div>
+
+        <!-- END TURN Screen -->
+        <div class="screen" id="screen-end-turn">
+            <div class="end-turn-container">
+                <h1 class="headline">✅ End Turn</h1>
+                <ul class="checklist-screen">
+                    <li>
+                        <span>🏃 Movement</span>
+                        <span class="status" id="checklist-movement">Unused</span>
+                    </li>
+                    <li>
+                        <span>⚔️ Action</span>
+                        <span class="status" id="checklist-action">Unused</span>
+                    </li>
+                    <li>
+                        <span>✨ Bonus Action</span>
+                        <span class="status" id="checklist-bonus-action">Unused</span>
+                    </li>
+                    <li>
+                        <span>🤏 Interaction</span>
+                        <span class="status" id="checklist-interaction">Unused</span>
+                    </li>
+                </ul>
+                <div class="button-grid">
+                    <button class="btn btn-danger" onclick="confirmEndTurn()">✅ Confirm End Turn</button>
+                    <button class="btn btn-secondary" onclick="showScreen('screen-home')">← Back</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MOVE Detail Screen -->
+        <div class="screen" id="screen-move-detail">
+            <h1 class="headline">🏃 Move</h1>
+            <div class="detail-content">
+                <p><strong>Move up to your speed, before or after your action.</strong></p>
+                <p>On your turn, you can move a distance up to your speed. You can use some of your movement before and after your action. For example, if you have a speed of 30 feet, you can move 10 feet, take your action, and then move 20 feet more.</p>
+            </div>
+            <div class="button-grid">
+                <button class="btn btn-primary" onclick="confirmMove()">✅ Confirm Move</button>
+                <button class="btn btn-secondary" onclick="showScreen('screen-home')">← Back</button>
+            </div>
+        </div>
+
+        <!-- DASH Detail Screen -->
+        <div class="screen" id="screen-dash-detail">
+            <h1 class="headline">💨 Dash</h1>
+            <div class="detail-content">
+                <p><strong>Dash: move up to your speed again (uses Action)</strong></p>
+                <p>When you take the Dash action, you gain extra movement for the current turn. The increase equals your speed, after applying any modifiers. With a speed of 30 feet, for example, you can move up to 60 feet on your turn if you dash.</p>
+                <p>Any increase or decrease to your speed changes this additional movement by the same amount. If your speed of 30 feet is reduced to 15 feet, for instance, you can move up to 30 feet this turn if you dash.</p>
+            </div>
+            <div class="button-grid">
+                <button class="btn btn-primary" onclick="confirmDash()">✅ Confirm Dash</button>
+                <button class="btn btn-secondary" onclick="showScreen('screen-home')">← Back</button>
+            </div>
+        </div>
+
+        <!-- INTERACT Detail Screens -->
+        <div class="screen" id="screen-interact-detail">
+            <h1 class="headline" id="interact-detail-title">🤏 Simple Interaction</h1>
+            <div class="detail-content" id="interact-detail-content"></div>
+            <div class="button-grid">
+                <button class="btn btn-primary" onclick="confirmInteract()">✅ Confirm Interaction</button>
+                <button class="btn btn-secondary" onclick="showScreen('screen-interact')">← Back</button>
+            </div>
+        </div>
+
+        <!-- ACTION Detail Screens -->
+        <div class="screen" id="screen-action-detail">
+            <h1 class="headline" id="action-detail-title">⚔️ Action</h1>
+            <div class="detail-content" id="action-detail-content"></div>
+            <div class="button-grid">
+                <button class="btn btn-primary" onclick="confirmActionDetail()">✅ Confirm Action</button>
+                <button class="btn btn-secondary" onclick="showScreen('screen-action')">← Back</button>
+            </div>
+        </div>
+
+        <!-- BONUS ACTION Detail Screens -->
+        <div class="screen" id="screen-bonus-action-detail">
+            <h1 class="headline" id="bonus-action-detail-title">✨ Bonus Action</h1>
+            <div class="detail-content" id="bonus-action-detail-content"></div>
+            <div class="button-grid">
+                <button class="btn btn-primary" onclick="confirmBonusAction()">✅ Confirm Bonus Action</button>
+                <button class="btn btn-secondary" onclick="showScreen('screen-bonus-action')">← Back</button>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div class="toast" id="toast"></div>
+
+        <!-- Reset Dialog -->
+        <div class="reset-dialog" id="reset-dialog">
+            <div class="reset-dialog-content">
+                <div class="reset-dialog-message">
+                    Reset all turn state? This will clear your current progress.
+                </div>
+                <div class="reset-dialog-actions">
+                    <button class="btn btn-secondary btn-small" onclick="closeResetDialog()">Cancel</button>
+                    <button class="btn btn-danger btn-small" onclick="confirmReset()">Reset All</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        let state = {
+            movement: 'available',
+            action: 'available',
+            bonusAction: 'available',
+            interaction: 'available',
+            reaction: 'available',
+            undoSnapshot: null,
+            dashActive: false,
+            actionUsedBy: null,
+            currentAttackStep: 1,
+            currentSaveType: null,
+            pendingAction: null
+        };
+
+        // Preferences (class + available options)
+        const PREFS_KEY = 'combatTurnPrefs';
+        let prefs = {
+            classKey: '',
+            canHealingWord: false,
+            canOffhandAttack: false
+        };
+
+        // Load state from localStorage
+        function loadState() {
+            const saved = localStorage.getItem('combatTurnState');
+            if (saved) {
+                state = { ...state, ...JSON.parse(saved) };
+                // Backward compatibility: ensure actionUsedBy defaults to null
+                if (state.actionUsedBy === undefined) {
+                    state.actionUsedBy = null;
+                }
+            }
+            updateUI();
+        }
+
+        function loadPrefs() {
+            const saved = localStorage.getItem(PREFS_KEY);
+            if (saved) {
+                prefs = { ...prefs, ...JSON.parse(saved) };
+            }
+
+            const classSelect = document.getElementById('class-select');
+            const toggleHealing = document.getElementById('toggle-healing-word');
+            const toggleOffhand = document.getElementById('toggle-offhand-attack');
+
+            if (classSelect) classSelect.value = prefs.classKey || '';
+            if (toggleHealing) toggleHealing.checked = !!prefs.canHealingWord;
+            if (toggleOffhand) toggleOffhand.checked = !!prefs.canOffhandAttack;
+        }
+
+        function savePrefs() {
+            localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+        }
+
+        function getClassFeatureBonusAction() {
+            switch (prefs.classKey) {
+                case 'barbarian':
+                    return {
+                        title: '😤 Rage (Barbarian)',
+                        content: '<p><strong>Enter a rage as a bonus action.</strong></p><ul><li>Advantage on STR checks/saves</li><li>Bonus damage (varies by level)</li><li>Resistance to bludgeoning/piercing/slashing (while raging)</li></ul><p>Ends early if you end your turn without attacking or taking damage (PHB rules).</p>'
+                    };
+                case 'bard':
+                    return {
+                        title: '🎶 Bardic Inspiration (Bard)',
+                        content: '<p><strong>Give an inspiration die to a creature within 60 ft who can hear you.</strong></p><ul><li>They can add it to an ability check / attack roll / saving throw (timing varies by feature)</li><li>Die size scales with level</li></ul>'
+                    };
+                case 'fighter':
+                    return {
+                        title: '💪 Second Wind (Fighter)',
+                        content: '<p><strong>Regain hit points as a bonus action.</strong></p><ul><li>Heal 1d10 + fighter level</li><li>Once per short/long rest</li></ul>'
+                    };
+                case 'monk':
+                    return {
+                        title: '🥋 Monk Bonus Action',
+                        content: '<p><strong>Common monk bonus actions:</strong></p><ul><li><strong>Martial Arts:</strong> unarmed strike after Attack action</li><li><strong>Flurry of Blows:</strong> spend 1 ki for 2 strikes</li><li><strong>Step of the Wind:</strong> spend 1 ki to Dash/Disengage + jump</li><li><strong>Patient Defense:</strong> spend 1 ki to Dodge</li></ul>'
+                    };
+                case 'rogue':
+                    return {
+                        title: '🗡️ Cunning Action (Rogue)',
+                        content: '<p><strong>Take Dash, Disengage, or Hide as a bonus action.</strong></p><ul><li>Dash: extra movement</li><li>Disengage: avoid opportunity attacks</li><li>Hide: attempt to hide (DM rules)</li></ul>'
+                    };
+                default:
+                    return null;
+            }
+        }
+
+        function getBonusActionOptions() {
+            const options = [];
+            if (prefs.canHealingWord) options.push({ key: 'healing-word', label: '💚 Healing Word' });
+            const classFeature = getClassFeatureBonusAction();
+            if (classFeature) options.push({ key: 'class-feature', label: classFeature.title });
+            if (prefs.canOffhandAttack) options.push({ key: 'offhand-attack', label: '🗡️ Offhand Attack' });
+            return options;
+        }
+
+        function hasBonusActionOptions() {
+            return getBonusActionOptions().length > 0;
+        }
+
+        // Save state to localStorage
+        function saveState() {
+            localStorage.setItem('combatTurnState', JSON.stringify(state));
+        }
+
+        // Update UI based on state
+        function updateUI() {
+            // Update tracker
+            updateTracker('movement', state.movement);
+            updateTracker('action', state.action);
+            updateTracker('bonus-action', state.bonusAction);
+            updateTracker('interaction', state.interaction);
+            updateTracker('reaction', state.reaction);
+            
+            // Update reaction widget (on NOT YOUR TURN screen)
+            updateReactionWidget();
+
+            // Update home buttons
+            updateHomeButtons();
+
+            // Update dash note
+            document.getElementById('dash-note').style.display = state.dashActive ? 'block' : 'none';
+
+            // Update DM panel
+            updateDMPanel();
+
+            saveState();
+        }
+
+        function updateDMPanel() {
+            const dmList = document.getElementById('dm-resources-list');
+            if (!dmList) return;
+
+            const available = [];
+            if (state.movement === 'available') available.push('Movement');
+            if (state.bonusAction === 'available' && hasBonusActionOptions()) available.push('Bonus Action');
+            if (state.interaction === 'available') available.push('Interaction');
+            if (state.reaction === 'available') available.push('Reaction');
+
+            dmList.innerHTML = '';
+            if (available.length === 0) {
+                dmList.innerHTML = '<span>All set.</span>';
+            } else {
+                available.forEach(item => {
+                    const span = document.createElement('span');
+                    span.className = 'dm-resource-item';
+                    span.textContent = item;
+                    dmList.appendChild(span);
+                });
+            }
+        }
+
+        function updateTracker(resource, status) {
+            const element = document.getElementById(`tracker-${resource}`);
+            element.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            element.className = 'tracker-status ' + status;
+        }
+
+        function updateReactionWidget() {
+            const status = state.reaction;
+            const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+            const statusClass = 'tracker-status reaction-status-large ' + status;
+            
+            // Update reaction widget on NOT YOUR TURN screen
+            const widget = document.getElementById('reaction-widget-status-2');
+            if (widget) {
+                widget.textContent = statusText;
+                widget.className = statusClass;
+            }
+        }
+
+        // Update home buttons - dynamically create and place in available/used sections
+        function updateHomeButtons() {
+            const availableContainer = document.getElementById('home-available');
+            const usedContainer = document.getElementById('home-used');
+            
+            if (!availableContainer || !usedContainer) return;
+            
+            // Clear both containers
+            availableContainer.innerHTML = '';
+            usedContainer.innerHTML = '';
+            
+            // MOVE button
+            if (state.movement === 'available') {
+                const btn = createButton('🏃 MOVE', 'btn-primary', () => handleMove());
+                availableContainer.appendChild(btn);
+            } else {
+                const btn = createButton('✅ 🏃 MOVE', 'btn-primary used', () => handleUndoMove());
+                usedContainer.appendChild(btn);
+            }
+            
+            // DASH button (only show if action is available)
+            if (state.action === 'available') {
+                const btn = createButton('💨 DASH (Action)', 'btn-primary', () => handleDash());
+                availableContainer.appendChild(btn);
+            }
+            
+            // ACTION button
+            if (state.action === 'available') {
+                const btn = createButton('⚔️ ACTION', 'btn-primary', () => handleActionClick());
+                availableContainer.appendChild(btn);
+            } else if (state.action === 'used') {
+                // If action was used for Dash, show DASH in used section
+                if (state.actionUsedBy === 'dash') {
+                    const btn = createButton('✅ 💨 DASH (Action)', 'btn-primary used', () => handleUndoDash());
+                    usedContainer.appendChild(btn);
+                } else {
+                    const btn = createButton('✅ ⚔️ ACTION', 'btn-primary used', () => handleUndoAction());
+                    usedContainer.appendChild(btn);
+                }
+            }
+            
+            // BONUS ACTION button (only if options available)
+            if (state.bonusAction === 'available' && hasBonusActionOptions()) {
+                const btn = createButton('✨ BONUS ACTION', 'btn-primary', () => handleBonusActionClick());
+                availableContainer.appendChild(btn);
+            } else if (state.bonusAction === 'used' && hasBonusActionOptions()) {
+                const btn = createButton('✅ ✨ BONUS ACTION', 'btn-primary used', () => handleUndoBonusAction());
+                usedContainer.appendChild(btn);
+            }
+            
+            // INTERACT button
+            if (state.interaction === 'available') {
+                const btn = createButton('🤏 INTERACT (Free)', 'btn-primary', () => handleInteractClick());
+                availableContainer.appendChild(btn);
+            } else if (state.interaction === 'used') {
+                const btn = createButton('✅ 🤏 INTERACT (Free)', 'btn-primary used', () => handleUndoInteract());
+                usedContainer.appendChild(btn);
+            }
+            
+            // END TURN button (always in available)
+            const endTurnBtn = createButton('✅ END TURN', 'btn-danger', () => handleEndTurn());
+            availableContainer.appendChild(endTurnBtn);
+            
+            // Reset button (always in available)
+            const resetBtn = createButton('🔄 Reset All', 'btn-secondary', () => showResetDialog());
+            availableContainer.appendChild(resetBtn);
+        }
+        
+        // Helper to create button element
+        function createButton(text, className, onClick) {
+            const btn = document.createElement('button');
+            btn.className = `btn ${className}`;
+            btn.textContent = text;
+            btn.onclick = onClick;
+            return btn;
+        }
+
+
+        // Screen Navigation
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // Save undo snapshot
+        function saveUndoSnapshot() {
+            state.undoSnapshot = {
+                movement: state.movement,
+                action: state.action,
+                bonusAction: state.bonusAction,
+                interaction: state.interaction,
+                reaction: state.reaction,
+                dashActive: state.dashActive
+            };
+        }
+
+        // Toast Notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 1500);
+        }
+
+        // MOVE
+        function handleMove() {
+            if (state.movement === 'used') {
+                showToast('Movement already used.');
+                return;
+            }
+            state.pendingAction = 'move';
+            showScreen('screen-move-detail');
+        }
+
+        // DASH
+        function handleDash() {
+            if (state.action === 'used') {
+                showToast('Action already used.');
+                return;
+            }
+            state.pendingAction = 'dash';
+            showScreen('screen-dash-detail');
+        }
+
+        // Handle Action Click (with check)
+        function handleActionClick() {
+            if (state.action === 'used') {
+                showToast('Action already used.');
+                return;
+            }
+            showScreen('screen-action');
+        }
+
+        // Handle Bonus Action Click (with check)
+        function handleBonusActionClick() {
+            if (state.bonusAction === 'used') {
+                showToast('Bonus Action already used.');
+                return;
+            }
+            if (!hasBonusActionOptions()) {
+                showToast('No bonus actions configured.');
+                return;
+            }
+            renderBonusActionOptions();
+            showScreen('screen-bonus-action');
+        }
+
+        // Handle Interact Click (with check)
+        function handleInteractClick() {
+            if (state.interaction === 'used') {
+                showToast('Interaction already used.');
+                return;
+            }
+            showScreen('screen-interact');
+        }
+
+        function renderBonusActionOptions() {
+            const container = document.getElementById('bonus-action-options');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const options = getBonusActionOptions();
+            if (options.length === 0) {
+                const wrap = document.createElement('div');
+                wrap.className = 'detail-content';
+                wrap.innerHTML = '<p class="muted-center">All set.</p>';
+                container.appendChild(wrap);
+                return;
+            }
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-primary';
+                btn.type = 'button';
+                btn.textContent = opt.label;
+                btn.onclick = () => showBonusActionDetail(opt.key);
+                container.appendChild(btn);
+            });
+        }
+
+        // Confirm Move
+        function confirmMove() {
+            saveUndoSnapshot();
+            state.movement = 'used';
+            state.pendingAction = null;
+            updateUI();
+            showScreen('screen-home');
+        }
+
+        // Confirm Dash
+        function confirmDash() {
+            saveUndoSnapshot();
+            state.action = 'used';
+            state.dashActive = true;
+            state.actionUsedBy = 'dash';
+            state.pendingAction = null;
+            updateUI();
+            showScreen('screen-home');
+        }
+
+        // INTERACT
+        function handleInteract(type) {
+            state.pendingAction = 'interact';
+            state.pendingInteractType = type;
+            
+            const interactDetails = {
+                'draw-stow': {
+                    title: '🗡️ Draw/Stow Weapon',
+                    content: '<p><strong>Draw or sheathe one weapon.</strong></p><p>You can interact with one object or feature of the environment for free during your move or action. For example, you could open a door during your move as you stride toward a foe, or you could draw your weapon as part of the same action you use to attack.</p><p>If you want to interact with a second object, you need to use your action. Some magic items and other special objects always require an action to use, as stated in their descriptions.</p>'
+                },
+                'door': {
+                    title: '🚪 Open/Close Door',
+                    content: '<p><strong>Open or close an unlocked door.</strong></p><p>You can interact with one object or feature of the environment for free during your move or action. Opening or closing a door is a common example of this type of interaction.</p><p>If you want to interact with a second object, you need to use your action.</p>'
+                },
+                'pickup-drop': {
+                    title: '📦 Pick Up / Drop Item',
+                    content: '<p><strong>Pick up an item from ground or drop held item.</strong></p><p>You can interact with one object or feature of the environment for free during your move or action. Picking up or dropping an item is a common example of this type of interaction.</p><p>Dropping an item is always free. Picking up an item is a free object interaction, but only one per turn.</p><p>If you want to interact with a second object, you need to use your action.</p>'
+                },
+                'move-object': {
+                    title: '🪑 Move Small Object',
+                    content: '<p><strong>Move a chair, table, or small object to create cover or clear a path.</strong></p><p>You can interact with one object or feature of the environment for free during your move or action. Moving a small object like a chair or table is a common example of this type of interaction.</p><p>This can be used to create cover, block a doorway, or clear a path. If you want to interact with a second object, you need to use your action.</p>'
+                }
+            };
+
+            const detail = interactDetails[type];
+            if (detail) {
+                document.getElementById('interact-detail-title').textContent = detail.title;
+                document.getElementById('interact-detail-content').innerHTML = detail.content;
+                showScreen('screen-interact-detail');
+            }
+        }
+
+        // Confirm Interact
+        function confirmInteract() {
+            saveUndoSnapshot();
+            state.interaction = 'used';
+            state.pendingAction = null;
+            state.pendingInteractType = null;
+            updateUI();
+            showScreen('screen-home');
+        }
+
+        // Toggle Reaction
+        function toggleReaction() {
+            // Can't toggle if reserved (from Ready action)
+            if (state.reaction === 'reserved') {
+                return;
+            }
+            
+            // Toggle between available and used
+            if (state.reaction === 'available') {
+                state.reaction = 'used';
+            } else if (state.reaction === 'used') {
+                state.reaction = 'available';
+            }
+            
+            // Update reaction widget and save state
+            updateReactionWidget();
+            saveState();
+        }
+
+        // Per-button undo handlers
+        function handleUndoMove() {
+            if (confirm('Undo MOVE?')) {
+                state.movement = 'available';
+                updateUI();
+            }
+        }
+        
+        function handleUndoDash() {
+            if (confirm('Undo DASH?')) {
+                state.action = 'available';
+                state.dashActive = false;
+                state.actionUsedBy = null;
+                updateUI();
+            }
+        }
+        
+        function handleUndoAction() {
+            if (confirm('Undo ACTION?')) {
+                // If action was used for dash, clear dashActive
+                if (state.actionUsedBy === 'dash') {
+                    state.dashActive = false;
+                }
+                // If reaction is reserved (from Ready action), restore it
+                if (state.reaction === 'reserved') {
+                    state.reaction = 'available';
+                }
+                state.action = 'available';
+                state.actionUsedBy = null;
+                updateUI();
+            }
+        }
+        
+        function handleUndoBonusAction() {
+            if (confirm('Undo BONUS ACTION?')) {
+                state.bonusAction = 'available';
+                updateUI();
+            }
+        }
+        
+        function handleUndoInteract() {
+            if (confirm('Undo INTERACT?')) {
+                state.interaction = 'available';
+                updateUI();
+            }
+        }
+
+        // Confirm Action Detail
+        function confirmActionDetail() {
+            saveUndoSnapshot();
+
+            if (state.pendingActionType === 'ready') {
+                state.action = 'used';
+                state.reaction = 'reserved';
+            } else {
+                state.action = 'used';
+            }
+            
+            state.actionUsedBy = 'other';
+
+            state.pendingAction = null;
+            state.pendingActionType = null;
+            updateUI();
+            showScreen('screen-home');
+        }
+
+        // Action Details
+        const actionDetails = {
+            'search': {
+                title: '🔍 Search',
+                content: '<p><strong>Make a Perception or Investigation check to find hidden objects, creatures, or details.</strong></p><p>When you take the Search action, you devote your attention to finding something. Depending on the nature of your search, the DM might have you make a Wisdom (Perception) check or an Intelligence (Investigation) check.</p>'
+            },
+            'ready': {
+                title: '⏳ Ready',
+                content: '<p><strong>Hold your action until a trigger occurs. Uses your reaction when triggered.</strong></p><p>Sometimes you want to get the jump on a foe or wait for a particular circumstance before you act. To do so, you can take the Ready action on your turn, which lets you act using your reaction before the start of your next turn.</p><p>First, you decide what perceivable circumstance will trigger your reaction. Then, you choose the action you will take in response to that trigger, or you choose to move up to your speed in response to it. Examples include "If the cultist steps on the trapdoor, I\'ll pull the lever that opens it," and "If the goblin steps next to me, I move away."</p><p><strong>When the trigger occurs, you can either take your reaction right after the trigger finishes or ignore the trigger. Remember that you can take only one reaction per round.</strong></p>'
+            },
+            'help': {
+                title: '🤝 Help',
+                content: '<p><strong>Grant advantage to an ally\'s next ability check or attack roll against a target within 5 feet.</strong></p><p>You can lend your aid to another creature in the completion of a task. When you take the Help action, the creature you aid gains advantage on the next ability check it makes to perform the task you are helping with, provided that it makes the check before the start of your next turn.</p><p>Alternatively, you can aid a friendly creature in attacking a creature within 5 feet of you. You feint, distract the target, or in some other way team up to make your ally\'s attack more effective. If your ally attacks the target before your next turn, the first attack roll is made with advantage.</p>'
+            },
+            'dodge': {
+                title: '🛡️ Dodge',
+                content: '<p><strong>Impose disadvantage on attack rolls against you. Dex saves with advantage until start of next turn.</strong></p><p>When you take the Dodge action, you focus entirely on avoiding attacks. Until the start of your next turn, any attack roll made against you has disadvantage if you can see the attacker, and you make Dexterity saving throws with advantage. You lose this benefit if you are incapacitated or if your speed drops to 0.</p>'
+            },
+            'disengage': {
+                title: '🏃‍♂️ Disengage',
+                content: '<p><strong>Your movement doesn\'t provoke opportunity attacks this turn.</strong></p><p>If you take the Disengage action, your movement doesn\'t provoke opportunity attacks for the rest of the turn.</p>'
+            },
+            'hide': {
+                title: '🥷 Hide',
+                content: '<p><strong>Make a Dexterity (Stealth) check to become hidden. Must be behind cover or heavily obscured.</strong></p><p>When you take the Hide action, you make a Dexterity (Stealth) check in an attempt to hide, following the rules for hiding. If you succeed, you gain certain benefits, as described in the "Unseen Attackers and Targets" section later in this chapter.</p><p>You can\'t hide from a creature that can see you, and if you make noise (such as shouting a warning or knocking over a vase), you give away your position. An invisible creature can\'t be seen, so it can always try to hide. Signs of its passage might still be noticed, however, and it still has to stay quiet.</p><p>In combat, most creatures stay alert for signs of danger all around, so if you come out of hiding and approach a creature, it usually sees you. However, under certain circumstances, the DM might allow you to stay hidden as you approach a creature that is distracted, allowing you to gain advantage on an attack before you are seen.</p>'
+            },
+            'use-object': {
+                title: '🔧 Use Object (Complex)',
+                content: '<p><strong>Complex object use - potion, device, tool, DM call.</strong></p><p>You normally interact with an object while doing something else, such as when you draw a sword as part of an attack. When an object requires your action for its use, you take the Use an Object action. This action is also useful when you want to interact with more than one object on your turn.</p><p>Some magic items and other special objects always require an action to use, as stated in their descriptions.</p><p><strong>This is separate from your free object interaction (INTERACT). Examples include drinking a potion, activating a magic item, using a device, or other complex object interactions as determined by the DM.</strong></p>'
+            },
+            'cast-spell': {
+                title: '✨ Cast a Spell',
+                content: '<p><strong>Cast a spell with casting time of 1 action.</strong></p><p>Spellcasters such as wizards and clerics, as well as many monsters, have access to spells and can use them to great effect in combat. Each spell has a casting time, which specifies whether the caster must use an action, a reaction, minutes, or even hours to cast the spell. Casting a spell is, therefore, not necessarily an action. Most spells have a casting time of 1 action, so a spellcaster often uses his or her action in combat to cast such a spell.</p>'
+            },
+            'shove': {
+                title: '💪 Shove',
+                content: '<p><strong>Make a Strength (Athletics) contest. On success, push target 5 feet away or knock prone.</strong></p><p>Using the Attack action, you can make a special melee attack to shove a creature, either to knock it prone or push it away from you. If you\'re able to make multiple attacks with the Attack action, this attack replaces one of them.</p><p>The target must be no more than one size larger than you and must be within your reach. Instead of making an attack roll, you make a Strength (Athletics) check contested by the target\'s Strength (Athletics) or Dexterity (Acrobatics) check (the target chooses the ability to use). If you win the contest, you either knock the target prone or push it 5 feet away from you.</p>'
+            },
+            'grapple': {
+                title: '🤼 Grapple',
+                content: '<p><strong>Make a Strength (Athletics) contest. On success, target is grappled (speed becomes 0).</strong></p><p>Using the Attack action, you can make a special melee attack to grapple a creature. If you\'re able to make multiple attacks with the Attack action, this attack replaces one of them.</p><p>The target of your grapple must be no more than one size larger than you and must be within your reach. Using at least one free hand, you try to seize the target by making a grapple check instead of an attack roll: a Strength (Athletics) check contested by the target\'s Strength (Athletics) or Dexterity (Acrobatics) check (the target chooses the ability to use). If you succeed, you subject the target to the grappled condition. The condition specifies the things that end it, and you can release the target whenever you like (no action required).</p>'
+            }
+        };
+
+        function showActionDetail(actionType) {
+            const detail = actionDetails[actionType];
+            if (detail) {
+                document.getElementById('action-detail-title').textContent = detail.title;
+                document.getElementById('action-detail-content').innerHTML = detail.content;
+                state.pendingAction = 'action';
+                state.pendingActionType = actionType;
+                showScreen('screen-action-detail');
+            }
+        }
+
+        // Bonus Action Details
+        const bonusActionDetails = {
+            'healing-word': {
+                title: '💚 Healing Word',
+                content: '<p><strong>Cast Healing Word as a bonus action. Target regains hit points.</strong></p><p>A creature of your choice that you can see within range regains hit points equal to 1d4 + your spellcasting ability modifier. This spell has no effect on undead or constructs.</p><p><strong>At Higher Levels:</strong> When you cast this spell using a spell slot of 2nd level or higher, the healing increases by 1d4 for each slot level above 1st.</p>'
+            },
+            'class-feature': {
+                title: '🎭 Class Feature',
+                content: '<p><strong>Use a class feature that takes a bonus action.</strong></p><p>Various class features can be used as a bonus action. Examples include:</p><ul><li><strong>Rogue - Cunning Action:</strong> Dash, Disengage, or Hide as a bonus action</li><li><strong>Barbarian - Rage:</strong> Enter a rage as a bonus action</li><li><strong>Monk - Flurry of Blows:</strong> Make unarmed strikes as a bonus action</li><li><strong>Ranger - Hunter\'s Mark:</strong> Cast Hunter\'s Mark as a bonus action</li></ul><p>Consult your class features for other bonus action options available to you.</p>'
+            },
+            'offhand-attack': {
+                title: '🗡️ Offhand Attack',
+                content: '<p><strong>Make an attack with a light weapon in your off hand.</strong></p><p>When you take the Attack action and attack with a light melee weapon that you\'re holding in one hand, you can use a bonus action to attack with a different light melee weapon that you\'re holding in the other hand. You don\'t add your ability modifier to the damage of the bonus attack, unless that modifier is negative.</p><p>If either weapon has the thrown property, you can throw the weapon, instead of making a melee attack with it.</p><p><strong>Two-Weapon Fighting Style:</strong> If you have the Two-Weapon Fighting style, you can add your ability modifier to the damage of the bonus attack.</p>'
+            }
+        };
+
+        function showBonusActionDetail(bonusType) {
+            let detail = bonusActionDetails[bonusType];
+            if (bonusType === 'class-feature') {
+                detail = getClassFeatureBonusAction();
+            }
+            if (detail) {
+                document.getElementById('bonus-action-detail-title').textContent = detail.title;
+                document.getElementById('bonus-action-detail-content').innerHTML = detail.content;
+                state.pendingAction = 'bonus-action';
+                state.pendingBonusActionType = bonusType;
+                showScreen('screen-bonus-action-detail');
+            } else {
+                showToast('No class bonus action configured.');
+            }
+        }
+
+        // Confirm Bonus Action
+        function confirmBonusAction() {
+            saveUndoSnapshot();
+            state.bonusAction = 'used';
+            state.pendingAction = null;
+            state.pendingBonusActionType = null;
+            updateUI();
+            showScreen('screen-home');
+        }
+
+        // Attack Tree
+        function showAttackTree() {
+            state.pendingAction = 'attack';
+            state.currentAttackStep = 1;
+            showScreen('screen-attack');
+            
+            // Hide all attack steps first
+            document.querySelectorAll('.attack-tree').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            // Show first step
+            document.getElementById('attack-step-1').classList.add('active');
+        }
+
+        function showAttackStep(step, type) {
+            // Hide all attack steps
+            document.querySelectorAll('.attack-tree').forEach(step => {
+                step.classList.remove('active');
+            });
+
+            if (step === 1) {
+                document.getElementById('attack-step-1').classList.add('active');
+                state.currentAttackStep = 1;
+            } else if (step === 2) {
+                if (type === 'weapon') {
+                    document.getElementById('attack-weapon-type').classList.add('active');
+                } else if (type === 'spell') {
+                    document.getElementById('attack-spell').classList.add('active');
+                } else if (type === 'save') {
+                    document.getElementById('attack-save-type').classList.add('active');
+                }
+                state.currentAttackStep = 2;
+            } else if (step === 3) {
+                if (type === 'weapon-melee') {
+                    document.getElementById('attack-weapon-melee').classList.add('active');
+                } else if (type === 'weapon-ranged') {
+                    document.getElementById('attack-weapon-ranged').classList.add('active');
+                } else if (type && type.startsWith('save-')) {
+                    const saveType = type.replace('save-', '').toUpperCase();
+                    document.getElementById('save-type-name').textContent = saveType;
+                    document.getElementById('attack-save-result').classList.add('active');
+                }
+                state.currentAttackStep = 3;
+            } else if (step === 4) {
+                if (type === 'hit') {
+                    document.getElementById('attack-hit').classList.add('active');
+                } else if (type === 'miss') {
+                    document.getElementById('attack-miss').classList.add('active');
+                } else if (type === 'save-succeeds') {
+                    document.getElementById('attack-save-succeeds').classList.add('active');
+                } else if (type === 'save-fails') {
+                    document.getElementById('attack-save-fails').classList.add('active');
+                }
+                state.currentAttackStep = 4;
+            }
+        }
+
+        function attackStep(step, type) {
+            showAttackStep(step, type);
+        }
+
+        // Confirm Attack Action
+        function confirmAttackAction() {
+            saveUndoSnapshot();
+            state.action = 'used';
+            state.actionUsedBy = 'other';
+            state.pendingAction = null;
+            updateUI();
+            showScreen('screen-home');
+        }
+
+        // End Turn
+        function handleEndTurn() {
+            // Update checklist
+            document.getElementById('checklist-movement').textContent = state.movement === 'used' ? 'Used' : 'Unused';
+            document.getElementById('checklist-movement').className = 'status ' + (state.movement === 'used' ? 'used' : 'unused');
+            document.getElementById('checklist-action').textContent = state.action === 'used' ? 'Used' : 'Unused';
+            document.getElementById('checklist-action').className = 'status ' + (state.action === 'used' ? 'used' : 'unused');
+            document.getElementById('checklist-bonus-action').textContent = state.bonusAction === 'used' ? 'Used' : 'Unused';
+            document.getElementById('checklist-bonus-action').className = 'status ' + (state.bonusAction === 'used' ? 'used' : 'unused');
+            document.getElementById('checklist-interaction').textContent = state.interaction === 'used' ? 'Used' : 'Unused';
+            document.getElementById('checklist-interaction').className = 'status ' + (state.interaction === 'used' ? 'used' : 'unused');
+            
+            showScreen('screen-end-turn');
+        }
+
+        function confirmEndTurn() {
+            // Reset resources
+            state.movement = 'available';
+            state.action = 'available';
+            state.bonusAction = 'available';
+            state.interaction = 'available';
+            // Reaction does NOT reset (resets at START of turn)
+            state.dashActive = false;
+            state.actionUsedBy = null;
+            state.undoSnapshot = null;
+
+            updateUI();
+            showScreen('screen-not-your-turn');
+        }
+
+        // Start Turn
+        function handleStartTurn() {
+            // Reset reaction at START of turn (per 5e rules)
+            if (state.reaction === 'reserved') {
+                state.reaction = 'available';
+            } else {
+                state.reaction = 'available';
+            }
+            updateUI();
+            showScreen('screen-home');
+        }
+
+        // Reset All
+        function showResetDialog() {
+            document.getElementById('reset-dialog').classList.add('active');
+        }
+
+        function closeResetDialog() {
+            document.getElementById('reset-dialog').classList.remove('active');
+        }
+
+        function confirmReset() {
+            // Clear localStorage
+            localStorage.removeItem('combatTurnState');
+            
+            // Reset state to defaults
+            state = {
+                movement: 'available',
+                action: 'available',
+                bonusAction: 'available',
+                interaction: 'available',
+                reaction: 'available',
+                undoSnapshot: null,
+                dashActive: false,
+                actionUsedBy: null,
+                currentAttackStep: 1,
+                currentSaveType: null,
+                pendingAction: null
+            };
+            
+            // Update UI and go to home
+            updateUI();
+            closeResetDialog();
+            showScreen('screen-home');
+        }
+
+        function wirePrefsUI() {
+            const classSelect = document.getElementById('class-select');
+            const toggleHealing = document.getElementById('toggle-healing-word');
+            const toggleOffhand = document.getElementById('toggle-offhand-attack');
+
+            if (classSelect) {
+                classSelect.addEventListener('change', () => {
+                    prefs.classKey = classSelect.value;
+                    savePrefs();
+                    updateUI();
+                });
+            }
+
+            if (toggleHealing) {
+                toggleHealing.addEventListener('change', () => {
+                    prefs.canHealingWord = !!toggleHealing.checked;
+                    savePrefs();
+                    updateUI();
+                });
+            }
+
+            if (toggleOffhand) {
+                toggleOffhand.addEventListener('change', () => {
+                    prefs.canOffhandAttack = !!toggleOffhand.checked;
+                    savePrefs();
+                    updateUI();
+                });
+            }
+        }
+
+        // Theme Management - Listen to hub's theme preference
+        (function() {
+            const THEME_KEY = 'dnd-hub-theme';
+            const DARK_MODE_CLASS = 'dark-mode';
+
+            function applyTheme(theme) {
+                const html = document.documentElement;
+                if (theme === 'dark') {
+                    html.classList.add(DARK_MODE_CLASS);
+                } else {
+                    html.classList.remove(DARK_MODE_CLASS);
+                }
+            }
+
+            function checkTheme() {
+                const saved = localStorage.getItem(THEME_KEY);
+                if (saved) {
+                    applyTheme(saved);
+                } else {
+                    // Check system preference if hub hasn't set one
+                    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                        applyTheme('dark');
+                    } else {
+                        applyTheme('light');
+                    }
+                }
+            }
+
+            function initTheme() {
+                checkTheme();
+                
+                // Listen for storage events (if opened in different tab)
+                window.addEventListener('storage', function(e) {
+                    if (e.key === THEME_KEY) {
+                        applyTheme(e.newValue || 'light');
+                    }
+                });
+                
+                // Fallback polling at slower rate (1000ms) for same-tab changes
+                setInterval(checkTheme, 1000);
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initTheme);
+            } else {
+                initTheme();
+            }
+        })();
+
+        // Initialize
+        loadPrefs();
+        wirePrefsUI();
+        loadState();
+        updateUI();
+    </script>
+</body>
+</html>
