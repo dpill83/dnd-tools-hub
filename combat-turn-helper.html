@@ -163,10 +163,81 @@
             padding: 0.5rem;
             background-color: rgba(0, 0, 0, 0.02);
             border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .reaction-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
         }
 
         .dark-mode .reaction-item {
             background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .dark-mode .reaction-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .reaction-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reaction-item-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .reaction-item-subtitle {
+            color: var(--text-light);
+        }
+
+        .reaction-item-expand-icon {
+            font-size: 0.75rem;
+            transition: transform 0.2s;
+            color: var(--text-light);
+        }
+
+        .reaction-item.expanded .reaction-item-expand-icon {
+            transform: rotate(90deg);
+        }
+
+        .reaction-item-details {
+            display: none;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .reaction-item.expanded .reaction-item-details {
+            display: block;
+        }
+
+        .reaction-item-details p {
+            margin-bottom: 0.5rem;
+        }
+
+        .reaction-item-details ul {
+            margin-left: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .reaction-item-details li {
+            margin-bottom: 0.25rem;
+        }
+
+        .reaction-page-numbers {
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.8rem;
+            color: var(--text-light);
+            font-style: italic;
         }
 
         /* Screen Views */
@@ -322,6 +393,19 @@
             min-height: 44px;
         }
 
+        /* Big Button Mode */
+        .big-button-mode .btn {
+            min-height: 80px;
+            font-size: 1.5rem;
+            padding: 1.25rem 2rem;
+        }
+
+        .big-button-mode .btn-small {
+            min-height: 60px;
+            font-size: 1.125rem;
+            padding: 0.75rem 1.5rem;
+        }
+
         /* DM Panel */
 
         /* Detail Content */
@@ -360,6 +444,67 @@
 
         .modal-body li {
             margin-bottom: 0.5rem;
+        }
+
+        /* Decision Helper Box */
+        .decision-helper-box {
+            display: none;
+            background-color: rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .dark-mode .decision-helper-box {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .decision-helper-prompt {
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .decision-helper-prompt:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark-mode .decision-helper-prompt:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .decision-helper-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .decision-helper-chip {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.8rem;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+
+        .decision-helper-chip:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .decision-helper-chip:active {
+            transform: scale(0.95);
         }
 
         /* Attack Tree */
@@ -682,9 +827,9 @@
         }
 
         .end-turn-dialog-message {
-            margin-bottom: 1.5rem;
-            font-size: 1.125rem;
-            line-height: 1.6;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            line-height: 1.5;
         }
 
         .end-turn-dialog-actions {
@@ -705,11 +850,6 @@
             display: block;
         }
 
-        .end-turn-dialog-quick-actions p {
-            font-size: 0.875rem;
-            color: var(--text-light);
-            margin-bottom: 0.5rem;
-        }
 
         .end-turn-dialog-quick-buttons {
             display: flex;
@@ -794,7 +934,7 @@
             </div>
             
             <!-- Reaction Widget -->
-            <div class="reaction-widget-large">
+            <div class="reaction-widget-large" id="reaction-widget-container">
                 <div class="reaction-header">
                     <div class="reaction-label-large">⚡ Reaction</div>
                     <div class="tracker-status reaction-status-large" onclick="toggleReaction()" title="Click to toggle when you use your reaction" id="reaction-widget-status-2">Available</div>
@@ -803,14 +943,111 @@
             </div>
 
             <!-- Common Reactions Reference -->
-            <div class="reactions-reference">
+            <div class="reactions-reference" id="reactions-reference-container">
                 <h3 class="section-title">Common Reactions:</h3>
                 <div class="reactions-list">
-                    <div class="reaction-item">⚔️ <strong>Opportunity Attack</strong> - When enemy leaves your reach</div>
-                    <div class="reaction-item">🛡️ <strong>Shield</strong> - When hit by an attack (+5 AC)</div>
-                    <div class="reaction-item">✨ <strong>Counterspell</strong> - When enemy casts a spell</div>
-                    <div class="reaction-item">⚡ <strong>Absorb Elements</strong> - When hit by elemental damage</div>
-                    <div class="reaction-item">⏳ <strong>Ready Action</strong> - Use your readied action (if reserved)</div>
+                    <div class="reaction-item" onclick="toggleReactionDetail(this)">
+                        <div class="reaction-item-header">
+                            <div class="reaction-item-title">
+                                <span>⚔️</span>
+                                <strong>Opportunity Attack</strong>
+                                <span class="reaction-item-subtitle">- When enemy leaves your reach</span>
+                            </div>
+                            <span class="reaction-item-expand-icon">▶</span>
+                        </div>
+                        <div class="reaction-item-details">
+                            <p><strong>You can make an opportunity attack when a hostile creature that you can see moves out of your reach.</strong></p>
+                            <p>To make the opportunity attack, you use your reaction to make one melee attack against the provoking creature. The attack occurs right before the creature leaves your reach.</p>
+                            <p>You can avoid provoking an opportunity attack by taking the Disengage action. You also don't provoke an opportunity attack when you teleport or when someone or something moves you without using your movement, action, or reaction.</p>
+                            <div class="reaction-page-numbers">
+                                PHB 2014: p.195 | PHB 2024: [PAGE_PLACEHOLDER]
+                            </div>
+                        </div>
+                    </div>
+                    <div class="reaction-item" onclick="toggleReactionDetail(this)">
+                        <div class="reaction-item-header">
+                            <div class="reaction-item-title">
+                                <span>🛡️</span>
+                                <strong>Shield</strong>
+                                <span class="reaction-item-subtitle">- When hit by an attack (+5 AC)</span>
+                            </div>
+                            <span class="reaction-item-expand-icon">▶</span>
+                        </div>
+                        <div class="reaction-item-details">
+                            <p><strong>1st-level abjuration spell</strong></p>
+                            <p><strong>Casting Time:</strong> 1 reaction, which you take when you are hit by an attack or targeted by the magic missile spell</p>
+                            <p><strong>Range:</strong> Self</p>
+                            <p><strong>Components:</strong> V, S</p>
+                            <p><strong>Duration:</strong> 1 round</p>
+                            <p>An invisible barrier of magical force appears and protects you. Until the start of your next turn, you have a +5 bonus to AC, including against the triggering attack, and you take no damage from magic missile.</p>
+                            <div class="reaction-page-numbers">
+                                PHB 2014: p.275 | PHB 2024: [PAGE_PLACEHOLDER]
+                            </div>
+                        </div>
+                    </div>
+                    <div class="reaction-item" onclick="toggleReactionDetail(this)">
+                        <div class="reaction-item-header">
+                            <div class="reaction-item-title">
+                                <span>✨</span>
+                                <strong>Counterspell</strong>
+                                <span class="reaction-item-subtitle">- When enemy casts a spell</span>
+                            </div>
+                            <span class="reaction-item-expand-icon">▶</span>
+                        </div>
+                        <div class="reaction-item-details">
+                            <p><strong>3rd-level abjuration spell</strong></p>
+                            <p><strong>Casting Time:</strong> 1 reaction, which you take when you see a creature within 60 feet of you casting a spell</p>
+                            <p><strong>Range:</strong> 60 feet</p>
+                            <p><strong>Components:</strong> S</p>
+                            <p><strong>Duration:</strong> Instantaneous</p>
+                            <p>You attempt to interrupt a creature in the process of casting a spell. If the creature is casting a spell of 3rd level or lower, its spell fails and has no effect. If it is casting a spell of 4th level or higher, make an ability check using your spellcasting ability. The DC equals 10 + the spell's level. On a success, the creature's spell fails and has no effect.</p>
+                            <p><strong>At Higher Levels:</strong> When you cast this spell using a spell slot of 4th level or higher, the interrupted spell has no effect if its level is less than or equal to the level of the spell slot you used.</p>
+                            <div class="reaction-page-numbers">
+                                PHB 2014: p.228 | PHB 2024: [PAGE_PLACEHOLDER]
+                            </div>
+                        </div>
+                    </div>
+                    <div class="reaction-item" onclick="toggleReactionDetail(this)">
+                        <div class="reaction-item-header">
+                            <div class="reaction-item-title">
+                                <span>⚡</span>
+                                <strong>Absorb Elements</strong>
+                                <span class="reaction-item-subtitle">- When hit by elemental damage</span>
+                            </div>
+                            <span class="reaction-item-expand-icon">▶</span>
+                        </div>
+                        <div class="reaction-item-details">
+                            <p><strong>1st-level abjuration spell</strong></p>
+                            <p><strong>Casting Time:</strong> 1 reaction, which you take when you take acid, cold, fire, lightning, or thunder damage</p>
+                            <p><strong>Range:</strong> Self</p>
+                            <p><strong>Components:</strong> S</p>
+                            <p><strong>Duration:</strong> 1 round</p>
+                            <p>The spell captures some of the incoming energy, lessening its effect on you and storing it for your next melee attack. You have resistance to the triggering damage type until the start of your next turn. Also, the first time you hit with a melee attack on your next turn, the target takes an extra 1d6 damage of the triggering type, and the spell ends.</p>
+                            <p><strong>At Higher Levels:</strong> When you cast this spell using a spell slot of 2nd level or higher, the extra damage increases by 1d6 for each slot level above 1st.</p>
+                            <div class="reaction-page-numbers">
+                                PHB 2014: [PAGE_PLACEHOLDER] | PHB 2024: [PAGE_PLACEHOLDER]
+                            </div>
+                        </div>
+                    </div>
+                    <div class="reaction-item" onclick="toggleReactionDetail(this)">
+                        <div class="reaction-item-header">
+                            <div class="reaction-item-title">
+                                <span>⏳</span>
+                                <strong>Ready Action</strong>
+                                <span class="reaction-item-subtitle">- Use your readied action (if reserved)</span>
+                            </div>
+                            <span class="reaction-item-expand-icon">▶</span>
+                        </div>
+                        <div class="reaction-item-details">
+                            <p><strong>Sometimes you want to get the jump on a foe or wait for a particular circumstance before you act. To do so, you can take the Ready action on your turn, which lets you act using your reaction before the start of your next turn.</strong></p>
+                            <p>First, you decide what perceivable circumstance will trigger your reaction. Then, you choose the action you will take in response to that trigger, or you choose to move up to your speed in response to it. Examples include "If the cultist steps on the trapdoor, I'll pull the lever that opens it," and "If the goblin steps next to me, I move away."</p>
+                            <p><strong>When the trigger occurs, you can either take your reaction right after the trigger finishes or ignore the trigger. Remember that you can take only one reaction per round.</strong></p>
+                            <p>When you ready a spell, you cast it as normal but hold its energy, which you release with your reaction when the trigger occurs. To be readied, a spell must have a casting time of 1 action, and holding onto the spell's magic requires concentration. If your concentration is broken, the spell dissipates without taking effect.</p>
+                            <div class="reaction-page-numbers">
+                                PHB 2014: p.193 | PHB 2024: [PAGE_PLACEHOLDER]
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -835,10 +1072,23 @@
         <div class="screen" id="screen-action">
             <h1 class="headline">⚔️ Choose Action</h1>
             
+            <!-- Decision Helper Box -->
+            <div class="decision-helper-box" id="decision-helper-box" style="display:none;">
+                <div class="decision-helper-prompt" id="decision-helper-prompt" onclick="rotateHelperPrompt()"></div>
+                <div class="decision-helper-chips" id="decision-helper-chips" style="display:none;"></div>
+            </div>
+            
             <!-- Primary actions (Attack and Cast Spell) -->
             <div class="button-grid">
                 <button class="btn btn-accent" onclick="showAttackTree()">⚔️ Attack</button>
                 <button class="btn btn-primary" onclick="showActionDetail('cast-spell')">✨ Cast a Spell</button>
+            </div>
+            
+            <!-- Spellcaster Reminders -->
+            <div id="spellcaster-reminders" style="display: none; margin-bottom: 1rem; padding: 0.75rem; background-color: rgba(212, 175, 55, 0.1); border-left: 3px solid var(--accent-color); border-radius: 4px; font-size: 0.875rem;">
+                <p style="margin: 0; font-weight: 600; margin-bottom: 0.5rem;">✨ Spellcaster Reminders:</p>
+                <p style="margin: 0.25rem 0;">💭 Concentration?</p>
+                <p style="margin: 0.25rem 0;">📚 Spell slots?</p>
             </div>
             
             <!-- Other actions in grid layout -->
@@ -856,7 +1106,7 @@
             </div>
             
             <!-- Interaction (Free) -->
-            <div class="button-grid">
+            <div class="button-grid" id="interaction-button-container">
                 <button class="btn btn-secondary" onclick="handleInteractClick()">🤏 INTERACT (Free)</button>
             </div>
             
@@ -893,6 +1143,7 @@
                     <div class="help-text">
                         <div>Advantage/Disadvantage?</div>
                         <div>Nat 20 = crit (double dice)</div>
+                        <div>Remember Bless/Bane/Guidance/Advantage.</div>
                     </div>
                 </div>
                 <div class="button-grid">
@@ -910,6 +1161,7 @@
                         <div>Cover may add +2/+5 AC vs ranged</div>
                         <div>Within 5 feet: Disadvantage (unless Crossbow Expert)</div>
                         <div>Nat 20 = crit (double dice)</div>
+                        <div>Remember Bless/Bane/Guidance/Advantage.</div>
                     </div>
                 </div>
                 <div class="button-grid">
@@ -927,6 +1179,7 @@
                         <div>Advantage/Disadvantage?</div>
                         <div>Cover may add +2/+5 AC</div>
                         <div>Nat 20 = crit (double dice)</div>
+                        <div>Remember Bless/Bane/Guidance/Advantage.</div>
                     </div>
                 </div>
                 <div class="button-grid">
@@ -965,6 +1218,17 @@
             <div class="attack-tree" id="attack-hit">
                 <div class="modal-body">
                     <p><strong>Roll damage dice + modifier</strong></p>
+                    <div id="extra-attack-reminder" style="display: none; margin-top: 1rem; padding: 0.75rem; background-color: rgba(0, 0, 0, 0.05); border-radius: 4px;">
+                        <p style="margin-bottom: 0.5rem; font-weight: 600;">Extra Attack Reminder:</p>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <input type="checkbox" style="width: 18px; height: 18px;" />
+                            <span>Attack 1</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" style="width: 18px; height: 18px;" />
+                            <span>Attack 2</span>
+                        </label>
+                    </div>
                 </div>
                 <div class="button-grid">
                     <button class="btn btn-primary" onclick="confirmAttackAction()">✅ Confirm Action</button>
@@ -1037,7 +1301,7 @@
                         <span>✨ Bonus Action</span>
                         <span class="status" id="checklist-bonus-action">Unused</span>
                     </li>
-                    <li>
+                    <li id="checklist-interaction-item">
                         <span>🤏 Interaction</span>
                         <span class="status" id="checklist-interaction">Unused</span>
                     </li>
@@ -1146,6 +1410,69 @@
                 </div>
             </div>
 
+            <!-- Must-Have Settings -->
+            <div class="character-setup-compact" style="margin-top: 1rem;">
+                <h3 class="section-title" style="margin-bottom: 0.5rem;">Must-Have</h3>
+                <div class="setup-toggles">
+                    <label title="Track reaction on NOT YOUR TURN screen">
+                        <input type="checkbox" id="toggle-track-reaction" />
+                        ⚡ Track Reaction
+                    </label>
+                    <label title="Track free interaction (draw weapon, open door, etc.)">
+                        <input type="checkbox" id="toggle-track-interaction" />
+                        🤏 Track Interaction
+                    </label>
+                </div>
+            </div>
+
+            <!-- Useful but Optional Settings -->
+            <div class="character-setup-compact" style="margin-top: 1rem;">
+                <h3 class="section-title" style="margin-bottom: 0.5rem;">Useful</h3>
+                <div class="setup-toggles">
+                    <label title="Show Extra Attack reminder in attack flow">
+                        <input type="checkbox" id="toggle-extra-attack" />
+                        ⚔️ Extra Attack Reminder
+                    </label>
+                    <label title="Show spellcaster reminders (concentration, spell slots)">
+                        <input type="checkbox" id="toggle-spellcaster-mode" />
+                        ✨ Spellcaster Mode
+                    </label>
+                    <label title="Show confirmation dialogs before spending resources">
+                        <input type="checkbox" id="toggle-confirm-spends" />
+                        ✓ Confirm Spends
+                    </label>
+                    <label title="Show decision helper prompts on ACTION screen">
+                        <input type="checkbox" id="toggle-decision-helper" />
+                        💡 Decision Helper
+                    </label>
+                </div>
+                <div class="setup-row" style="margin-top: 0.75rem;">
+                    <label for="helper-preset-select">Helper Preset</label>
+                    <select id="helper-preset-select">
+                        <option value="none">None</option>
+                        <option value="cleric">Cleric</option>
+                        <option value="barbarian">Barbarian</option>
+                        <option value="rogue">Rogue</option>
+                        <option value="wizard">Wizard</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Quality-of-Life Settings -->
+            <div class="character-setup-compact" style="margin-top: 1rem;">
+                <h3 class="section-title" style="margin-bottom: 0.5rem;">Quality of Life</h3>
+                <div class="setup-toggles">
+                    <label title="Make buttons larger for phone-at-the-table use">
+                        <input type="checkbox" id="toggle-big-button-mode" />
+                        📱 Big Button Mode
+                    </label>
+                    <label title="Automatically reset resources when starting turn">
+                        <input type="checkbox" id="toggle-auto-reset" />
+                        🔄 Auto-Reset on Start Turn
+                    </label>
+                </div>
+            </div>
+
             <div class="button-grid">
                 <button class="btn btn-secondary" onclick="showScreen('screen-home')">← Back</button>
             </div>
@@ -1174,7 +1501,6 @@
                     <!-- Message will be populated by JavaScript -->
                 </div>
                 <div class="end-turn-dialog-quick-actions" id="end-turn-dialog-quick-actions">
-                    <p><strong>Quick actions:</strong> Mark resources as used if you don't need them.</p>
                     <div class="end-turn-dialog-quick-buttons" id="end-turn-dialog-quick-buttons">
                         <!-- Quick action buttons will be populated by JavaScript -->
                     </div>
@@ -1208,7 +1534,19 @@
             classKey: '',
             canHealingWord: false,
             canOffhandAttack: false,
-            bonusActionEnabled: false
+            bonusActionEnabled: false,
+            // Must-have settings
+            trackReaction: true,
+            trackInteraction: true,
+            // Useful but optional settings
+            extraAttackReminder: false,
+            spellcasterMode: false,
+            confirmSpends: true,
+            decisionHelperEnabled: false,
+            helperPreset: 'none',
+            // Quality-of-life settings
+            bigButtonMode: false,
+            autoResetOnStartTurn: false
         };
 
         // Load state from localStorage
@@ -1229,20 +1567,72 @@
             if (saved) {
                 prefs = { ...prefs, ...JSON.parse(saved) };
             }
-            // Backward compatibility: ensure bonusActionEnabled defaults to false
+            // Backward compatibility: ensure defaults for all settings
             if (prefs.bonusActionEnabled === undefined) {
                 prefs.bonusActionEnabled = false;
+            }
+            if (prefs.trackReaction === undefined) {
+                prefs.trackReaction = true;
+            }
+            if (prefs.trackInteraction === undefined) {
+                prefs.trackInteraction = true;
+            }
+            if (prefs.extraAttackReminder === undefined) {
+                prefs.extraAttackReminder = false;
+            }
+            if (prefs.spellcasterMode === undefined) {
+                prefs.spellcasterMode = false;
+            }
+            if (prefs.confirmSpends === undefined) {
+                prefs.confirmSpends = true;
+            }
+            if (prefs.bigButtonMode === undefined) {
+                prefs.bigButtonMode = false;
+            }
+            if (prefs.autoResetOnStartTurn === undefined) {
+                prefs.autoResetOnStartTurn = false;
+            }
+            if (prefs.decisionHelperEnabled === undefined) {
+                prefs.decisionHelperEnabled = false;
+            }
+            if (prefs.helperPreset === undefined) {
+                prefs.helperPreset = 'none';
             }
 
             const classSelect = document.getElementById('class-select');
             const toggleBonusAction = document.getElementById('toggle-bonus-action-enabled');
             const toggleHealing = document.getElementById('toggle-healing-word');
             const toggleOffhand = document.getElementById('toggle-offhand-attack');
+            const toggleTrackReaction = document.getElementById('toggle-track-reaction');
+            const toggleTrackInteraction = document.getElementById('toggle-track-interaction');
+            const toggleExtraAttack = document.getElementById('toggle-extra-attack');
+            const toggleSpellcaster = document.getElementById('toggle-spellcaster-mode');
+            const toggleConfirmSpends = document.getElementById('toggle-confirm-spends');
+            const toggleBigButton = document.getElementById('toggle-big-button-mode');
+            const toggleAutoReset = document.getElementById('toggle-auto-reset');
+            const toggleDecisionHelper = document.getElementById('toggle-decision-helper');
+            const helperPresetSelect = document.getElementById('helper-preset-select');
 
             if (classSelect) classSelect.value = prefs.classKey || '';
             if (toggleBonusAction) toggleBonusAction.checked = !!prefs.bonusActionEnabled;
             if (toggleHealing) toggleHealing.checked = !!prefs.canHealingWord;
             if (toggleOffhand) toggleOffhand.checked = !!prefs.canOffhandAttack;
+            if (toggleTrackReaction) toggleTrackReaction.checked = !!prefs.trackReaction;
+            if (toggleTrackInteraction) toggleTrackInteraction.checked = !!prefs.trackInteraction;
+            if (toggleExtraAttack) toggleExtraAttack.checked = !!prefs.extraAttackReminder;
+            if (toggleSpellcaster) toggleSpellcaster.checked = !!prefs.spellcasterMode;
+            if (toggleConfirmSpends) toggleConfirmSpends.checked = !!prefs.confirmSpends;
+            if (toggleBigButton) toggleBigButton.checked = !!prefs.bigButtonMode;
+            if (toggleAutoReset) toggleAutoReset.checked = !!prefs.autoResetOnStartTurn;
+            if (toggleDecisionHelper) toggleDecisionHelper.checked = !!prefs.decisionHelperEnabled;
+            if (helperPresetSelect) helperPresetSelect.value = prefs.helperPreset || 'none';
+
+            // Apply big button mode CSS class if enabled
+            if (prefs.bigButtonMode) {
+                document.body.classList.add('big-button-mode');
+            } else {
+                document.body.classList.remove('big-button-mode');
+            }
         }
 
         function savePrefs() {
@@ -1311,6 +1701,18 @@
             // Update dash note
             document.getElementById('dash-note').style.display = state.dashActive ? 'block' : 'none';
 
+            // Show/hide interaction button in ACTION screen based on setting
+            const interactionButtonContainer = document.getElementById('interaction-button-container');
+            if (interactionButtonContainer) {
+                interactionButtonContainer.style.display = prefs.trackInteraction ? 'block' : 'none';
+            }
+
+            // Show/hide spellcaster reminders based on setting
+            const spellcasterReminders = document.getElementById('spellcaster-reminders');
+            if (spellcasterReminders) {
+                spellcasterReminders.style.display = prefs.spellcasterMode ? 'block' : 'none';
+            }
+
             saveState();
         }
 
@@ -1328,7 +1730,8 @@
                 count++;
                 available.push('Bonus Action');
             }
-            if (state.interaction === 'available') {
+            // Only count Interaction if tracking is enabled
+            if (prefs.trackInteraction && state.interaction === 'available') {
                 count++;
                 available.push('Interaction');
             }
@@ -1347,6 +1750,16 @@
             if (widget) {
                 widget.textContent = statusText;
                 widget.className = statusClass;
+            }
+            
+            // Show/hide reaction widget and reference based on setting
+            const widgetContainer = document.getElementById('reaction-widget-container');
+            const referenceContainer = document.getElementById('reactions-reference-container');
+            if (widgetContainer) {
+                widgetContainer.style.display = prefs.trackReaction ? 'block' : 'none';
+            }
+            if (referenceContainer) {
+                referenceContainer.style.display = prefs.trackReaction ? 'block' : 'none';
             }
         }
 
@@ -1429,6 +1842,11 @@
                 screen.classList.remove('active');
             });
             document.getElementById(screenId).classList.add('active');
+            
+            // Update decision helper when ACTION screen is shown
+            if (screenId === 'screen-action') {
+                updateDecisionHelper();
+            }
         }
 
         // Toast Notification
@@ -1448,7 +1866,11 @@
                 return;
             }
             state.pendingAction = 'move';
-            showScreen('screen-move-detail');
+            if (prefs.confirmSpends) {
+                showScreen('screen-move-detail');
+            } else {
+                confirmMove();
+            }
         }
 
         // DASH
@@ -1458,7 +1880,11 @@
                 return;
             }
             state.pendingAction = 'dash';
-            showScreen('screen-dash-detail');
+            if (prefs.confirmSpends) {
+                showScreen('screen-dash-detail');
+            } else {
+                confirmDash();
+            }
         }
 
         // Handle Action Click (with check)
@@ -1561,9 +1987,13 @@
 
             const detail = interactDetails[type];
             if (detail) {
-                document.getElementById('interact-detail-title').textContent = detail.title;
-                document.getElementById('interact-detail-content').innerHTML = detail.content;
-                showScreen('screen-interact-detail');
+                if (prefs.confirmSpends) {
+                    document.getElementById('interact-detail-title').textContent = detail.title;
+                    document.getElementById('interact-detail-content').innerHTML = detail.content;
+                    showScreen('screen-interact-detail');
+                } else {
+                    confirmInteract();
+                }
             }
         }
 
@@ -1706,11 +2136,15 @@
         function showActionDetail(actionType) {
             const detail = actionDetails[actionType];
             if (detail) {
-                document.getElementById('action-detail-title').textContent = detail.title;
-                document.getElementById('action-detail-content').innerHTML = detail.content;
                 state.pendingAction = 'action';
                 state.pendingActionType = actionType;
-                showScreen('screen-action-detail');
+                if (prefs.confirmSpends) {
+                    document.getElementById('action-detail-title').textContent = detail.title;
+                    document.getElementById('action-detail-content').innerHTML = detail.content;
+                    showScreen('screen-action-detail');
+                } else {
+                    confirmActionDetail();
+                }
             }
         }
 
@@ -1736,11 +2170,15 @@
                 detail = getClassFeatureBonusAction();
             }
             if (detail) {
-                document.getElementById('bonus-action-detail-title').textContent = detail.title;
-                document.getElementById('bonus-action-detail-content').innerHTML = detail.content;
                 state.pendingAction = 'bonus-action';
                 state.pendingBonusActionType = bonusType;
-                showScreen('screen-bonus-action-detail');
+                if (prefs.confirmSpends) {
+                    document.getElementById('bonus-action-detail-title').textContent = detail.title;
+                    document.getElementById('bonus-action-detail-content').innerHTML = detail.content;
+                    showScreen('screen-bonus-action-detail');
+                } else {
+                    confirmBonusAction();
+                }
             } else {
                 showToast('No class bonus action configured.');
             }
@@ -1802,6 +2240,11 @@
             } else if (step === 4) {
                 if (type === 'hit') {
                     document.getElementById('attack-hit').classList.add('active');
+                    // Show/hide Extra Attack reminder based on setting
+                    const extraAttackReminder = document.getElementById('extra-attack-reminder');
+                    if (extraAttackReminder) {
+                        extraAttackReminder.style.display = prefs.extraAttackReminder ? 'block' : 'none';
+                    }
                 } else if (type === 'miss') {
                     document.getElementById('attack-miss').classList.add('active');
                 } else if (type === 'save-succeeds') {
@@ -1833,15 +2276,17 @@
             // If there are available resources, show reminder
             if (resources.count > 0) {
                 // Build simple reminder message
-                let message = `Reminder: You still have ${resources.count} resource${resources.count > 1 ? 's' : ''} available: <strong>${resources.available.join(', ')}</strong>`;
+                let message = `You still have ${resources.count} resource${resources.count > 1 ? 's' : ''} available: <strong>${resources.available.join(', ')}</strong>`;
                 
                 // Add brief explanation for Interaction if it's available
                 if (resources.available.includes('Interaction')) {
-                    message += `<br><small style="color: var(--text-light);">💡 Interaction = free object interaction (draw weapon, open door, etc.). Access from ACTION screen.</small>`;
+                    message += `<br><small style="color: var(--text-light);">💡 Interaction = free object interaction (draw weapon, open door, etc.). Find it in the ACTION screen.</small>`;
                 }
                 
                 const messageEl = document.getElementById('end-turn-dialog-message');
                 messageEl.innerHTML = message;
+                
+                // Don't show toast - just show the dialog
                 
                 // Show quick action buttons
                 const quickActionsEl = document.getElementById('end-turn-dialog-quick-actions');
@@ -1861,7 +2306,7 @@
                     quickButtonsEl.appendChild(btn);
                 }
                 
-                if (state.interaction === 'available') {
+                if (prefs.trackInteraction && state.interaction === 'available') {
                     const btn = document.createElement('button');
                     btn.className = 'btn btn-secondary btn-small';
                     btn.textContent = 'Mark Interaction as Used';
@@ -1919,8 +2364,15 @@
                 bonusActionItem.style.display = 'none';
             }
             
-            document.getElementById('checklist-interaction').textContent = state.interaction === 'used' ? 'Used' : 'Unused';
-            document.getElementById('checklist-interaction').className = 'status ' + (state.interaction === 'used' ? 'used' : 'unused');
+            // Only show Interaction in checklist if tracking is enabled
+            const interactionItem = document.getElementById('checklist-interaction-item');
+            if (prefs.trackInteraction) {
+                interactionItem.style.display = '';
+                document.getElementById('checklist-interaction').textContent = state.interaction === 'used' ? 'Used' : 'Unused';
+                document.getElementById('checklist-interaction').className = 'status ' + (state.interaction === 'used' ? 'used' : 'unused');
+            } else {
+                interactionItem.style.display = 'none';
+            }
             
             showScreen('screen-end-turn');
         }
@@ -1956,6 +2408,17 @@
             } else {
                 state.reaction = 'available';
             }
+            
+            // Auto-reset resources if setting is enabled
+            if (prefs.autoResetOnStartTurn) {
+                state.movement = 'available';
+                state.action = 'available';
+                state.bonusAction = 'available';
+                state.interaction = 'available';
+                state.dashActive = false;
+                state.actionUsedBy = null;
+            }
+            
             updateUI();
             showScreen('screen-home');
         }
@@ -1993,16 +2456,142 @@
             showScreen('screen-home');
         }
 
+        function applyClassPresets(classKey) {
+            const toggleBonusAction = document.getElementById('toggle-bonus-action-enabled');
+            const toggleHealing = document.getElementById('toggle-healing-word');
+            const toggleOffhand = document.getElementById('toggle-offhand-attack');
+
+            switch (classKey) {
+                case 'cleric':
+                    // Cleric: Healing Word ON, Bonus Action enabled
+                    prefs.canHealingWord = true;
+                    prefs.bonusActionEnabled = true;
+                    if (toggleHealing) toggleHealing.checked = true;
+                    if (toggleBonusAction) toggleBonusAction.checked = true;
+                    break;
+                case 'barbarian':
+                    // Barbarian: Offhand usually OFF (unless dual wield), Bonus Action enabled
+                    prefs.canOffhandAttack = false;
+                    prefs.bonusActionEnabled = true;
+                    if (toggleOffhand) toggleOffhand.checked = false;
+                    if (toggleBonusAction) toggleBonusAction.checked = true;
+                    break;
+                case 'rogue':
+                    // Rogue: Bonus Action enabled (Cunning Action is class feature)
+                    prefs.bonusActionEnabled = true;
+                    if (toggleBonusAction) toggleBonusAction.checked = true;
+                    break;
+                default:
+                    // Other classes: no auto-presets, user can configure manually
+                    break;
+            }
+            savePrefs();
+        }
+
+        // Decision Helper Functions
+        const helperPrompts = [
+            'Need defense? Consider Dodge.',
+            'Enemy trying to flee? Consider Ready or Grapple.',
+            'Need to reposition? Disengage first.',
+            'Need advantage for an ally? Help.'
+        ];
+
+        let currentPromptIndex = 0;
+
+        function getHelperPresetChips(preset) {
+            const chips = {
+                cleric: [
+                    { if: 'Ally down?', then: 'Healing Word' },
+                    { if: 'Need defense?', then: 'Dodge / Shield of Faith' },
+                    { if: 'Enemies grouped?', then: 'AoE spell' }
+                ],
+                barbarian: [
+                    { if: 'Low HP?', then: 'Rage' },
+                    { if: 'Need to close?', then: 'Dash' },
+                    { if: 'Enemy near?', then: 'Reckless Attack' }
+                ],
+                rogue: [
+                    { if: 'Need advantage?', then: 'Hide' },
+                    { if: 'Need to escape?', then: 'Cunning Action: Disengage' },
+                    { if: 'Enemy isolated?', then: 'Sneak Attack' }
+                ],
+                wizard: [
+                    { if: 'Allies in danger?', then: 'Shield / Counterspell' },
+                    { if: 'Enemies grouped?', then: 'AoE spell' },
+                    { if: 'Need info?', then: 'Detect Magic' }
+                ]
+            };
+            return chips[preset] || [];
+        }
+
+        function rotateHelperPrompt() {
+            if (!prefs.decisionHelperEnabled) return;
+            currentPromptIndex = (currentPromptIndex + 1) % helperPrompts.length;
+            updateHelperPrompt();
+        }
+
+        function updateHelperPrompt() {
+            const promptEl = document.getElementById('decision-helper-prompt');
+            if (promptEl) {
+                promptEl.textContent = helperPrompts[currentPromptIndex];
+            }
+        }
+
+        function handleHelperChipClick(chipText) {
+            showToast('Suggestion: ' + chipText);
+        }
+
+        function updateDecisionHelper() {
+            const helperBox = document.getElementById('decision-helper-box');
+            const chipsContainer = document.getElementById('decision-helper-chips');
+            
+            if (!helperBox || !chipsContainer) return;
+
+            if (prefs.decisionHelperEnabled) {
+                helperBox.style.display = 'block';
+                // Rotate prompt each time ACTION screen is opened (show current, then advance for next time)
+                updateHelperPrompt();
+                currentPromptIndex = (currentPromptIndex + 1) % helperPrompts.length;
+                
+                // Update chips based on preset
+                chipsContainer.innerHTML = '';
+                if (prefs.helperPreset && prefs.helperPreset !== 'none') {
+                    const chips = getHelperPresetChips(prefs.helperPreset);
+                    chips.forEach(chip => {
+                        const chipEl = document.createElement('button');
+                        chipEl.className = 'decision-helper-chip';
+                        chipEl.textContent = chip.if + ' → ' + chip.then;
+                        chipEl.onclick = () => handleHelperChipClick(chip.then);
+                        chipsContainer.appendChild(chipEl);
+                    });
+                    chipsContainer.style.display = 'flex';
+                } else {
+                    chipsContainer.style.display = 'none';
+                }
+            } else {
+                helperBox.style.display = 'none';
+            }
+        }
+
         function wirePrefsUI() {
             const classSelect = document.getElementById('class-select');
             const toggleBonusAction = document.getElementById('toggle-bonus-action-enabled');
             const toggleHealing = document.getElementById('toggle-healing-word');
             const toggleOffhand = document.getElementById('toggle-offhand-attack');
+            const toggleTrackReaction = document.getElementById('toggle-track-reaction');
+            const toggleTrackInteraction = document.getElementById('toggle-track-interaction');
+            const toggleExtraAttack = document.getElementById('toggle-extra-attack');
+            const toggleSpellcaster = document.getElementById('toggle-spellcaster-mode');
+            const toggleConfirmSpends = document.getElementById('toggle-confirm-spends');
+            const toggleBigButton = document.getElementById('toggle-big-button-mode');
+            const toggleAutoReset = document.getElementById('toggle-auto-reset');
+            const toggleDecisionHelper = document.getElementById('toggle-decision-helper');
+            const helperPresetSelect = document.getElementById('helper-preset-select');
 
             if (classSelect) {
                 classSelect.addEventListener('change', () => {
                     prefs.classKey = classSelect.value;
-                    savePrefs();
+                    applyClassPresets(classSelect.value);
                     updateUI();
                 });
             }
@@ -2028,6 +2617,80 @@
                     prefs.canOffhandAttack = !!toggleOffhand.checked;
                     savePrefs();
                     updateUI();
+                });
+            }
+
+            if (toggleTrackReaction) {
+                toggleTrackReaction.addEventListener('change', () => {
+                    prefs.trackReaction = !!toggleTrackReaction.checked;
+                    savePrefs();
+                    updateUI();
+                });
+            }
+
+            if (toggleTrackInteraction) {
+                toggleTrackInteraction.addEventListener('change', () => {
+                    prefs.trackInteraction = !!toggleTrackInteraction.checked;
+                    savePrefs();
+                    updateUI();
+                });
+            }
+
+            if (toggleExtraAttack) {
+                toggleExtraAttack.addEventListener('change', () => {
+                    prefs.extraAttackReminder = !!toggleExtraAttack.checked;
+                    savePrefs();
+                    updateUI();
+                });
+            }
+
+            if (toggleSpellcaster) {
+                toggleSpellcaster.addEventListener('change', () => {
+                    prefs.spellcasterMode = !!toggleSpellcaster.checked;
+                    savePrefs();
+                    updateUI();
+                });
+            }
+
+            if (toggleConfirmSpends) {
+                toggleConfirmSpends.addEventListener('change', () => {
+                    prefs.confirmSpends = !!toggleConfirmSpends.checked;
+                    savePrefs();
+                });
+            }
+
+            if (toggleBigButton) {
+                toggleBigButton.addEventListener('change', () => {
+                    prefs.bigButtonMode = !!toggleBigButton.checked;
+                    savePrefs();
+                    if (prefs.bigButtonMode) {
+                        document.body.classList.add('big-button-mode');
+                    } else {
+                        document.body.classList.remove('big-button-mode');
+                    }
+                });
+            }
+
+            if (toggleAutoReset) {
+                toggleAutoReset.addEventListener('change', () => {
+                    prefs.autoResetOnStartTurn = !!toggleAutoReset.checked;
+                    savePrefs();
+                });
+            }
+
+            if (toggleDecisionHelper) {
+                toggleDecisionHelper.addEventListener('change', () => {
+                    prefs.decisionHelperEnabled = !!toggleDecisionHelper.checked;
+                    savePrefs();
+                    updateDecisionHelper();
+                });
+            }
+
+            if (helperPresetSelect) {
+                helperPresetSelect.addEventListener('change', () => {
+                    prefs.helperPreset = helperPresetSelect.value || 'none';
+                    savePrefs();
+                    updateDecisionHelper();
                 });
             }
         }
@@ -2080,6 +2743,11 @@
                 initTheme();
             }
         })();
+
+        // Toggle reaction detail expansion
+        function toggleReactionDetail(element) {
+            element.classList.toggle('expanded');
+        }
 
         // Initialize
         loadPrefs();
