@@ -68,19 +68,6 @@
         }
 
 
-        /* Turn Tracker */
-        .turn-tracker {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 0.75rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 0.5rem;
-            font-size: 0.875rem;
-        }
-
         /* Reaction Widget (NOT YOUR TURN Screen) */
         .reaction-widget-large {
             background-color: rgba(0, 0, 0, 0.05);
@@ -115,6 +102,34 @@
             font-size: 1rem;
             padding: 0.5rem 1rem;
             font-weight: 600;
+            border-radius: 4px;
+        }
+
+        /* tracker-status classes (only used by reaction widget on NOT YOUR TURN screen) */
+        .tracker-status.available {
+            background-color: var(--success);
+            color: white;
+            cursor: pointer;
+        }
+
+        .tracker-status.available:hover {
+            opacity: 0.8;
+        }
+
+        .tracker-status.used {
+            background-color: var(--error);
+            color: white;
+            cursor: pointer;
+        }
+
+        .tracker-status.used:hover {
+            opacity: 0.8;
+        }
+
+        .tracker-status.reserved {
+            background-color: var(--warning);
+            color: var(--text);
+            cursor: not-allowed;
         }
 
         .reaction-hint {
@@ -152,60 +167,6 @@
 
         .dark-mode .reaction-item {
             background-color: rgba(255, 255, 255, 0.02);
-        }
-
-
-        .tracker-item {
-            text-align: center;
-        }
-
-        .tracker-label {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            white-space: nowrap;
-            font-size: 0.8rem;
-        }
-
-        .tracker-status {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            background-color: rgba(255, 255, 255, 0.2);
-            font-size: 0.75rem;
-        }
-
-        .tracker-status.available {
-            background-color: var(--success);
-            cursor: pointer;
-        }
-
-        .tracker-status.available:hover {
-            opacity: 0.8;
-        }
-
-        .tracker-status.used {
-            background-color: var(--error);
-            cursor: pointer;
-        }
-
-        .tracker-status.used:hover {
-            opacity: 0.8;
-        }
-
-        .tracker-status.reserved {
-            background-color: var(--warning);
-            color: var(--text);
-            cursor: not-allowed;
-        }
-
-        /* Reaction tracker clickable */
-        #tracker-reaction.available,
-        #tracker-reaction.used {
-            cursor: pointer;
-        }
-
-        #tracker-reaction.available:hover,
-        #tracker-reaction.used:hover {
-            opacity: 0.8;
         }
 
         /* Screen Views */
@@ -248,6 +209,31 @@
             display: grid;
             gap: 1rem;
             margin-bottom: 1.5rem;
+        }
+
+        /* Action grid for organizing action buttons */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 480px) {
+            .action-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Minor buttons container (Settings and Reset) */
+        .minor-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .minor-buttons .btn {
+            flex: 1;
         }
 
         /* End Turn screen - reduce button grid spacing */
@@ -297,12 +283,17 @@
 
         .btn-accent {
             background-color: var(--accent-color);
-            color: var(--text);
+            color: #1a1a1a;
+            font-weight: 600;
         }
 
         .btn-accent:hover {
             background-color: #c19d2e;
             box-shadow: 0 4px 8px var(--shadow-hover);
+        }
+
+        .dark-mode .btn-accent {
+            color: #1a1a1a;
         }
 
         .btn-danger {
@@ -483,19 +474,6 @@
                 font-size: 1rem;
                 padding: 0.875rem 1.25rem;
             }
-
-            .turn-tracker {
-                grid-template-columns: repeat(2, 1fr);
-                font-size: 0.75rem;
-            }
-
-            .tracker-label {
-                font-size: 0.75rem;
-            }
-
-            #bonus-action-label::after {
-                content: " Action";
-            }
         }
 
         /* Dash Active Note */
@@ -513,14 +491,9 @@
             background-color: rgba(74, 155, 95, 0.2);
         }
 
-        /* Dark mode specific adjustments */
-        .dark-mode .tracker-status.reserved {
-            color: var(--background);
-        }
-
         /* DM Panel (compact) */
         .dm-panel-compact {
-            margin-top: 1rem;
+            margin-bottom: 1rem;
             padding: 0.75rem;
             background-color: rgba(212, 175, 55, 0.1);
             border-left: 3px solid var(--accent-color);
@@ -682,6 +655,68 @@
             justify-content: flex-end;
         }
 
+        /* End Turn Safety Net Dialog */
+        .end-turn-dialog {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .end-turn-dialog.active {
+            display: flex;
+        }
+
+        .end-turn-dialog-content {
+            background-color: var(--surface);
+            padding: 1.5rem;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .end-turn-dialog-message {
+            margin-bottom: 1.5rem;
+            font-size: 1.125rem;
+            line-height: 1.6;
+        }
+
+        .end-turn-dialog-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .end-turn-dialog-quick-actions {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+            display: none;
+        }
+
+        .end-turn-dialog-quick-actions.show {
+            display: block;
+        }
+
+        .end-turn-dialog-quick-actions p {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .end-turn-dialog-quick-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
         /* Default hidden elements (JS will reveal when needed) */
         #dash-note {
             display: none;
@@ -738,31 +773,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Turn Tracker -->
-        <div class="turn-tracker">
-            <div class="tracker-item">
-                <div class="tracker-label">🏃 Movement</div>
-                <div class="tracker-status" id="tracker-movement">Available</div>
-            </div>
-            <div class="tracker-item">
-                <div class="tracker-label">⚔️ Action</div>
-                <div class="tracker-status" id="tracker-action">Available</div>
-            </div>
-            <div class="tracker-item">
-                <div class="tracker-label" id="bonus-action-label">✨ Bonus</div>
-                <div class="tracker-status" id="tracker-bonus-action">Available</div>
-            </div>
-            <div class="tracker-item">
-                <div class="tracker-label">🤏 Interaction</div>
-                <div class="tracker-status" id="tracker-interaction">Available</div>
-            </div>
-            <div class="tracker-item">
-                <div class="tracker-label">⚡ Reaction</div>
-                <div class="tracker-status" id="tracker-reaction" onclick="toggleReaction()" title="Click to toggle (can be used during other creatures' turns)">Available</div>
-            </div>
-        </div>
-
-        <!-- Reaction Status (Separate) -->
         <!-- Home Screen -->
         <div class="screen active" id="screen-home">
             <!-- Dash Note -->
@@ -772,46 +782,7 @@
 
             <div id="home-available" class="button-grid"></div>
             <div id="home-used" class="button-grid used-grid"></div>
-
-            <!-- DM Panel (compact) -->
-            <div class="dm-panel-compact">
-                <div class="dm-label">DM said: Anything else?</div>
-                <div class="dm-resources" id="dm-resources-list">
-                    <span>All set.</span>
-                </div>
-            </div>
-
-            <!-- Character Setup (compact) -->
-            <div class="character-setup-compact">
-                <div class="setup-row">
-                    <label for="class-select">⚙️ Class</label>
-                    <select id="class-select">
-                        <option value="">(Select)</option>
-                        <option value="barbarian">Barbarian</option>
-                        <option value="bard">Bard</option>
-                        <option value="cleric">Cleric</option>
-                        <option value="fighter">Fighter</option>
-                        <option value="monk">Monk</option>
-                        <option value="paladin">Paladin</option>
-                        <option value="ranger">Ranger</option>
-                        <option value="rogue">Rogue</option>
-                        <option value="sorcerer">Sorcerer</option>
-                        <option value="warlock">Warlock</option>
-                        <option value="wizard">Wizard</option>
-                        <option value="other">Other / None</option>
-                    </select>
-                </div>
-                <div class="setup-toggles">
-                    <label title="Show Healing Word option">
-                        <input type="checkbox" id="toggle-healing-word" />
-                        💚 Healing Word
-                    </label>
-                    <label title="Show offhand attack option">
-                        <input type="checkbox" id="toggle-offhand-attack" />
-                        🗡️ Offhand
-                    </label>
-                </div>
-            </div>
+            <div id="home-minor-buttons" class="minor-buttons"></div>
         </div>
 
         <!-- NOT YOUR TURN Screen -->
@@ -863,7 +834,16 @@
         <!-- ACTION Screen -->
         <div class="screen" id="screen-action">
             <h1 class="headline">⚔️ Choose Action</h1>
+            
+            <!-- Primary actions (Attack and Cast Spell) -->
             <div class="button-grid">
+                <button class="btn btn-accent" onclick="showAttackTree()">⚔️ Attack</button>
+                <button class="btn btn-primary" onclick="showActionDetail('cast-spell')">✨ Cast a Spell</button>
+            </div>
+            
+            <!-- Other actions in grid layout -->
+            <div class="action-grid">
+                <button class="btn btn-primary" onclick="handleDash()">💨 Dash</button>
                 <button class="btn btn-primary" onclick="showActionDetail('search')">🔍 Search</button>
                 <button class="btn btn-primary" onclick="showActionDetail('ready')">⏳ Ready</button>
                 <button class="btn btn-primary" onclick="showActionDetail('help')">🤝 Help</button>
@@ -871,10 +851,17 @@
                 <button class="btn btn-primary" onclick="showActionDetail('disengage')">🏃‍♂️ Disengage</button>
                 <button class="btn btn-primary" onclick="showActionDetail('hide')">🥷 Hide</button>
                 <button class="btn btn-primary" onclick="showActionDetail('use-object')">🔧 Use Object</button>
-                <button class="btn btn-primary" onclick="showActionDetail('cast-spell')">✨ Cast a Spell</button>
                 <button class="btn btn-primary" onclick="showActionDetail('shove')">💪 Shove</button>
                 <button class="btn btn-primary" onclick="showActionDetail('grapple')">🤼 Grapple</button>
-                <button class="btn btn-accent" onclick="showAttackTree()">⚔️ Attack</button>
+            </div>
+            
+            <!-- Interaction (Free) -->
+            <div class="button-grid">
+                <button class="btn btn-secondary" onclick="handleInteractClick()">🤏 INTERACT (Free)</button>
+            </div>
+            
+            <!-- Back button -->
+            <div class="button-grid">
                 <button class="btn btn-secondary" onclick="showScreen('screen-home')">← Back</button>
             </div>
         </div>
@@ -1085,7 +1072,7 @@
             </div>
             <div class="button-grid">
                 <button class="btn btn-primary" onclick="confirmDash()">✅ Confirm Dash</button>
-                <button class="btn btn-secondary" onclick="showScreen('screen-home')">← Back</button>
+                <button class="btn btn-secondary" onclick="showScreen('screen-action')">← Back</button>
             </div>
         </div>
 
@@ -1119,6 +1106,51 @@
             </div>
         </div>
 
+        <!-- SETTINGS Screen -->
+        <div class="screen" id="screen-settings">
+            <h1 class="headline">⚙️ Settings</h1>
+            
+            <!-- Character Setup -->
+            <div class="character-setup-compact">
+                <div class="setup-row">
+                    <label for="class-select">⚙️ Class</label>
+                    <select id="class-select">
+                        <option value="">(Select)</option>
+                        <option value="barbarian">Barbarian</option>
+                        <option value="bard">Bard</option>
+                        <option value="cleric">Cleric</option>
+                        <option value="fighter">Fighter</option>
+                        <option value="monk">Monk</option>
+                        <option value="paladin">Paladin</option>
+                        <option value="ranger">Ranger</option>
+                        <option value="rogue">Rogue</option>
+                        <option value="sorcerer">Sorcerer</option>
+                        <option value="warlock">Warlock</option>
+                        <option value="wizard">Wizard</option>
+                        <option value="other">Other / None</option>
+                    </select>
+                </div>
+                <div class="setup-toggles">
+                    <label title="Enable Bonus Action button on Home screen">
+                        <input type="checkbox" id="toggle-bonus-action-enabled" />
+                        ✨ Bonus Action
+                    </label>
+                    <label title="Show Healing Word option">
+                        <input type="checkbox" id="toggle-healing-word" />
+                        💚 Healing Word
+                    </label>
+                    <label title="Show offhand attack option">
+                        <input type="checkbox" id="toggle-offhand-attack" />
+                        🗡️ Offhand
+                    </label>
+                </div>
+            </div>
+
+            <div class="button-grid">
+                <button class="btn btn-secondary" onclick="showScreen('screen-home')">← Back</button>
+            </div>
+        </div>
+
         <!-- Toast Notification -->
         <div class="toast" id="toast"></div>
 
@@ -1134,6 +1166,25 @@
                 </div>
             </div>
         </div>
+
+        <!-- End Turn Safety Net Dialog -->
+        <div class="end-turn-dialog" id="end-turn-dialog">
+            <div class="end-turn-dialog-content">
+                <div class="end-turn-dialog-message" id="end-turn-dialog-message">
+                    <!-- Message will be populated by JavaScript -->
+                </div>
+                <div class="end-turn-dialog-quick-actions" id="end-turn-dialog-quick-actions">
+                    <p><strong>Quick actions:</strong> Mark resources as used if you don't need them.</p>
+                    <div class="end-turn-dialog-quick-buttons" id="end-turn-dialog-quick-buttons">
+                        <!-- Quick action buttons will be populated by JavaScript -->
+                    </div>
+                </div>
+                <div class="end-turn-dialog-actions">
+                    <button class="btn btn-secondary btn-small" onclick="closeEndTurnDialog()">Go Back</button>
+                    <button class="btn btn-danger btn-small" onclick="confirmEndTurnAnyway()">End Turn</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1144,7 +1195,6 @@
             bonusAction: 'available',
             interaction: 'available',
             reaction: 'available',
-            undoSnapshot: null,
             dashActive: false,
             actionUsedBy: null,
             currentAttackStep: 1,
@@ -1157,7 +1207,8 @@
         let prefs = {
             classKey: '',
             canHealingWord: false,
-            canOffhandAttack: false
+            canOffhandAttack: false,
+            bonusActionEnabled: false
         };
 
         // Load state from localStorage
@@ -1178,12 +1229,18 @@
             if (saved) {
                 prefs = { ...prefs, ...JSON.parse(saved) };
             }
+            // Backward compatibility: ensure bonusActionEnabled defaults to false
+            if (prefs.bonusActionEnabled === undefined) {
+                prefs.bonusActionEnabled = false;
+            }
 
             const classSelect = document.getElementById('class-select');
+            const toggleBonusAction = document.getElementById('toggle-bonus-action-enabled');
             const toggleHealing = document.getElementById('toggle-healing-word');
             const toggleOffhand = document.getElementById('toggle-offhand-attack');
 
             if (classSelect) classSelect.value = prefs.classKey || '';
+            if (toggleBonusAction) toggleBonusAction.checked = !!prefs.bonusActionEnabled;
             if (toggleHealing) toggleHealing.checked = !!prefs.canHealingWord;
             if (toggleOffhand) toggleOffhand.checked = !!prefs.canOffhandAttack;
         }
@@ -1234,7 +1291,8 @@
         }
 
         function hasBonusActionOptions() {
-            return getBonusActionOptions().length > 0;
+            // Bonus Action must be enabled in settings AND have at least one option
+            return prefs.bonusActionEnabled && getBonusActionOptions().length > 0;
         }
 
         // Save state to localStorage
@@ -1244,13 +1302,6 @@
 
         // Update UI based on state
         function updateUI() {
-            // Update tracker
-            updateTracker('movement', state.movement);
-            updateTracker('action', state.action);
-            updateTracker('bonus-action', state.bonusAction);
-            updateTracker('interaction', state.interaction);
-            updateTracker('reaction', state.reaction);
-            
             // Update reaction widget (on NOT YOUR TURN screen)
             updateReactionWidget();
 
@@ -1260,39 +1311,30 @@
             // Update dash note
             document.getElementById('dash-note').style.display = state.dashActive ? 'block' : 'none';
 
-            // Update DM panel
-            updateDMPanel();
-
             saveState();
         }
 
-        function updateDMPanel() {
-            const dmList = document.getElementById('dm-resources-list');
-            if (!dmList) return;
-
+        // Count available resources (for End Turn safety net)
+        function countAvailableResources() {
+            let count = 0;
             const available = [];
-            if (state.movement === 'available') available.push('Movement');
-            if (state.bonusAction === 'available' && hasBonusActionOptions()) available.push('Bonus Action');
-            if (state.interaction === 'available') available.push('Interaction');
-            if (state.reaction === 'available') available.push('Reaction');
-
-            dmList.innerHTML = '';
-            if (available.length === 0) {
-                dmList.innerHTML = '<span>All set.</span>';
-            } else {
-                available.forEach(item => {
-                    const span = document.createElement('span');
-                    span.className = 'dm-resource-item';
-                    span.textContent = item;
-                    dmList.appendChild(span);
-                });
+            
+            if (state.movement === 'available') {
+                count++;
+                available.push('Movement');
             }
-        }
-
-        function updateTracker(resource, status) {
-            const element = document.getElementById(`tracker-${resource}`);
-            element.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-            element.className = 'tracker-status ' + status;
+            // Only count Bonus Action if enabled
+            if (prefs.bonusActionEnabled && state.bonusAction === 'available' && hasBonusActionOptions()) {
+                count++;
+                available.push('Bonus Action');
+            }
+            if (state.interaction === 'available') {
+                count++;
+                available.push('Interaction');
+            }
+            // Do NOT count Reaction - it's normal to have it available
+            
+            return { count, available };
         }
 
         function updateReactionWidget() {
@@ -1328,12 +1370,6 @@
                 usedContainer.appendChild(btn);
             }
             
-            // DASH button (only show if action is available)
-            if (state.action === 'available') {
-                const btn = createButton('💨 DASH (Action)', 'btn-primary', () => handleDash());
-                availableContainer.appendChild(btn);
-            }
-            
             // ACTION button
             if (state.action === 'available') {
                 const btn = createButton('⚔️ ACTION', 'btn-primary', () => handleActionClick());
@@ -1358,22 +1394,23 @@
                 usedContainer.appendChild(btn);
             }
             
-            // INTERACT button
-            if (state.interaction === 'available') {
-                const btn = createButton('🤏 INTERACT (Free)', 'btn-primary', () => handleInteractClick());
-                availableContainer.appendChild(btn);
-            } else if (state.interaction === 'used') {
-                const btn = createButton('✅ 🤏 INTERACT (Free)', 'btn-primary used', () => handleUndoInteract());
-                usedContainer.appendChild(btn);
-            }
-            
-            // END TURN button (always in available)
-            const endTurnBtn = createButton('✅ END TURN', 'btn-danger', () => handleEndTurn());
+            // END TURN button (always in available) - dynamic label based on available resources
+            const resources = countAvailableResources();
+            const endTurnLabel = resources.count > 0 
+                ? `✅ END TURN (${resources.count} LEFT)` 
+                : '✅ END TURN';
+            const endTurnBtn = createButton(endTurnLabel, 'btn-danger', () => handleEndTurn());
             availableContainer.appendChild(endTurnBtn);
             
-            // Reset button (always in available)
-            const resetBtn = createButton('🔄 Reset All', 'btn-secondary', () => showResetDialog());
-            availableContainer.appendChild(resetBtn);
+            // Minor buttons container (Settings and Reset)
+            const minorContainer = document.getElementById('home-minor-buttons');
+            if (minorContainer) {
+                minorContainer.innerHTML = '';
+                const settingsBtn = createButton('⚙️ Settings', 'btn-secondary', () => showScreen('screen-settings'));
+                const resetBtn = createButton('🔄 Reset All', 'btn-secondary', () => showResetDialog());
+                minorContainer.appendChild(settingsBtn);
+                minorContainer.appendChild(resetBtn);
+            }
         }
         
         // Helper to create button element
@@ -1392,18 +1429,6 @@
                 screen.classList.remove('active');
             });
             document.getElementById(screenId).classList.add('active');
-        }
-
-        // Save undo snapshot
-        function saveUndoSnapshot() {
-            state.undoSnapshot = {
-                movement: state.movement,
-                action: state.action,
-                bonusAction: state.bonusAction,
-                interaction: state.interaction,
-                reaction: state.reaction,
-                dashActive: state.dashActive
-            };
         }
 
         // Toast Notification
@@ -1494,7 +1519,6 @@
 
         // Confirm Move
         function confirmMove() {
-            saveUndoSnapshot();
             state.movement = 'used';
             state.pendingAction = null;
             updateUI();
@@ -1503,7 +1527,6 @@
 
         // Confirm Dash
         function confirmDash() {
-            saveUndoSnapshot();
             state.action = 'used';
             state.dashActive = true;
             state.actionUsedBy = 'dash';
@@ -1546,7 +1569,6 @@
 
         // Confirm Interact
         function confirmInteract() {
-            saveUndoSnapshot();
             state.interaction = 'used';
             state.pendingAction = null;
             state.pendingInteractType = null;
@@ -1622,8 +1644,6 @@
 
         // Confirm Action Detail
         function confirmActionDetail() {
-            saveUndoSnapshot();
-
             if (state.pendingActionType === 'ready') {
                 state.action = 'used';
                 state.reaction = 'reserved';
@@ -1728,7 +1748,6 @@
 
         // Confirm Bonus Action
         function confirmBonusAction() {
-            saveUndoSnapshot();
             state.bonusAction = 'used';
             state.pendingAction = null;
             state.pendingBonusActionType = null;
@@ -1800,7 +1819,6 @@
 
         // Confirm Attack Action
         function confirmAttackAction() {
-            saveUndoSnapshot();
             state.action = 'used';
             state.actionUsedBy = 'other';
             state.pendingAction = null;
@@ -1810,17 +1828,110 @@
 
         // End Turn
         function handleEndTurn() {
+            const resources = countAvailableResources();
+            
+            // If there are available resources, show reminder
+            if (resources.count > 0) {
+                // Build simple reminder message
+                let message = `Reminder: You still have ${resources.count} resource${resources.count > 1 ? 's' : ''} available: <strong>${resources.available.join(', ')}</strong>`;
+                
+                // Add brief explanation for Interaction if it's available
+                if (resources.available.includes('Interaction')) {
+                    message += `<br><small style="color: var(--text-light);">💡 Interaction = free object interaction (draw weapon, open door, etc.). Access from ACTION screen.</small>`;
+                }
+                
+                const messageEl = document.getElementById('end-turn-dialog-message');
+                messageEl.innerHTML = message;
+                
+                // Show quick action buttons
+                const quickActionsEl = document.getElementById('end-turn-dialog-quick-actions');
+                const quickButtonsEl = document.getElementById('end-turn-dialog-quick-buttons');
+                quickButtonsEl.innerHTML = '';
+                
+                if (state.movement === 'available') {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-secondary btn-small';
+                    btn.textContent = 'Mark Movement as Used';
+                    btn.onclick = () => {
+                        state.movement = 'used';
+                        updateUI();
+                        closeEndTurnDialog();
+                        handleEndTurn(); // Re-check
+                    };
+                    quickButtonsEl.appendChild(btn);
+                }
+                
+                if (state.interaction === 'available') {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-secondary btn-small';
+                    btn.textContent = 'Mark Interaction as Used';
+                    btn.onclick = () => {
+                        state.interaction = 'used';
+                        updateUI();
+                        closeEndTurnDialog();
+                        handleEndTurn(); // Re-check
+                    };
+                    quickButtonsEl.appendChild(btn);
+                }
+                
+                if (prefs.bonusActionEnabled && state.bonusAction === 'available' && hasBonusActionOptions()) {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-secondary btn-small';
+                    btn.textContent = 'Mark Bonus Action as Used';
+                    btn.onclick = () => {
+                        state.bonusAction = 'used';
+                        updateUI();
+                        closeEndTurnDialog();
+                        handleEndTurn(); // Re-check
+                    };
+                    quickButtonsEl.appendChild(btn);
+                }
+                
+                if (quickButtonsEl.children.length > 0) {
+                    quickActionsEl.classList.add('show');
+                } else {
+                    quickActionsEl.classList.remove('show');
+                }
+                
+                document.getElementById('end-turn-dialog').classList.add('active');
+                
+                return; // Don't proceed to end turn screen yet
+            }
+            
+            // No available resources, proceed normally
+            proceedToEndTurnScreen();
+        }
+
+        function proceedToEndTurnScreen() {
             // Update checklist
             document.getElementById('checklist-movement').textContent = state.movement === 'used' ? 'Used' : 'Unused';
             document.getElementById('checklist-movement').className = 'status ' + (state.movement === 'used' ? 'used' : 'unused');
             document.getElementById('checklist-action').textContent = state.action === 'used' ? 'Used' : 'Unused';
             document.getElementById('checklist-action').className = 'status ' + (state.action === 'used' ? 'used' : 'unused');
-            document.getElementById('checklist-bonus-action').textContent = state.bonusAction === 'used' ? 'Used' : 'Unused';
-            document.getElementById('checklist-bonus-action').className = 'status ' + (state.bonusAction === 'used' ? 'used' : 'unused');
+            
+            // Only show Bonus Action in checklist if enabled
+            const bonusActionItem = document.getElementById('checklist-bonus-action').parentElement;
+            if (prefs.bonusActionEnabled && hasBonusActionOptions()) {
+                bonusActionItem.style.display = '';
+                document.getElementById('checklist-bonus-action').textContent = state.bonusAction === 'used' ? 'Used' : 'Unused';
+                document.getElementById('checklist-bonus-action').className = 'status ' + (state.bonusAction === 'used' ? 'used' : 'unused');
+            } else {
+                bonusActionItem.style.display = 'none';
+            }
+            
             document.getElementById('checklist-interaction').textContent = state.interaction === 'used' ? 'Used' : 'Unused';
             document.getElementById('checklist-interaction').className = 'status ' + (state.interaction === 'used' ? 'used' : 'unused');
             
             showScreen('screen-end-turn');
+        }
+
+        function closeEndTurnDialog() {
+            document.getElementById('end-turn-dialog').classList.remove('active');
+        }
+
+        function confirmEndTurnAnyway() {
+            closeEndTurnDialog();
+            proceedToEndTurnScreen();
         }
 
         function confirmEndTurn() {
@@ -1832,7 +1943,6 @@
             // Reaction does NOT reset (resets at START of turn)
             state.dashActive = false;
             state.actionUsedBy = null;
-            state.undoSnapshot = null;
 
             updateUI();
             showScreen('screen-not-your-turn');
@@ -1870,7 +1980,6 @@
                 bonusAction: 'available',
                 interaction: 'available',
                 reaction: 'available',
-                undoSnapshot: null,
                 dashActive: false,
                 actionUsedBy: null,
                 currentAttackStep: 1,
@@ -1886,12 +1995,21 @@
 
         function wirePrefsUI() {
             const classSelect = document.getElementById('class-select');
+            const toggleBonusAction = document.getElementById('toggle-bonus-action-enabled');
             const toggleHealing = document.getElementById('toggle-healing-word');
             const toggleOffhand = document.getElementById('toggle-offhand-attack');
 
             if (classSelect) {
                 classSelect.addEventListener('change', () => {
                     prefs.classKey = classSelect.value;
+                    savePrefs();
+                    updateUI();
+                });
+            }
+
+            if (toggleBonusAction) {
+                toggleBonusAction.addEventListener('change', () => {
+                    prefs.bonusActionEnabled = !!toggleBonusAction.checked;
                     savePrefs();
                     updateUI();
                 });
