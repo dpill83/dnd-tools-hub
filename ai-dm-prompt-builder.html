@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D 5e Adventure Builder - DMG-Faithful</title>
+    <title>AI DM Prompt Builder - Build Prompts for ChatGPT to Run Adventures</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -12,15 +12,20 @@
         <header>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <div>
-                    <h1>D&D 5e Adventure Builder</h1>
-                    <p class="intro">Follow the Dungeon Master's Guide principles to build adventures as situations, not fixed plots. Players are co-authors.</p>
+                    <h1>AI DM Prompt Builder</h1>
+                    <p class="intro">Build prompts for AI (ChatGPT, Claude, etc.) to run D&D 5e adventures as your Dungeon Master. Create adventure structures following DMG principles, then generate ready-to-use prompts that let AI DM your sessions.</p>
                 </div>
-                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
-                    <span class="theme-icon">🌙</span>
-                </button>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <a href="index.html" class="theme-toggle" aria-label="Go to home" style="text-decoration: none;">
+                        <span class="theme-icon">🏠</span>
+                    </a>
+                    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                </div>
             </div>
             <div class="warning-box">
-                <strong>⚠️ Critical Principle:</strong> Adventures are situations, not fixed plots. Players are co-authors. Avoid single-outcome design.
+                <strong>🤖 AI DM Focus:</strong> This tool builds prompts specifically designed for AI to run adventures at the table. The "Run Prompt" generates a complete prompt you paste into ChatGPT to start DMing immediately.
             </div>
         </header>
 
@@ -407,14 +412,15 @@
 
         <!-- Output Section -->
         <section class="output-section">
-            <h2>Generate Template</h2>
+            <h2>Generate AI DM Prompt</h2>
 
             <div class="form-group">
                 <label>Template Type</label>
                 <div class="radio-group">
                     <label><input type="radio" name="templateType" value="build" checked> Build Prompt (Generate Adventure Content)</label>
-                    <label><input type="radio" name="templateType" value="run"> Run Prompt (Act as DM at Table)</label>
+                    <label><input type="radio" name="templateType" value="run"> Run Prompt (Act as DM at Table) ⭐</label>
                 </div>
+                <p class="help-text" style="margin-top: 0.5rem;">⭐ <strong>Recommended:</strong> Use "Run Prompt" to generate a complete prompt for ChatGPT/Claude to DM your adventure. This is the main feature of this tool.</p>
             </div>
 
             <div class="button-group">

@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventure Maker - D&D 5e Adventure Authoring Tool</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Adventure Maker Specific Styles */
+        .adventure-maker-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: calc(100vh - 4rem);
+        }
+
+        /* Horizontal Step Navigation */
+        .step-navigation {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background-color: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .step-item:hover {
+            background-color: var(--background);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .step-item.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .step-item.active .step-number {
+            background-color: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .step-label {
+            font-size: 1rem;
+        }
+
+        .step-arrow {
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .step-separator {
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0 0.5rem;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            background-color: var(--surface);
+            border-radius: 8px;
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* Progressive Disclosure Styles */
+        .section-card {
+            background-color: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .section-card.changed {
+            background-color: rgba(74, 155, 95, 0.1);
+            border-color: var(--success);
+            animation: highlightFade 3s ease-out;
+        }
+
+        @keyframes highlightFade {
+            0% { background-color: rgba(74, 155, 95, 0.2); }
+            100% { background-color: rgba(74, 155, 95, 0.05); }
+        }
+
+        .section-header {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border);
+            transition: background-color 0.2s;
+        }
+
+        .section-header:hover {
+            background-color: var(--background);
+        }
+
+        .section-header h3 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 1.25rem;
+        }
+
+        .section-toggle {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            transition: transform 0.3s;
+        }
+
+        .section-card.expanded .section-toggle {
+            transform: rotate(180deg);
+        }
+
+        .section-summary {
+            padding: 0.75rem 1.5rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .section-content {
+            display: none;
+            padding: 1.5rem;
+        }
+
+        .section-card.expanded .section-content {
+            display: block;
+        }
+
+        /* Constraints Section */
+        .constraints-section {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+
+        .constraints-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem 0;
+        }
+
+        .constraints-content {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .constraints-section.expanded .constraints-content {
+            display: block;
+        }
+
+        /* Recurring Element Picker */
+        .recurring-picker {
+            position: relative;
+        }
+
+        .picker-search {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+
+        .picker-options {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background-color: var(--surface);
+        }
+
+        .picker-option {
+            padding: 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+            transition: background-color 0.2s;
+        }
+
+        .picker-option:hover {
+            background-color: var(--background);
+        }
+
+        .picker-option:last-child {
+            border-bottom: none;
+        }
+
+        .recurring-badge {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .step-navigation {
+                padding: 1rem;
+                gap: 0.5rem;
+            }
+
+            .step-item {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .step-number {
+                width: 20px;
+                height: 20px;
+                font-size: 0.75rem;
+            }
+
+            .step-arrow,
+            .step-separator {
+                font-size: 1.2rem;
+            }
+
+            .step-label {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* ChatGPT Button */
+        .chatgpt-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chatgpt-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Help text links */
+        .help-text a {
+            color: var(--primary-color);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .help-text a:hover {
+            color: var(--primary-light);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                    <h1>Adventure Maker</h1>
+                    <p class="intro">Build D&D 5e adventures optimized for AI deep research. Author adventures with campaign context and progressive disclosure.</p>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <a href="index.html" class="theme-toggle" aria-label="Go to home" style="text-decoration: none;">
+                        <span class="theme-icon">🏠</span>
+                    </a>
+                    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Horizontal Step Navigation -->
+        <nav class="step-navigation">
+            <div class="step-item active" data-view="setup">
+                <span class="step-number">1</span>
+                <span class="step-label">Setup</span>
+            </div>
+            <div class="step-arrow">></div>
+            <div class="step-item" data-view="builder">
+                <span class="step-number">2</span>
+                <span class="step-label">Builder</span>
+            </div>
+            <div class="step-arrow">></div>
+            <div class="step-item" data-view="module">
+                <span class="step-number">3</span>
+                <span class="step-label">Generator</span>
+            </div>
+            <div class="step-separator">|</div>
+            <div class="step-item" data-view="campaign">
+                <span class="step-label">Settings</span>
+            </div>
+        </nav>
+
+        <div class="adventure-maker-container">
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Adventure Setup View -->
+                <section id="view-setup" class="view-section active">
+                    <h2>Adventure Setup</h2>
+                    <p class="help-text">Configure the foundational parameters for your adventure. These settings influence AI prompt generation and provide defaults for the builder.</p>
+
+                    <form id="setup-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="setup-party-level">Party Level *</label>
+                                <input type="number" id="setup-party-level" min="1" max="20" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="setup-party-size">Party Size</label>
+                                <input type="number" id="setup-party-size" min="1" max="10" value="4">
+                            </div>
+                            <div class="form-group">
+                                <label for="setup-tone">Tone</label>
+                                <select id="setup-tone">
+                                    <option value="">Select tone...</option>
+                                    <option value="Heroic">Heroic</option>
+                                    <option value="Grimdark">Grimdark</option>
+                                    <option value="Mystery">Mystery</option>
+                                    <option value="Horror">Horror</option>
+                                    <option value="Comedy">Comedy</option>
+                                    <option value="Political">Political</option>
+                                    <option value="Epic">Epic</option>
+                                    <option value="Other">Other...</option>
+                                </select>
+                                <input type="text" id="setup-tone-other" placeholder="Specify tone" style="display:none; margin-top: 0.5rem;">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="setup-setting">Setting/Location</label>
+                                <select id="setup-setting">
+                                    <option value="">Select location...</option>
+                                </select>
+                                <input type="text" id="setup-setting-other" placeholder="Enter custom location" style="display:none; margin-top: 0.5rem;">
+                            </div>
+                            <div class="form-group">
+                                <label for="setup-length">Adventure Length</label>
+                                <select id="setup-length">
+                                    <option value="One-shot (1 session)">One-shot (1 session)</option>
+                                    <option value="Short (2-3 sessions)">Short (2-3 sessions)</option>
+                                    <option value="Medium (4-6 sessions)" selected>Medium (4-6 sessions)</option>
+                                    <option value="Long (7+ sessions)">Long (7+ sessions)</option>
+                                    <option value="Epic (10+ sessions)">Epic (10+ sessions)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Optional Constraints (Collapsed by default) -->
+                        <div class="constraints-section">
+                            <div class="constraints-toggle" onclick="toggleConstraints()">
+                                <strong>Optional Constraints</strong>
+                                <span class="section-toggle">▼</span>
+                            </div>
+                            <div class="constraints-content">
+                                <div class="form-group">
+                                    <label>Recurring NPCs</label>
+                                    <p class="help-text" style="margin-bottom: 0.5rem; font-size: 0.85rem;">Select from your campaign library. <a href="#" onclick="switchView('campaign'); return false;">Add new NPCs in Campaign Settings</a></p>
+                                    <div id="setup-recurring-npcs" class="recurring-picker">
+                                        <select id="setup-npcs-select" multiple style="width: 100%; min-height: 100px;">
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Recurring Locations</label>
+                                    <p class="help-text" style="margin-bottom: 0.5rem; font-size: 0.85rem;">Select from your campaign library. <a href="#" onclick="switchView('campaign'); return false;">Add new locations in Campaign Settings</a></p>
+                                    <div id="setup-recurring-locations" class="recurring-picker">
+                                        <select id="setup-locations-select" multiple style="width: 100%; min-height: 100px;">
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Recurring Factions</label>
+                                    <p class="help-text" style="margin-bottom: 0.5rem; font-size: 0.85rem;">Select from your campaign library. <a href="#" onclick="switchView('campaign'); return false;">Add new factions in Campaign Settings</a></p>
+                                    <div id="setup-recurring-factions" class="recurring-picker">
+                                        <select id="setup-factions-select" multiple style="width: 100%; min-height: 100px;">
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="setup-special-items">Special Items/Rewards</label>
+                                    <textarea id="setup-special-items" rows="2" placeholder="Any specific items or rewards to include"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="setup-themes">Themes</label>
+                                    <textarea id="setup-themes" rows="2" placeholder="Themes to explore (e.g., betrayal, redemption, sacrifice)"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="button-group" style="margin-top: 2rem;">
+                            <button type="button" class="btn-primary" onclick="navigateToBuilder()">Start Building</button>
+                            <button type="button" class="btn-secondary" onclick="saveSetup()">Save Setup</button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Adventure Builder View -->
+                <section id="view-builder" class="view-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2>Adventure Builder</h2>
+                        <div class="button-group">
+                            <button type="button" class="btn-secondary" onclick="toggleAllSections()" id="expand-all-btn">Expand All</button>
+                        </div>
+                    </div>
+
+                    <div class="button-group" style="margin-bottom: 2rem;">
+                        <button type="button" class="btn-primary" onclick="generateAIPrompt()">Generate AI Prompt</button>
+                        <button type="button" class="btn-secondary" onclick="exportJSON()">Export JSON</button>
+                        <button type="button" class="btn-secondary" onclick="document.getElementById('import-json-file').click()">Import JSON</button>
+                        <input type="file" id="import-json-file" accept=".json" style="display:none;" onchange="importJSON(event)">
+                    </div>
+
+                    <div id="ai-prompt-output" style="display: none; margin-bottom: 2rem;">
+                        <div class="form-group">
+                            <label>Generated AI Prompt</label>
+                            <textarea id="ai-prompt-text" rows="15" readonly style="font-family: monospace;"></textarea>
+                            <div class="button-group" style="margin-top: 0.5rem;">
+                                <button type="button" class="btn-secondary" onclick="copyAIPrompt()">Copy Prompt</button>
+                                <button type="button" class="chatgpt-button" onclick="openChatGPT()">Open ChatGPT</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section" style="margin-bottom: 2rem;">
+                        <h3>Paste AI Response</h3>
+                        <p class="help-text">After generating the prompt and getting a response from ChatGPT or another AI, paste the JSON response below and click Parse to import it into your adventure.</p>
+                        <div class="form-group">
+                            <label for="ai-response-textarea">AI Response (JSON)</label>
+                            <textarea id="ai-response-textarea" rows="20" placeholder='Paste the AI\'s JSON response here. It should start with { and end with }.' style="font-family: monospace; font-size: 0.9rem;"></textarea>
+                        </div>
+                        <div class="button-group">
+                            <button type="button" class="btn-primary" onclick="parseAIResponseFromTextarea()">Parse AI Response</button>
+                            <button type="button" class="btn-secondary" onclick="clearAIResponse()">Clear</button>
+                        </div>
+                    </div>
+
+                    <div id="ai-parse-status" style="display: none; margin-bottom: 1rem;"></div>
+
+                    <!-- Progressive Disclosure Sections -->
+                    <div id="builder-sections">
+                        <!-- Sections will be rendered by JavaScript -->
+                    </div>
+                </section>
+
+                <!-- Campaign Settings View -->
+                <section id="view-campaign" class="view-section">
+                    <h2>Campaign Settings</h2>
+                    <p class="help-text">Manage recurring NPCs, locations, and factions that appear across multiple adventures.</p>
+
+                    <div class="form-group">
+                        <label for="campaign-hub">Campaign Hub</label>
+                        <input type="text" id="campaign-hub" value="Waterdeep" placeholder="Default campaign location">
+                    </div>
+
+                    <!-- Recurring NPCs -->
+                    <div class="form-section">
+                        <h3>Recurring NPCs</h3>
+                        <div id="campaign-npcs-list"></div>
+                        <button type="button" class="btn-secondary" onclick="addCampaignNPC()">+ Add NPC</button>
+                    </div>
+
+                    <!-- Recurring Locations -->
+                    <div class="form-section">
+                        <h3>Recurring Locations</h3>
+                        <div id="campaign-locations-list"></div>
+                        <button type="button" class="btn-secondary" onclick="addCampaignLocation()">+ Add Location</button>
+                    </div>
+
+                    <!-- Recurring Factions -->
+                    <div class="form-section">
+                        <h3>Recurring Factions</h3>
+                        <div id="campaign-factions-list"></div>
+                        <button type="button" class="btn-secondary" onclick="addCampaignFaction()">+ Add Faction</button>
+                    </div>
+
+                    <div class="button-group" style="margin-top: 2rem;">
+                        <button type="button" class="btn-primary" onclick="saveCampaignSettings()">Save Campaign Settings</button>
+                        <button type="button" id="cleanup-btn" class="btn-secondary" onclick="cleanupCampaignSettings()" style="display: none;">Clean Up Blank Entries</button>
+                    </div>
+                </section>
+
+                <!-- Module Generator View -->
+                <section id="view-module" class="view-section">
+                    <h2>Adventure Module Generator</h2>
+                    <p class="help-text">Generate a prompt to create a full adventure module in the style of official D&D modules like Hoard of the Dragon Queen or Curse of Strahd. This will use all your filled adventure data to create a comprehensive, publication-ready module.</p>
+
+                    <div class="form-section" style="margin-bottom: 2rem;">
+                        <h3>Module Format Options</h3>
+                        <div class="form-group">
+                            <label for="module-style">Module Style</label>
+                            <select id="module-style">
+                                <option value="official">Official D&D Module (Hoard of the Dragon Queen style)</option>
+                                <option value="detailed">Detailed Campaign Book (Curse of Strahd style)</option>
+                                <option value="concise">Concise Adventure (Lost Mine of Phandelver style)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="module-sections">Include Sections</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" id="module-intro" checked> Introduction & Background</label>
+                                <label><input type="checkbox" id="module-chapters" checked> Chapter Breakdown</label>
+                                <label><input type="checkbox" id="module-npcs" checked> NPC Appendix</label>
+                                <label><input type="checkbox" id="module-locations" checked> Locations Appendix</label>
+                                <label><input type="checkbox" id="module-treasure" checked> Treasure & Rewards</label>
+                                <label><input type="checkbox" id="module-maps" checked> Map Descriptions</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="button-group" style="margin-bottom: 2rem;">
+                        <button type="button" class="btn-primary" onclick="generateModulePrompt()">Generate Module Prompt</button>
+                        <button type="button" class="btn-secondary" onclick="exportAdventureJSON()">Export Adventure JSON</button>
+                        <button type="button" class="chatgpt-button" onclick="openChatGPT()">Open ChatGPT</button>
+                    </div>
+
+                    <div id="module-prompt-output" style="display: none; margin-bottom: 2rem;">
+                        <div class="form-group">
+                            <label>Module Generation Prompt</label>
+                            <p class="help-text">Copy this prompt and paste it into ChatGPT. Then upload the exported JSON file using ChatGPT's file upload feature.</p>
+                            <textarea id="module-prompt-text" rows="25" readonly style="font-family: monospace; font-size: 0.9rem;"></textarea>
+                            <div class="button-group" style="margin-top: 0.5rem;">
+                                <button type="button" class="btn-secondary" onclick="copyModulePrompt()">Copy Prompt</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="warning-box" style="margin-top: 2rem;">
+                        <strong>📋 Instructions:</strong>
+                        <ol style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                            <li>Click "Generate Module Prompt" to create the prompt</li>
+                            <li>Click "Export Adventure JSON" to download the JSON file with all your adventure data</li>
+                            <li>Copy the generated prompt</li>
+                            <li>Open ChatGPT and paste the prompt</li>
+                            <li>Upload the exported JSON file to ChatGPT</li>
+                            <li>ChatGPT will generate a full adventure module in the requested format</li>
+                        </ol>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="theme.js"></script>
+    <script src="adventure-maker.js"></script>
+</body>
+</html>
