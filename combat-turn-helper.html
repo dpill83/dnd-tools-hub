@@ -296,6 +296,59 @@
             }
         }
 
+        /* Collapsible Section */
+        .collapsible-section {
+            margin-bottom: 1rem;
+        }
+
+        .collapsible-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background-color: rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            user-select: none;
+        }
+
+        .dark-mode .collapsible-header {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .collapsible-header:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark-mode .collapsible-header:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .collapsible-header-text {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .collapsible-icon {
+            transition: transform 0.2s;
+            color: var(--text-light);
+        }
+
+        .collapsible-section.expanded .collapsible-icon {
+            transform: rotate(90deg);
+        }
+
+        .collapsible-content {
+            display: none;
+            margin-top: 0.75rem;
+        }
+
+        .collapsible-section.expanded .collapsible-content {
+            display: block;
+        }
+
         /* Minor buttons container (Settings and Reset) */
         .minor-buttons {
             display: flex;
@@ -729,6 +782,8 @@
             align-items: center;
             gap: 0.35rem;
             -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
             user-select: none;
             color: var(--text);
         }
@@ -893,6 +948,70 @@
             font-size: 1rem;
         }
 
+        /* Tooltip */
+        .help-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--text-light);
+            color: var(--surface);
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: help;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+            transition: background-color 0.2s;
+        }
+
+        .help-icon:hover {
+            background-color: var(--primary-color);
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip-content {
+            visibility: hidden;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--text);
+            color: var(--surface);
+            text-align: left;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            white-space: normal;
+            width: 250px;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .tooltip-content::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: var(--text) transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltip-content,
+        .tooltip.active .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+        }
+
         .hint-text {
             text-align: center;
             margin-top: 1.5rem;
@@ -915,6 +1034,23 @@
     <div class="container">
         <!-- Home Screen -->
         <div class="screen active" id="screen-home">
+            <!-- Help Section (collapsible, shown on first visit) -->
+            <div class="collapsible-section" id="help-section" style="margin-bottom: 1rem;">
+                <div class="collapsible-header" onclick="toggleCollapsible('help-section')">
+                    <span class="collapsible-header-text">❓ What do these mean?</span>
+                    <span class="collapsible-icon">▶</span>
+                </div>
+                <div class="collapsible-content">
+                    <div style="padding: 0.75rem; background-color: rgba(0, 0, 0, 0.03); border-radius: 4px; font-size: 0.875rem; line-height: 1.6;">
+                        <p style="margin-bottom: 0.5rem;"><strong>🏃 Movement:</strong> Move up to your speed. You can split this before and after your action.</p>
+                        <p style="margin-bottom: 0.5rem;"><strong>⚔️ Action:</strong> Most common actions are Attack or Cast a Spell. You can also Dash, Dodge, Help, and more.</p>
+                        <p style="margin-bottom: 0.5rem;"><strong>✨ Bonus Action:</strong> Only if you have a feature that grants one (like Rage, Cunning Action, or a spell).</p>
+                        <p style="margin-bottom: 0.5rem;"><strong>🤏 Interaction:</strong> One free object interaction per turn (draw weapon, open door, pick up item).</p>
+                        <p style="margin: 0;"><strong>⚡ Reaction:</strong> Tracked on the "NOT YOUR TURN" screen. You get one per round.</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Dash Note -->
             <div class="dash-note" id="dash-note">
                 💨 Extra movement granted this turn (Dash active)
@@ -1091,18 +1227,26 @@
                 <p style="margin: 0.25rem 0;">📚 Spell slots?</p>
             </div>
             
-            <!-- Other actions in grid layout -->
-            <div class="action-grid">
-                <button class="btn btn-primary" onclick="handleDash()">💨 Dash</button>
-                <button class="btn btn-primary" onclick="showActionDetail('search')">🔍 Search</button>
-                <button class="btn btn-primary" onclick="showActionDetail('ready')">⏳ Ready</button>
-                <button class="btn btn-primary" onclick="showActionDetail('help')">🤝 Help</button>
-                <button class="btn btn-primary" onclick="showActionDetail('dodge')">🛡️ Dodge</button>
-                <button class="btn btn-primary" onclick="showActionDetail('disengage')">🏃‍♂️ Disengage</button>
-                <button class="btn btn-primary" onclick="showActionDetail('hide')">🥷 Hide</button>
-                <button class="btn btn-primary" onclick="showActionDetail('use-object')">🔧 Use Object</button>
-                <button class="btn btn-primary" onclick="showActionDetail('shove')">💪 Shove</button>
-                <button class="btn btn-primary" onclick="showActionDetail('grapple')">🤼 Grapple</button>
+            <!-- Other actions in collapsible section -->
+            <div class="collapsible-section" id="other-actions-section">
+                <div class="collapsible-header" onclick="toggleCollapsible('other-actions-section')">
+                    <span class="collapsible-header-text">📋 Other Actions</span>
+                    <span class="collapsible-icon">▶</span>
+                </div>
+                <div class="collapsible-content">
+                    <div class="action-grid">
+                        <button class="btn btn-primary" onclick="handleDash()">💨 Dash</button>
+                        <button class="btn btn-primary" onclick="showActionDetail('search')">🔍 Search</button>
+                        <button class="btn btn-primary" onclick="showActionDetail('ready')">⏳ Ready</button>
+                        <button class="btn btn-primary" onclick="showActionDetail('help')">🤝 Help</button>
+                        <button class="btn btn-primary" onclick="showActionDetail('dodge')">🛡️ Dodge</button>
+                        <button class="btn btn-primary" onclick="showActionDetail('disengage')">🏃‍♂️ Disengage</button>
+                        <button class="btn btn-primary" onclick="showActionDetail('hide')">🥷 Hide</button>
+                        <button class="btn btn-primary" onclick="showActionDetail('use-object')">🔧 Use Object</button>
+                        <button class="btn btn-primary" onclick="showActionDetail('shove')">💪 Shove</button>
+                        <button class="btn btn-primary" onclick="showActionDetail('grapple')">🤼 Grapple</button>
+                    </div>
+                </div>
             </div>
             
             <!-- Interaction (Free) -->
@@ -1128,46 +1272,31 @@
                 </div>
             </div>
 
-            <!-- Weapon Attack Flow -->
-            <div class="attack-tree" id="attack-weapon-type">
+            <!-- Weapon Attack Flow - Simplified: Direct to roll result -->
+            <div class="attack-tree" id="attack-weapon">
+                <div class="modal-body">
+                    <p><strong>Roll d20 + modifier (STR for melee, DEX for ranged/finesse)</strong></p>
+                    <div class="help-text">
+                        <div>Advantage/Disadvantage?</div>
+                        <div>Nat 20 = crit (double dice)</div>
+                        <div>Remember Bless/Bane/Guidance/Advantage.</div>
+                    </div>
+                    <div id="extra-attack-reminder" style="display: none; margin-top: 1rem; padding: 0.75rem; background-color: rgba(0, 0, 0, 0.05); border-radius: 4px;">
+                        <p style="margin-bottom: 0.5rem; font-weight: 600;">Extra Attack Reminder:</p>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <input type="checkbox" style="width: 18px; height: 18px;" />
+                            <span>Attack 1</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" style="width: 18px; height: 18px;" />
+                            <span>Attack 2</span>
+                        </label>
+                    </div>
+                </div>
                 <div class="button-grid">
-                    <button class="btn btn-primary" onclick="attackStep(3, 'weapon-melee')">⚔️ Melee</button>
-                    <button class="btn btn-primary" onclick="attackStep(3, 'weapon-ranged')">🏹 Ranged</button>
+                    <button class="btn btn-success" onclick="attackStep(3, 'hit')">✅ Hit</button>
+                    <button class="btn btn-danger" onclick="attackStep(3, 'miss')">❌ Miss</button>
                     <button class="btn btn-secondary" onclick="attackStep(1)">← Back</button>
-                </div>
-            </div>
-
-            <div class="attack-tree" id="attack-weapon-melee">
-                <div class="modal-body">
-                    <p><strong>Roll d20 + Strength modifier (or Dexterity for finesse)</strong></p>
-                    <div class="help-text">
-                        <div>Advantage/Disadvantage?</div>
-                        <div>Nat 20 = crit (double dice)</div>
-                        <div>Remember Bless/Bane/Guidance/Advantage.</div>
-                    </div>
-                </div>
-                <div class="button-grid">
-                    <button class="btn btn-success" onclick="attackStep(4, 'hit')">✅ Hit</button>
-                    <button class="btn btn-danger" onclick="attackStep(4, 'miss')">❌ Miss</button>
-                    <button class="btn btn-secondary" onclick="attackStep(2, 'weapon')">← Back</button>
-                </div>
-            </div>
-
-            <div class="attack-tree" id="attack-weapon-ranged">
-                <div class="modal-body">
-                    <p><strong>Roll d20 + Dexterity modifier</strong></p>
-                    <div class="help-text">
-                        <div>Advantage/Disadvantage?</div>
-                        <div>Cover may add +2/+5 AC vs ranged</div>
-                        <div>Within 5 feet: Disadvantage (unless Crossbow Expert)</div>
-                        <div>Nat 20 = crit (double dice)</div>
-                        <div>Remember Bless/Bane/Guidance/Advantage.</div>
-                    </div>
-                </div>
-                <div class="button-grid">
-                    <button class="btn btn-success" onclick="attackStep(4, 'hit')">✅ Hit</button>
-                    <button class="btn btn-danger" onclick="attackStep(4, 'miss')">❌ Miss</button>
-                    <button class="btn btn-secondary" onclick="attackStep(2, 'weapon')">← Back</button>
                 </div>
             </div>
 
@@ -1183,22 +1312,22 @@
                     </div>
                 </div>
                 <div class="button-grid">
-                    <button class="btn btn-success" onclick="attackStep(4, 'hit')">Hit</button>
-                    <button class="btn btn-danger" onclick="attackStep(4, 'miss')">Miss</button>
-                    <button class="btn btn-secondary" onclick="attackStep(1)">Back</button>
+                    <button class="btn btn-success" onclick="attackStep(3, 'hit')">✅ Hit</button>
+                    <button class="btn btn-danger" onclick="attackStep(3, 'miss')">❌ Miss</button>
+                    <button class="btn btn-secondary" onclick="attackStep(1)">← Back</button>
                 </div>
             </div>
 
             <!-- Save Flow -->
             <div class="attack-tree" id="attack-save-type">
                 <div class="button-grid">
-                    <button class="btn btn-primary" onclick="attackStep(3, 'save-str')">STR</button>
-                    <button class="btn btn-primary" onclick="attackStep(3, 'save-dex')">DEX</button>
-                    <button class="btn btn-primary" onclick="attackStep(3, 'save-con')">CON</button>
-                    <button class="btn btn-primary" onclick="attackStep(3, 'save-int')">INT</button>
-                    <button class="btn btn-primary" onclick="attackStep(3, 'save-wis')">WIS</button>
-                    <button class="btn btn-primary" onclick="attackStep(3, 'save-cha')">CHA</button>
-                    <button class="btn btn-secondary" onclick="attackStep(1)">Back</button>
+                    <button class="btn btn-primary" onclick="attackStep(2, 'save-str')">STR</button>
+                    <button class="btn btn-primary" onclick="attackStep(2, 'save-dex')">DEX</button>
+                    <button class="btn btn-primary" onclick="attackStep(2, 'save-con')">CON</button>
+                    <button class="btn btn-primary" onclick="attackStep(2, 'save-int')">INT</button>
+                    <button class="btn btn-primary" onclick="attackStep(2, 'save-wis')">WIS</button>
+                    <button class="btn btn-primary" onclick="attackStep(2, 'save-cha')">CHA</button>
+                    <button class="btn btn-secondary" onclick="attackStep(1)">← Back</button>
                 </div>
             </div>
 
@@ -1208,69 +1337,20 @@
                     <p>Spell save DC = 8 + proficiency bonus + spellcasting ability modifier</p>
                 </div>
                 <div class="button-grid">
-                    <button class="btn btn-success" onclick="attackStep(4, 'save-succeeds')">✅ Save Succeeds</button>
-                    <button class="btn btn-danger" onclick="attackStep(4, 'save-fails')">❌ Save Fails</button>
+                    <button class="btn btn-success" onclick="attackStep(3, 'save-succeeds')">✅ Save Succeeds</button>
+                    <button class="btn btn-danger" onclick="attackStep(3, 'save-fails')">❌ Save Fails</button>
                     <button class="btn btn-secondary" onclick="attackStep(2, 'save')">← Back</button>
                 </div>
             </div>
 
-            <!-- Hit/Miss Results -->
-            <div class="attack-tree" id="attack-hit">
-                <div class="modal-body">
-                    <p><strong>Roll damage dice + modifier</strong></p>
-                    <div id="extra-attack-reminder" style="display: none; margin-top: 1rem; padding: 0.75rem; background-color: rgba(0, 0, 0, 0.05); border-radius: 4px;">
-                        <p style="margin-bottom: 0.5rem; font-weight: 600;">Extra Attack Reminder:</p>
-                        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                            <input type="checkbox" style="width: 18px; height: 18px;" />
-                            <span>Attack 1</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 0.5rem;">
-                            <input type="checkbox" style="width: 18px; height: 18px;" />
-                            <span>Attack 2</span>
-                        </label>
-                    </div>
+            <!-- Hit/Miss Results - Combined into one screen -->
+            <div class="attack-tree" id="attack-result">
+                <div class="modal-body" id="attack-result-content">
+                    <!-- Content will be populated by JavaScript -->
                 </div>
                 <div class="button-grid">
                     <button class="btn btn-primary" onclick="confirmAttackAction()">✅ Confirm Action</button>
-                    <button class="btn btn-secondary" onclick="attackStep(3)">← Back</button>
-                </div>
-            </div>
-
-            <div class="attack-tree" id="attack-miss">
-                <div class="modal-body">
-                    <p><strong>Miss!</strong></p>
-                    <p><strong>Follow-up suggestions:</strong></p>
-                    <ul>
-                        <li>Move to better position or cover</li>
-                        <li>Help an ally on your next turn</li>
-                        <li>Try Shove to push or knock prone</li>
-                        <li>Try Grapple to restrain target</li>
-                        <li>Use environment (close door, tip table for cover)</li>
-                    </ul>
-                </div>
-                <div class="button-grid">
-                    <button class="btn btn-primary" onclick="confirmAttackAction()">✅ Confirm Action</button>
-                    <button class="btn btn-secondary" onclick="attackStep(3)">← Back</button>
-                </div>
-            </div>
-
-            <div class="attack-tree" id="attack-save-succeeds">
-                <div class="modal-body">
-                    <p><strong>Save Succeeds:</strong> Reduced or no effect (as per spell)</p>
-                </div>
-                <div class="button-grid">
-                    <button class="btn btn-primary" onclick="confirmAction()">Confirm Action</button>
-                    <button class="btn btn-secondary" onclick="attackStep(3)">Back</button>
-                </div>
-            </div>
-
-            <div class="attack-tree" id="attack-save-fails">
-                <div class="modal-body">
-                    <p><strong>Save Fails:</strong> Full effect applied</p>
-                </div>
-                <div class="button-grid">
-                    <button class="btn btn-primary" onclick="confirmAttackAction()">✅ Confirm Action</button>
-                    <button class="btn btn-secondary" onclick="attackStep(3)">← Back</button>
+                    <button class="btn btn-secondary" onclick="goBackFromAttackResult()">← Back</button>
                 </div>
             </div>
         </div>
@@ -1306,6 +1386,11 @@
                         <span class="status" id="checklist-interaction">Unused</span>
                     </li>
                 </ul>
+                <!-- Quick actions for unused resources -->
+                <div id="end-turn-quick-actions" style="display: none; margin-bottom: 1rem; padding: 0.75rem; background-color: rgba(255, 193, 7, 0.1); border-left: 3px solid var(--warning); border-radius: 4px;">
+                    <p style="margin: 0 0 0.5rem 0; font-weight: 600; font-size: 0.875rem;">You still have unused resources:</p>
+                    <div id="end-turn-quick-buttons" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
+                </div>
                 <div class="button-grid">
                     <button class="btn btn-danger" onclick="confirmEndTurn()">✅ Confirm End Turn</button>
                     <button class="btn btn-secondary" onclick="showScreen('screen-home')">← Back</button>
@@ -1425,51 +1510,53 @@
                 </div>
             </div>
 
-            <!-- Useful but Optional Settings -->
-            <div class="character-setup-compact" style="margin-top: 1rem;">
-                <h3 class="section-title" style="margin-bottom: 0.5rem;">Useful</h3>
-                <div class="setup-toggles">
-                    <label title="Show Extra Attack reminder in attack flow">
-                        <input type="checkbox" id="toggle-extra-attack" />
-                        ⚔️ Extra Attack Reminder
-                    </label>
-                    <label title="Show spellcaster reminders (concentration, spell slots)">
-                        <input type="checkbox" id="toggle-spellcaster-mode" />
-                        ✨ Spellcaster Mode
-                    </label>
-                    <label title="Show confirmation dialogs before spending resources">
-                        <input type="checkbox" id="toggle-confirm-spends" />
-                        ✓ Confirm Spends
-                    </label>
-                    <label title="Show decision helper prompts on ACTION screen">
-                        <input type="checkbox" id="toggle-decision-helper" />
-                        💡 Decision Helper
-                    </label>
+            <!-- Useful but Optional Settings (Collapsible) -->
+            <div class="collapsible-section" id="useful-settings-section" style="margin-top: 1rem;">
+                <div class="collapsible-header" onclick="toggleCollapsible('useful-settings-section')">
+                    <span class="collapsible-header-text">⚙️ Advanced Settings</span>
+                    <span class="collapsible-icon">▶</span>
                 </div>
-                <div class="setup-row" style="margin-top: 0.75rem;">
-                    <label for="helper-preset-select">Helper Preset</label>
-                    <select id="helper-preset-select">
-                        <option value="none">None</option>
-                        <option value="cleric">Cleric</option>
-                        <option value="barbarian">Barbarian</option>
-                        <option value="rogue">Rogue</option>
-                        <option value="wizard">Wizard</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Quality-of-Life Settings -->
-            <div class="character-setup-compact" style="margin-top: 1rem;">
-                <h3 class="section-title" style="margin-bottom: 0.5rem;">Quality of Life</h3>
-                <div class="setup-toggles">
-                    <label title="Make buttons larger for phone-at-the-table use">
-                        <input type="checkbox" id="toggle-big-button-mode" />
-                        📱 Big Button Mode
-                    </label>
-                    <label title="Automatically reset resources when starting turn">
-                        <input type="checkbox" id="toggle-auto-reset" />
-                        🔄 Auto-Reset on Start Turn
-                    </label>
+                <div class="collapsible-content">
+                    <div class="character-setup-compact">
+                        <div class="setup-toggles">
+                            <label title="Show Extra Attack reminder in attack flow">
+                                <input type="checkbox" id="toggle-extra-attack" />
+                                ⚔️ Extra Attack Reminder
+                            </label>
+                            <label title="Show spellcaster reminders (concentration, spell slots)">
+                                <input type="checkbox" id="toggle-spellcaster-mode" />
+                                ✨ Spellcaster Mode
+                            </label>
+                            <label title="Show confirmation dialogs before spending resources">
+                                <input type="checkbox" id="toggle-confirm-spends" />
+                                ✓ Confirm Spends
+                            </label>
+                            <label title="Show decision helper prompts on ACTION screen">
+                                <input type="checkbox" id="toggle-decision-helper" />
+                                💡 Decision Helper
+                            </label>
+                        </div>
+                        <div class="setup-row" style="margin-top: 0.75rem;">
+                            <label for="helper-preset-select">Helper Preset</label>
+                            <select id="helper-preset-select">
+                                <option value="none">None</option>
+                                <option value="cleric">Cleric</option>
+                                <option value="barbarian">Barbarian</option>
+                                <option value="rogue">Rogue</option>
+                                <option value="wizard">Wizard</option>
+                            </select>
+                        </div>
+                        <div class="setup-toggles" style="margin-top: 0.75rem;">
+                            <label title="Make buttons larger for phone-at-the-table use">
+                                <input type="checkbox" id="toggle-big-button-mode" />
+                                📱 Big Button Mode
+                            </label>
+                            <label title="Automatically reset resources when starting turn">
+                                <input type="checkbox" id="toggle-auto-reset" />
+                                🔄 Auto-Reset on Start Turn
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1525,7 +1612,8 @@
             actionUsedBy: null,
             currentAttackStep: 1,
             currentSaveType: null,
-            pendingAction: null
+            pendingAction: null,
+            lastAttackType: null  // Track last attack type for back button
         };
 
         // Preferences (class + available options)
@@ -1541,7 +1629,7 @@
             // Useful but optional settings
             extraAttackReminder: false,
             spellcasterMode: false,
-            confirmSpends: true,
+            confirmSpends: false,
             decisionHelperEnabled: false,
             helperPreset: 'none',
             // Quality-of-life settings
@@ -1584,7 +1672,7 @@
                 prefs.spellcasterMode = false;
             }
             if (prefs.confirmSpends === undefined) {
-                prefs.confirmSpends = true;
+                prefs.confirmSpends = false;
             }
             if (prefs.bigButtonMode === undefined) {
                 prefs.bigButtonMode = false;
@@ -2219,45 +2307,63 @@
                 state.currentAttackStep = 1;
             } else if (step === 2) {
                 if (type === 'weapon') {
-                    document.getElementById('attack-weapon-type').classList.add('active');
-                } else if (type === 'spell') {
-                    document.getElementById('attack-spell').classList.add('active');
-                } else if (type === 'save') {
-                    document.getElementById('attack-save-type').classList.add('active');
-                }
-                state.currentAttackStep = 2;
-            } else if (step === 3) {
-                if (type === 'weapon-melee') {
-                    document.getElementById('attack-weapon-melee').classList.add('active');
-                } else if (type === 'weapon-ranged') {
-                    document.getElementById('attack-weapon-ranged').classList.add('active');
-                } else if (type && type.startsWith('save-')) {
-                    const saveType = type.replace('save-', '').toUpperCase();
-                    document.getElementById('save-type-name').textContent = saveType;
-                    document.getElementById('attack-save-result').classList.add('active');
-                }
-                state.currentAttackStep = 3;
-            } else if (step === 4) {
-                if (type === 'hit') {
-                    document.getElementById('attack-hit').classList.add('active');
+                    document.getElementById('attack-weapon').classList.add('active');
+                    state.lastAttackType = 'weapon';
                     // Show/hide Extra Attack reminder based on setting
                     const extraAttackReminder = document.getElementById('extra-attack-reminder');
                     if (extraAttackReminder) {
                         extraAttackReminder.style.display = prefs.extraAttackReminder ? 'block' : 'none';
                     }
-                } else if (type === 'miss') {
-                    document.getElementById('attack-miss').classList.add('active');
-                } else if (type === 'save-succeeds') {
-                    document.getElementById('attack-save-succeeds').classList.add('active');
-                } else if (type === 'save-fails') {
-                    document.getElementById('attack-save-fails').classList.add('active');
+                } else if (type === 'spell') {
+                    document.getElementById('attack-spell').classList.add('active');
+                    state.lastAttackType = 'spell';
+                } else if (type === 'save') {
+                    document.getElementById('attack-save-type').classList.add('active');
+                    state.lastAttackType = 'save';
+                } else if (type && type.startsWith('save-')) {
+                    const saveType = type.replace('save-', '').toUpperCase();
+                    document.getElementById('save-type-name').textContent = saveType;
+                    document.getElementById('attack-save-result').classList.add('active');
+                    state.lastAttackType = type; // Store the save ability type
                 }
-                state.currentAttackStep = 4;
+                state.currentAttackStep = 2;
+            } else if (step === 3) {
+                // Combined hit/miss/save result screen
+                const resultContent = document.getElementById('attack-result-content');
+                if (type === 'hit') {
+                    resultContent.innerHTML = '<p><strong>Roll damage dice + modifier</strong></p>';
+                    // Show Extra Attack reminder if enabled
+                    if (prefs.extraAttackReminder) {
+                        resultContent.innerHTML += '<div style="margin-top: 1rem; padding: 0.75rem; background-color: rgba(0, 0, 0, 0.05); border-radius: 4px;"><p style="margin-bottom: 0.5rem; font-weight: 600;">Extra Attack Reminder:</p><p style="margin: 0.25rem 0;">If you have Extra Attack, you can make another attack.</p></div>';
+                    }
+                } else if (type === 'miss') {
+                    resultContent.innerHTML = '<p><strong>Miss!</strong></p><p><strong>Follow-up suggestions:</strong></p><ul><li>Move to better position or cover</li><li>Help an ally on your next turn</li><li>Try Shove to push or knock prone</li><li>Try Grapple to restrain target</li><li>Use environment (close door, tip table for cover)</li></ul>';
+                } else if (type === 'save-succeeds') {
+                    resultContent.innerHTML = '<p><strong>Save Succeeds:</strong> Reduced or no effect (as per spell)</p>';
+                } else if (type === 'save-fails') {
+                    resultContent.innerHTML = '<p><strong>Save Fails:</strong> Full effect applied</p>';
+                }
+                document.getElementById('attack-result').classList.add('active');
+                state.currentAttackStep = 3;
             }
         }
 
         function attackStep(step, type) {
             showAttackStep(step, type);
+        }
+
+        // Handle back button from attack result screen
+        function goBackFromAttackResult() {
+            if (state.lastAttackType && state.lastAttackType.startsWith('save-')) {
+                // For save attacks, go back to save result screen
+                attackStep(2, state.lastAttackType);
+            } else if (state.lastAttackType === 'weapon' || state.lastAttackType === 'spell') {
+                // For weapon/spell attacks, go back to weapon/spell screen
+                attackStep(2, state.lastAttackType);
+            } else {
+                // Fallback to step 1
+                attackStep(1);
+            }
         }
 
         // Confirm Attack Action
@@ -2269,81 +2375,8 @@
             showScreen('screen-home');
         }
 
-        // End Turn
+        // End Turn - Streamlined: go directly to checklist, show quick actions there if needed
         function handleEndTurn() {
-            const resources = countAvailableResources();
-            
-            // If there are available resources, show reminder
-            if (resources.count > 0) {
-                // Build simple reminder message
-                let message = `You still have ${resources.count} resource${resources.count > 1 ? 's' : ''} available: <strong>${resources.available.join(', ')}</strong>`;
-                
-                // Add brief explanation for Interaction if it's available
-                if (resources.available.includes('Interaction')) {
-                    message += `<br><small style="color: var(--text-light);">💡 Interaction = free object interaction (draw weapon, open door, etc.). Find it in the ACTION screen.</small>`;
-                }
-                
-                const messageEl = document.getElementById('end-turn-dialog-message');
-                messageEl.innerHTML = message;
-                
-                // Don't show toast - just show the dialog
-                
-                // Show quick action buttons
-                const quickActionsEl = document.getElementById('end-turn-dialog-quick-actions');
-                const quickButtonsEl = document.getElementById('end-turn-dialog-quick-buttons');
-                quickButtonsEl.innerHTML = '';
-                
-                if (state.movement === 'available') {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn btn-secondary btn-small';
-                    btn.textContent = 'Mark Movement as Used';
-                    btn.onclick = () => {
-                        state.movement = 'used';
-                        updateUI();
-                        closeEndTurnDialog();
-                        handleEndTurn(); // Re-check
-                    };
-                    quickButtonsEl.appendChild(btn);
-                }
-                
-                if (prefs.trackInteraction && state.interaction === 'available') {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn btn-secondary btn-small';
-                    btn.textContent = 'Mark Interaction as Used';
-                    btn.onclick = () => {
-                        state.interaction = 'used';
-                        updateUI();
-                        closeEndTurnDialog();
-                        handleEndTurn(); // Re-check
-                    };
-                    quickButtonsEl.appendChild(btn);
-                }
-                
-                if (prefs.bonusActionEnabled && state.bonusAction === 'available' && hasBonusActionOptions()) {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn btn-secondary btn-small';
-                    btn.textContent = 'Mark Bonus Action as Used';
-                    btn.onclick = () => {
-                        state.bonusAction = 'used';
-                        updateUI();
-                        closeEndTurnDialog();
-                        handleEndTurn(); // Re-check
-                    };
-                    quickButtonsEl.appendChild(btn);
-                }
-                
-                if (quickButtonsEl.children.length > 0) {
-                    quickActionsEl.classList.add('show');
-                } else {
-                    quickActionsEl.classList.remove('show');
-                }
-                
-                document.getElementById('end-turn-dialog').classList.add('active');
-                
-                return; // Don't proceed to end turn screen yet
-            }
-            
-            // No available resources, proceed normally
             proceedToEndTurnScreen();
         }
 
@@ -2372,6 +2405,55 @@
                 document.getElementById('checklist-interaction').className = 'status ' + (state.interaction === 'used' ? 'used' : 'unused');
             } else {
                 interactionItem.style.display = 'none';
+            }
+            
+            // Show quick actions if resources are available
+            const resources = countAvailableResources();
+            const quickActionsEl = document.getElementById('end-turn-quick-actions');
+            const quickButtonsEl = document.getElementById('end-turn-quick-buttons');
+            
+            if (resources.count > 0 && quickActionsEl && quickButtonsEl) {
+                quickButtonsEl.innerHTML = '';
+                
+                if (state.movement === 'available') {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-secondary btn-small';
+                    btn.textContent = 'Mark Movement Used';
+                    btn.onclick = () => {
+                        state.movement = 'used';
+                        updateUI();
+                        proceedToEndTurnScreen(); // Refresh
+                    };
+                    quickButtonsEl.appendChild(btn);
+                }
+                
+                if (prefs.trackInteraction && state.interaction === 'available') {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-secondary btn-small';
+                    btn.textContent = 'Mark Interaction Used';
+                    btn.onclick = () => {
+                        state.interaction = 'used';
+                        updateUI();
+                        proceedToEndTurnScreen(); // Refresh
+                    };
+                    quickButtonsEl.appendChild(btn);
+                }
+                
+                if (prefs.bonusActionEnabled && state.bonusAction === 'available' && hasBonusActionOptions()) {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-secondary btn-small';
+                    btn.textContent = 'Mark Bonus Action Used';
+                    btn.onclick = () => {
+                        state.bonusAction = 'used';
+                        updateUI();
+                        proceedToEndTurnScreen(); // Refresh
+                    };
+                    quickButtonsEl.appendChild(btn);
+                }
+                
+                quickActionsEl.style.display = quickButtonsEl.children.length > 0 ? 'block' : 'none';
+            } else if (quickActionsEl) {
+                quickActionsEl.style.display = 'none';
             }
             
             showScreen('screen-end-turn');
@@ -2460,6 +2542,19 @@
             const toggleBonusAction = document.getElementById('toggle-bonus-action-enabled');
             const toggleHealing = document.getElementById('toggle-healing-word');
             const toggleOffhand = document.getElementById('toggle-offhand-attack');
+            const helperPresetSelect = document.getElementById('helper-preset-select');
+
+            // Auto-sync helper preset with class selection
+            // Only sync if the class has a helper preset available
+            const classesWithPresets = ['cleric', 'barbarian', 'rogue', 'wizard'];
+            if (classesWithPresets.includes(classKey)) {
+                prefs.helperPreset = classKey;
+                if (helperPresetSelect) helperPresetSelect.value = classKey;
+            } else if (classKey === '' || classKey === 'other') {
+                // Clear preset if no class or "other" selected
+                prefs.helperPreset = 'none';
+                if (helperPresetSelect) helperPresetSelect.value = 'none';
+            }
 
             switch (classKey) {
                 case 'cleric':
@@ -2470,16 +2565,47 @@
                     if (toggleBonusAction) toggleBonusAction.checked = true;
                     break;
                 case 'barbarian':
-                    // Barbarian: Offhand usually OFF (unless dual wield), Bonus Action enabled
-                    prefs.canOffhandAttack = false;
+                    // Barbarian: Bonus Action enabled (Rage)
                     prefs.bonusActionEnabled = true;
-                    if (toggleOffhand) toggleOffhand.checked = false;
                     if (toggleBonusAction) toggleBonusAction.checked = true;
                     break;
                 case 'rogue':
-                    // Rogue: Bonus Action enabled (Cunning Action is class feature)
+                    // Rogue: Bonus Action enabled (Cunning Action)
                     prefs.bonusActionEnabled = true;
                     if (toggleBonusAction) toggleBonusAction.checked = true;
+                    break;
+                case 'monk':
+                    // Monk: Bonus Action enabled (Martial Arts, Flurry, etc.)
+                    prefs.bonusActionEnabled = true;
+                    if (toggleBonusAction) toggleBonusAction.checked = true;
+                    break;
+                case 'fighter':
+                    // Fighter: Bonus Action enabled (Second Wind)
+                    prefs.bonusActionEnabled = true;
+                    if (toggleBonusAction) toggleBonusAction.checked = true;
+                    break;
+                case 'ranger':
+                    // Ranger: Bonus Action enabled (various features)
+                    prefs.bonusActionEnabled = true;
+                    if (toggleBonusAction) toggleBonusAction.checked = true;
+                    break;
+                case 'paladin':
+                    // Paladin: Bonus Action enabled (various features)
+                    prefs.bonusActionEnabled = true;
+                    if (toggleBonusAction) toggleBonusAction.checked = true;
+                    break;
+                case 'bard':
+                    // Bard: Bonus Action enabled (Bardic Inspiration)
+                    prefs.bonusActionEnabled = true;
+                    if (toggleBonusAction) toggleBonusAction.checked = true;
+                    break;
+                case 'sorcerer':
+                case 'warlock':
+                case 'wizard':
+                    // Spellcasters: Spellcaster mode enabled
+                    prefs.spellcasterMode = true;
+                    const toggleSpellcaster = document.getElementById('toggle-spellcaster-mode');
+                    if (toggleSpellcaster) toggleSpellcaster.checked = true;
                     break;
                 default:
                     // Other classes: no auto-presets, user can configure manually
@@ -2749,11 +2875,61 @@
             element.classList.toggle('expanded');
         }
 
+        // Toggle collapsible section
+        function toggleCollapsible(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.classList.toggle('expanded');
+            }
+        }
+
+        // Auto-detect mobile and enable big buttons by default
+        function detectMobile() {
+            // Check if user has explicitly set bigButtonMode preference
+            const saved = localStorage.getItem(PREFS_KEY);
+            if (saved) {
+                const savedPrefs = JSON.parse(saved);
+                // If user has explicitly set it, don't override
+                if (savedPrefs.bigButtonMode !== undefined) {
+                    return;
+                }
+            }
+            
+            // Detect mobile device
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                            (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) ||
+                            ('ontouchstart' in window);
+            
+            if (isMobile && prefs.bigButtonMode === false) {
+                prefs.bigButtonMode = true;
+                savePrefs();
+                // Apply immediately
+                if (prefs.bigButtonMode) {
+                    document.body.classList.add('big-button-mode');
+                }
+            }
+        }
+
+        // Show help section on first visit
+        function initHelpSection() {
+            const helpSection = document.getElementById('help-section');
+            if (!helpSection) return;
+            
+            const hasSeenHelp = localStorage.getItem('hasSeenHelp');
+            if (!hasSeenHelp) {
+                // First visit - show expanded
+                helpSection.classList.add('expanded');
+                localStorage.setItem('hasSeenHelp', 'true');
+            }
+        }
+
         // Initialize
         loadPrefs();
+        detectMobile();
         wirePrefsUI();
         loadState();
         updateUI();
+        initHelpSection();
     </script>
 </body>
 </html>
