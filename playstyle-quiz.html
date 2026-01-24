@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D Playstyle Quiz</title>
+    <link rel="stylesheet" href="playstyle-quiz.css">
+</head>
+<body>
+    <div class="quiz-container">
+        <!-- Header -->
+        <header class="quiz-header">
+            <div class="header-content">
+                <h1>D&D Playstyle Quiz</h1>
+                <p class="quiz-helper-text">Choose the option that fits better. No right answers.</p>
+            </div>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </header>
+
+        <!-- Main Content -->
+        <main class="quiz-main">
+            <!-- Progress Section -->
+            <section class="progress-section" aria-live="polite" aria-atomic="true">
+                <div class="progress-text" id="progress-text" aria-label="Quiz progress">Prompt 1 of 15</div>
+                <div class="progress-bar" role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="15" aria-label="Quiz progress">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </section>
+
+            <!-- Quiz Section -->
+            <section class="quiz-section" id="quiz-section">
+                <div class="question-container" id="question-container">
+                    <div class="question-number" aria-hidden="true">Prompt <span id="question-number">1</span></div>
+                    <div class="choices-container" id="choices-container" role="radiogroup" aria-label="Choose the option that fits better">
+                        <button class="choice-button choice-left" id="choice-left" aria-label="Option 1" tabindex="0">
+                            <span class="choice-text"></span>
+                        </button>
+                        <div class="choice-divider" aria-hidden="true">VS</div>
+                        <button class="choice-button choice-right" id="choice-right" aria-label="Option 2" tabindex="0">
+                            <span class="choice-text"></span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navigation Section (for review/edit) -->
+            <section class="navigation-section hidden" id="navigation-section">
+                <button class="nav-button nav-prev" id="nav-prev" aria-label="Previous prompt">
+                    ← Previous
+                </button>
+                <button class="nav-button nav-next" id="nav-next" aria-label="Next prompt">
+                    Next →
+                </button>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section hidden" id="results-section" aria-live="polite" aria-atomic="true">
+                <h2>Your Playstyle Results</h2>
+                
+                <div class="results-summary" id="results-summary" role="region" aria-label="Quiz results summary">
+                    <!-- Top 3 will be inserted here -->
+                </div>
+
+                <div class="results-chart" id="results-chart" role="img" aria-label="Bar chart showing top playstyle preferences">
+                    <!-- Bar chart will be inserted here -->
+                </div>
+
+                <div class="results-all" id="results-all" role="region" aria-label="All playstyle percentages">
+                    <!-- All results will be inserted here -->
+                </div>
+
+                <button class="restart-button" id="restart-button" aria-label="Restart quiz">Restart Quiz</button>
+            </section>
+        </main>
+
+        <!-- Restart button (visible during quiz) -->
+        <div class="quiz-controls">
+            <button class="restart-button-small" id="restart-button-small" aria-label="Start over">Start Over</button>
+        </div>
+    </div>
+
+    <!-- Screen reader announcements -->
+    <div class="sr-only" aria-live="polite" aria-atomic="true" id="sr-announcements"></div>
+
+    <script src="theme.js"></script>
+    <script src="playstyle-quiz.js"></script>
+</body>
+</html>
