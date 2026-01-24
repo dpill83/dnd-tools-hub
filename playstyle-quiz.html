@@ -71,6 +71,15 @@
                     <!-- All results will be inserted here -->
                 </div>
 
+                <div class="results-actions">
+                    <button class="share-button" id="copy-results-button" aria-label="Copy results to clipboard">
+                        Copy Results
+                    </button>
+                    <button class="share-button" id="share-button" aria-label="Share results">
+                        Share
+                    </button>
+                </div>
+
                 <button class="restart-button" id="restart-button" aria-label="Restart quiz">Restart Quiz</button>
             </section>
         </main>
@@ -83,6 +92,11 @@
 
     <!-- Screen reader announcements -->
     <div class="sr-only" aria-live="polite" aria-atomic="true" id="sr-announcements"></div>
+
+    <!-- Toast notification -->
+    <div class="toast hidden" id="toast" aria-live="polite" role="status">
+        <span id="toast-message"></span>
+    </div>
 
     <script src="theme.js"></script>
     <script src="playstyle-quiz.js"></script>

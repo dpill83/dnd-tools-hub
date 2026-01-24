@@ -169,7 +169,11 @@ const elements = {
     resultsAll: document.getElementById('results-all'),
     restartButton: document.getElementById('restart-button'),
     restartButtonSmall: document.getElementById('restart-button-small'),
-    srAnnouncements: document.getElementById('sr-announcements')
+    srAnnouncements: document.getElementById('sr-announcements'),
+    copyResultsButton: document.getElementById('copy-results-button'),
+    shareButton: document.getElementById('share-button'),
+    toast: document.getElementById('toast'),
+    toastMessage: document.getElementById('toast-message')
 };
 
 // Initialize Quiz
@@ -600,6 +604,14 @@ function displayResults() {
         elements.resultsSection.insertBefore(reviewButton, elements.restartButton);
     }
     
+    // Set up share button event listeners
+    if (elements.copyResultsButton) {
+        elements.copyResultsButton.onclick = copyResults;
+    }
+    if (elements.shareButton) {
+        elements.shareButton.onclick = shareResults;
+    }
+    
     // Display Top 3
     elements.resultsSummary.innerHTML = '';
     top3.forEach((result, index) => {
@@ -654,6 +666,97 @@ function displayResults() {
     }, 100);
     
     updateAccessibilityAnnouncements('results');
+}
+
+// Build Share Text
+function buildShareText(results) {
+    const { top3, all } = handleTies(results);
+    let text = 'My D&D Playstyle Results:\n';
+    
+    // Top 3
+    top3.forEach((result, index) => {
+        const rank = index + 1;
+        text += `${rank}) ${result.name} ${result.percentage}%\n`;
+    });
+    
+    // Full breakdown (include all results)
+    if (all.length > 0) {
+        text += '\nFull breakdown: ';
+        const breakdown = all.map(r => `${r.name} ${r.percentage}%`).join(', ');
+        text += breakdown;
+        text += '\n';
+    }
+    
+    // Add URL
+    text += `\n${location.href}`;
+    
+    return text;
+}
+
+// Show Toast
+function showToast(message) {
+    elements.toastMessage.textContent = message;
+    elements.toast.classList.remove('hidden');
+    
+    setTimeout(() => {
+        elements.toast.classList.add('hidden');
+    }, 2000);
+}
+
+// Copy Results to Clipboard
+async function copyResults() {
+    const results = calculateResults();
+    const shareText = buildShareText(results);
+    
+    try {
+        await navigator.clipboard.writeText(shareText);
+        showToast('Copied!');
+    } catch (err) {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = shareText;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        
+        try {
+            document.execCommand('copy');
+            showToast('Copied!');
+        } catch (fallbackErr) {
+            showToast('Failed to copy');
+            console.error('Failed to copy:', fallbackErr);
+        }
+        
+        document.body.removeChild(textarea);
+    }
+}
+
+// Share Results
+async function shareResults() {
+    const results = calculateResults();
+    const shareText = buildShareText(results);
+    const title = 'My D&D Playstyle Results';
+    
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: title,
+                text: shareText,
+                url: location.href
+            });
+        } catch (err) {
+            // User cancelled or error occurred
+            if (err.name !== 'AbortError') {
+                console.error('Error sharing:', err);
+                // Fallback to copy
+                copyResults();
+            }
+        }
+    } else {
+        // Fallback to copy
+        copyResults();
+    }
 }
 
 // Show Results
@@ -768,6 +871,14 @@ function setupEventListeners() {
     // Restart buttons
     elements.restartButton.addEventListener('click', restartQuiz);
     elements.restartButtonSmall.addEventListener('click', restartQuiz);
+    
+    // Share buttons (will be set up when results are displayed)
+    if (elements.copyResultsButton) {
+        elements.copyResultsButton.addEventListener('click', copyResults);
+    }
+    if (elements.shareButton) {
+        elements.shareButton.addEventListener('click', shareResults);
+    }
     
     // Keyboard navigation
     document.addEventListener('keydown', handleKeyboardNavigation);
