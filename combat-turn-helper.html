@@ -311,6 +311,7 @@
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.2s;
+            -webkit-user-select: none;
             user-select: none;
         }
 
@@ -343,6 +344,184 @@
         .collapsible-content {
             display: none;
             margin-top: 0.75rem;
+        }
+
+        .collapsible-section.expanded .collapsible-content {
+            display: block;
+        }
+
+        /* Spells Panel */
+        .spells-panel {
+            margin: 1rem 0;
+        }
+
+        .spells-section {
+            margin-bottom: 1rem;
+        }
+
+        .spells-section-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .spells-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .spell-item {
+            padding: 0.5rem 0.75rem;
+            background-color: rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .dark-mode .spell-item {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .spell-slots-info {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        .spell-slots-remaining {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .spell-slots-empty {
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .spell-item {
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .spell-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+            transform: translateX(2px);
+        }
+
+        .dark-mode .spell-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .spell-item:active {
+            transform: translateX(0);
+        }
+
+        /* Spell Selection Screen */
+        .spell-selection-content {
+            margin: 1rem 0;
+        }
+
+        /* Turn Log */
+        .turn-log {
+            margin: 1rem 0;
+            padding: 0.75rem;
+            background-color: rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.875rem;
+        }
+
+        .dark-mode .turn-log {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .turn-log-header {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .turn-log-clear {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .turn-log-clear:hover {
+            color: var(--text);
+        }
+
+        .turn-log-entry {
+            padding: 0.25rem 0;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .turn-log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .turn-log-entry-time {
+            color: var(--text-light);
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+        }
+
+        .turn-log-empty {
+            color: var(--text-light);
+            font-style: italic;
+            text-align: center;
+            padding: 0.5rem 0;
+        }
+
+        /* Spell Slot Spending Dialog */
+        .spell-slot-dialog {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spell-slot-dialog.active {
+            display: flex;
+        }
+
+        .spell-slot-dialog-content {
+            background-color: var(--surface);
+            padding: 1.5rem;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .spell-slot-dialog-message {
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .spell-slot-dialog-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
         }
 
         .collapsible-section.expanded .collapsible-content {
@@ -478,6 +657,60 @@
 
         .detail-content li {
             margin-bottom: 0.5rem;
+        }
+
+        /* D&D Character Sheet Style Speed Display */
+        .speed-display {
+            margin: 1.5rem auto;
+            max-width: 200px;
+            border: 2px solid var(--text);
+            border-radius: 6px;
+            background: var(--surface);
+            overflow: hidden;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        .speed-display-value {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 2px solid var(--text);
+        }
+
+        .speed-display-value .speed-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .speed-display-value .speed-unit {
+            font-size: 1.25rem;
+            color: var(--text);
+            margin-left: 0.25rem;
+        }
+
+        .speed-display-value .speed-type {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            margin-top: 0.25rem;
+            letter-spacing: 0.5px;
+        }
+
+        .speed-display-label {
+            padding: 0.5rem;
+            text-align: center;
+            background: var(--surface);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text);
+        }
+
+        .dark-mode .speed-display-value {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%);
         }
 
         /* Modal Body (used in attack tree) */
@@ -912,6 +1145,87 @@
             flex-wrap: wrap;
         }
 
+        /* Import Character Confirmation Dialog */
+        .import-confirm-dialog {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .import-confirm-dialog.active {
+            display: flex;
+        }
+
+        .import-confirm-dialog-content {
+            background-color: var(--surface);
+            padding: 1.5rem;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .import-confirm-dialog-header {
+            margin-bottom: 1rem;
+        }
+
+        .import-confirm-dialog-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: var(--text);
+        }
+
+        .import-confirm-dialog-body {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .import-confirm-dialog-body .profile-item {
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .import-confirm-dialog-body .profile-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .import-confirm-dialog-body .profile-label {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .import-confirm-dialog-body .profile-value {
+            color: var(--text-light);
+        }
+
+        .import-confirm-dialog-body .profile-value.empty {
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .import-confirm-dialog-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
         /* Default hidden elements (JS will reveal when needed) */
         #dash-note {
             display: none;
@@ -1029,6 +1343,22 @@
             margin: 0;
         }
     </style>
+    <!-- PDF.js for PDF text extraction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // Configure PDF.js worker
+        (function() {
+            function configureWorker() {
+                if (typeof pdfjsLib !== 'undefined') {
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                } else {
+                    // Retry if library not loaded yet
+                    setTimeout(configureWorker, 100);
+                }
+            }
+            configureWorker();
+        })();
+    </script>
 </head>
 <body>
     <div class="container">
@@ -1054,6 +1384,15 @@
             <!-- Dash Note -->
             <div class="dash-note" id="dash-note">
                 💨 Extra movement granted this turn (Dash active)
+            </div>
+
+            <!-- Turn Log -->
+            <div class="turn-log" id="turn-log" style="display: none;">
+                <div class="turn-log-header">
+                    <span>📋 Turn Log</span>
+                    <span class="turn-log-clear" onclick="clearTurnLog()">Clear</span>
+                </div>
+                <div id="turn-log-entries"></div>
             </div>
 
             <div id="home-available" class="button-grid"></div>
@@ -1217,7 +1556,7 @@
             <!-- Primary actions (Attack and Cast Spell) -->
             <div class="button-grid">
                 <button class="btn btn-accent" onclick="showAttackTree()">⚔️ Attack</button>
-                <button class="btn btn-primary" onclick="showActionDetail('cast-spell')">✨ Cast a Spell</button>
+                <button class="btn btn-primary" onclick="showSpellSelection('action')">✨ Cast a Spell</button>
             </div>
             
             <!-- Spellcaster Reminders -->
@@ -1364,6 +1703,28 @@
             </div>
         </div>
 
+        <!-- Spell Selection Screen (for ACTION) -->
+        <div class="screen" id="screen-spell-selection-action">
+            <h1 class="headline">✨ Cast a Spell (Action)</h1>
+            <div id="spell-selection-content-action" class="spell-selection-content">
+                <!-- Content populated by JavaScript -->
+            </div>
+            <div class="button-grid">
+                <button class="btn btn-secondary" onclick="showScreen('screen-action')">← Back</button>
+            </div>
+        </div>
+
+        <!-- Spell Selection Screen (for BONUS ACTION) -->
+        <div class="screen" id="screen-spell-selection-bonus">
+            <h1 class="headline">✨ Cast a Spell (Bonus Action)</h1>
+            <div id="spell-selection-content-bonus" class="spell-selection-content">
+                <!-- Content populated by JavaScript -->
+            </div>
+            <div class="button-grid">
+                <button class="btn btn-secondary" onclick="showScreen('screen-bonus-action')">← Back</button>
+            </div>
+        </div>
+
         <!-- END TURN Screen -->
         <div class="screen" id="screen-end-turn">
             <div class="end-turn-container">
@@ -1402,8 +1763,20 @@
         <div class="screen" id="screen-move-detail">
             <h1 class="headline">🏃 Move</h1>
             <div class="detail-content">
+                <!-- Speed Display (D&D Character Sheet Style) -->
+                <div class="speed-display" id="move-speed-display" style="display: none;">
+                    <div class="speed-display-value">
+                        <div>
+                            <span class="speed-number" id="move-speed-number">30</span>
+                            <span class="speed-unit">ft.</span>
+                        </div>
+                        <div class="speed-type" id="move-speed-type">Walking</div>
+                    </div>
+                    <div class="speed-display-label">SPEED</div>
+                </div>
+                
                 <p><strong>Move up to your speed, before or after your action.</strong></p>
-                <p>On your turn, you can move a distance up to your speed. You can use some of your movement before and after your action. For example, if you have a speed of 30 feet, you can move 10 feet, take your action, and then move 20 feet more.</p>
+                <p id="move-description-text">On your turn, you can move a distance up to your speed. You can use some of your movement before and after your action. For example, if you have a speed of 30 feet, you can move 10 feet, take your action, and then move 20 feet more.</p>
             </div>
             <div class="button-grid">
                 <button class="btn btn-primary" onclick="confirmMove()">✅ Confirm Move</button>
@@ -1459,6 +1832,26 @@
         <div class="screen" id="screen-settings">
             <h1 class="headline">⚙️ Settings</h1>
             
+            <!-- Character Library -->
+            <div class="character-setup-compact" style="margin-bottom: 1rem;">
+                <div class="setup-row">
+                    <label for="character-library-select">📚 Active Character</label>
+                    <select id="character-library-select" onchange="switchCharacter(this.value)">
+                        <option value="">(No Character)</option>
+                    </select>
+                </div>
+                <div class="button-grid" style="margin-top: 0.75rem;">
+                    <button class="btn btn-secondary btn-small" onclick="createNewCharacter()">➕ New</button>
+                    <button class="btn btn-secondary btn-small" onclick="document.getElementById('import-pdf-file').click()">📄 Import PDF</button>
+                    <button class="btn btn-secondary btn-small" onclick="document.getElementById('import-json-file').click()">📥 Import JSON</button>
+                    <button class="btn btn-secondary btn-small" onclick="exportCharacterJSON()">💾 Export JSON</button>
+                    <button class="btn btn-secondary btn-small" onclick="duplicateCurrentCharacter()">📋 Duplicate</button>
+                    <button class="btn btn-secondary btn-small" onclick="deleteCurrentCharacter()">🗑️ Delete</button>
+                </div>
+                <input type="file" id="import-pdf-file" accept=".pdf" style="display:none;" onchange="handlePdfImport(event)">
+                <input type="file" id="import-json-file" accept=".json" style="display:none;" onchange="handleJsonImport(event)">
+            </div>
+            
             <!-- Character Setup -->
             <div class="character-setup-compact">
                 <div class="setup-row">
@@ -1494,6 +1887,7 @@
                     </label>
                 </div>
             </div>
+
 
             <!-- Must-Have Settings -->
             <div class="character-setup-compact" style="margin-top: 1rem;">
@@ -1598,6 +1992,35 @@
                 </div>
             </div>
         </div>
+
+        <!-- Import Character Confirmation Dialog -->
+        <div class="import-confirm-dialog" id="import-confirm-dialog">
+            <div class="import-confirm-dialog-content">
+                <div class="import-confirm-dialog-header">
+                    <h2>Confirm Character Import</h2>
+                </div>
+                <div class="import-confirm-dialog-body" id="import-confirm-dialog-body">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+                <div class="import-confirm-dialog-actions">
+                    <button class="btn btn-secondary btn-small" onclick="closeImportConfirmDialog()">Cancel</button>
+                    <button class="btn btn-primary btn-small" onclick="confirmCharacterImport()">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spell Slot Spending Dialog -->
+        <div class="spell-slot-dialog" id="spell-slot-dialog">
+            <div class="spell-slot-dialog-content">
+                <div class="spell-slot-dialog-message" id="spell-slot-dialog-message">
+                    <!-- Message will be populated by JavaScript -->
+                </div>
+                <div class="spell-slot-dialog-actions">
+                    <button class="btn btn-secondary btn-small" onclick="cancelSpellSlotSpend()">No</button>
+                    <button class="btn btn-primary btn-small" onclick="confirmSpellSlotSpend()">Yes</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1613,7 +2036,9 @@
             currentAttackStep: 1,
             currentSaveType: null,
             pendingAction: null,
-            lastAttackType: null  // Track last attack type for back button
+            lastAttackType: null,  // Track last attack type for back button
+            spellSlotsUsed: {},  // Track used spell slots: {1: 2, 2: 0, ...}
+            turnLog: []  // Track spell casts and actions: [{timestamp, action, spell?, level?}]
         };
 
         // Preferences (class + available options)
@@ -1645,6 +2070,14 @@
                 // Backward compatibility: ensure actionUsedBy defaults to null
                 if (state.actionUsedBy === undefined) {
                     state.actionUsedBy = null;
+                }
+                // Backward compatibility: ensure spellSlotsUsed exists
+                if (state.spellSlotsUsed === undefined) {
+                    state.spellSlotsUsed = {};
+                }
+                // Backward compatibility: ensure turnLog exists
+                if (state.turnLog === undefined) {
+                    state.turnLog = [];
                 }
             }
             updateUI();
@@ -1786,6 +2219,9 @@
             // Update home buttons
             updateHomeButtons();
 
+            // Update turn log
+            updateTurnLog();
+
             // Update dash note
             document.getElementById('dash-note').style.display = state.dashActive ? 'block' : 'none';
 
@@ -1862,12 +2298,26 @@
             availableContainer.innerHTML = '';
             usedContainer.innerHTML = '';
             
-            // MOVE button
+            // MOVE button (with speed if available)
+            let moveLabel = '🏃 MOVE';
+            let moveLabelUsed = '✅ 🏃 MOVE';
+            
+            // Try to get speed from active character profile
+            try {
+                const profile = getActiveCharacterProfile();
+                if (profile && profile.speed !== undefined && profile.speed !== null) {
+                    moveLabel = `🏃 MOVE (${profile.speed} ft)`;
+                    moveLabelUsed = `✅ 🏃 MOVE (${profile.speed} ft)`;
+                }
+            } catch (e) {
+                // Ignore errors, use default label
+            }
+            
             if (state.movement === 'available') {
-                const btn = createButton('🏃 MOVE', 'btn-primary', () => handleMove());
+                const btn = createButton(moveLabel, 'btn-primary', () => handleMove());
                 availableContainer.appendChild(btn);
             } else {
-                const btn = createButton('✅ 🏃 MOVE', 'btn-primary used', () => handleUndoMove());
+                const btn = createButton(moveLabelUsed, 'btn-primary used', () => handleUndoMove());
                 usedContainer.appendChild(btn);
             }
             
@@ -1934,6 +2384,385 @@
             // Update decision helper when ACTION screen is shown
             if (screenId === 'screen-action') {
                 updateDecisionHelper();
+            }
+            
+            // Update speed display when MOVE screen is shown
+            if (screenId === 'screen-move-detail') {
+                updateMoveSpeedDisplay();
+            }
+            
+            // Populate character library when SETTINGS screen is shown
+            if (screenId === 'screen-settings') {
+                populateCharacterLibrary();
+            }
+        }
+
+        // Known bonus action spells (fallback if metadata not available)
+        const BONUS_ACTION_SPELLS = [
+            'Healing Word',
+            'Sanctuary',
+            'Shield of Faith',
+            'Hunter\'s Mark',
+            'Hex',
+            'Misty Step',
+            'Spiritual Weapon'
+        ];
+
+        // Check if a spell is a bonus action spell
+        function isBonusActionSpell(spellName, profile) {
+            // First check if we have casting time metadata in rawFields
+            if (profile && profile.rawFields) {
+                // Look for spellCastingTime fields
+                const spellIndex = profile.spells ? profile.spells.indexOf(spellName) : -1;
+                if (spellIndex >= 0) {
+                    const castingTimeKey = `spellCastingTime${spellIndex}`;
+                    const castingTime = profile.rawFields[castingTimeKey];
+                    if (castingTime) {
+                        const timeStr = String(castingTime).trim().toUpperCase();
+                        // Check for "1BA" or "1 Bonus Action" patterns
+                        if (timeStr.includes('1BA') || timeStr.includes('BONUS ACTION')) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            
+            // Fallback: check against known bonus action spells
+            return BONUS_ACTION_SPELLS.some(baSpell => 
+                spellName.toLowerCase().includes(baSpell.toLowerCase()) ||
+                baSpell.toLowerCase().includes(spellName.toLowerCase())
+            );
+        }
+
+        // Get bonus action spells from profile
+        function getBonusActionSpells(profile) {
+            if (!profile || !profile.spells) return [];
+            return profile.spells.filter(spell => isBonusActionSpell(spell, profile));
+        }
+
+        // Get action spells from profile (all spells except bonus action spells)
+        function getActionSpells(profile) {
+            if (!profile || !profile.spells) return [];
+            const bonusActionSpells = getBonusActionSpells(profile);
+            return profile.spells.filter(spell => !bonusActionSpells.includes(spell));
+        }
+
+        // Show spell selection screen
+        function showSpellSelection(actionType) {
+            const profile = getActiveCharacterProfile();
+            if (!profile) {
+                showToast('No character loaded');
+                return;
+            }
+
+            const screenId = actionType === 'bonus' ? 'screen-spell-selection-bonus' : 'screen-spell-selection-action';
+            const contentId = actionType === 'bonus' ? 'spell-selection-content-bonus' : 'spell-selection-content-action';
+            const content = document.getElementById(contentId);
+            
+            if (!content) return;
+
+            let html = '';
+            const hasCantrips = profile.cantrips && profile.cantrips.length > 0;
+            const hasSpellSlots = profile.spellSlots && Object.keys(profile.spellSlots).length > 0;
+
+            if (actionType === 'bonus') {
+                // Show only bonus action spells
+                const bonusSpells = getBonusActionSpells(profile);
+                if (bonusSpells.length === 0) {
+                    html += '<div class="detail-content"><p class="muted-center">No bonus action spells available.</p></div>';
+                } else {
+                    // Sort bonus action spells alphabetically
+                    const sortedSpells = [...bonusSpells].sort((a, b) => a.localeCompare(b));
+                    html += '<div class="spells-section">';
+                    html += '<div class="spells-section-title">✨ Bonus Action Spells</div>';
+                    html += '<div class="spells-list">';
+                    sortedSpells.forEach(spell => {
+                        // Find spell level (assume level 1 for now, could be enhanced)
+                        const level = 1;
+                        html += `<div class="spell-item" onclick="handleSpellCast('${spell.replace(/'/g, "\\'")}', ${level}, 'bonus')">${spell}</div>`;
+                    });
+                    html += '</div>';
+                    html += '</div>';
+                }
+            } else {
+                // Show cantrips and action spells
+                if (hasCantrips) {
+                    html += '<div class="spells-section">';
+                    html += '<div class="spells-section-title">✨ Cantrips</div>';
+                    html += '<div class="spells-list">';
+                    const sortedCantrips = [...profile.cantrips].sort((a, b) => a.localeCompare(b));
+                    sortedCantrips.forEach(spell => {
+                        html += `<div class="spell-item" onclick="handleSpellCast('${spell.replace(/'/g, "\\'")}', 0, 'action')">${spell}</div>`;
+                    });
+                    html += '</div>';
+                    html += '</div>';
+                }
+
+                // Show action spells by level
+                if (hasSpellSlots) {
+                    const spellLevels = Object.keys(profile.spellSlots)
+                        .map(level => parseInt(level, 10))
+                        .filter(level => level >= 1 && level <= 9)
+                        .sort((a, b) => a - b);
+
+                    spellLevels.forEach(level => {
+                        const totalSlots = profile.spellSlots[level] || 0;
+                        const usedSlots = state.spellSlotsUsed[level] || 0;
+                        const remainingSlots = totalSlots - usedSlots;
+
+                        // Get action spells for this level
+                        const actionSpells = getActionSpells(profile);
+                        if (actionSpells.length === 0 && level === 1) return; // Skip if no action spells
+
+                        html += '<div class="spells-section">';
+                        html += `<div class="spells-section-title">Level ${level}`;
+                        if (totalSlots > 0) {
+                            html += ` <span class="spell-slots-info">`;
+                            if (remainingSlots > 0) {
+                                html += `<span class="spell-slots-remaining">${remainingSlots}/${totalSlots} slots remaining</span>`;
+                            } else {
+                                html += `<span class="spell-slots-empty">0/${totalSlots} slots remaining</span>`;
+                            }
+                            html += `</span>`;
+                        }
+                        html += '</div>';
+
+                        if (level === 1 && actionSpells.length > 0) {
+                            html += '<div class="spells-list">';
+                            const sortedSpells = [...actionSpells].sort((a, b) => a.localeCompare(b));
+                            sortedSpells.forEach(spell => {
+                                html += `<div class="spell-item" onclick="handleSpellCast('${spell.replace(/'/g, "\\'")}', ${level}, 'action')">${spell}</div>`;
+                            });
+                            html += '</div>';
+                        } else if (level > 1) {
+                            html += '<div class="spells-list">';
+                            html += '<div class="spell-item" style="color: var(--text-light); font-style: italic;">No spells of this level</div>';
+                            html += '</div>';
+                        }
+                        html += '</div>';
+                    });
+                } else if (profile.spells && profile.spells.length > 0) {
+                    // If no spell slots but has spells, show action spells under Level 1
+                    const actionSpells = getActionSpells(profile);
+                    if (actionSpells.length > 0) {
+                        html += '<div class="spells-section">';
+                        html += '<div class="spells-section-title">Level 1</div>';
+                        html += '<div class="spells-list">';
+                        const sortedSpells = [...actionSpells].sort((a, b) => a.localeCompare(b));
+                        sortedSpells.forEach(spell => {
+                            html += `<div class="spell-item" onclick="handleSpellCast('${spell.replace(/'/g, "\\'")}', 1, 'action')">${spell}</div>`;
+                        });
+                        html += '</div>';
+                        html += '</div>';
+                    }
+                }
+            }
+
+            content.innerHTML = html;
+            showScreen(screenId);
+        }
+
+        // Pending spell cast (stored while waiting for slot confirmation)
+        let pendingSpellCast = null;
+
+        // Handle spell cast
+        function handleSpellCast(spellName, level, actionType) {
+            // level 0 = cantrip, level >= 1 = leveled spell
+            // actionType = 'action' or 'bonus'
+            
+            if (level === 0) {
+                // Cantrip - no slot needed, just log it and mark action as used
+                logSpellCast(spellName, 0);
+                if (actionType === 'action') {
+                    state.action = 'used';
+                    state.actionUsedBy = 'spell';
+                } else if (actionType === 'bonus') {
+                    state.bonusAction = 'used';
+                }
+                saveState();
+                updateUI();
+                showToast(`Cast: ${spellName}`);
+                // Return to home screen
+                showScreen('screen-home');
+            } else {
+                // Leveled spell - check if slots available and prompt
+                const profile = getActiveCharacterProfile();
+                if (!profile || !profile.spellSlots || !profile.spellSlots[level]) {
+                    showToast(`No spell slots available for level ${level}`);
+                    return;
+                }
+
+                const totalSlots = profile.spellSlots[level] || 0;
+                const usedSlots = state.spellSlotsUsed[level] || 0;
+                const remainingSlots = totalSlots - usedSlots;
+
+                if (remainingSlots <= 0) {
+                    showToast(`No level ${level} spell slots remaining`);
+                    return;
+                }
+
+                // Store pending cast (including action type)
+                pendingSpellCast = { spellName, level, actionType };
+
+                // Show prompt dialog if confirmSpends is enabled, otherwise auto-confirm
+                if (prefs.confirmSpends) {
+                    const dialog = document.getElementById('spell-slot-dialog');
+                    const message = document.getElementById('spell-slot-dialog-message');
+                    message.textContent = `Cast ${spellName}? Spend a level ${level} spell slot? (${remainingSlots - 1}/${totalSlots} remaining)`;
+                    dialog.classList.add('active');
+                } else {
+                    confirmSpellSlotSpend();
+                }
+            }
+        }
+
+        // Confirm spell slot spending
+        function confirmSpellSlotSpend() {
+            if (!pendingSpellCast) return;
+
+            const { spellName, level, actionType } = pendingSpellCast;
+
+            // Decrement slot
+            if (!state.spellSlotsUsed[level]) {
+                state.spellSlotsUsed[level] = 0;
+            }
+            state.spellSlotsUsed[level]++;
+
+            // Mark action/bonus action as used
+            if (actionType === 'action') {
+                state.action = 'used';
+                state.actionUsedBy = 'spell';
+            } else if (actionType === 'bonus') {
+                state.bonusAction = 'used';
+            }
+
+            // Log the cast
+            logSpellCast(spellName, level);
+
+            // Save state
+            saveState();
+
+            // Close dialog
+            closeSpellSlotDialog();
+
+            // Update UI
+            updateUI();
+
+            // Show toast
+            const profile = getActiveCharacterProfile();
+            const totalSlots = profile?.spellSlots?.[level] || 0;
+            const usedSlots = state.spellSlotsUsed[level] || 0;
+            const remainingSlots = totalSlots - usedSlots;
+            showToast(`Cast: ${spellName} (${remainingSlots}/${totalSlots} slots remaining)`);
+
+            // Clear pending and return to home
+            pendingSpellCast = null;
+            showScreen('screen-home');
+        }
+
+        // Cancel spell slot spending
+        function cancelSpellSlotSpend() {
+            closeSpellSlotDialog();
+            pendingSpellCast = null;
+        }
+
+        // Close spell slot dialog
+        function closeSpellSlotDialog() {
+            document.getElementById('spell-slot-dialog').classList.remove('active');
+        }
+
+        // Log spell cast to turn log
+        function logSpellCast(spellName, level) {
+            const entry = {
+                action: 'cast',
+                spell: spellName,
+                level: level
+            };
+
+            // Add timestamp if enabled (default: enabled)
+            if (prefs.turnLogTimestamps !== false) {
+                const now = new Date();
+                entry.timestamp = now.toLocaleTimeString('en-US', { 
+                    hour12: false, 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                });
+            }
+
+            state.turnLog.push(entry);
+            saveState();
+            updateTurnLog();
+        }
+
+        // Update turn log display
+        function updateTurnLog() {
+            const turnLogContainer = document.getElementById('turn-log');
+            const turnLogEntries = document.getElementById('turn-log-entries');
+
+            if (!turnLogContainer || !turnLogEntries) return;
+
+            if (state.turnLog && state.turnLog.length > 0) {
+                turnLogContainer.style.display = 'block';
+                let html = '';
+                state.turnLog.forEach(entry => {
+                    if (entry.action === 'cast') {
+                        const levelText = entry.level === 0 ? 'Cantrip' : `Level ${entry.level}`;
+                        html += `<div class="turn-log-entry">`;
+                        if (entry.timestamp) {
+                            html += `<span class="turn-log-entry-time">${entry.timestamp}</span>`;
+                        }
+                        html += `<span>✨ Cast ${entry.spell} (${levelText})</span>`;
+                        html += `</div>`;
+                    }
+                });
+                turnLogEntries.innerHTML = html;
+            } else {
+                turnLogContainer.style.display = 'none';
+            }
+        }
+
+        // Clear turn log
+        function clearTurnLog() {
+            if (confirm('Clear turn log?')) {
+                state.turnLog = [];
+                saveState();
+                updateTurnLog();
+            }
+        }
+
+        // Update speed display in Move modal
+        function updateMoveSpeedDisplay() {
+            const speedDisplay = document.getElementById('move-speed-display');
+            const speedNumber = document.getElementById('move-speed-number');
+            const speedType = document.getElementById('move-speed-type');
+            const descriptionText = document.getElementById('move-description-text');
+            
+            if (!speedDisplay || !speedNumber || !speedType || !descriptionText) return;
+            
+            // Try to get speed from active character profile
+            let speed = null;
+            try {
+                const profile = getActiveCharacterProfile();
+                if (profile && profile.speed !== undefined && profile.speed !== null) {
+                    speed = profile.speed;
+                }
+            } catch (e) {
+                // Ignore errors
+            }
+            
+            if (speed !== null && speed > 0) {
+                // Show speed display and update values
+                speedDisplay.style.display = 'block';
+                speedNumber.textContent = speed;
+                speedType.textContent = 'Walking';
+                
+                // Update description text with actual speed
+                descriptionText.textContent = `On your turn, you can move a distance up to your speed. You can use some of your movement before and after your action. For example, if you have a speed of ${speed} feet, you can move ${Math.floor(speed / 3)} feet, take your action, and then move ${Math.floor(speed * 2 / 3)} feet more.`;
+            } else {
+                // Hide speed display if no speed available
+                speedDisplay.style.display = 'none';
+                descriptionText.textContent = 'On your turn, you can move a distance up to your speed. You can use some of your movement before and after your action. For example, if you have a speed of 30 feet, you can move 10 feet, take your action, and then move 20 feet more.';
             }
         }
 
@@ -2013,7 +2842,21 @@
             container.innerHTML = '';
 
             const options = getBonusActionOptions();
-            if (options.length === 0) {
+            
+            // Check if character has bonus action spells
+            const profile = getActiveCharacterProfile();
+            const hasBonusActionSpells = profile && getBonusActionSpells(profile).length > 0;
+            
+            if (hasBonusActionSpells) {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-primary';
+                btn.type = 'button';
+                btn.textContent = '✨ Cast a Spell';
+                btn.onclick = () => showSpellSelection('bonus');
+                container.appendChild(btn);
+            }
+
+            if (options.length === 0 && !hasBonusActionSpells) {
                 const wrap = document.createElement('div');
                 wrap.className = 'detail-content';
                 wrap.innerHTML = '<p class="muted-center">All set.</p>';
@@ -2477,6 +3320,7 @@
             // Reaction does NOT reset (resets at START of turn)
             state.dashActive = false;
             state.actionUsedBy = null;
+            // Spell slots do NOT reset (they reset on long rest, not end of turn)
 
             updateUI();
             showScreen('screen-not-your-turn');
@@ -2499,6 +3343,7 @@
                 state.interaction = 'available';
                 state.dashActive = false;
                 state.actionUsedBy = null;
+                // Note: Spell slots are NOT reset on start turn (they reset on long rest)
             }
             
             updateUI();
@@ -2529,13 +3374,973 @@
                 actionUsedBy: null,
                 currentAttackStep: 1,
                 currentSaveType: null,
-                pendingAction: null
+                pendingAction: null,
+                spellSlotsUsed: {},  // Reset spell slots usage
+                turnLog: []  // Reset turn log
             };
             
             // Update UI and go to home
             updateUI();
             closeResetDialog();
             showScreen('screen-home');
+        }
+
+        // PDF Import Functions
+        let pendingCharacterProfile = null;
+
+        // Active Character Management
+        const ACTIVE_CHARACTER_ID_KEY = 'activeCharacterId';
+        const CHARACTER_PROFILE_PREFIX = 'characterProfileV1:';
+
+        // Generate a unique character ID
+        function generateCharacterId() {
+            return 'char_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Get active character ID
+        function getActiveCharacterId() {
+            return localStorage.getItem(ACTIVE_CHARACTER_ID_KEY);
+        }
+
+        // Set active character ID
+        function setActiveCharacterId(id) {
+            localStorage.setItem(ACTIVE_CHARACTER_ID_KEY, id);
+        }
+
+        // Get active character profile
+        function getActiveCharacterProfile() {
+            const activeId = getActiveCharacterId();
+            if (activeId) {
+                try {
+                    const profileData = localStorage.getItem(CHARACTER_PROFILE_PREFIX + activeId);
+                    if (profileData) {
+                        return JSON.parse(profileData);
+                    }
+                } catch (e) {
+                    console.error('Failed to load active character profile:', e);
+                }
+            }
+            
+            // Backward compatibility: migrate old 'characterProfile' if it exists
+            try {
+                const oldProfile = localStorage.getItem('characterProfile');
+                if (oldProfile) {
+                    const profile = JSON.parse(oldProfile);
+                    // Migrate to new format
+                    if (!profile.id) {
+                        profile.id = generateCharacterId();
+                    }
+                    saveCharacterProfile(profile, profile.id);
+                    // Remove old key
+                    localStorage.removeItem('characterProfile');
+                    return profile;
+                }
+            } catch (e) {
+                console.error('Failed to migrate old character profile:', e);
+            }
+            
+            return null;
+        }
+
+        // Save character profile with ID
+        function saveCharacterProfile(profile, id) {
+            if (!id) {
+                id = generateCharacterId();
+            }
+            localStorage.setItem(CHARACTER_PROFILE_PREFIX + id, JSON.stringify(profile));
+            setActiveCharacterId(id);
+            return id;
+        }
+
+        // Get all saved character profiles
+        function getAllCharacterProfiles() {
+            const profiles = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(CHARACTER_PROFILE_PREFIX)) {
+                    try {
+                        const id = key.replace(CHARACTER_PROFILE_PREFIX, '');
+                        const profileData = localStorage.getItem(key);
+                        if (profileData) {
+                            const profile = JSON.parse(profileData);
+                            profile.id = id; // Ensure ID is set
+                            profiles.push(profile);
+                        }
+                    } catch (e) {
+                        console.error('Failed to load character profile:', key, e);
+                    }
+                }
+            }
+            return profiles.sort((a, b) => {
+                // Sort by name, then by creation time
+                if (a.name && b.name) {
+                    return a.name.localeCompare(b.name);
+                }
+                return 0;
+            });
+        }
+
+        // Populate character library dropdown
+        function populateCharacterLibrary() {
+            const select = document.getElementById('character-library-select');
+            if (!select) return;
+
+            const profiles = getAllCharacterProfiles();
+            const activeId = getActiveCharacterId();
+
+            // Clear existing options except the first one
+            select.innerHTML = '<option value="">(No Character)</option>';
+
+            // Add character options
+            profiles.forEach(profile => {
+                const option = document.createElement('option');
+                option.value = profile.id;
+                const displayName = profile.name || `Character ${profile.id.substring(0, 8)}`;
+                const classLevel = profile.className && profile.level ? ` (${profile.className} ${profile.level})` : '';
+                option.textContent = `${displayName}${classLevel}`;
+                if (profile.id === activeId) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+
+        // Switch to a different character
+        function switchCharacter(characterId) {
+            if (!characterId) {
+                // Clear active character
+                localStorage.removeItem(ACTIVE_CHARACTER_ID_KEY);
+                showToast('No character selected');
+                updateUI();
+                return;
+            }
+
+            // Verify character exists
+            const profileData = localStorage.getItem(CHARACTER_PROFILE_PREFIX + characterId);
+            if (!profileData) {
+                showToast('Character not found');
+                populateCharacterLibrary();
+                return;
+            }
+
+            // Set as active
+            setActiveCharacterId(characterId);
+            
+            // Load character settings
+            try {
+                const profile = JSON.parse(profileData);
+                applyCharacterProfileToSettings(profile);
+                showToast(`Switched to ${profile.name || 'Character'}`);
+            } catch (e) {
+                console.error('Failed to load character:', e);
+                showToast('Failed to load character');
+            }
+
+            updateUI();
+        }
+
+        // Create a new empty character
+        function createNewCharacter() {
+            const newProfile = {
+                id: generateCharacterId(),
+                name: 'New Character',
+                className: '',
+                level: 0,
+                ac: undefined,
+                hpMax: undefined,
+                speed: undefined,
+                initiativeBonus: undefined,
+                spellAttackBonus: undefined,
+                spellSaveDC: undefined,
+                spellSlots: {},
+                cantrips: [],
+                spells: []
+            };
+
+            saveCharacterProfile(newProfile, newProfile.id);
+            applyCharacterProfileToSettings(newProfile);
+            populateCharacterLibrary();
+            updateUI();
+            showToast('New character created');
+        }
+
+        // Duplicate current character
+        function duplicateCurrentCharacter() {
+            const currentProfile = getActiveCharacterProfile();
+            if (!currentProfile) {
+                showToast('No character to duplicate');
+                return;
+            }
+
+            // Create a copy with new ID
+            const duplicated = JSON.parse(JSON.stringify(currentProfile));
+            duplicated.id = generateCharacterId();
+            duplicated.name = (currentProfile.name || 'Character') + ' (Copy)';
+
+            saveCharacterProfile(duplicated, duplicated.id);
+            applyCharacterProfileToSettings(duplicated);
+            populateCharacterLibrary();
+            updateUI();
+            showToast('Character duplicated');
+        }
+
+        // Delete current character
+        function deleteCurrentCharacter() {
+            const activeId = getActiveCharacterId();
+            if (!activeId) {
+                showToast('No character to delete');
+                return;
+            }
+
+            const profile = getActiveCharacterProfile();
+            const characterName = profile?.name || 'Character';
+
+            if (!confirm(`Delete "${characterName}"? This cannot be undone.`)) {
+                return;
+            }
+
+            // Remove from localStorage
+            localStorage.removeItem(CHARACTER_PROFILE_PREFIX + activeId);
+            localStorage.removeItem(ACTIVE_CHARACTER_ID_KEY);
+
+            // Clear settings
+            prefs.classKey = '';
+            prefs.canHealingWord = false;
+            prefs.canOffhandAttack = false;
+            prefs.bonusActionEnabled = false;
+            savePrefs();
+
+            // Update UI
+            populateCharacterLibrary();
+            updateUI();
+            showToast('Character deleted');
+        }
+
+        // Export current character as JSON
+        function exportCharacterJSON() {
+            const profile = getActiveCharacterProfile();
+            if (!profile) {
+                showToast('No character to export');
+                return;
+            }
+
+            // Create clean export (remove debug fields)
+            const exportData = { ...profile };
+            delete exportData._debugExtractedText;
+            delete exportData._debugFields;
+
+            const json = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            // Generate filename from character name (sanitized)
+            let filename = 'character';
+            if (profile.name) {
+                filename = profile.name
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+            }
+            a.download = `${filename}.json`;
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('Character exported');
+        }
+
+        // Import character from JSON file
+        function handleJsonImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            if (!file.type.includes('json') && !file.name.toLowerCase().endsWith('.json')) {
+                showToast('Please select a JSON file.');
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    
+                    // Validate it's a character profile
+                    if (typeof imported !== 'object' || (!imported.name && !imported.className)) {
+                        showToast('Invalid character file format.');
+                        event.target.value = '';
+                        return;
+                    }
+
+                    // Generate new ID for imported character (don't reuse old ID)
+                    if (imported.id) {
+                        delete imported.id;
+                    }
+                    imported.id = generateCharacterId();
+
+                    // Save and set as active
+                    saveCharacterProfile(imported, imported.id);
+                    applyCharacterProfileToSettings(imported);
+                    populateCharacterLibrary();
+                    updateUI();
+                    
+                    showToast(`Character "${imported.name || 'Imported Character'}" imported successfully!`);
+                } catch (err) {
+                    console.error('JSON import error:', err);
+                    showToast('Failed to import JSON: ' + err.message);
+                } finally {
+                    event.target.value = '';
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        async function extractPdfData(file) {
+            try {
+                if (typeof pdfjsLib === 'undefined') {
+                    throw new Error('PDF.js library not loaded');
+                }
+
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const numPages = pdf.numPages;
+                let fullText = '';
+
+                // Extract text content from pages
+                for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+                    const page = await pdf.getPage(pageNum);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    
+                    // Normalize: collapse multiple spaces to single spaces
+                    const normalizedPageText = pageText.replace(/\s+/g, ' ').trim();
+                    
+                    // Preserve newlines at page boundaries
+                    if (fullText && normalizedPageText) {
+                        fullText += '\n';
+                    }
+                    fullText += normalizedPageText;
+                }
+
+                // Extract form field values (AcroForm fields) into a map
+                const fieldMap = {}; // Object map: { fieldNameOrLabel: value }
+
+                try {
+                    // Method 1: Try getFieldObjects() if available
+                    if (pdf.getFieldObjects && typeof pdf.getFieldObjects === 'function') {
+                        const fieldObjects = await pdf.getFieldObjects();
+                        if (fieldObjects && Array.isArray(fieldObjects)) {
+                            for (const field of fieldObjects) {
+                                if (field && field.fieldName && field.fieldValue) {
+                                    const name = String(field.fieldName).trim();
+                                    const value = String(field.fieldValue).trim();
+                                    if (name && value && value !== '' && value !== 'null' && value !== 'undefined') {
+                                        fieldMap[name] = value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.log('getFieldObjects() not available or failed:', e.message);
+                }
+
+                // Method 2: Extract annotations from each page (may contain form fields)
+                try {
+                    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+                        const page = await pdf.getPage(pageNum);
+                        const annotations = await page.getAnnotations();
+                        
+                        if (annotations && Array.isArray(annotations)) {
+                            // DEBUG: Log annotation structure for first page
+                            if (pageNum === 1 && annotations.length > 0) {
+                                console.log('Sample annotation structure (first annotation):', JSON.stringify(annotations[0], null, 2));
+                            }
+                            
+                            for (const annotation of annotations) {
+                                // Check for form field annotations - try multiple property names
+                                const fieldName = annotation.fieldName || annotation.T || annotation.FT || annotation.name;
+                                const fieldValue = annotation.fieldValue || annotation.V || annotation.value || annotation.defaultFieldValue;
+                                
+                                if (fieldName && fieldValue) {
+                                    const name = String(fieldName).trim();
+                                    const value = String(fieldValue).trim();
+                                    if (name && value && value !== '' && value !== 'null' && value !== 'undefined') {
+                                        // Store in map (overwrite if duplicate, keeping last value)
+                                        if (!fieldMap[name] || value.length > fieldMap[name].length) {
+                                            fieldMap[name] = value;
+                                        }
+                                    }
+                                }
+                                
+                                // Also check annotation subtype for widget annotations (form fields)
+                                if (annotation.subtype === 'Widget' && annotation.fieldName) {
+                                    const name = String(annotation.fieldName).trim();
+                                    // Try to get value from various possible locations
+                                    let value = annotation.fieldValue || annotation.V || annotation.value;
+                                    if (value) {
+                                        value = String(value).trim();
+                                        if (value && value !== '' && value !== 'null' && value !== 'undefined') {
+                                            if (!fieldMap[name] || value.length > fieldMap[name].length) {
+                                                fieldMap[name] = value;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.log('getAnnotations() extraction failed:', e.message);
+                }
+
+                // Method 3: Try accessing AcroForm dictionary directly via PDF.js internals
+                try {
+                    // Access PDF catalog and AcroForm
+                    const pdfDocument = pdf;
+                    
+                    // Try to get the PDF's catalog (root dictionary)
+                    if (pdfDocument._pdfInfo) {
+                        // Log structure for debugging
+                        console.log('PDF info structure keys:', Object.keys(pdfDocument._pdfInfo));
+                    }
+                    
+                    // Try accessing through PDF.js internal structures
+                    // Note: This may vary by PDF.js version
+                    if (pdfDocument.catalog && pdfDocument.catalog.acroForm) {
+                        const acroForm = pdfDocument.catalog.acroForm;
+                        console.log('Found AcroForm in catalog:', acroForm);
+                    }
+                    
+                    // Alternative: Try to access via transport
+                    if (pdfDocument.transport && pdfDocument.transport.pdfInfo) {
+                        const pdfInfo = pdfDocument.transport.pdfInfo;
+                        if (pdfInfo.AcroForm) {
+                            console.log('Found AcroForm in transport.pdfInfo');
+                        }
+                    }
+                } catch (e) {
+                    console.log('AcroForm direct access failed:', e.message);
+                }
+
+                // DEBUG: Log field extraction results
+                console.log('=== FORM FIELD EXTRACTION DEBUG ===');
+                const fieldCount = Object.keys(fieldMap).length;
+                console.log('Number of fields found:', fieldCount);
+                const fieldKeys = Object.keys(fieldMap);
+                if (fieldKeys.length > 0) {
+                    console.log('Sample field keys (first 20):', fieldKeys.slice(0, 20));
+                    console.log('Sample field values:', Object.fromEntries(
+                        fieldKeys.slice(0, 10).map(key => [key, fieldMap[key]])
+                    ));
+                }
+
+                // Return both text and fieldMap
+                return { text: fullText, fieldMap: fieldMap };
+            } catch (error) {
+                console.error('Error extracting PDF text:', error);
+                throw new Error('Failed to extract text from PDF: ' + error.message);
+            }
+        }
+
+        // Helper function to find a field key using fuzzy matching
+        function findKey(fieldMap, possibleKeys) {
+            if (!fieldMap || typeof fieldMap !== 'object' || Object.keys(fieldMap).length === 0) {
+                return null;
+            }
+            
+            // Handle array of possible keys
+            if (!Array.isArray(possibleKeys)) {
+                possibleKeys = [possibleKeys];
+            }
+            
+            // First try exact match (case-insensitive)
+            const fieldKeys = Object.keys(fieldMap);
+            for (const key of possibleKeys) {
+                const exactMatch = fieldKeys.find(fk => fk.toLowerCase() === key.toLowerCase());
+                if (exactMatch) return exactMatch;
+            }
+            
+            // Then try partial match (contains)
+            for (const key of possibleKeys) {
+                const partialMatch = fieldKeys.find(fk => 
+                    fk.toLowerCase().includes(key.toLowerCase()) || 
+                    key.toLowerCase().includes(fk.toLowerCase())
+                );
+                if (partialMatch) return partialMatch;
+            }
+            
+            // Finally try fuzzy match (word boundaries)
+            for (const key of possibleKeys) {
+                const keyWords = key.toLowerCase().split(/\s+/);
+                const fuzzyMatch = fieldKeys.find(fk => {
+                    const fkLower = fk.toLowerCase();
+                    return keyWords.every(word => fkLower.includes(word));
+                });
+                if (fuzzyMatch) return fuzzyMatch;
+            }
+            
+            return null;
+        }
+
+        function parseFromFields(fieldMap, textFallback) {
+            const profile = {
+                name: '',
+                className: '',
+                level: 0,
+                ac: undefined,
+                hpMax: undefined,
+                speed: undefined,
+                initiativeBonus: undefined,
+                spellAttackBonus: undefined,
+                spellSaveDC: undefined,
+                spellSlots: {},
+                cantrips: [],
+                spells: [],
+                rawText: textFallback || '',
+                rawFields: fieldMap || {}
+            };
+
+            // Helper to parse numeric value from field
+            const parseNumeric = (value) => {
+                if (!value) return undefined;
+                const str = String(value).trim();
+                // Extract first number (handles "+2", "16", "30 ft", etc.)
+                const match = str.match(/([+-]?\d+)/);
+                return match ? parseInt(match[1], 10) : undefined;
+            };
+
+            // Use fieldMap as source of truth - only parse if fieldMap exists and has entries
+            const hasFieldMap = fieldMap && typeof fieldMap === 'object' && Object.keys(fieldMap).length > 0;
+
+            if (hasFieldMap) {
+                // Parse Name from fieldMap
+                if (fieldMap.CharacterName) {
+                    profile.name = String(fieldMap.CharacterName).trim();
+                }
+
+                // Parse Class + Level from fieldMap
+                const classLevelKey = findKey(fieldMap, ['CLASS  LEVEL', 'Class Level', 'ClassLevel', 'CLASSLEVEL']);
+                if (classLevelKey && fieldMap[classLevelKey]) {
+                    const classLevelStr = String(fieldMap[classLevelKey]).trim();
+                    // Match "Cleric 2" or "Cleric2" pattern
+                    const classLevelMatch = classLevelStr.match(/\b(barbarian|bard|cleric|druid|fighter|monk|paladin|ranger|rogue|sorcerer|warlock|wizard)\s*(\d+)\b/i);
+                    if (classLevelMatch) {
+                        profile.className = classLevelMatch[1].charAt(0).toUpperCase() + classLevelMatch[1].slice(1).toLowerCase();
+                        profile.level = parseInt(classLevelMatch[2], 10);
+                    }
+                }
+
+                // Parse AC (Armor Class) from fieldMap
+                const acKey = findKey(fieldMap, ['ARMOR CLASS', 'AC', 'ArmorClass', 'Armor Class']);
+                if (acKey && fieldMap[acKey]) {
+                    profile.ac = parseNumeric(fieldMap[acKey]);
+                }
+
+                // Parse HP Max from fieldMap
+                const hpMaxKey = findKey(fieldMap, ['Max HP', 'HPMax', 'HP Max', 'MAX HP', 'Hit Points']);
+                if (hpMaxKey && fieldMap[hpMaxKey]) {
+                    const hpValue = String(fieldMap[hpMaxKey]).trim();
+                    // Handle "15/15" format - take the second number
+                    const hpMatch = hpValue.match(/(\d+)\s*\/\s*(\d+)/);
+                    if (hpMatch) {
+                        profile.hpMax = parseInt(hpMatch[2], 10);
+                    } else {
+                        profile.hpMax = parseNumeric(hpValue);
+                    }
+                }
+
+                // Parse Speed from fieldMap
+                const speedKey = findKey(fieldMap, ['SPEED', 'Speed', 'WALKING', 'Walking']);
+                if (speedKey && fieldMap[speedKey]) {
+                    profile.speed = parseNumeric(fieldMap[speedKey]);
+                }
+
+                // Parse Initiative Bonus from fieldMap
+                const initiativeKey = findKey(fieldMap, ['INITIATIVE', 'Initiative', 'InitiativeBonus']);
+                if (initiativeKey && fieldMap[initiativeKey]) {
+                    profile.initiativeBonus = parseNumeric(fieldMap[initiativeKey]);
+                }
+
+                // Parse Spell Save DC from exact field (no fuzzy search)
+                if (fieldMap.spellSaveDC0) {
+                    profile.spellSaveDC = parseInt(fieldMap.spellSaveDC0, 10);
+                }
+
+                // Parse Spell Attack Bonus from exact field (no fuzzy search)
+                if (fieldMap.spellAtkBonus0) {
+                    const bonusStr = String(fieldMap.spellAtkBonus0).trim();
+                    profile.spellAttackBonus = parseNumeric(bonusStr);
+                }
+
+                // Parse Spellcasting Ability (optional, for reference)
+                if (fieldMap.spellCastingAbility0) {
+                    profile.spellcastingAbility = String(fieldMap.spellCastingAbility0).trim();
+                }
+
+                // Parse Spell Slots from exact field spellSlotHeader1
+                profile.spellSlots = {};
+                if (fieldMap.spellSlotHeader1) {
+                    const slotValue = String(fieldMap.spellSlotHeader1).trim();
+                    const m = slotValue.match(/(\d+)\s+Slots/i);
+                    if (m) {
+                        profile.spellSlots[1] = parseInt(m[1], 10);
+                    }
+                }
+                // Do NOT populate levels 2-9
+
+                // Build spell rows from spellName0 through spellName21 (all spell names in order)
+                const rows = [];
+                for (let i = 0; i <= 21; i++) {
+                    const v = fieldMap[`spellName${i}`];
+                    if (typeof v === 'string' && v.trim()) {
+                        rows.push(v.trim());
+                    }
+                }
+
+                // Find header positions in the array (if headers are in spellName fields)
+                const cantripHeaderIndex = rows.findIndex(row => /^===.*CANTRIPS.*===/i.test(row));
+                const lvl1HeaderIndex = rows.findIndex(row => /^===.*1ST.*LEVEL.*===/i.test(row));
+
+                // Split cantrips and spells
+                let cantrips = [];
+                let spellsLvl1 = [];
+
+                if (cantripHeaderIndex >= 0 && lvl1HeaderIndex >= 0) {
+                    // Headers found in array - split between them
+                    cantrips = rows.slice(cantripHeaderIndex + 1, lvl1HeaderIndex);
+                    spellsLvl1 = rows.slice(lvl1HeaderIndex + 1);
+                } else {
+                    // Headers not in array - use fixed split (first 6 are cantrips for this PDF)
+                    // spellHeader0 and spellHeader1 are in separate fields, so we use fixed split
+                    cantrips = rows.slice(0, 6); // Guidance..Spare the Dying
+                    spellsLvl1 = rows.slice(6);  // Healing Word..Bless
+                }
+
+                // Filter out header-like values starting with "==="
+                const filterHeaders = (arr) => {
+                    return arr.filter(item => !item.startsWith('==='));
+                };
+
+                // Deduplicate while preserving order
+                const deduplicate = (arr) => {
+                    const seen = new Set();
+                    const result = [];
+                    for (const item of arr) {
+                        if (!seen.has(item)) {
+                            seen.add(item);
+                            result.push(item);
+                        }
+                    }
+                    return result;
+                };
+
+                // Process and assign
+                cantrips = filterHeaders(cantrips);
+                spellsLvl1 = filterHeaders(spellsLvl1);
+                
+                profile.cantrips = deduplicate(cantrips);
+                profile.spells = deduplicate(spellsLvl1);
+            }
+
+            // FALLBACK: Use regex on textFallback ONLY if fieldMap is missing or empty
+            if (!hasFieldMap && textFallback) {
+                // Fallback for Name (only if not found in fieldMap)
+                if (!profile.name) {
+                    const lines = textFallback.split('\n').map(line => line.trim()).filter(line => line);
+                    for (let i = 0; i < Math.min(10, lines.length); i++) {
+                        const line = lines[i];
+                        if (!line.toLowerCase().includes('character') && 
+                            !line.toLowerCase().includes('sheet') &&
+                            !line.toLowerCase().includes('d&d') &&
+                            line.length > 2 && line.length < 50) {
+                            profile.name = line;
+                            break;
+                        }
+                    }
+                }
+
+                // Fallback for Class + Level (only if not found in fieldMap)
+                if (!profile.className || !profile.level) {
+                    const classLevelMatch = textFallback.match(/\b(barbarian|bard|cleric|druid|fighter|monk|paladin|ranger|rogue|sorcerer|warlock|wizard)\s+(\d+)\b/i);
+                    if (classLevelMatch) {
+                        profile.className = classLevelMatch[1].charAt(0).toUpperCase() + classLevelMatch[1].slice(1).toLowerCase();
+                        profile.level = parseInt(classLevelMatch[2], 10);
+                    }
+                }
+
+                // Fallback for AC (only if not found in fieldMap)
+                if (profile.ac === undefined) {
+                    const acMatch = textFallback.match(/\b(?:ac|armor\s+class)[:\s]+(\d+)\b/i);
+                    if (acMatch) {
+                        profile.ac = parseInt(acMatch[1], 10);
+                    }
+                }
+
+                // Fallback for HP Max (only if not found in fieldMap)
+                if (profile.hpMax === undefined) {
+                    const hpMatch = textFallback.match(/\b(?:hit\s+points|hp)[:\s]+(?:(\d+)\s*\/\s*)?(\d+)\b/i);
+                    if (hpMatch) {
+                        profile.hpMax = parseInt(hpMatch[2] || hpMatch[1], 10);
+                    }
+                }
+
+                // Fallback for Speed (only if not found in fieldMap)
+                if (profile.speed === undefined) {
+                    const speedMatch = textFallback.match(/\bspeed[:\s]+(\d+)\s*(?:ft|feet)?\b/i);
+                    if (speedMatch) {
+                        profile.speed = parseInt(speedMatch[1], 10);
+                    }
+                }
+
+                // Fallback for Initiative (only if not found in fieldMap)
+                if (profile.initiativeBonus === undefined) {
+                    const initiativeMatch = textFallback.match(/\binitiative[:\s]*([+-]?\d+)\b/i);
+                    if (initiativeMatch) {
+                        profile.initiativeBonus = parseInt(initiativeMatch[1], 10);
+                    }
+                }
+
+                // No fallback for spell-related fields - we use exact field names only
+            }
+
+            return profile;
+        }
+
+        function applyCharacterProfileToSettings(profile) {
+            // Apply settings based on profile
+            prefs.bonusActionEnabled = true;
+            prefs.canHealingWord = profile.spells && profile.spells.some(s => s.toLowerCase().includes('healing word'));
+            prefs.trackReaction = true;
+            prefs.trackInteraction = true;
+            prefs.canOffhandAttack = false; // Default for cleric + shield style
+            prefs.spellcasterMode = profile.className && profile.className.toLowerCase().includes('cleric');
+            prefs.confirmSpends = !!profile.spellSlots && Object.keys(profile.spellSlots).length > 0;
+            prefs.decisionHelperEnabled = true;
+            prefs.autoResetOnStartTurn = true;
+
+            // Set class if it matches
+            const classSelect = document.getElementById('class-select');
+            if (classSelect && profile.className) {
+                const classKey = profile.className.toLowerCase();
+                const validClasses = ['barbarian', 'bard', 'cleric', 'fighter', 'monk', 'paladin', 'ranger', 'rogue', 'sorcerer', 'warlock', 'wizard'];
+                if (validClasses.includes(classKey)) {
+                    prefs.classKey = classKey;
+                    classSelect.value = classKey;
+                    applyClassPresets(classKey);
+                }
+            }
+
+            // Update UI checkboxes
+            const toggleBonusAction = document.getElementById('toggle-bonus-action-enabled');
+            const toggleHealing = document.getElementById('toggle-healing-word');
+            const toggleOffhand = document.getElementById('toggle-offhand-attack');
+            const toggleTrackReaction = document.getElementById('toggle-track-reaction');
+            const toggleTrackInteraction = document.getElementById('toggle-track-interaction');
+            const toggleSpellcaster = document.getElementById('toggle-spellcaster-mode');
+            const toggleConfirmSpends = document.getElementById('toggle-confirm-spends');
+            const toggleDecisionHelper = document.getElementById('toggle-decision-helper');
+            const toggleAutoReset = document.getElementById('toggle-auto-reset');
+
+            if (toggleBonusAction) toggleBonusAction.checked = prefs.bonusActionEnabled;
+            if (toggleHealing) toggleHealing.checked = prefs.canHealingWord;
+            if (toggleOffhand) toggleOffhand.checked = prefs.canOffhandAttack;
+            if (toggleTrackReaction) toggleTrackReaction.checked = prefs.trackReaction;
+            if (toggleTrackInteraction) toggleTrackInteraction.checked = prefs.trackInteraction;
+            if (toggleSpellcaster) toggleSpellcaster.checked = prefs.spellcasterMode;
+            if (toggleConfirmSpends) toggleConfirmSpends.checked = prefs.confirmSpends;
+            if (toggleDecisionHelper) toggleDecisionHelper.checked = prefs.decisionHelperEnabled;
+            if (toggleAutoReset) toggleAutoReset.checked = prefs.autoResetOnStartTurn;
+
+            // Save preferences
+            savePrefs();
+
+            // Add ID to profile and save
+            if (!profile.id) {
+                profile.id = generateCharacterId();
+            }
+            const characterId = saveCharacterProfile(profile, profile.id);
+            console.log('Character saved with ID:', characterId);
+
+            // Update UI
+            updateUI();
+        }
+
+        function showImportConfirmDialog(profile, extractedText) {
+            const dialogBody = document.getElementById('import-confirm-dialog-body');
+            if (!dialogBody) return;
+
+            // Use stored debug text if available
+            if (!extractedText && profile._debugExtractedText) {
+                extractedText = profile._debugExtractedText;
+            }
+
+            let html = '';
+
+            const addItem = (label, value, emptyText = 'Not found') => {
+                html += '<div class="profile-item">';
+                html += `<div class="profile-label">${label}</div>`;
+                if (value !== undefined && value !== null && value !== '' && 
+                    !(Array.isArray(value) && value.length === 0) &&
+                    !(typeof value === 'object' && Object.keys(value).length === 0)) {
+                    if (Array.isArray(value)) {
+                        html += `<div class="profile-value">${value.join(', ') || emptyText}</div>`;
+                    } else if (typeof value === 'object') {
+                        const entries = Object.entries(value).map(([k, v]) => `Level ${k}: ${v}`).join(', ');
+                        html += `<div class="profile-value">${entries || emptyText}</div>`;
+                    } else {
+                        html += `<div class="profile-value">${value}</div>`;
+                    }
+                } else {
+                    html += `<div class="profile-value empty">${emptyText}</div>`;
+                }
+                html += '</div>';
+            };
+
+            addItem('Name', profile.name);
+            addItem('Class & Level', profile.className && profile.level ? `${profile.className} ${profile.level}` : null);
+            addItem('AC', profile.ac);
+            addItem('Max HP', profile.hpMax);
+            addItem('Speed', profile.speed ? `${profile.speed} ft` : null);
+            addItem('Initiative Bonus', profile.initiativeBonus !== undefined ? (profile.initiativeBonus >= 0 ? '+' : '') + profile.initiativeBonus : null);
+            addItem('Spell Attack Bonus', profile.spellAttackBonus !== undefined ? (profile.spellAttackBonus >= 0 ? '+' : '') + profile.spellAttackBonus : null);
+            addItem('Spell Save DC', profile.spellSaveDC);
+            addItem('Spell Slots', profile.spellSlots);
+            addItem('Cantrips', profile.cantrips);
+            addItem('Spells', profile.spells);
+
+            // DEBUG SECTION
+            if (extractedText) {
+                html += '<div class="profile-item" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid var(--border);">';
+                html += '<div class="profile-label">🔍 Debug Info</div>';
+                html += `<div class="profile-value" style="margin-bottom: 0.5rem;">Extracted text length: ${extractedText.length}</div>`;
+                html += '<details style="margin-top: 0.5rem;">';
+                html += '<summary style="cursor: pointer; color: var(--text-light); font-size: 0.9rem;">Show first 1000 characters</summary>';
+                html += '<pre style="margin-top: 0.5rem; padding: 0.75rem; background: var(--background); border: 1px solid var(--border); border-radius: 4px; overflow-x: auto; font-size: 0.85rem; max-height: 300px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word;">';
+                html += escapeHtml(extractedText.substring(0, 1000));
+                html += '</pre>';
+                html += '</details>';
+                html += '</div>';
+            }
+
+            dialogBody.innerHTML = html;
+            document.getElementById('import-confirm-dialog').classList.add('active');
+        }
+
+        // Helper function to escape HTML for safe display
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function closeImportConfirmDialog() {
+            document.getElementById('import-confirm-dialog').classList.remove('active');
+            pendingCharacterProfile = null;
+        }
+
+        function confirmCharacterImport() {
+            if (pendingCharacterProfile) {
+                applyCharacterProfileToSettings(pendingCharacterProfile);
+                closeImportConfirmDialog();
+                populateCharacterLibrary(); // Update library dropdown
+                showToast('Character imported successfully!');
+                showScreen('screen-home');
+            }
+        }
+
+        async function handlePdfImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
+                showToast('Please select a PDF file.');
+                event.target.value = ''; // Reset file input
+                return;
+            }
+
+            try {
+                showToast('Parsing PDF...');
+                
+                // Extract text and fieldMap from PDF
+                const { text, fieldMap } = await extractPdfData(file);
+                
+                // DEBUG: Log extracted text info
+                console.log('=== PDF EXTRACTION DEBUG ===');
+                console.log('Extracted text length:', text.length);
+                const fieldCount = Object.keys(fieldMap || {}).length;
+                console.log('Number of fields found:', fieldCount);
+                console.log('First 1000 characters of text:', text.substring(0, 1000));
+                console.log('Sample fields:', Object.fromEntries(
+                    Object.entries(fieldMap || {}).slice(0, 10)
+                ));
+                window.__lastPdfText = text; // Store globally for inspection
+                window.__lastPdfFields = fieldMap; // Store fieldMap globally for inspection
+                
+                // DEBUG: Dump spellName values (spellName0..21)
+                const spellRows = [];
+                for (let i = 0; i <= 21; i++) {
+                    const key = `spellName${i}`;
+                    const value = fieldMap[key];
+                    spellRows.push([key, value]);
+                    console.log(`  ${key}:`, value || '(empty)');
+                }
+                console.log('SPELL ROWS (spellName0..21) - Full dump above');
+                
+                // DEBUG: Dump spell/DC/attack related fields
+                const spellMetaKeys = Object.keys(fieldMap || {}).filter(k => /spell|save dc|attack|ability save|dc/i.test(k));
+                console.log('SPELL META KEYS (count):', spellMetaKeys.length);
+                spellMetaKeys.forEach(k => {
+                    console.log(`  ${k}:`, fieldMap[k]);
+                });
+                
+                // DEBUG: Fix slot keys log to print real contents
+                const slotKeys = Object.keys(fieldMap || {}).filter(k => /slot/i.test(k));
+                console.log('SLOT PAIRS (count):', slotKeys.length);
+                slotKeys.forEach(k => {
+                    console.log(`  ${k}:`, fieldMap[k]);
+                });
+                
+                // Safety check: Too little text and no fields
+                if (text.length < 200 && (!fieldMap || fieldCount === 0)) {
+                    showToast('No readable text found in this PDF (may be flattened image or blocked worker).');
+                    console.warn('PDF extraction returned very little text:', text.length, 'characters and', fieldCount, 'fields');
+                    event.target.value = '';
+                    return;
+                }
+                
+                // Parse into character profile using fieldMap as source of truth, text as fallback
+                const profile = parseFromFields(fieldMap || {}, text);
+                
+                // Safety check: Text/fields found but parsing failed
+                const hasCoreFields = profile.name || profile.className || profile.ac !== undefined || 
+                                     profile.hpMax !== undefined || profile.speed !== undefined;
+                if (!hasCoreFields) {
+                    showToast('Text found, but format wasn\'t recognized. Likely text-order issue. Check debug output.');
+                    console.warn('Parsing found no core fields. Profile:', profile);
+                }
+                
+                // Store for confirmation (include raw text and fieldMap for debug)
+                pendingCharacterProfile = profile;
+                pendingCharacterProfile._debugExtractedText = text; // Store for debug display
+                pendingCharacterProfile._debugFields = fieldMap; // Store fieldMap for debug display
+                
+                // Show confirmation dialog
+                showImportConfirmDialog(profile, text);
+                
+            } catch (error) {
+                console.error('PDF import error:', error);
+                showToast('Failed to import PDF: ' + error.message);
+            } finally {
+                // Reset file input
+                event.target.value = '';
+            }
         }
 
         function applyClassPresets(classKey) {
