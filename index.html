@@ -15,9 +15,21 @@
                 <h1>D&D Tools Hub</h1>
                 <p class="header-subtitle">Your collection of Dungeon & Dragons tools and utilities</p>
             </div>
-            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
-                <span class="theme-icon">🌙</span>
-            </button>
+            <div class="header-actions">
+                <label class="hub-sort-label">
+                    Sort:
+                    <select id="sort-by" class="hub-sort-select" aria-label="Sort tools below starred">
+                        <option value="default">Default order</option>
+                        <option value="name-asc">Name A–Z</option>
+                        <option value="name-desc">Name Z–A</option>
+                        <option value="emoji">By emoji</option>
+                    </select>
+                </label>
+                <button id="clear-stars" type="button" class="clear-stars-btn" aria-label="Clear all starred tools">Clear stars</button>
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
         </header>
 
         <!-- Main Content -->

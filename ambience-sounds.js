@@ -15,7 +15,8 @@
                 customColors: null,
                 cardsPerRow: 1,
                 cardSize: 'medium',
-                startFromBeginning: true
+                startFromBeginning: true,
+                cardSort: 'manual'
             },
             folders: [],
             profiles: [],
@@ -60,11 +61,23 @@
         return m ? m[1] : null;
     }
 
-    function getEmbedUrl(url) {
+    function getEmbedUrl(url, options) {
+        options = options || {};
         const id = getVideoId(url);
         if (!id) return null;
-        const params = (state.settings && state.settings.startFromBeginning) ? 'autoplay=1&start=0' : 'autoplay=1';
-        return 'https://www.youtube.com/embed/' + id + '?' + params;
+        var parts = ['autoplay=1'];
+        if (state.settings && state.settings.startFromBeginning) parts.push('start=0');
+        if (options.loop) {
+            parts.push('loop=1');
+            parts.push('playlist=' + id);
+        }
+        // Add origin to help with cross-origin issues and rel=0 to reduce external requests
+        try {
+            parts.push('origin=' + encodeURIComponent(window.location.origin));
+        } catch (_) {}
+        parts.push('rel=0');
+        parts.push('modestbranding=1');
+        return 'https://www.youtube.com/embed/' + id + '?' + parts.join('&');
     }
 
     function appendStartParam(url) {
@@ -103,21 +116,48 @@
             const bo = typeof b.order === 'number' ? b.order : 0;
             return ao - bo;
         });
+        let result;
         if (filterFolderId === '__starred__') {
-            return list.filter(function (p) { return p.starred === true; });
-        }
-        if (filterFolderId.indexOf('pl:') === 0) {
+            result = list.filter(function (p) { return p.starred === true; });
+        } else if (filterFolderId.indexOf('pl:') === 0) {
             const playlistId = filterFolderId.slice(3);
             const pl = state.playlists.find(function (x) { return x.id === playlistId; });
             if (!pl || !Array.isArray(pl.profileIds)) return [];
             const byId = {};
             list.forEach(function (p) { byId[p.id] = p; });
             return pl.profileIds.map(function (id) { return byId[id]; }).filter(Boolean);
+        } else if (filterFolderId) {
+            result = list.filter(function (p) { return (p.folderId || '') === filterFolderId; });
+        } else {
+            result = list;
         }
-        if (filterFolderId) {
-            return list.filter(function (p) { return (p.folderId || '') === filterFolderId; });
+        var sortMode = (state.settings && state.settings.cardSort) || 'manual';
+        if (sortMode !== 'manual' && result.length > 1) {
+            result = result.slice();
+            if (sortMode === 'name-az') {
+                result.sort(function (a, b) { return String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base' }); });
+            } else if (sortMode === 'name-za') {
+                result.sort(function (a, b) { return String(b.name || '').localeCompare(String(a.name || ''), undefined, { sensitivity: 'base' }); });
+            } else if (sortMode === 'emoji') {
+                result.sort(function (a, b) {
+                    var ia = (a.icon && !a.icon.startsWith('data:')) ? a.icon : '\uffff';
+                    var ib = (b.icon && !b.icon.startsWith('data:')) ? b.icon : '\uffff';
+                    if (ia === ib) return String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base' });
+                    return ia.localeCompare(ib, undefined, { sensitivity: 'base' });
+                });
+            } else if (sortMode === 'folder') {
+                var folderById = {};
+                state.folders.forEach(function (f) { folderById[f.id] = f; });
+                result.sort(function (a, b) {
+                    var fa = a.folderId ? (folderById[a.folderId] && folderById[a.folderId].name) || a.folderId : '';
+                    var fb = b.folderId ? (folderById[b.folderId] && folderById[b.folderId].name) || b.folderId : '';
+                    var cmp = fa.localeCompare(fb, undefined, { sensitivity: 'base' });
+                    if (cmp !== 0) return cmp;
+                    return String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base' });
+                });
+            }
         }
-        return list;
+        return result;
     }
 
     function getNextOrder() {
@@ -209,6 +249,14 @@
 
             const header = document.createElement('div');
             header.className = 'card-header';
+            if (p.loop) {
+                var loopBadge = document.createElement('span');
+                loopBadge.className = 'card-loop-badge';
+                loopBadge.textContent = '\u27F3';
+                loopBadge.setAttribute('title', 'Loops continuously');
+                loopBadge.setAttribute('aria-hidden', 'true');
+                header.appendChild(loopBadge);
+            }
             const handle = document.createElement('button');
             handle.type = 'button';
             handle.className = 'card-drag-handle';
@@ -351,18 +399,25 @@
     }
 
     function playProfile(profile) {
-        const mode = (state.settings && state.settings.playbackMode) || 'newTab';
+        var mode = (state.settings && state.settings.playbackMode) || 'newTab';
         var url = profile.url;
         if (!url) return;
+        var loop = profile.loop === true;
+        
         if (mode === 'newTab') {
-            window.open(appendStartParam(url), '_blank');
+            if (loop) {
+                var loopEmbedUrl = getEmbedUrl(url, { loop: true });
+                if (loopEmbedUrl) window.open(loopEmbedUrl, '_blank');
+            } else {
+                window.open(appendStartParam(url), '_blank');
+            }
             return;
         }
-        const embedUrl = getEmbedUrl(url);
+        var embedUrl = getEmbedUrl(url, { loop: loop });
         if (!embedUrl) return;
-        const frame = document.getElementById('ambience-embed-frame');
-        const area = document.getElementById('ambience-embed-area');
-        const titleEl = document.getElementById('ambience-embed-title');
+        var frame = document.getElementById('ambience-embed-frame');
+        var area = document.getElementById('ambience-embed-area');
+        var titleEl = document.getElementById('ambience-embed-title');
         if (frame && area && titleEl) {
             frame.src = embedUrl;
             titleEl.textContent = profile.name || 'Now playing';
@@ -383,12 +438,14 @@
         const preview = document.getElementById('ambience-icon-preview');
         if (fileInput) fileInput.value = '';
         if (preview) preview.innerHTML = '';
+        var loopEl = document.getElementById('ambience-form-loop');
         if (profileId) {
             const p = state.profiles.find(function (x) { return x.id === profileId; });
             if (p) {
                 nameInput.value = p.name || '';
                 urlInput.value = p.url || '';
                 folderSelect.value = p.folderId || '';
+                if (loopEl) loopEl.checked = p.loop === true;
                 renderEmojiGrid(p.icon && !p.icon.startsWith('data:') ? p.icon : null);
                 if (p.icon && p.icon.startsWith('data:')) {
                     preview.innerHTML = '<img src="' + p.icon + '" alt="">';
@@ -398,6 +455,7 @@
             nameInput.value = '';
             urlInput.value = '';
             folderSelect.value = '';
+            if (loopEl) loopEl.checked = false;
         }
         document.getElementById('ambience-form-url-error').classList.add('hidden');
         document.getElementById('ambience-form-overlay').classList.add('open');
@@ -480,6 +538,8 @@
         }
         finishSave(icon);
 
+        var loopEl = document.getElementById('ambience-form-loop');
+        var loop = loopEl && loopEl.checked === true;
         function finishSave(iconValue) {
             if (editingProfileId) {
                 const p = state.profiles.find(function (x) { return x.id === editingProfileId; });
@@ -488,6 +548,7 @@
                     p.url = url;
                     p.folderId = folderId || null;
                     p.icon = iconValue;
+                    p.loop = loop;
                 }
             } else {
                 state.profiles.push({
@@ -497,7 +558,8 @@
                     name: name,
                     url: url,
                     icon: iconValue,
-                    starred: false
+                    starred: false,
+                    loop: loop
                 });
             }
         saveState(state);
@@ -844,6 +906,16 @@
             filterFolderId = this.value || '';
             renderCards();
         });
+        var sortEl = document.getElementById('ambience-sort');
+        if (sortEl) {
+            sortEl.value = (state.settings && state.settings.cardSort) || 'manual';
+            sortEl.addEventListener('change', function () {
+                state.settings = state.settings || {};
+                state.settings.cardSort = this.value || 'manual';
+                saveState(state);
+                renderCards();
+            });
+        }
         document.getElementById('ambience-add-folder-btn').addEventListener('click', addFolder);
         document.getElementById('ambience-add-folder-settings').addEventListener('click', addFolder);
         document.getElementById('ambience-add-playlist-settings').addEventListener('click', addPlaylist);
@@ -900,6 +972,8 @@
         }
         applyGridLayout();
         renderFolderFilter();
+        var sortEl = document.getElementById('ambience-sort');
+        if (sortEl) sortEl.value = (state.settings && state.settings.cardSort) || 'manual';
         renderFoldersInForm();
         renderCards();
         bindEvents();

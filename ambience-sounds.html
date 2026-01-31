@@ -27,6 +27,14 @@
                 <select id="ambience-folder-filter" class="folder-filter" aria-label="Filter by folder">
                     <option value="">All</option>
                 </select>
+                <label for="ambience-sort" class="sr-only">Sort by</label>
+                <select id="ambience-sort" class="folder-filter sort-select" aria-label="Sort by">
+                    <option value="manual">Manual order</option>
+                    <option value="name-az">Name A–Z</option>
+                    <option value="name-za">Name Z–A</option>
+                    <option value="emoji">Emoji</option>
+                    <option value="folder">Folder</option>
+                </select>
                 <button type="button" id="ambience-add-folder-btn" class="ambience-btn secondary" aria-label="Add folder">+ Folder</button>
             </div>
 
@@ -82,6 +90,13 @@
                             <option value="">Uncategorized</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="ambience-form-loop" aria-describedby="loop-desc">
+                            Loop (for short sound effects)
+                        </label>
+                        <p id="loop-desc" class="setting-desc">Video repeats continuously. Use for sounds that need to play over and over.</p>
+                    </div>
                     <div class="form-actions">
                         <button type="button" id="ambience-form-cancel" class="ambience-btn secondary">Cancel</button>
                         <button type="submit" id="ambience-form-save" class="ambience-btn primary">Save</button>
@@ -104,6 +119,7 @@
                             <input type="radio" name="playbackMode" value="embed" id="playback-embed">
                             Play embedded on page
                         </label>
+                        <p id="embed-note" class="setting-desc" style="margin-top:0;">Embedded playback requires serving from a web server (http://). Opens in new tab when opened as a file.</p>
                         <label class="radio-label checkbox-label">
                             <input type="checkbox" id="setting-start-from-beginning" checked aria-describedby="start-from-beginning-desc">
                             Start videos from beginning

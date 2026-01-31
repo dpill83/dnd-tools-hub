@@ -398,9 +398,16 @@
     border-radius: 4px;
 }
 
+.card-loop-badge {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-right: 0.25rem;
+}
+
 .card-drag-handle {
     width: 32px;
     height: 32px;
+    margin-left: auto;
     padding: 0;
     border: none;
     background: transparent;

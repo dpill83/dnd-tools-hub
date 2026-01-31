@@ -1,5 +1,9 @@
 /* QBasic-style text editor: match classic QBasic IDE look */
 /* Lock to viewport so the browser window has no scrollbars */
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
 html,
 body {
     height: 100%;
@@ -29,6 +33,9 @@ body {
     flex-wrap: wrap;
     gap: 0.5rem;
     padding: 0.25rem 0.5rem 0.35rem;
+    padding-left: calc(0.5rem + env(safe-area-inset-left));
+    padding-right: calc(0.5rem + env(safe-area-inset-right));
+    padding-top: calc(0.35rem + env(safe-area-inset-top));
     background: #d4a84b;
     border-bottom: 1px solid #b8922e;
 }
@@ -53,8 +60,11 @@ body {
     color: #000080;
     background: transparent;
     border: none;
-    padding: 0.2rem 0.4rem;
+    padding: 0.5rem 0.6rem;
+    min-height: 44px;
+    min-width: 44px;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .qb-menu-trigger:hover {
@@ -88,9 +98,12 @@ body {
     color: #000080;
     background: none;
     border: none;
-    padding: 0.35rem 1rem;
+    padding: 0.6rem 1.25rem;
+    min-height: 44px;
+    box-sizing: border-box;
     text-align: left;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .qb-file-dropdown button:hover {
@@ -101,11 +114,28 @@ body {
     color: #000080;
 }
 
+#qb-file-input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+
 .qb-doc-title {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    padding: 0.15rem 0.6rem;
+    padding: 0.35rem 0.6rem;
+    min-height: 44px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 50%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     background: #e8e8e8;
     color: #000;
     font-size: 12px;
@@ -120,14 +150,21 @@ body {
 }
 
 .qb-menu-btn {
-    padding: 0.2rem 0.4rem;
+    padding: 0.5rem 0.6rem;
+    min-height: 44px;
+    min-width: 44px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: #d4a84b;
     color: #000080;
     border: 1px solid #b8922e;
     border-radius: 2px;
-    font-size: 1rem;
+    font-size: 1.25rem;
     text-decoration: none;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .qb-menu-btn:hover {
@@ -153,6 +190,8 @@ body {
     min-height: 0;
     margin: 0;
     padding: 0.5rem 0.75rem;
+    padding-left: calc(0.75rem + env(safe-area-inset-left));
+    padding-right: calc(0.75rem + env(safe-area-inset-right));
     box-sizing: border-box;
     font-family: Consolas, "Courier New", monospace;
     font-size: 16px;
@@ -162,6 +201,7 @@ body {
     border: none;
     resize: none;
     outline: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 #qb-editor::placeholder {
@@ -219,7 +259,12 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.2rem 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.35rem 0.5rem;
+    padding-left: calc(0.5rem + env(safe-area-inset-left));
+    padding-right: calc(0.5rem + env(safe-area-inset-right));
+    padding-bottom: calc(0.35rem + env(safe-area-inset-bottom));
     background: #55aaff;
     color: #000080;
     font-size: 12px;
@@ -228,13 +273,41 @@ body {
 
 .qb-status-keys {
     font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 
 .qb-status-pos {
     background: #4080c0;
     color: #fff;
-    padding: 0.1rem 0.4rem;
-    margin: -0.1rem -0.5rem -0.1rem 0;
-    min-width: 6rem;
+    padding: 0.25rem 0.5rem;
+    min-width: 5rem;
+    flex-shrink: 0;
     text-align: right;
+}
+
+/* Mobile: hide decorative menu text, larger tap targets, compact status */
+@media (max-width: 640px) {
+    .qb-menu-static {
+        display: none;
+    }
+
+    .qb-doc-title {
+        max-width: 40%;
+    }
+
+    .qb-status-bar {
+        font-size: 11px;
+    }
+
+    .qb-status-keys {
+        max-width: 60%;
+    }
+}
+
+@media (max-width: 380px) {
+    .qb-doc-title {
+        max-width: 30%;
+    }
 }

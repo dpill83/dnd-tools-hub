@@ -56,6 +56,55 @@ body {
     border-bottom: 2px solid var(--hub-border);
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.hub-sort-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.875rem;
+    color: var(--hub-text-light);
+}
+
+.hub-sort-select {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.875rem;
+    border: 1px solid var(--hub-border);
+    border-radius: 8px;
+    background: var(--hub-surface);
+    color: var(--hub-text);
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.hub-sort-select:hover,
+.hub-sort-select:focus {
+    border-color: var(--hub-primary);
+    outline: none;
+}
+
+.clear-stars-btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.875rem;
+    border: 1px solid var(--hub-border);
+    border-radius: 8px;
+    background: var(--hub-surface);
+    color: var(--hub-text-light);
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.clear-stars-btn:hover {
+    color: var(--hub-primary);
+    border-color: var(--hub-primary);
+    background: var(--hub-card-bg);
+}
+
 .header-content h1 {
     color: var(--hub-primary);
     font-size: 2.5rem;
