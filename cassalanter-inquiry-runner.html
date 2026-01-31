@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brother George Ward's Cassalanter Inquiry</title>
+  <link rel="stylesheet" href="global.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Runner-specific layout; uses styles.css variables (primary-color, surface, border, etc.) */
+    .runner-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border);
+    }
+    .runner-header h1 { color: var(--primary-color); font-size: 1.5rem; margin-bottom: 0.25rem; }
+    .runner-header .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .runner-header a.theme-toggle { text-decoration: none; }
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: var(--surface);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px var(--shadow);
+      padding: 1rem;
+      min-height: 200px;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .panel h2 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary-color);
+    }
+    .runner-details {
+      margin-bottom: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      transition: border-color 0.3s ease;
+    }
+    .runner-details summary {
+      padding: 0.5rem 0.75rem;
+      background: var(--card-bg);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .runner-details[open] summary { border-bottom: 1px solid var(--border); }
+    .runner-details .content { padding: 0.75rem; }
+    .runner-btn {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--primary-color);
+      background: var(--primary-color);
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+    .runner-btn:hover:not(:disabled) { background: var(--primary-light); }
+    .runner-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .runner-btn.secondary {
+      background: var(--surface);
+      color: var(--primary-color);
+    }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+    .runner-btn-row .runner-btn { flex: 0 1 auto; white-space: nowrap; }
+    .log-list { list-style: none; }
+    .log-list li {
+      padding: 0.35rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .log-list li .time { color: var(--text-light); font-size: 0.8rem; }
+    .runner-tabs { display: flex; gap: 0.25rem; margin-bottom: 0.75rem; }
+    .runner-tabs .runner-btn { flex: 1; }
+    .runner-tabs .runner-btn.active { background: var(--primary-light); }
+    .track { display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0; }
+    .track span { min-width: 2rem; font-weight: 600; }
+    .site-panel {
+      margin-top: 0.5rem;
+      border: 2px solid var(--secondary-color);
+      border-radius: 6px;
+      padding: 0.75rem;
+      transition: border-color 0.3s ease;
+    }
+    .site-panel h3 { font-size: 0.95rem; margin: 0.5rem 0 0.25rem; }
+    .table-editor td { padding: 0.25rem; vertical-align: top; }
+    .table-editor textarea { min-height: 40px; }
+    .approach-options { margin-top: 0.5rem; padding-left: 0.5rem; border-left: 3px solid var(--border); }
+    .approach-choice {
+      display: block;
+      margin-bottom: 0.75rem;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .approach-choice:last-of-type { border-bottom: none; margin-bottom: 0.5rem; }
+    .help-btn {
+      width: 2rem;
+      height: 2rem;
+      min-width: 2rem;
+      padding: 0;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .help-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .help-overlay.open { display: flex; }
+    .help-dialog {
+      background: var(--surface);
+      border: 2px solid var(--primary-color);
+      border-radius: 8px;
+      max-width: 520px;
+      max-height: 85vh;
+      overflow: auto;
+      padding: 1.25rem;
+      box-shadow: 0 8px 24px var(--shadow);
+    }
+    .help-dialog h2 { color: var(--primary-color); font-size: 1.25rem; margin-bottom: 0.75rem; }
+    .help-dialog h3 { font-size: 1rem; margin: 1rem 0 0.35rem; }
+    .help-dialog p, .help-dialog ul, .help-dialog ol { margin: 0 0 0.5rem; font-size: 0.9rem; line-height: 1.5; }
+    .help-dialog ul, .help-dialog ol { padding-left: 1.25rem; }
+    .help-dialog code { background: var(--card-bg); padding: 0.15rem 0.35rem; border-radius: 4px; font-size: 0.85em; }
+    .help-dialog .help-close { margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="runner-header">
+      <div>
+        <h1>Brother George Ward's Cassalanter Inquiry</h1>
+        <p class="intro" style="margin: 0;">Waterdeep-style investigation episode runner. Hook, Progress, Pressure, Reveal.</p>
+      </div>
+      <div class="header-actions">
+        <button type="button" id="btn-help" class="theme-toggle help-btn runner-btn" aria-label="How this works">?</button>
+        <a href="index.html" class="theme-toggle" aria-label="Go to home"><span class="theme-icon">&#127968;</span></a>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode"><span class="theme-icon">&#127769;</span></button>
+      </div>
+    </header>
+
+    <div id="help-overlay" class="help-overlay" aria-hidden="true">
+      <div class="help-dialog" role="dialog" aria-labelledby="help-title">
+        <h2 id="help-title">How this works</h2>
+        <p>This runner plays one <strong>episode</strong> at a time. Follow the buttons in order.</p>
+        <h3>Episode flow</h3>
+        <ol>
+          <li><strong>Roll Hook</strong> – Roll 1d6 and use that hook to start the scene.</li>
+          <li><strong>Resolve Progress</strong> – Pick an approach (A–D), enter your skill and modifier, then roll. You get a clue (partial, solid, or strong). On a fail you still get a compromised clue and Heat goes up.</li>
+          <li><strong>Roll Pressure</strong> – Roll 1d6 + Heat (+2 if Progress failed). The result can add Heat, give you disadvantage next roll, or mark the next clue compromised.</li>
+          <li><strong>Roll Reveal</strong> – Roll 1d8 for the reveal. If conditions are met (e.g. Heat 3+), a 2, 5, or 7 can turn into a Site; you may see the Sealed Family Chapel or another location.</li>
+          <li><strong>End Episode</strong> – Wrap up. If Doom is on, roll 1d6 for Doom (1–3 no change, 4–5 +1, 6 +2).</li>
+        </ol>
+        <h3>Case DC, Heat, Doom</h3>
+        <p>Set <strong>Case DC</strong> (13, 15, or 17) before play. <strong>Heat</strong> (0–5) goes up on failed Progress and some Pressure results. Turn on the <strong>Doom</strong> clock (0–6) if you use it; it is rolled only at End Episode.</p>
+        <h3>Approaches</h3>
+        <p>Choose one approach per Progress roll. Legwork can spend 10 gp for advantage. Shadow Work adds +2 Heat on failure. Divine can add +1 Heat on success if you check “Public pressure.” Social gives a second lead if you beat the DC by 5 or more.</p>
+        <h3>Tables and export</h3>
+        <p>Use the <strong>Tables</strong> tab to view or edit the hook, pressure, reveal, and site text. Use <strong>Copy Discord block</strong> to paste a summary into Discord, and <strong>Copy Avrae command</strong> for the current skill check (e.g. <code>!check investigation</code>).</p>
+        <button type="button" id="help-close" class="runner-btn help-close">Close</button>
+      </div>
+    </div>
+  <div class="layout">
+    <div class="panel left">
+      <div class="runner-tabs">
+        <button type="button" id="tab-main" class="runner-btn active">Main</button>
+        <button type="button" id="tab-tables" class="runner-btn">Tables</button>
+      </div>
+
+      <div id="view-main">
+        <details class="runner-details">
+          <summary>How to use</summary>
+          <div class="content">
+            Run an episode in order: Roll Hook, choose Approach, Resolve Progress, Roll Pressure, Roll Reveal, then End Episode. Set Case DC (13, 15, or 17) and track Heat (0 to 5). Optionally turn on the Doom clock and roll it at End Episode. Use the Notes area for Leads and Clues. Export a Discord block or Avrae command from the Export section.
+          </div>
+        </details>
+
+        <details class="runner-details" open>
+          <summary>Case DC / Heat / Doom</summary>
+          <div class="content">
+            <label for="case-dc">Case DC</label>
+            <select id="case-dc" aria-label="Case DC">
+              <option value="13">13</option>
+              <option value="15" selected>15</option>
+              <option value="17">17</option>
+            </select>
+            <div class="track">
+              <label>Heat (0 to 5)</label>
+              <button type="button" id="heat-minus" class="runner-btn" aria-label="Decrease Heat">-</button>
+              <span id="heat-value">0</span>
+              <button type="button" id="heat-plus" class="runner-btn" aria-label="Increase Heat">+</button>
+            </div>
+            <div class="track">
+              <label><input type="checkbox" id="doom-enabled"> Doom clock (0 to 6)</label>
+              <span id="doom-value">0</span>
+              <span id="doom-hint">(rolled at End Episode)</span>
+            </div>
+          </div>
+        </details>
+
+        <details class="runner-details" open>
+          <summary>Episode actions</summary>
+          <div class="content">
+            <div class="btn-row runner-btn-row">
+              <button type="button" id="btn-quick-start" class="runner-btn">Quick Start</button>
+              <button type="button" id="btn-new-episode" class="runner-btn">New Episode</button>
+              <button type="button" id="btn-hook" class="runner-btn">Roll Hook</button>
+              <button type="button" id="btn-progress" class="runner-btn" disabled>Resolve Progress</button>
+              <button type="button" id="btn-pressure" class="runner-btn" disabled>Roll Pressure</button>
+              <button type="button" id="btn-reveal" class="runner-btn" disabled>Roll Reveal</button>
+              <button type="button" id="btn-end" class="runner-btn" disabled>End Episode</button>
+            </div>
+          </div>
+        </details>
+
+        <details class="runner-details" open>
+          <summary>Approach</summary>
+          <div class="content">
+            <p>Approach: choose one. Options below apply only to the selected approach.</p>
+            <label class="approach-choice"><input type="radio" name="approach" value="legwork"> A Legwork (Investigation or Persuasion; 10 gp for advantage)</label>
+            <label class="approach-choice"><input type="radio" name="approach" value="social"> B Social Infiltration (Deception, Persuasion, or Insight; beat DC by 5+ for second lead)</label>
+            <label class="approach-choice"><input type="radio" name="approach" value="shadow"> C Shadow Work (Stealth, Perception, or Thieves Tools; failure adds Heat +2)</label>
+            <label class="approach-choice"><input type="radio" name="approach" value="divine"> D Divine Angle (Religion, Insight, or Intimidation; public pressure +1 Heat on success)</label>
+            <div class="approach-options" id="approach-options">
+              <label id="opt-legwork" style="display:none"><input type="checkbox" id="legwork-advantage"> 10 gp for advantage</label>
+              <label id="opt-divine" style="display:none"><input type="checkbox" id="divine-pressure"> Public pressure (+1 Heat on success)</label>
+            </div>
+          </div>
+        </details>
+
+        <details class="runner-details" open>
+          <summary>Progress</summary>
+          <div class="content">
+            <label for="skill-name">Skill name (plain text)</label>
+            <input type="text" id="skill-name" placeholder="e.g. Investigation" aria-label="Skill name">
+            <label for="skill-mod">Modifier</label>
+            <input type="number" id="skill-mod" value="0" min="-5" max="20" aria-label="Skill modifier">
+            <label><input type="radio" name="adv" value="none" checked> Normal</label>
+            <label><input type="radio" name="adv" value="adv"> Advantage</label>
+            <label><input type="radio" name="adv" value="dis"> Disadvantage</label>
+            <div class="btn-row">
+              <button type="button" id="btn-resolve-progress" class="runner-btn">Resolve Progress</button>
+            </div>
+            <div id="avrae-area" style="margin-top:0.5rem">
+              <label for="avrae-cmd">Avrae</label>
+              <input type="text" id="avrae-cmd" readonly style="width:100%; background:#eee" aria-label="Avrae command">
+              <button type="button" id="btn-copy-avrae" class="runner-btn secondary">Copy Avrae command</button>
+            </div>
+          </div>
+        </details>
+
+        <details class="runner-details" open>
+          <summary>Notes (Leads and Clues)</summary>
+          <div class="content">
+            <label for="note-input">Add lead or clue</label>
+            <input type="text" id="note-input" placeholder="Add lead or clue" aria-label="Note text">
+            <button type="button" id="btn-add-note" class="runner-btn">Add</button>
+            <ul class="notes-list" id="notes-list"></ul>
+          </div>
+        </details>
+
+        <details class="runner-details" open>
+          <summary>Export</summary>
+          <div class="content">
+            <button type="button" id="btn-copy-discord" class="runner-btn">Copy Discord block</button>
+            <button type="button" id="btn-reset" class="runner-btn">Reset (clear session)</button>
+          </div>
+        </details>
+      </div>
+
+      <div id="view-tables" style="display:none">
+        <p>Edit table text below; effects for Pressure are fixed. Save stores to this session.</p>
+        <button type="button" id="btn-save-tables" class="runner-btn">Save tables</button>
+        <div id="tables-editor"></div>
+      </div>
+    </div>
+
+    <div class="panel right">
+      <h2>Session log</h2>
+      <ul class="log-list" id="log-list"></ul>
+      <div id="site-panel" class="site-panel" style="display:none"></div>
+    </div>
+  </div>
+  </div>
+
+  <script src="theme.js"></script>
+  <script>
+(function() {
+  'use strict';
+
+  var STORAGE_KEY = 'cassalanter-inquiry-session';
+
+  // Clue quality: partial (margin < 0), solid (0-4), strong (5+). Use everywhere.
+  function getClueQuality(margin) {
+    if (margin < 0) return 'partial';
+    if (margin <= 4) return 'solid';
+    return 'strong';
+  }
+
+  // Default table content (editable; persisted on save)
+  function getDefaultTables() {
+    return {
+      hooks: {
+        1: 'Hook 1: [paste text]',
+        2: 'Hook 2: [paste text]',
+        3: 'Hook 3: [paste text]',
+        4: 'Hook 4: [paste text]',
+        5: 'Hook 5: [paste text]',
+        6: 'Hook 6: [paste text]'
+      },
+      pressure: [
+        { min: 1, max: 1, text: 'Pressure 1: [paste text]', heatChange: 0, disadvantage: false, nextClueCompromised: false, timeLoss: false },
+        { min: 2, max: 2, text: 'Pressure 2: [paste text]', heatChange: 0, disadvantage: false, nextClueCompromised: false, timeLoss: false },
+        { min: 3, max: 3, text: 'Pressure 3: [paste text]', heatChange: 0, disadvantage: false, nextClueCompromised: false, timeLoss: false },
+        { min: 4, max: 4, text: 'Pressure 4: [paste text]', heatChange: 0, disadvantage: false, nextClueCompromised: false, timeLoss: false },
+        { min: 5, max: 5, text: 'Pressure 5: [paste text]', heatChange: 0, disadvantage: false, nextClueCompromised: false, timeLoss: false },
+        { min: 6, max: 6, text: 'Pressure 6: [paste text]', heatChange: 0, disadvantage: false, nextClueCompromised: false, timeLoss: false },
+        { min: 7, max: 7, text: 'Pressure 7: [paste text]', heatChange: 0, disadvantage: false, nextClueCompromised: false, timeLoss: false },
+        { min: 8, max: 8, text: 'Pressure 8: [paste text]', heatChange: 0, disadvantage: false, nextClueCompromised: false, timeLoss: false },
+        { min: 9, max: 9, text: 'Pressure 9: [paste text]', heatChange: 0, disadvantage: false, nextClueCompromised: false, timeLoss: false },
+        { min: 10, max: 999, text: 'Pressure 10+: [paste text]', heatChange: 0, disadvantage: false, nextClueCompromised: false, timeLoss: false }
+      ],
+      reveal: {
+        1: 'Reveal 1: [paste text]',
+        2: 'Reveal 2: [paste text]',
+        3: 'Reveal 3: [paste text]',
+        4: 'Reveal 4: [paste text]',
+        5: 'Reveal 5: [paste text]',
+        6: 'Reveal 6: [paste text]',
+        7: 'Reveal 7: [paste text]',
+        8: 'Reveal 8: [paste text]'
+      },
+      compromised: {
+        1: 'Compromised 1: [paste text]',
+        2: 'Compromised 2: [paste text]',
+        3: 'Compromised 3: [paste text]',
+        4: 'Compromised 4: [paste text]'
+      },
+      siteTable: {
+        1: 'Site 1: [paste text]',
+        2: 'Site 2: [paste text]',
+        3: 'Sealed Family Chapel',
+        4: 'Site 4: [paste text]',
+        5: 'Site 5: [paste text]',
+        6: 'Site 6: [paste text]',
+        7: 'Site 7: [paste text]',
+        8: 'Site 8: [paste text]'
+      },
+      encounterSites: {
+        'Sealed Family Chapel': {
+          boxedText: '[Paste boxed read-aloud text for Sealed Family Chapel here.]',
+          areas: { C1: '[C1 paste text]', C2: '[C2 paste text]', C3: '[C3 paste text]' },
+          outcomes: '[Paste outcomes text here.]'
+        }
+      }
+    };
+  }
+
+  function deepCopy(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  // Dice
+  function rollD4() { return 1 + Math.floor(Math.random() * 4); }
+  function rollD6() { return 1 + Math.floor(Math.random() * 6); }
+  function rollD8() { return 1 + Math.floor(Math.random() * 8); }
+  function rollD20() { return 1 + Math.floor(Math.random() * 20); }
+  function roll2D20Keep(high) {
+    var a = rollD20(), b = rollD20();
+    return high ? Math.max(a, b) : Math.min(a, b);
+  }
+
+  // Sanitize skill name for Avrae: plain text, safe chars only
+  function sanitizeForAvrae(str) {
+    if (!str || typeof str !== 'string') return 'investigation';
+    return str.replace(/<[^>]*>/g, '').replace(/[^\w\s-]/g, '').trim().toLowerCase().replace(/\s+/g, '-') || 'investigation';
+  }
+
+  var state = {
+    caseDc: 15,
+    heat: 0,
+    doom: 0,
+    doomEnabled: false,
+    episodeStep: 'hook',
+    lastProgressFailed: false,
+    lastProgressMargin: null,
+    lastPressureResult: null,
+    lastRevealResult: null,
+    lastBoxedText: null,
+    nextLead: null,
+    flagDisadvantage: false,
+    flagNextClueCompromised: false,
+    log: [],
+    notes: [],
+    currentHookText: null,
+    currentHookRoll: null,
+    tables: getDefaultTables()
+  };
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        caseDc: state.caseDc,
+        heat: state.heat,
+        doom: state.doom,
+        doomEnabled: state.doomEnabled,
+        episodeStep: state.episodeStep,
+        lastProgressFailed: state.lastProgressFailed,
+        lastProgressMargin: state.lastProgressMargin,
+        lastPressureResult: state.lastPressureResult,
+        lastRevealResult: state.lastRevealResult,
+        lastBoxedText: state.lastBoxedText,
+        nextLead: state.nextLead,
+        flagDisadvantage: state.flagDisadvantage,
+        flagNextClueCompromised: state.flagNextClueCompromised,
+        log: state.log,
+        notes: state.notes,
+        currentHookText: state.currentHookText,
+        currentHookRoll: state.currentHookRoll,
+        tables: state.tables
+      }));
+    } catch (e) {}
+  }
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      var data = JSON.parse(raw);
+      state.caseDc = data.caseDc ?? 15;
+      state.heat = Math.max(0, Math.min(5, data.heat ?? 0));
+      state.doom = Math.max(0, Math.min(6, data.doom ?? 0));
+      state.doomEnabled = !!data.doomEnabled;
+      state.episodeStep = data.episodeStep || 'hook';
+      state.lastProgressFailed = !!data.lastProgressFailed;
+      state.lastProgressMargin = data.lastProgressMargin;
+      state.lastPressureResult = data.lastPressureResult;
+      state.lastRevealResult = data.lastRevealResult;
+      state.lastBoxedText = data.lastBoxedText || null;
+      state.nextLead = data.nextLead || null;
+      state.flagDisadvantage = !!data.flagDisadvantage;
+      state.flagNextClueCompromised = !!data.flagNextClueCompromised;
+      state.log = Array.isArray(data.log) ? data.log : [];
+      state.notes = Array.isArray(data.notes) ? data.notes : [];
+      state.currentHookText = data.currentHookText || null;
+      state.currentHookRoll = data.currentHookRoll ?? null;
+      var defaults = getDefaultTables();
+      if (data.tables) {
+        state.tables = deepCopy(data.tables);
+        if (!state.tables.encounterSites) state.tables.encounterSites = defaults.encounterSites;
+        if (!state.tables.encounterSites['Sealed Family Chapel']) state.tables.encounterSites['Sealed Family Chapel'] = defaults.encounterSites['Sealed Family Chapel'];
+        if (Array.isArray(state.tables.pressure)) {
+          state.tables.pressure.forEach(function(p, i) {
+            if (p.disadvantage === undefined) p.disadvantage = false;
+            if (p.nextClueCompromised === undefined) p.nextClueCompromised = false;
+            if (p.timeLoss === undefined) p.timeLoss = false;
+          });
+        }
+      } else {
+        state.tables = defaults;
+      }
+    } catch (e) {}
+  }
+
+  function addLog(message, type) {
+    var time = new Date().toLocaleTimeString();
+    state.log.push({ time: time, message: message, type: type || 'general' });
+    saveState();
+    renderLog();
+  }
+
+  function setEpisodeStep(step) {
+    state.episodeStep = step;
+    updateButtonStates();
+    saveState();
+  }
+
+  function updateButtonStates() {
+    var s = state.episodeStep;
+    document.getElementById('btn-hook').disabled = s !== 'hook';
+    document.getElementById('btn-progress').disabled = s !== 'progress';
+    document.getElementById('btn-resolve-progress').disabled = s !== 'progress';
+    document.getElementById('btn-pressure').disabled = s !== 'pressure';
+    document.getElementById('btn-reveal').disabled = s !== 'reveal';
+    document.getElementById('btn-end').disabled = s !== 'end';
+  }
+
+  function renderLog() {
+    var ul = document.getElementById('log-list');
+    ul.innerHTML = '';
+    state.log.forEach(function(entry) {
+      var li = document.createElement('li');
+      li.appendChild(document.createElement('span')).className = 'time';
+      li.firstChild.textContent = entry.time + ' ';
+      var msg = document.createElement('span');
+      msg.textContent = entry.message;
+      li.appendChild(msg);
+      ul.appendChild(li);
+    });
+  }
+
+  function renderNotes() {
+    var ul = document.getElementById('notes-list');
+    ul.innerHTML = '';
+    state.notes.forEach(function(note, i) {
+      var li = document.createElement('li');
+      var span = document.createElement('span');
+      span.textContent = note.text;
+      li.appendChild(span);
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'runner-btn';
+      btn.textContent = 'Delete';
+      btn.dataset.index = String(i);
+      btn.addEventListener('click', function() {
+        state.notes.splice(parseInt(btn.dataset.index, 10), 1);
+        saveState();
+        renderNotes();
+      });
+      li.appendChild(btn);
+      ul.appendChild(li);
+    });
+  }
+
+  function renderTracks() {
+    document.getElementById('case-dc').value = String(state.caseDc);
+    document.getElementById('heat-value').textContent = state.heat;
+    document.getElementById('heat-minus').disabled = state.heat <= 0;
+    document.getElementById('heat-plus').disabled = state.heat >= 5;
+    document.getElementById('doom-enabled').checked = state.doomEnabled;
+    document.getElementById('doom-value').textContent = state.doom;
+  }
+
+  function updateAvrae() {
+    var skill = document.getElementById('skill-name').value;
+    var adv = document.querySelector('input[name="adv"]:checked').value;
+    var base = sanitizeForAvrae(skill);
+    var cmd = '!check ' + base;
+    if (adv === 'adv') cmd += ' adv';
+    if (adv === 'dis') cmd += ' dis';
+    document.getElementById('avrae-cmd').value = cmd;
+  }
+
+  // Approach options visibility
+  function syncApproachOptions() {
+    var approach = document.querySelector('input[name="approach"]:checked');
+    var val = approach ? approach.value : '';
+    document.getElementById('opt-legwork').style.display = val === 'legwork' ? 'block' : 'none';
+    document.getElementById('opt-divine').style.display = val === 'divine' ? 'block' : 'none';
+  }
+
+  function getApproach() {
+    var a = document.querySelector('input[name="approach"]:checked');
+    return a ? a.value : '';
+  }
+
+  // Pressure lookup and apply structured effects
+  function getPressureRow(total) {
+    var rows = state.tables.pressure;
+    for (var i = 0; i < rows.length; i++) {
+      if (total >= rows[i].min && total <= rows[i].max) return rows[i];
+    }
+    return rows[rows.length - 1];
+  }
+
+  function applyPressureEffects(row) {
+    var heatChange = row.heatChange || 0;
+    state.heat = Math.max(0, Math.min(5, state.heat + heatChange));
+    if (row.disadvantage) state.flagDisadvantage = true;
+    if (row.nextClueCompromised) state.flagNextClueCompromised = true;
+    if (row.timeLoss) addLog('Time lost.', 'pressure');
+  }
+
+  // Quick Start
+  document.getElementById('btn-quick-start').addEventListener('click', function() {
+    state.caseDc = 15;
+    state.heat = 0;
+    state.doomEnabled = false;
+    state.episodeStep = 'hook';
+    state.flagDisadvantage = false;
+    state.flagNextClueCompromised = false;
+    document.getElementById('case-dc').value = '15';
+    var roll = rollD6();
+    var text = state.tables.hooks[roll];
+    state.currentHookText = text;
+    state.currentHookRoll = roll;
+    addLog('Quick Start: Hook ' + roll + ' - ' + text, 'hook');
+    setEpisodeStep('progress');
+    renderTracks();
+  });
+
+  document.getElementById('btn-new-episode').addEventListener('click', function() {
+    state.episodeStep = 'hook';
+    state.flagDisadvantage = false;
+    state.flagNextClueCompromised = false;
+    setEpisodeStep('hook');
+    renderTracks();
+    addLog('New episode started. Roll Hook.', 'general');
+  });
+
+  document.getElementById('btn-hook').addEventListener('click', function() {
+    var roll = rollD6();
+    var text = state.tables.hooks[roll];
+    state.currentHookText = text;
+    state.currentHookRoll = roll;
+    addLog('Hook ' + roll + ': ' + text, 'hook');
+    setEpisodeStep('progress');
+  });
+
+  document.getElementById('btn-resolve-progress').addEventListener('click', function() {
+    var dc = state.caseDc;
+    var mod = parseInt(document.getElementById('skill-mod').value, 10) || 0;
+    var useAdv = document.querySelector('input[name="adv"]:checked').value;
+    var approach = getApproach();
+    var legworkAdv = approach === 'legwork' && document.getElementById('legwork-advantage').checked;
+    var divinePressure = approach === 'divine' && document.getElementById('divine-pressure').checked;
+
+    var roll, roll2;
+    if (state.flagDisadvantage) {
+      roll = roll2D20Keep(false);
+      state.flagDisadvantage = false;
+    } else if (useAdv === 'adv' || legworkAdv) {
+      roll = roll2D20Keep(true);
+    } else if (useAdv === 'dis') {
+      roll = roll2D20Keep(false);
+    } else {
+      roll = rollD20();
+    }
+
+    var total = roll + mod;
+    var margin = total - dc;
+    var success = total >= dc;
+    var quality = getClueQuality(margin);
+
+    var compromisedText = null;
+    if (!success) {
+      var d4 = rollD4();
+      compromisedText = state.tables.compromised[d4];
+      var heatAdd = approach === 'shadow' ? 2 : 1;
+      state.heat = Math.min(5, state.heat + heatAdd);
+      addLog('Progress FAILED. Roll ' + roll + ' + ' + mod + ' = ' + total + ' (DC ' + dc + '). Clue: partial (compromised). d4=' + d4 + ': ' + compromisedText + '. Heat +' + heatAdd, 'progress');
+    } else {
+      if (state.flagNextClueCompromised) {
+        var d4 = rollD4();
+        compromisedText = state.tables.compromised[d4];
+        state.flagNextClueCompromised = false;
+        addLog('Progress SUCCESS. Roll ' + roll + ' + ' + mod + ' = ' + total + ' (DC ' + dc + '). Margin ' + margin + ', quality: ' + quality + '. Next clue compromised (flag): d4=' + d4 + ' - ' + compromisedText, 'progress');
+      } else {
+        addLog('Progress SUCCESS. Roll ' + roll + ' + ' + mod + ' = ' + total + ' (DC ' + dc + '). Margin ' + margin + ', quality: ' + quality + (approach === 'social' && margin >= 5 ? '. Second lead!' : ''), 'progress');
+      }
+      if (divinePressure) {
+        state.heat = Math.min(5, state.heat + 1);
+        addLog('Divine public pressure: Heat +1', 'progress');
+      }
+    }
+
+    state.lastProgressFailed = !success;
+    state.lastProgressMargin = margin;
+    state.nextLead = compromisedText || ('Clue quality: ' + quality);
+    renderTracks();
+    setEpisodeStep('pressure');
+    saveState();
+  });
+
+  document.getElementById('btn-progress').addEventListener('click', function() {
+    document.getElementById('btn-resolve-progress').click();
+  });
+
+  document.getElementById('btn-pressure').addEventListener('click', function() {
+    var base = rollD6() + state.heat;
+    if (state.lastProgressFailed) base += 2;
+    var row = getPressureRow(base);
+    applyPressureEffects(row);
+    state.lastPressureResult = base;
+    addLog('Pressure: 1d6 + Heat + (fail? +2) = ' + base + '. ' + row.text + (row.heatChange ? ' Heat ' + (row.heatChange > 0 ? '+' : '') + row.heatChange : ''), 'pressure');
+    renderTracks();
+    setEpisodeStep('reveal');
+    saveState();
+  });
+
+  document.getElementById('btn-reveal').addEventListener('click', function() {
+    var roll = rollD8();
+    var text = state.tables.reveal[roll];
+    state.lastRevealResult = roll;
+
+    var trigger = state.heat >= 3 || state.doom >= 3 || (state.lastProgressMargin !== null && state.lastProgressMargin >= 10) || (state.lastPressureResult !== null && state.lastPressureResult >= 9);
+    var convertReveal = [2, 5, 7].indexOf(roll) !== -1;
+    var siteName = null;
+    var siteRoll = null;
+
+    if (trigger && convertReveal) {
+      siteRoll = rollD8();
+      siteName = state.tables.siteTable[siteRoll];
+      state.lastBoxedText = null;
+      var enc = state.tables.encounterSites[siteName];
+      if (enc) {
+        state.lastBoxedText = enc.boxedText;
+        showSitePanel(siteName, enc);
+      }
+      addLog('Reveal ' + roll + ' (Site trigger). Converted to Site. Site roll ' + siteRoll + ': ' + siteName + '. ' + text, 'reveal');
+    } else {
+      hideSitePanel();
+      addLog('Reveal ' + roll + ': ' + text, 'reveal');
+    }
+
+    setEpisodeStep('end');
+    saveState();
+  });
+
+  function showSitePanel(name, enc) {
+    var panel = document.getElementById('site-panel');
+    panel.style.display = 'block';
+    var html = '<details open><summary>' + name + '</summary><div class="content">';
+    html += '<p><strong>Boxed text</strong></p><p>' + escapeHtml(enc.boxedText) + '</p>';
+    html += '<h3>C1</h3><p>' + escapeHtml(enc.areas.C1) + '</p>';
+    html += '<h3>C2</h3><p>' + escapeHtml(enc.areas.C2) + '</p>';
+    html += '<h3>C3</h3><p>' + escapeHtml(enc.areas.C3) + '</p>';
+    html += '<h3>Outcomes</h3><p>' + escapeHtml(enc.outcomes) + '</p></div></details>';
+    panel.innerHTML = html;
+  }
+
+  function escapeHtml(s) {
+    if (!s) return '';
+    var div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  function hideSitePanel() {
+    document.getElementById('site-panel').style.display = 'none';
+    document.getElementById('site-panel').innerHTML = '';
+  }
+
+  document.getElementById('btn-end').addEventListener('click', function() {
+    if (state.doomEnabled) {
+      var r = rollD6();
+      var add = r <= 3 ? 0 : r <= 5 ? 1 : 2;
+      state.doom = Math.min(6, state.doom + add);
+      addLog('End Episode. Doom roll 1d6 = ' + r + '. Doom ' + (add ? '+' + add : 'no change') + '. Total Doom: ' + state.doom, 'doom');
+    } else {
+      addLog('End Episode.', 'general');
+    }
+    renderTracks();
+    setEpisodeStep('hook');
+    saveState();
+  });
+
+  document.getElementById('heat-minus').addEventListener('click', function() {
+    if (state.heat > 0) { state.heat--; renderTracks(); saveState(); }
+  });
+  document.getElementById('heat-plus').addEventListener('click', function() {
+    if (state.heat < 5) { state.heat++; renderTracks(); saveState(); }
+  });
+  document.getElementById('case-dc').addEventListener('change', function() {
+    state.caseDc = parseInt(this.value, 10);
+    saveState();
+  });
+  document.getElementById('doom-enabled').addEventListener('change', function() {
+    state.doomEnabled = this.checked;
+    saveState();
+    renderTracks();
+  });
+
+  document.getElementById('btn-add-note').addEventListener('click', function() {
+    var input = document.getElementById('note-input');
+    var text = (input.value || '').trim();
+    if (!text) return;
+    state.notes.push({ id: Date.now(), text: text });
+    input.value = '';
+    saveState();
+    renderNotes();
+  });
+
+  document.getElementById('btn-copy-avrae').addEventListener('click', function() {
+    var cmd = document.getElementById('avrae-cmd').value;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(cmd).then(function() { addLog('Avrae command copied.', 'general'); });
+    } else {
+      document.getElementById('avrae-cmd').select();
+      try { document.execCommand('copy'); addLog('Avrae command copied.', 'general'); } catch (e) {}
+    }
+  });
+
+  document.getElementById('btn-copy-discord').addEventListener('click', function() {
+    var parts = [];
+    if (state.lastBoxedText) {
+      parts.push('**Last scene (boxed text)**');
+      parts.push(state.lastBoxedText);
+      parts.push('');
+    }
+    parts.push('**Roll results**');
+    parts.push('Last Progress: margin ' + (state.lastProgressMargin !== null ? state.lastProgressMargin : 'n/a') + ', failed=' + state.lastProgressFailed);
+    parts.push('Last Pressure: ' + (state.lastPressureResult !== null ? state.lastPressureResult : 'n/a'));
+    parts.push('Last Reveal: ' + (state.lastRevealResult !== null ? state.lastRevealResult : 'n/a'));
+    parts.push('');
+    parts.push('**Heat:** ' + state.heat + ' | **Doom:** ' + (state.doomEnabled ? state.doom : 'off'));
+    parts.push('');
+    parts.push('**Next lead:** ' + (state.nextLead || 'none'));
+    var block = parts.join('\n');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(block).then(function() { addLog('Discord block copied.', 'general'); });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = block;
+      ta.style.position = 'fixed';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); addLog('Discord block copied.', 'general'); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', function() {
+    if (!confirm('Clear all session data and reset?')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    state.caseDc = 15;
+    state.heat = 0;
+    state.doom = 0;
+    state.doomEnabled = false;
+    state.episodeStep = 'hook';
+    state.log = [];
+    state.notes = [];
+    state.lastProgressFailed = false;
+    state.lastProgressMargin = null;
+    state.lastPressureResult = null;
+    state.lastRevealResult = null;
+    state.lastBoxedText = null;
+    state.nextLead = null;
+    state.flagDisadvantage = false;
+    state.flagNextClueCompromised = false;
+    state.currentHookText = null;
+    state.currentHookRoll = null;
+    state.tables = getDefaultTables();
+    renderLog();
+    renderNotes();
+    renderTracks();
+    updateButtonStates();
+    updateAvrae();
+    hideSitePanel();
+    document.getElementById('skill-name').value = '';
+    document.getElementById('skill-mod').value = '0';
+    saveState();
+  });
+
+  // Tabs
+  document.getElementById('tab-main').addEventListener('click', function() {
+    document.getElementById('view-main').style.display = 'block';
+    document.getElementById('view-tables').style.display = 'none';
+    this.classList.add('active');
+    document.getElementById('tab-tables').classList.remove('active');
+  });
+  document.getElementById('tab-tables').addEventListener('click', function() {
+    document.getElementById('view-main').style.display = 'none';
+    document.getElementById('view-tables').style.display = 'block';
+    this.classList.add('active');
+    document.getElementById('tab-main').classList.remove('active');
+    renderTablesEditor();
+  });
+
+  var helpOverlay = document.getElementById('help-overlay');
+  document.getElementById('btn-help').addEventListener('click', function() {
+    helpOverlay.classList.add('open');
+    helpOverlay.setAttribute('aria-hidden', 'false');
+  });
+  document.getElementById('help-close').addEventListener('click', function() {
+    helpOverlay.classList.remove('open');
+    helpOverlay.setAttribute('aria-hidden', 'true');
+  });
+  helpOverlay.addEventListener('click', function(e) {
+    if (e.target === helpOverlay) {
+      helpOverlay.classList.remove('open');
+      helpOverlay.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  function renderTablesEditor() {
+    var container = document.getElementById('tables-editor');
+    container.innerHTML = '';
+    var t = state.tables;
+
+    var section = function(title) {
+      var h = document.createElement('h3');
+      h.textContent = title;
+      container.appendChild(h);
+    };
+
+    section('Hooks (d6)');
+    var hookTable = document.createElement('table');
+    hookTable.className = 'table-editor';
+    container.appendChild(hookTable);
+    for (var i = 1; i <= 6; i++) {
+      var row = document.createElement('tr');
+      row.innerHTML = '<td>' + i + '</td><td><textarea data-hook="' + i + '">' + escapeHtml(t.hooks[i]) + '</textarea></td>';
+      hookTable.appendChild(row);
+    }
+
+    section('Pressure (1 to 10+)');
+    var pressureDiv = document.createElement('div');
+    t.pressure.forEach(function(p, idx) {
+      var label = p.min === 10 ? '10+' : String(p.min);
+      var row = document.createElement('div');
+      row.innerHTML = '<label>' + label + ' (Heat ' + (p.heatChange || 0) + (p.disadvantage ? ', disadvantage' : '') + (p.nextClueCompromised ? ', next clue compromised' : '') + (p.timeLoss ? ', time loss' : '') + ')</label><textarea data-pressure="' + idx + '">' + escapeHtml(p.text) + '</textarea>';
+      container.appendChild(row);
+    });
+    container.appendChild(pressureDiv);
+
+    section('Reveal (d8)');
+    for (var j = 1; j <= 8; j++) {
+      var r = document.createElement('div');
+      r.innerHTML = '<label>' + j + '</label><textarea data-reveal="' + j + '">' + escapeHtml(t.reveal[j]) + '</textarea>';
+      container.appendChild(r);
+    }
+
+    section('Compromised clues (d4)');
+    for (var k = 1; k <= 4; k++) {
+      var c = document.createElement('div');
+      c.innerHTML = '<label>' + k + '</label><textarea data-compromised="' + k + '">' + escapeHtml(t.compromised[k]) + '</textarea>';
+      container.appendChild(c);
+    }
+
+    section('Site table (d8)');
+    for (var s = 1; s <= 8; s++) {
+      var r2 = document.createElement('div');
+      r2.innerHTML = '<label>' + s + '</label><textarea data-site="' + s + '">' + escapeHtml(t.siteTable[s]) + '</textarea>';
+      container.appendChild(r2);
+    }
+
+    section('Encounter Site: Sealed Family Chapel');
+    var enc = t.encounterSites['Sealed Family Chapel'];
+    if (enc) {
+      var       boxed = document.createElement('div');
+      boxed.innerHTML = '<label>Boxed text</label><textarea data-enc-boxed>' + escapeHtml(enc.boxedText) + '</textarea>';
+      container.appendChild(boxed);
+      var c1 = document.createElement('div');
+      c1.innerHTML = '<label>C1</label><textarea data-enc-c1>' + escapeHtml(enc.areas.C1) + '</textarea>';
+      container.appendChild(c1);
+      var c2 = document.createElement('div');
+      c2.innerHTML = '<label>C2</label><textarea data-enc-c2>' + escapeHtml(enc.areas.C2) + '</textarea>';
+      container.appendChild(c2);
+      var c3 = document.createElement('div');
+      c3.innerHTML = '<label>C3</label><textarea data-enc-c3>' + escapeHtml(enc.areas.C3) + '</textarea>';
+      container.appendChild(c3);
+      var out = document.createElement('div');
+      out.innerHTML = '<label>Outcomes</label><textarea data-enc-outcomes>' + escapeHtml(enc.outcomes) + '</textarea>';
+      container.appendChild(out);
+    }
+
+    function bindTableEdit(selector, fn) {
+      container.querySelectorAll(selector).forEach(function(ta) {
+        ta.addEventListener('input', fn);
+        ta.addEventListener('change', fn);
+      });
+    }
+    bindTableEdit('textarea[data-hook]', function() { state.tables.hooks[this.dataset.hook] = this.value; });
+    bindTableEdit('textarea[data-pressure]', function() { state.tables.pressure[parseInt(this.dataset.pressure, 10)].text = this.value; });
+    bindTableEdit('textarea[data-reveal]', function() { state.tables.reveal[this.dataset.reveal] = this.value; });
+    bindTableEdit('textarea[data-compromised]', function() { state.tables.compromised[this.dataset.compromised] = this.value; });
+    bindTableEdit('textarea[data-site]', function() { state.tables.siteTable[this.dataset.site] = this.value; });
+    bindTableEdit('textarea[data-enc-boxed]', function() { state.tables.encounterSites['Sealed Family Chapel'].boxedText = this.value; });
+    bindTableEdit('textarea[data-enc-c1]', function() { state.tables.encounterSites['Sealed Family Chapel'].areas.C1 = this.value; });
+    bindTableEdit('textarea[data-enc-c2]', function() { state.tables.encounterSites['Sealed Family Chapel'].areas.C2 = this.value; });
+    bindTableEdit('textarea[data-enc-c3]', function() { state.tables.encounterSites['Sealed Family Chapel'].areas.C3 = this.value; });
+    bindTableEdit('textarea[data-enc-outcomes]', function() { state.tables.encounterSites['Sealed Family Chapel'].outcomes = this.value; });
+  }
+
+  document.getElementById('btn-save-tables').addEventListener('click', function() {
+    saveState();
+    addLog('Tables saved.', 'general');
+  });
+
+  document.querySelectorAll('input[name="approach"]').forEach(function(radio) {
+    radio.addEventListener('change', syncApproachOptions);
+  });
+  document.getElementById('skill-name').addEventListener('input', updateAvrae);
+  document.getElementById('skill-name').addEventListener('change', updateAvrae);
+  document.querySelectorAll('input[name="adv"]').forEach(function(r) {
+    r.addEventListener('change', updateAvrae);
+  });
+
+  loadState();
+  renderLog();
+  renderNotes();
+  renderTracks();
+  updateButtonStates();
+  updateAvrae();
+  syncApproachOptions();
+})();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brother George Ward's Cassalanter Inquiry (Wizard)</title>
+  <link rel="stylesheet" href="global.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .wizard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border);
+    }
+    .wizard-header h1 { color: var(--primary-color); font-size: 1.5rem; margin-bottom: 0.25rem; }
+    .wizard-intro { margin: 0; }
+    .wizard-header .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .wizard-header a.theme-toggle { text-decoration: none; }
+    .app { max-width: 560px; margin: 0 auto; }
+    .wizard-card {
+      background: var(--surface);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px var(--shadow);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .step-indicator { font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.25rem; }
+    .step-title { font-size: 1.25rem; color: var(--primary-color); margin-bottom: 1rem; font-weight: 600; }
+    .step-content { min-height: 120px; }
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+    .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; gap: 0.5rem; flex-wrap: wrap; }
+    .nav-row .left { display: flex; gap: 0.5rem; }
+    .wizard-btn {
+      padding: 0.5rem 1rem;
+      min-height: 44px;
+      border: 1px solid var(--primary-color);
+      background: var(--primary-color);
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    .wizard-btn:hover:not(:disabled) { background: var(--primary-light); }
+    .wizard-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .wizard-btn.secondary { background: var(--surface); color: var(--primary-color); }
+    .roll-flow { background: var(--card-bg); padding: 0.75rem; border-radius: 6px; margin: 0.75rem 0; border-left: 4px solid var(--primary-color); }
+    .roll-flow p { margin: 0.25rem 0; font-size: 0.9rem; }
+    .roll-cmd { font-family: monospace; background: var(--surface); padding: 0.25rem 0.5rem; border-radius: 4px; }
+    .log-drawer { margin-top: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    .log-drawer summary { padding: 0.5rem 0.75rem; background: var(--card-bg); cursor: pointer; font-weight: 600; }
+    .log-drawer ul { list-style: none; max-height: 200px; overflow: auto; padding: 0.5rem; }
+    .log-drawer li { font-size: 0.85rem; padding: 0.25rem 0; border-bottom: 1px solid var(--border); }
+    .log-drawer li .time { color: var(--text-light); margin-right: 0.5rem; }
+    .wizard-card label { display: block; margin-top: 0.5rem; }
+    .wizard-card input[type="number"], .wizard-card input[type="text"], .wizard-card select { padding: 0.4rem; border: 1px solid var(--border); border-radius: 4px; font-size: 1rem; margin-top: 0.25rem; }
+    .track { display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0; }
+    .track span { min-width: 2rem; font-weight: 600; }
+    .approach-choice { display: block; margin-bottom: 0.5rem; padding: 0.35rem 0; }
+    .result-box { background: var(--card-bg); padding: 0.75rem; border-radius: 6px; margin-top: 0.75rem; }
+    .chapel-panel { border: 2px solid var(--secondary-color); border-radius: 6px; padding: 0.75rem; margin-top: 0.75rem; }
+    .chapel-panel details { margin: 0.5rem 0; }
+    .chapel-panel summary { cursor: pointer; font-weight: 600; }
+    .chapel-panel h3 { font-size: 0.95rem; margin: 0.5rem 0 0.25rem; }
+    .reset-row { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border); }
+    .wizard-hide { display: none !important; }
+    .wrap-heading { margin-top: 1rem; }
+    .wizard-card details { margin-top: 0.75rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    .wizard-card details summary { padding: 0.5rem 0.75rem; background: var(--card-bg); cursor: pointer; font-weight: 600; }
+    .wizard-card details[open] summary { border-bottom: 1px solid var(--border); }
+    .wizard-card details h4 { color: var(--primary-color); }
+    .wizard-card details textarea { width: 100%; min-height: 50px; padding: 0.4rem; border: 1px solid var(--border); border-radius: 4px; font-family: inherit; font-size: 0.9rem; }
+    @media (max-width: 480px) {
+      .nav-row { flex-direction: column; align-items: stretch; }
+      .nav-row .left { justify-content: center; }
+    }
+  </style>
+  <!-- PDF.js for character sheet import -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    (function() {
+      function configureWorker() {
+        if (typeof pdfjsLib !== 'undefined') {
+          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        } else {
+          setTimeout(configureWorker, 100);
+        }
+      }
+      configureWorker();
+    })();
+  </script>
+  <script src="character-sheet-importer.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="wizard-header">
+      <div>
+        <h1>Brother George Ward's Cassalanter Inquiry (Wizard)</h1>
+        <p class="intro wizard-intro">Guided episode: Setup, Hook, Progress, Pressure, Reveal and Wrap. Roll in Discord with Avrae, then enter results here.</p>
+        <p id="wiz-playing-as" style="display:none; font-size:0.9rem; color:var(--text-light); margin:0.25rem 0 0;"></p>
+      </div>
+      <div class="header-actions">
+        <button type="button" id="wiz-import-pdf" class="wizard-btn secondary" aria-label="Import character sheet PDF">Import PDF</button>
+        <input type="file" id="wiz-import-pdf-file" accept=".pdf" style="display:none;" aria-label="Select character sheet PDF">
+        <a href="index.html" class="theme-toggle" aria-label="Go to home"><span class="theme-icon">&#127968;</span></a>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode"><span class="theme-icon">&#127769;</span></button>
+      </div>
+    </header>
+  <div class="app">
+    <div class="wizard-card">
+      <p class="step-indicator" id="step-indicator" aria-live="polite">Step 1 of 5: Setup</p>
+      <h1 class="step-title" id="step-title">Setup</h1>
+      <div class="step-content">
+        <div id="panel-setup" class="step-panel active"></div>
+        <div id="panel-hook" class="step-panel"></div>
+        <div id="panel-progress" class="step-panel"></div>
+        <div id="panel-pressure" class="step-panel"></div>
+        <div id="panel-reveal" class="step-panel"></div>
+      </div>
+      <div class="nav-row">
+        <div class="left">
+          <button type="button" id="btn-back" class="wizard-btn secondary" disabled aria-label="Previous step">Back</button>
+          <button type="button" id="btn-reroll" class="wizard-btn secondary wizard-hide" aria-label="Reroll this step and clear later steps">Reroll this step</button>
+        </div>
+        <button type="button" id="btn-next" class="wizard-btn" aria-label="Next step">Next</button>
+      </div>
+      <div class="reset-row">
+        <button type="button" id="btn-new-episode" class="wizard-btn secondary">Start New Episode</button>
+        <button type="button" id="btn-reset-episode" class="wizard-btn secondary">Reset episode only</button>
+        <button type="button" id="btn-reset-all" class="wizard-btn secondary">Reset everything</button>
+      </div>
+    </div>
+    <div class="log-drawer">
+      <details>
+        <summary aria-expanded="false">Session Log</summary>
+        <ul id="log-list"></ul>
+      </details>
+    </div>
+  </div>
+  </div>
+
+  <script src="theme.js"></script>
+  <script>
+(function() {
+  'use strict';
+
+  var STORAGE_KEY = 'cassalanter-wizard-state';
+  var STEP_NAMES = ['Setup', 'Hook', 'Progress', 'Pressure', 'Reveal and Wrap'];
+
+  function getClueQuality(margin) {
+    if (margin < 0) return 'partial';
+    if (margin <= 4) return 'solid';
+    return 'strong';
+  }
+
+  function rollD4() { return 1 + Math.floor(Math.random() * 4); }
+  function rollD6() { return 1 + Math.floor(Math.random() * 6); }
+  function rollD8() { return 1 + Math.floor(Math.random() * 8); }
+  function rollD20() { return 1 + Math.floor(Math.random() * 20); }
+  function roll2D20Keep(high) {
+    var a = rollD20(), b = rollD20();
+    return high ? Math.max(a, b) : Math.min(a, b);
+  }
+
+  function sanitizeForAvrae(str) {
+    if (!str || typeof str !== 'string') return 'investigation';
+    return str.replace(/<[^>]*>/g, '').replace(/[^\w\s-]/g, '').trim().toLowerCase().replace(/\s+/g, '-') || 'investigation';
+  }
+
+  function escapeHtml(s) {
+    if (!s) return '';
+    var div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  function formatModifier(n) {
+    if (n > 0) return '+' + n;
+    if (n < 0) return String(n);
+    return '0';
+  }
+
+  function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() { addLog('Copied to clipboard: ' + text, 'general'); });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); addLog('Copied to clipboard: ' + text, 'general'); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+  }
+
+  /** Parse Avrae/Discord roll output. Returns the number or null. */
+  function parseDiscordRoll(str) {
+    if (!str || typeof str !== 'string') return null;
+    var s = str.trim();
+    var m = s.match(/\*\*Total\*\*:\s*(\d+)/i);
+    if (m) return parseInt(m[1], 10);
+    m = s.match(/\*\*Result\*\*:.*?\(\*\*(\d+)\*\*\)/i);
+    if (m) return parseInt(m[1], 10);
+    m = s.match(/\(\*\*(\d+)\*\*\)/);
+    if (m) return parseInt(m[1], 10);
+    m = s.match(/(\d+)/);
+    if (m) return parseInt(m[1], 10);
+    return null;
+  }
+
+  var TABLES = {
+    hooks: { id: 'hooks', title: 'Hooks', entries: [
+      { key: '1', text: 'Hook 1: [paste text]' },
+      { key: '2', text: 'Hook 2: [paste text]' },
+      { key: '3', text: 'Hook 3: [paste text]' },
+      { key: '4', text: 'Hook 4: [paste text]' },
+      { key: '5', text: 'Hook 5: [paste text]' },
+      { key: '6', text: 'Hook 6: [paste text]' }
+    ]},
+    pressure: { id: 'pressure', title: 'Pressure', entries: [
+      { key: '1', text: 'Pressure 1: [paste text]', effects: [] },
+      { key: '2', text: 'Pressure 2: [paste text]', effects: [] },
+      { key: '3', text: 'Pressure 3: [paste text]', effects: [] },
+      { key: '4', text: 'Pressure 4: [paste text]', effects: [] },
+      { key: '5', text: 'Pressure 5: [paste text]', effects: [] },
+      { key: '6', text: 'Pressure 6: [paste text]', effects: [] },
+      { key: '7', text: 'Pressure 7: [paste text]', effects: [{ heatDelta: 1 }, { flagSet: 'nextClueCompromised' }] },
+      { key: '8', text: 'Pressure 8: [paste text]', effects: [{ heatDelta: 1 }] },
+      { key: '9', text: 'Pressure 9: [paste text]', effects: [{ heatDelta: 2 }, { flagSet: 'disadvantageNextProgress' }] },
+      { key: '10+', text: 'Pressure 10+: [paste text]', effects: [{ heatDelta: 2 }] }
+    ]},
+    reveal: { id: 'reveal', title: 'Reveal', entries: [
+      { key: '1', text: 'Reveal 1: [paste text]' },
+      { key: '2', text: 'Reveal 2: [paste text]' },
+      { key: '3', text: 'Reveal 3: [paste text]' },
+      { key: '4', text: 'Reveal 4: [paste text]' },
+      { key: '5', text: 'Reveal 5: [paste text]' },
+      { key: '6', text: 'Reveal 6: [paste text]' },
+      { key: '7', text: 'Reveal 7: [paste text]' },
+      { key: '8', text: 'Reveal 8: [paste text]' }
+    ]},
+    compromised: { id: 'compromised', title: 'Compromised', entries: [
+      { key: '1', text: 'Compromised 1: [paste text]' },
+      { key: '2', text: 'Compromised 2: [paste text]' },
+      { key: '3', text: 'Compromised 3: [paste text]' },
+      { key: '4', text: 'Compromised 4: [paste text]' }
+    ]},
+    siteTable: { id: 'siteTable', title: 'Site', entries: [
+      { key: '1', name: 'Site 1', text: 'Site 1: [paste text]' },
+      { key: '2', name: 'Site 2', text: 'Site 2: [paste text]' },
+      { key: '3', name: 'Sealed Family Chapel', text: 'Sealed Family Chapel' },
+      { key: '4', name: 'Site 4', text: 'Site 4: [paste text]' },
+      { key: '5', name: 'Site 5', text: 'Site 5: [paste text]' },
+      { key: '6', name: 'Site 6', text: 'Site 6: [paste text]' },
+      { key: '7', name: 'Site 7', text: 'Site 7: [paste text]' },
+      { key: '8', name: 'Site 8', text: 'Site 8: [paste text]' }
+    ]}
+  };
+
+  var ENCOUNTER_SITES = {
+    'Sealed Family Chapel': {
+      boxedText: '[Paste boxed read-aloud text for Sealed Family Chapel here.]',
+      areas: { C1: '[C1 paste text]', C2: '[C2 paste text]', C3: '[C3 paste text]' },
+      outcomes: '[Paste outcomes text here.]'
+    }
+  };
+
+  var APPROACH_SKILLS = {
+    legwork: ['Investigation', 'Persuasion'],
+    social: ['Deception', 'Persuasion', 'Insight'],
+    shadow: ['Stealth', 'Perception', "Thieves' Tools"],
+    divine: ['Religion', 'Insight', 'Intimidation']
+  };
+
+  function deepCopy(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  function getEntry(tableId, key) {
+    var t = state.tables && state.tables[tableId] ? state.tables[tableId] : TABLES[tableId];
+    if (!t) return null;
+    var numKey = typeof key === 'string' ? parseInt(key, 10) : key;
+    if (tableId === 'pressure' && (numKey >= 10 || key === '10+'))
+      return t.entries[t.entries.length - 1];
+    for (var i = 0; i < t.entries.length; i++) {
+      if (String(t.entries[i].key) === String(key)) return t.entries[i];
+    }
+    return null;
+  }
+
+  function buildAIPrompt() {
+    var schema = {
+      tables: {
+        hooks: { id: 'hooks', title: 'Hooks', entries: [ { key: '1', text: 'string' }, { key: '2', text: 'string' }, { key: '3', text: 'string' }, { key: '4', text: 'string' }, { key: '5', text: 'string' }, { key: '6', text: 'string' } ] },
+        pressure: { id: 'pressure', title: 'Pressure', entries: [ { key: '1', text: 'string' }, { key: '2', text: 'string' }, { key: '3', text: 'string' }, { key: '4', text: 'string' }, { key: '5', text: 'string' }, { key: '6', text: 'string' }, { key: '7', text: 'string' }, { key: '8', text: 'string' }, { key: '9', text: 'string' }, { key: '10+', text: 'string' } ] },
+        reveal: { id: 'reveal', title: 'Reveal', entries: [ { key: '1', text: 'string' }, { key: '2', text: 'string' }, { key: '3', text: 'string' }, { key: '4', text: 'string' }, { key: '5', text: 'string' }, { key: '6', text: 'string' }, { key: '7', text: 'string' }, { key: '8', text: 'string' } ] },
+        compromised: { id: 'compromised', title: 'Compromised', entries: [ { key: '1', text: 'string' }, { key: '2', text: 'string' }, { key: '3', text: 'string' }, { key: '4', text: 'string' } ] },
+        siteTable: { id: 'siteTable', title: 'Site', entries: [ { key: '1', name: 'string', text: 'string' }, { key: '2', name: 'string', text: 'string' }, { key: '3', name: 'Sealed Family Chapel', text: 'string' }, { key: '4', name: 'string', text: 'string' }, { key: '5', name: 'string', text: 'string' }, { key: '6', name: 'string', text: 'string' }, { key: '7', name: 'string', text: 'string' }, { key: '8', name: 'string', text: 'string' } ] }
+      },
+      encounterSites: { 'Sealed Family Chapel': { boxedText: 'string', areas: { C1: 'string', C2: 'string', C3: 'string' }, outcomes: 'string' } }
+    };
+    return 'You are helping create content for a D&D 5e Waterdeep investigation episode called "Brother George Ward\'s Cassalanter Inquiry." It is a guided episode with tables: Hooks (d6), Pressure (1-10+), Reveal (d8), Compromised clues (d4), and a Site table (d8). There is also a special location "Sealed Family Chapel" with boxed read-aloud text, areas C1/C2/C3, and outcomes.\n\n' +
+      'Generate vivid, short table entries suitable for a DM to read or paraphrase. Keep each entry to one or two sentences. Theme: urban intrigue, noble house Cassalanter, investigation and social pressure.\n\n' +
+      'Output valid JSON only, no markdown or explanation. Use this exact structure (replace the placeholder strings with your content):\n\n' +
+      JSON.stringify(schema, null, 2);
+  }
+
+  function parseAndFillFromJson(str) {
+    if (!str || typeof str !== 'string') return { ok: false, message: 'No input.' };
+    var s = str.trim();
+    var m = s.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (m) s = m[1].trim();
+    var data;
+    try { data = JSON.parse(s); } catch (e) { return { ok: false, message: 'Invalid JSON: ' + (e.message || 'parse error') }; }
+    if (!data || typeof data !== 'object') return { ok: false, message: 'JSON must be an object.' };
+    var merged = 0;
+    if (data.tables && typeof data.tables === 'object') {
+      ['hooks', 'pressure', 'reveal', 'compromised', 'siteTable'].forEach(function(tableId) {
+        var src = data.tables[tableId];
+        if (!src || !src.entries || !Array.isArray(src.entries)) return;
+        var dst = state.tables[tableId];
+        if (!dst || !dst.entries) return;
+        src.entries.forEach(function(entry, i) {
+          var key = entry.key != null ? String(entry.key) : (dst.entries[i] && String(dst.entries[i].key));
+          var destEntry = null;
+          for (var j = 0; j < dst.entries.length; j++) {
+            if (String(dst.entries[j].key) === key) { destEntry = dst.entries[j]; break; }
+          }
+          if (destEntry) {
+            if (typeof entry.text === 'string') { destEntry.text = entry.text; merged++; }
+            if (tableId === 'siteTable' && typeof entry.name === 'string') { destEntry.name = entry.name; }
+          }
+        });
+      });
+    }
+    if (data.encounterSites && data.encounterSites['Sealed Family Chapel']) {
+      var enc = state.encounterSites['Sealed Family Chapel'];
+      if (enc) {
+        var src = data.encounterSites['Sealed Family Chapel'];
+        if (typeof src.boxedText === 'string') { enc.boxedText = src.boxedText; merged++; }
+        if (typeof src.outcomes === 'string') { enc.outcomes = src.outcomes; merged++; }
+        if (src.areas && typeof src.areas === 'object') {
+          ['C1', 'C2', 'C3'].forEach(function(k) { if (typeof src.areas[k] === 'string') { enc.areas[k] = src.areas[k]; merged++; } });
+        }
+      }
+    }
+    saveState();
+    return { ok: true, message: 'Filled ' + merged + ' entries.', merged: merged };
+  }
+
+  var state = {
+    caseDC: 15,
+    heat: 0,
+    doomEnabled: false,
+    doom: 0,
+    episode: 1,
+    currentStepIndex: 0,
+    lastHook: null,
+    lastProgress: null,
+    lastPressure: null,
+    lastReveal: null,
+    notes: { leads: [], clues: [] },
+    log: [],
+    disadvantageNextProgress: false,
+    nextClueCompromised: false,
+    progressSkillName: '',
+    progressModifier: 0,
+    progressAdv: false,
+    progressDis: false,
+    profileSkills: {},
+    lastSkillPerApproach: { legwork: '', social: '', shadow: '', divine: '' },
+    characterName: '',
+    characterGold: undefined,
+    tables: deepCopy(TABLES),
+    encounterSites: deepCopy(ENCOUNTER_SITES)
+  };
+
+  function addLog(message, type) {
+    var time = new Date().toLocaleTimeString();
+    state.log.push({ time: time, message: message, type: type || 'general' });
+    renderLog();
+    saveState();
+  }
+
+  function renderLog() {
+    var ul = document.getElementById('log-list');
+    ul.innerHTML = '';
+    state.log.forEach(function(entry) {
+      var li = document.createElement('li');
+      li.innerHTML = '<span class="time">' + escapeHtml(entry.time) + '</span> ' + escapeHtml(entry.message);
+      ul.appendChild(li);
+    });
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        caseDC: state.caseDC,
+        heat: state.heat,
+        doomEnabled: state.doomEnabled,
+        doom: state.doom,
+        episode: state.episode,
+        currentStepIndex: state.currentStepIndex,
+        lastHook: state.lastHook,
+        lastProgress: state.lastProgress,
+        lastPressure: state.lastPressure,
+        lastReveal: state.lastReveal,
+        notes: state.notes,
+        log: state.log,
+        disadvantageNextProgress: state.disadvantageNextProgress,
+        nextClueCompromised: state.nextClueCompromised,
+        progressSkillName: state.progressSkillName,
+        progressModifier: state.progressModifier,
+        progressAdv: state.progressAdv,
+        progressDis: state.progressDis,
+        profileSkills: state.profileSkills || {},
+        lastSkillPerApproach: state.lastSkillPerApproach,
+        characterName: state.characterName,
+        characterGold: state.characterGold,
+        tables: state.tables,
+        encounterSites: state.encounterSites
+      }));
+    } catch (e) {}
+  }
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      var data = JSON.parse(raw);
+      state.caseDC = data.caseDC ?? 15;
+      state.heat = Math.max(0, Math.min(5, data.heat ?? 0));
+      state.doom = Math.max(0, Math.min(6, data.doom ?? 0));
+      state.doomEnabled = !!data.doomEnabled;
+      state.episode = data.episode ?? 1;
+      state.currentStepIndex = Math.max(0, Math.min(4, data.currentStepIndex ?? 0));
+      state.lastHook = data.lastHook || null;
+      state.lastProgress = data.lastProgress || null;
+      state.lastPressure = data.lastPressure || null;
+      state.lastReveal = data.lastReveal || null;
+      state.notes = data.notes && data.notes.leads ? data.notes : { leads: [], clues: [] };
+      state.log = Array.isArray(data.log) ? data.log : [];
+      state.disadvantageNextProgress = !!data.disadvantageNextProgress;
+      state.nextClueCompromised = !!data.nextClueCompromised;
+      state.progressSkillName = data.progressSkillName || '';
+      state.progressModifier = data.progressModifier ?? 0;
+      state.progressAdv = !!data.progressAdv;
+      state.progressDis = !!data.progressDis;
+      state.profileSkills = data.profileSkills && typeof data.profileSkills === 'object' ? data.profileSkills : {};
+      state.lastSkillPerApproach = data.lastSkillPerApproach && typeof data.lastSkillPerApproach === 'object' ? { legwork: data.lastSkillPerApproach.legwork || '', social: data.lastSkillPerApproach.social || '', shadow: data.lastSkillPerApproach.shadow || '', divine: data.lastSkillPerApproach.divine || '' } : { legwork: '', social: '', shadow: '', divine: '' };
+      state.characterName = data.characterName || '';
+      state.characterGold = data.characterGold;
+      state.tables = data.tables ? deepCopy(data.tables) : deepCopy(TABLES);
+      state.encounterSites = data.encounterSites ? deepCopy(data.encounterSites) : deepCopy(ENCOUNTER_SITES);
+    } catch (e) {}
+  }
+
+  function updateCharacterHeader() {
+    var el = document.getElementById('wiz-playing-as');
+    if (!el) return;
+    if (state.characterName) {
+      el.textContent = 'Playing as: ' + state.characterName;
+      el.style.display = 'block';
+    } else {
+      el.style.display = 'none';
+    }
+  }
+
+  /** Parse wizard-relevant profile from PDF fieldMap (and optional text fallback): name, skills, gold */
+  function parseWizardProfileFromFields(fieldMap, textFallback) {
+    var profile = { name: '', skills: {}, gold: undefined };
+    var hasFields = fieldMap && typeof fieldMap === 'object' && Object.keys(fieldMap).length > 0;
+    function parseNum(v) {
+      if (v == null || v === '') return undefined;
+      var m = String(v).trim().match(/([+-]?\d+)/);
+      return m ? parseInt(m[1], 10) : undefined;
+    }
+    if (hasFields) {
+      var nameKey = CharacterSheetImporter.findKey(fieldMap, ['CharacterName', 'Character Name', 'NAME', 'Name']);
+      if (nameKey && fieldMap[nameKey]) profile.name = String(fieldMap[nameKey]).trim();
+      var goldKey = CharacterSheetImporter.findKey(fieldMap, ['GP', 'Gold', 'GOLD', 'CP', 'SP', 'EP', 'PP', 'Currency']);
+      if (goldKey && fieldMap[goldKey]) {
+        var g = parseNum(fieldMap[goldKey]);
+        if (g !== undefined) profile.gold = g;
+      }
+      var skillNames = ['Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'Sleight of Hand', 'Stealth', 'Survival', "Thieves' Tools", 'Thieves Tools'];
+      for (var i = 0; i < skillNames.length; i++) {
+        var sn = skillNames[i];
+        var key = CharacterSheetImporter.findKey(fieldMap, [sn, 'Skill ' + sn, sn + ' Mod', 'Skills.' + sn, 'Skills ' + sn]);
+        if (key && fieldMap[key]) {
+          var mod = parseNum(fieldMap[key]);
+          if (mod !== undefined) {
+            var norm = sn === 'Thieves Tools' ? "Thieves' Tools" : sn;
+            profile.skills[norm] = mod;
+          }
+        }
+      }
+    }
+    if (!hasFields && textFallback) {
+      if (!profile.name) {
+        var nameMatch = textFallback.match(/\b(?:character\s+name|name)[:\s]+([A-Za-z][A-Za-z\s'-]{0,40})/i);
+        if (nameMatch) profile.name = nameMatch[1].trim();
+      }
+      var skillList = ['Investigation', 'Persuasion', 'Deception', 'Insight', 'Stealth', 'Perception', 'Religion', 'Intimidation'];
+      for (var s = 0; s < skillList.length; s++) {
+        var re = new RegExp(skillList[s].replace(/\s+/g, '\\s+') + '\\s*[+:]?\\s*(-?\\d+)', 'i');
+        var match = textFallback.match(re);
+        if (match) profile.skills[skillList[s]] = parseInt(match[1], 10);
+      }
+    }
+    return profile;
+  }
+
+  /** Apply parsed profile to wizard state: Step 3 skill/modifier and lastSkillPerApproach; optional name/gold */
+  function applyWizardProfile(profile) {
+    if (profile.name) state.characterName = profile.name;
+    if (profile.gold !== undefined) state.characterGold = profile.gold;
+    var skills = profile.skills || {};
+    state.profileSkills = profile.skills || {};
+    var skillKeys = Object.keys(skills);
+    if (skillKeys.length > 0) {
+      var approachKeys = ['legwork', 'social', 'shadow', 'divine'];
+      for (var a = 0; a < approachKeys.length; a++) {
+        var approach = approachKeys[a];
+        var list = APPROACH_SKILLS[approach] || [];
+        var bestSkill = '';
+        var bestMod = -999;
+        for (var i = 0; i < list.length; i++) {
+          var sk = list[i];
+          if (skills[sk] !== undefined && skills[sk] > bestMod) {
+            bestMod = skills[sk];
+            bestSkill = sk;
+          }
+        }
+        if (bestSkill) state.lastSkillPerApproach[approach] = bestSkill;
+      }
+      var defaultSkill = state.progressSkillName && skills[state.progressSkillName] !== undefined ? state.progressSkillName : (skillKeys.indexOf('Investigation') >= 0 ? 'Investigation' : skillKeys[0]);
+      state.progressSkillName = defaultSkill;
+      state.progressModifier = skills[defaultSkill] !== undefined ? skills[defaultSkill] : 0;
+    }
+    saveState();
+    updateCharacterHeader();
+    if (state.currentStepIndex === 2) renderStep(2);
+    addLog('Character sheet applied: ' + (profile.name || 'import') + (skillKeys.length ? ' (skills/modifier set)' : ''), 'general');
+  }
+
+  function handlePdfImport(event) {
+    var file = event.target && event.target.files && event.target.files[0];
+    event.target.value = '';
+    if (!file || !file.type.includes('pdf')) {
+      addLog('Please select a PDF file.', 'general');
+      return;
+    }
+    addLog('Parsing PDF...', 'general');
+    CharacterSheetImporter.extractPdfData(file).then(function(result) {
+      var text = result.text || '';
+      var fieldMap = result.fieldMap || {};
+      if (!text && Object.keys(fieldMap).length === 0) {
+        addLog('No readable text or form fields in this PDF.', 'general');
+        return;
+      }
+      var profile = parseWizardProfileFromFields(fieldMap, text);
+      applyWizardProfile(profile);
+      addLog('Character sheet imported successfully.', 'general');
+    }).catch(function(err) {
+      addLog('PDF import failed: ' + (err && err.message ? err.message : String(err)), 'general');
+    });
+  }
+
+  function applyPressureEffects(entry) {
+    if (!entry || !entry.effects) return;
+    entry.effects.forEach(function(e) {
+      if (e.heatDelta) state.heat = Math.max(0, Math.min(5, state.heat + e.heatDelta));
+      if (e.doomDelta) state.doom = Math.max(0, Math.min(6, state.doom + e.doomDelta));
+      if (e.flagSet === 'disadvantageNextProgress') state.disadvantageNextProgress = true;
+      if (e.flagSet === 'nextClueCompromised') state.nextClueCompromised = true;
+    });
+  }
+
+  function canGoNext() {
+    var step = state.currentStepIndex;
+    if (step === 0) return true;
+    if (step === 1) return state.lastHook !== null;
+    if (step === 2) return state.lastProgress !== null;
+    if (step === 3) return state.lastPressure !== null;
+    if (step === 4) return state.lastReveal !== null;
+    return false;
+  }
+
+  function showStep(index) {
+    state.currentStepIndex = index;
+    document.getElementById('step-indicator').textContent = 'Step ' + (index + 1) + ' of 5: ' + STEP_NAMES[index];
+    document.getElementById('step-title').textContent = STEP_NAMES[index];
+    [ 'panel-setup', 'panel-hook', 'panel-progress', 'panel-pressure', 'panel-reveal' ].forEach(function(id, i) {
+      document.getElementById(id).classList.toggle('active', i === index);
+    });
+    document.getElementById('btn-back').disabled = index === 0;
+    document.getElementById('btn-next').disabled = !canGoNext();
+    document.getElementById('btn-next').textContent = index === 4 ? 'Finish' : 'Next';
+    var reroll = document.getElementById('btn-reroll');
+    reroll.classList.toggle('wizard-hide', index < 1 || index > 4);
+    renderStep(index);
+    saveState();
+  }
+
+  function renderStep(index) {
+    if (index === 0) renderSetup();
+    else if (index === 1) renderHook();
+    else if (index === 2) renderProgress();
+    else if (index === 3) renderPressure();
+    else if (index === 4) renderRevealWrap();
+  }
+
+  function renderSetup() {
+    var el = document.getElementById('panel-setup');
+    el.innerHTML = '<label for="wiz-case-dc">Case DC</label>' +
+      '<select id="wiz-case-dc"><option value="13">13</option><option value="15" selected>15</option><option value="17">17</option></select>' +
+      '<div class="track"><label>Heat (0 to 5)</label><button type="button" id="heat-minus" class="wizard-btn">-</button><span id="heat-val">' + state.heat + '</span><button type="button" id="heat-plus" class="wizard-btn">+</button></div>' +
+      '<div class="track"><label><input type="checkbox" id="doom-check"> Doom clock (0 to 6)</label><span id="doom-val">' + state.doom + '</span></div>' +
+      '<p style="margin-top:0.75rem;font-size:0.9rem;">Set Case DC and optionally Heat/Doom. Click Next to continue.</p>' +
+      '<details><summary>Edit tables (paste your hook, pressure, reveal, and site text)</summary>' +
+      '<div style="margin-top:0.5rem;"><p style="font-size:0.85rem;margin-bottom:0.5rem;">Edit table text below. Changes are saved automatically.</p>' +
+      '<div style="margin-bottom:0.75rem;">' +
+      '<button type="button" id="btn-copy-ai-prompt" class="wizard-btn secondary">Copy AI prompt</button> ' +
+      '<span style="font-size:0.85rem;color:var(--text-light);">Copy a prompt to paste into an AI to generate all table content.</span>' +
+      '<p style="font-size:0.85rem;margin:0.5rem 0 0.25rem;color:var(--text-light);">Paste JSON from your AI here (raw or in a code block), then click Parse and fill tables.</p>' +
+      '<textarea id="ai-json-paste" placeholder="Paste JSON here..." style="width:100%;min-height:100px;padding:0.4rem;border:1px solid var(--border);border-radius:4px;font-family:monospace;font-size:0.85rem;"></textarea>' +
+      '<button type="button" id="btn-parse-ai-json" class="wizard-btn secondary" style="margin-top:0.35rem;">Parse and fill tables</button>' +
+      '<p id="ai-json-status" style="font-size:0.85rem;margin-top:0.35rem;color:var(--text-light);"></p></div>' +
+      '<div id="tables-editor"></div></div></details>';
+    document.getElementById('wiz-case-dc').value = String(state.caseDC);
+    document.getElementById('heat-val').textContent = state.heat;
+    document.getElementById('doom-check').checked = state.doomEnabled;
+    document.getElementById('doom-val').textContent = state.doom;
+    document.getElementById('heat-minus').addEventListener('click', function() {
+      if (state.heat > 0) { state.heat--; document.getElementById('heat-val').textContent = state.heat; saveState(); }
+    });
+    document.getElementById('heat-plus').addEventListener('click', function() {
+      if (state.heat < 5) { state.heat++; document.getElementById('heat-val').textContent = state.heat; saveState(); }
+    });
+    document.getElementById('doom-check').addEventListener('change', function() {
+      state.doomEnabled = this.checked;
+      saveState();
+    });
+    document.getElementById('wiz-case-dc').addEventListener('change', function() {
+      state.caseDC = parseInt(this.value, 10);
+      saveState();
+    });
+    renderTablesEditor();
+    var copyPromptBtn = document.getElementById('btn-copy-ai-prompt');
+    if (copyPromptBtn) copyPromptBtn.addEventListener('click', function() { copyToClipboard(buildAIPrompt()); addLog('AI prompt copied to clipboard.', 'general'); });
+    var parseBtn = document.getElementById('btn-parse-ai-json');
+    var pasteTa = document.getElementById('ai-json-paste');
+    var statusEl = document.getElementById('ai-json-status');
+    if (parseBtn && pasteTa && statusEl) parseBtn.addEventListener('click', function() {
+      var result = parseAndFillFromJson(pasteTa.value);
+      statusEl.textContent = result.ok ? result.message : result.message;
+      statusEl.style.color = result.ok ? 'var(--primary-color)' : 'var(--text-light)';
+      if (result.ok) { addLog('Imported ' + result.merged + ' entries from AI JSON.', 'general'); renderTablesEditor(); }
+    });
+  }
+
+  function renderTablesEditor() {
+    var container = document.getElementById('tables-editor');
+    if (!container) return;
+    container.innerHTML = '';
+    var t = state.tables;
+    var enc = state.encounterSites;
+    var html = '<h4 style="margin-top:0.75rem;font-size:0.95rem;">Hooks (d6)</h4>';
+    for (var i = 1; i <= 6; i++) {
+      var entry = getEntry('hooks', i);
+      html += '<label>Hook ' + i + '</label><textarea data-hook="' + i + '">' + escapeHtml(entry ? entry.text : '') + '</textarea>';
+    }
+    html += '<h4 style="margin-top:0.75rem;font-size:0.95rem;">Pressure (1 to 10+)</h4>';
+    t.pressure.entries.forEach(function(p, idx) {
+      var label = p.key === '10+' ? '10+' : p.key;
+      html += '<label>' + label + '</label><textarea data-pressure="' + idx + '">' + escapeHtml(p.text) + '</textarea>';
+    });
+    html += '<h4 style="margin-top:0.75rem;font-size:0.95rem;">Reveal (d8)</h4>';
+    for (var j = 1; j <= 8; j++) {
+      var revEntry = getEntry('reveal', j);
+      html += '<label>Reveal ' + j + '</label><textarea data-reveal="' + j + '">' + escapeHtml(revEntry ? revEntry.text : '') + '</textarea>';
+    }
+    html += '<h4 style="margin-top:0.75rem;font-size:0.95rem;">Compromised clues (d4)</h4>';
+    for (var k = 1; k <= 4; k++) {
+      var compEntry = getEntry('compromised', k);
+      html += '<label>Compromised ' + k + '</label><textarea data-compromised="' + k + '">' + escapeHtml(compEntry ? compEntry.text : '') + '</textarea>';
+    }
+    html += '<h4 style="margin-top:0.75rem;font-size:0.95rem;">Site table (d8)</h4>';
+    for (var s = 1; s <= 8; s++) {
+      var siteEntry = getEntry('siteTable', s);
+      html += '<label>Site ' + s + '</label><textarea data-site="' + s + '">' + escapeHtml(siteEntry ? (siteEntry.name || siteEntry.text) : '') + '</textarea>';
+    }
+    html += '<h4 style="margin-top:0.75rem;font-size:0.95rem;">Sealed Family Chapel</h4>';
+    if (enc && enc['Sealed Family Chapel']) {
+      html += '<label>Boxed text</label><textarea data-enc-boxed style="min-height:80px;">' + escapeHtml(enc['Sealed Family Chapel'].boxedText) + '</textarea>';
+      html += '<label>C1</label><textarea data-enc-c1>' + escapeHtml(enc['Sealed Family Chapel'].areas.C1) + '</textarea>';
+      html += '<label>C2</label><textarea data-enc-c2>' + escapeHtml(enc['Sealed Family Chapel'].areas.C2) + '</textarea>';
+      html += '<label>C3</label><textarea data-enc-c3>' + escapeHtml(enc['Sealed Family Chapel'].areas.C3) + '</textarea>';
+      html += '<label>Outcomes</label><textarea data-enc-outcomes>' + escapeHtml(enc['Sealed Family Chapel'].outcomes) + '</textarea>';
+    }
+    container.innerHTML = html;
+    container.querySelectorAll('textarea[data-hook]').forEach(function(ta) {
+      ta.addEventListener('input', function() { var entry = getEntry('hooks', this.dataset.hook); if (entry) entry.text = this.value; saveState(); });
+    });
+    container.querySelectorAll('textarea[data-pressure]').forEach(function(ta) {
+      ta.addEventListener('input', function() { var idx = parseInt(this.dataset.pressure, 10); if (state.tables.pressure.entries[idx]) state.tables.pressure.entries[idx].text = this.value; saveState(); });
+    });
+    container.querySelectorAll('textarea[data-reveal]').forEach(function(ta) {
+      ta.addEventListener('input', function() { var entry = getEntry('reveal', this.dataset.reveal); if (entry) entry.text = this.value; saveState(); });
+    });
+    container.querySelectorAll('textarea[data-compromised]').forEach(function(ta) {
+      ta.addEventListener('input', function() { var entry = getEntry('compromised', this.dataset.compromised); if (entry) entry.text = this.value; saveState(); });
+    });
+    container.querySelectorAll('textarea[data-site]').forEach(function(ta) {
+      ta.addEventListener('input', function() { var entry = getEntry('siteTable', this.dataset.site); if (entry) { entry.name = this.value; entry.text = this.value; } saveState(); });
+    });
+    container.querySelectorAll('textarea[data-enc-boxed]').forEach(function(ta) {
+      ta.addEventListener('input', function() { if (state.encounterSites['Sealed Family Chapel']) state.encounterSites['Sealed Family Chapel'].boxedText = this.value; saveState(); });
+    });
+    container.querySelectorAll('textarea[data-enc-c1]').forEach(function(ta) {
+      ta.addEventListener('input', function() { if (state.encounterSites['Sealed Family Chapel']) state.encounterSites['Sealed Family Chapel'].areas.C1 = this.value; saveState(); });
+    });
+    container.querySelectorAll('textarea[data-enc-c2]').forEach(function(ta) {
+      ta.addEventListener('input', function() { if (state.encounterSites['Sealed Family Chapel']) state.encounterSites['Sealed Family Chapel'].areas.C2 = this.value; saveState(); });
+    });
+    container.querySelectorAll('textarea[data-enc-c3]').forEach(function(ta) {
+      ta.addEventListener('input', function() { if (state.encounterSites['Sealed Family Chapel']) state.encounterSites['Sealed Family Chapel'].areas.C3 = this.value; saveState(); });
+    });
+    container.querySelectorAll('textarea[data-enc-outcomes]').forEach(function(ta) {
+      ta.addEventListener('input', function() { if (state.encounterSites['Sealed Family Chapel']) state.encounterSites['Sealed Family Chapel'].outcomes = this.value; saveState(); });
+    });
+  }
+
+  function renderHook() {
+    var el = document.getElementById('panel-hook');
+    var html = '<div class="roll-flow"><p>1. Copy the Avrae roll command below.</p><p>2. Paste in Discord and run Avrae to roll.</p><p>3. Enter the result (1 to 6) from Discord here.</p></div>';
+    html += '<p><span class="roll-cmd">!r 1d6</span></p>';
+    html += '<button type="button" id="btn-copy-hook" class="wizard-btn secondary">Copy roll command</button>';
+    html += '<label for="hook-result">Result from Discord (1 to 6). Paste Avrae output or type the number.</label><input type="text" id="hook-result" inputmode="numeric" placeholder="Paste or type 1-6" autocomplete="off">';
+    html += '<button type="button" id="btn-use-hook" class="wizard-btn">Use result</button>';
+    if (state.lastHook) {
+      html += '<div class="result-box"><p><strong>Hook ' + state.lastHook.roll + '</strong></p><p>' + escapeHtml(state.lastHook.text) + '</p></div>';
+      html += '<button type="button" id="btn-roll-again-hook" class="wizard-btn secondary">Roll again (copy command, enter new result)</button>';
+    }
+    el.innerHTML = html;
+    document.getElementById('btn-copy-hook').addEventListener('click', function() { copyToClipboard('!r 1d6'); });
+    document.getElementById('btn-use-hook').addEventListener('click', function() {
+      var input = document.getElementById('hook-result');
+      var raw = input && input.value ? input.value.trim() : '';
+      var val = parseDiscordRoll(raw);
+      if (val === null) val = parseInt(raw, 10);
+      if (isNaN(val) || val < 1 || val > 6) { alert('Enter or paste the result from Discord (1 to 6).'); return; }
+      var roll = val;
+      var entry = getEntry('hooks', roll);
+      state.lastHook = { roll: roll, text: entry ? entry.text : 'Unknown' };
+      addLog('Hook: d6 = ' + roll + ' (from Discord). ' + state.lastHook.text, 'hook');
+      renderHook();
+      document.getElementById('btn-next').disabled = false;
+      saveState();
+    });
+    if (state.lastHook) {
+      document.getElementById('btn-roll-again-hook').addEventListener('click', function() {
+        state.lastHook = null;
+        renderHook();
+        document.getElementById('btn-next').disabled = true;
+      });
+    }
+    document.getElementById('btn-next').disabled = !state.lastHook;
+  }
+
+  function getProgressSkillFromDom() {
+    var sel = document.getElementById('wiz-skill');
+    var other = document.getElementById('wiz-skill-other');
+    if (!sel) return state.progressSkillName || 'investigation';
+    if (sel.value === '__other__' && other) return other.value.trim() || 'investigation';
+    return sel.value || 'investigation';
+  }
+
+  function getProgressRollCmd() {
+    var skillName = getProgressSkillFromDom();
+    var mod = parseInt(document.getElementById('wiz-mod').value, 10) || 0;
+    var adv = document.querySelector('input[name="wiz-adv"]:checked');
+    var approachVal = document.querySelector('input[name="wiz-approach"]:checked');
+    var legworkAdv = approachVal && approachVal.value === 'legwork' && document.getElementById('wiz-10gp') && document.getElementById('wiz-10gp').checked;
+    var useAdv = (adv && adv.value === 'adv') || legworkAdv;
+    var useDis = adv && adv.value === 'dis';
+    var base = '!check ' + sanitizeForAvrae(skillName);
+    if (state.disadvantageNextProgress || useDis) base += ' dis';
+    else if (useAdv) base += ' adv';
+    if (mod !== 0) base += (mod >= 0 ? '+' : '') + mod;
+    return base;
+  }
+
+  function renderProgress() {
+    var el = document.getElementById('panel-progress');
+    var defaultApproach = (state.lastProgress && state.lastProgress.approach && APPROACH_SKILLS[state.lastProgress.approach]) ? state.lastProgress.approach : 'legwork';
+    var approachHtml = '<p>Choose approach:</p>' +
+      '<label class="approach-choice"><input type="radio" name="wiz-approach" value="legwork"' + (defaultApproach === 'legwork' ? ' checked' : '') + '> A Legwork (Investigation or Persuasion; 10 gp for advantage)</label>' +
+      '<label class="approach-choice"><input type="radio" name="wiz-approach" value="social"' + (defaultApproach === 'social' ? ' checked' : '') + '> B Social (Deception, Persuasion, or Insight; margin 5+ adds second lead)</label>' +
+      '<label class="approach-choice"><input type="radio" name="wiz-approach" value="shadow"' + (defaultApproach === 'shadow' ? ' checked' : '') + '> C Shadow (Stealth, Perception, or Thieves\' Tools; failure adds Heat +2)</label>' +
+      '<label class="approach-choice"><input type="radio" name="wiz-approach" value="divine"' + (defaultApproach === 'divine' ? ' checked' : '') + '> D Divine (Religion, Insight, or Intimidation; public pressure adds Heat +1 on success)</label>' +
+      '<div id="progress-options" style="margin-top:0.5rem"></div>';
+    var formHtml = '<label for="wiz-skill">Skill</label><select id="wiz-skill"><option value="Investigation">Investigation</option><option value="Persuasion">Persuasion</option><option value="__other__">Other...</option></select>' +
+      '<input type="text" id="wiz-skill-other" placeholder="Skill name" style="display:none;margin-top:0.25rem;" aria-label="Other skill name">' +
+      '<label for="wiz-mod">Modifier</label><input type="text" id="wiz-mod" value="' + formatModifier(state.progressModifier) + '" inputmode="numeric" aria-label="Skill modifier">' +
+      '<label><input type="radio" name="wiz-adv" value="none" checked> Normal</label>' +
+      '<label><input type="radio" name="wiz-adv" value="adv"> Advantage</label>' +
+      '<label><input type="radio" name="wiz-adv" value="dis"> Disadvantage</label>' +
+      '<div class="roll-flow"><p>1. Copy the Avrae check command (updates with your skill and modifier).</p><p>2. Paste in Discord and run Avrae.</p><p>3. Enter the <strong>total</strong> from Discord (the number Avrae shows).</p></div>' +
+      '<p><span class="roll-cmd" id="progress-cmd">!check investigation+0</span></p>' +
+      '<button type="button" id="btn-copy-progress" class="wizard-btn secondary">Copy Avrae command</button>' +
+      '<label for="wiz-progress-total">Total from Discord. Paste Avrae output or type the number.</label><input type="text" id="wiz-progress-total" inputmode="numeric" placeholder="Paste or type total" autocomplete="off">' +
+      '<button type="button" id="btn-use-progress" class="wizard-btn">Use result</button>';
+    var resultHtml = '';
+    if (state.lastProgress) {
+      resultHtml = '<div class="result-box"><p>Total ' + state.lastProgress.total + ' vs DC ' + state.caseDC + '. ' + (state.lastProgress.success ? 'Success' : 'Failure') + '. Margin ' + state.lastProgress.margin + ', quality: ' + state.lastProgress.qualityLabel + '</p>';
+      if (state.lastProgress.compromisedText) resultHtml += '<p>Compromised clue: ' + escapeHtml(state.lastProgress.compromisedText) + '</p>';
+      if (state.lastProgress.secondLead) resultHtml += '<p>Second lead!</p>';
+      resultHtml += '</div>';
+    }
+    el.innerHTML = approachHtml + formHtml + resultHtml;
+    var optDiv = document.getElementById('progress-options');
+    if (!optDiv) return;
+    function syncProgressOptions() {
+      var v = document.querySelector('input[name="wiz-approach"]:checked');
+      var val = v ? v.value : 'legwork';
+      optDiv.innerHTML = val === 'legwork' ? '<label><input type="checkbox" id="wiz-10gp"> Spend 10 gp for advantage</label>' : (val === 'divine' ? '<label><input type="checkbox" id="wiz-pressure"> Public pressure (+1 Heat on success)</label>' : '');
+    }
+    function syncSkillDropdown(approach) {
+      var sel = document.getElementById('wiz-skill');
+      var other = document.getElementById('wiz-skill-other');
+      if (!sel || !other) return;
+      var skills = APPROACH_SKILLS[approach] || APPROACH_SKILLS.legwork;
+      var lastForApproach = (state.lastSkillPerApproach[approach] || '').trim();
+      var selectedSkill = (lastForApproach && skills.indexOf(lastForApproach) >= 0) ? lastForApproach : (lastForApproach ? lastForApproach : skills[0]);
+      var isOther = skills.indexOf(selectedSkill) < 0;
+      sel.innerHTML = '';
+      skills.forEach(function(s) {
+        var opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        if (s === selectedSkill) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      var optOther = document.createElement('option');
+      optOther.value = '__other__';
+      optOther.textContent = 'Other...';
+      if (isOther) optOther.selected = true;
+      sel.appendChild(optOther);
+      other.value = isOther ? selectedSkill : '';
+      other.style.display = isOther ? 'block' : 'none';
+      var skillName = getProgressSkillFromDom();
+      var mod = state.profileSkills && state.profileSkills[skillName] !== undefined ? state.profileSkills[skillName] : undefined;
+      if (mod !== undefined) {
+        state.progressModifier = mod;
+        var modEl = document.getElementById('wiz-mod');
+        if (modEl) modEl.value = formatModifier(mod);
+      }
+      var cmdEl = document.getElementById('progress-cmd');
+      if (cmdEl) cmdEl.textContent = getProgressRollCmd();
+    }
+    function updateProgressCmd() {
+      var cmdEl = document.getElementById('progress-cmd');
+      if (cmdEl) cmdEl.textContent = getProgressRollCmd();
+    }
+    var currentProgressApproach = (document.querySelector('input[name="wiz-approach"]:checked') && document.querySelector('input[name="wiz-approach"]:checked').value) || 'legwork';
+    document.querySelectorAll('input[name="wiz-approach"]').forEach(function(r) {
+      r.addEventListener('change', function() {
+        state.lastSkillPerApproach[currentProgressApproach] = getProgressSkillFromDom();
+        currentProgressApproach = document.querySelector('input[name="wiz-approach"]:checked').value;
+        syncProgressOptions();
+        syncSkillDropdown(currentProgressApproach);
+        saveState();
+      });
+    });
+    document.getElementById('wiz-mod').addEventListener('input', function() { updateProgressCmd(); });
+    document.querySelectorAll('input[name="wiz-adv"]').forEach(function(r) {
+      r.addEventListener('change', updateProgressCmd);
+    });
+    syncProgressOptions();
+    syncSkillDropdown(currentProgressApproach);
+    var selSkill = document.getElementById('wiz-skill');
+    var otherSkill = document.getElementById('wiz-skill-other');
+    if (selSkill) selSkill.addEventListener('change', function() {
+      var approach = document.querySelector('input[name="wiz-approach"]:checked');
+      var approachVal = approach ? approach.value : 'legwork';
+      if (this.value === '__other__') {
+        otherSkill.style.display = 'block';
+        otherSkill.focus();
+      } else {
+        otherSkill.style.display = 'none';
+        state.lastSkillPerApproach[approachVal] = this.value;
+      }
+      var skillName = getProgressSkillFromDom();
+      var mod = state.profileSkills && state.profileSkills[skillName] !== undefined ? state.profileSkills[skillName] : undefined;
+      if (mod !== undefined) {
+        state.progressModifier = mod;
+        var modEl = document.getElementById('wiz-mod');
+        if (modEl) modEl.value = formatModifier(mod);
+      }
+      updateProgressCmd();
+      saveState();
+    });
+    if (otherSkill) otherSkill.addEventListener('input', function() {
+      var approach = document.querySelector('input[name="wiz-approach"]:checked');
+      if (approach) state.lastSkillPerApproach[approach.value] = this.value.trim();
+      var skillName = getProgressSkillFromDom();
+      var mod = state.profileSkills && state.profileSkills[skillName] !== undefined ? state.profileSkills[skillName] : undefined;
+      if (mod !== undefined) {
+        state.progressModifier = mod;
+        var modEl = document.getElementById('wiz-mod');
+        if (modEl) modEl.value = formatModifier(mod);
+      }
+      updateProgressCmd();
+      saveState();
+    });
+    document.getElementById('btn-copy-progress').addEventListener('click', function() { copyToClipboard(getProgressRollCmd()); });
+    document.getElementById('btn-use-progress').addEventListener('click', function() {
+      var approach = document.querySelector('input[name="wiz-approach"]:checked');
+      var approachVal = approach ? approach.value : 'legwork';
+      var skillName = getProgressSkillFromDom();
+      var mod = parseInt(document.getElementById('wiz-mod').value, 10) || 0;
+      var totalInput = document.getElementById('wiz-progress-total');
+      var rawTotal = totalInput && totalInput.value ? totalInput.value.trim() : '';
+      var total = parseDiscordRoll(rawTotal);
+      if (total === null) total = parseInt(rawTotal, 10);
+      if (isNaN(total) || total < 1 || total > 50) { alert('Enter or paste the total from Discord (e.g. 18).'); return; }
+      var divinePressure = approachVal === 'divine' && document.getElementById('wiz-pressure') && document.getElementById('wiz-pressure').checked;
+      state.progressSkillName = skillName;
+      state.lastSkillPerApproach[approachVal] = skillName;
+      state.progressModifier = mod;
+      state.progressAdv = document.querySelector('input[name="wiz-adv"]:checked').value === 'adv' || (approachVal === 'legwork' && document.getElementById('wiz-10gp') && document.getElementById('wiz-10gp').checked);
+      state.progressDis = document.querySelector('input[name="wiz-adv"]:checked').value === 'dis';
+      var margin = total - state.caseDC;
+      var success = total >= state.caseDC;
+      var qualityLabel = getClueQuality(margin);
+      var compromisedText = null;
+      var secondLead = false;
+      if (!success) {
+        el.innerHTML = approachHtml + formHtml + '<div class="result-box"><p>Progress failed (total ' + total + ' &lt; DC ' + state.caseDC + '). Roll for compromised clue in Discord.</p></div>' +
+          '<div class="roll-flow"><p>Copy: <span class="roll-cmd">!r 1d4</span></p><p>Paste in Discord, then enter result (1 to 4):</p></div>' +
+          '<button type="button" id="btn-copy-d4" class="wizard-btn secondary">Copy !r 1d4</button>' +
+          '<label for="wiz-d4">Result (1 to 4). Paste Avrae output or type.</label><input type="text" id="wiz-d4" inputmode="numeric" placeholder="1-4" autocomplete="off">' +
+          '<button type="button" id="btn-use-d4" class="wizard-btn">Use compromised result</button>';
+        document.getElementById('btn-copy-d4').addEventListener('click', function() { copyToClipboard('!r 1d4'); });
+        document.getElementById('btn-use-d4').addEventListener('click', function() {
+          var d4Input = document.getElementById('wiz-d4');
+          var rawD4 = d4Input && d4Input.value ? d4Input.value.trim() : '';
+          var d4 = parseDiscordRoll(rawD4);
+          if (d4 === null) d4 = parseInt(rawD4, 10);
+          if (isNaN(d4) || d4 < 1 || d4 > 4) { alert('Enter or paste the result from Discord (1 to 4).'); return; }
+          var compEntry = getEntry('compromised', d4);
+          compromisedText = compEntry ? compEntry.text : '';
+          var heatAdd = approachVal === 'shadow' ? 2 : 1;
+          state.heat = Math.min(5, state.heat + heatAdd);
+          addLog('Progress FAILED. Total ' + total + ' (from Discord). Compromised d4 = ' + d4 + ' (from Discord). Heat +' + heatAdd, 'progress');
+          state.lastProgress = { success: false, total: total, margin: margin, qualityLabel: qualityLabel, approach: approachVal, compromisedText: compromisedText, secondLead: false };
+          renderProgress();
+          document.getElementById('btn-next').disabled = false;
+          saveState();
+        });
+        return;
+      }
+      if (state.nextClueCompromised) {
+        el.innerHTML = approachHtml + formHtml + '<div class="result-box"><p>Progress success, but next clue is compromised (Pressure effect). Roll d4 in Discord.</p></div>' +
+          '<div class="roll-flow"><p>Copy: <span class="roll-cmd">!r 1d4</span></p></div>' +
+          '<button type="button" id="btn-copy-d4b" class="wizard-btn secondary">Copy !r 1d4</button>' +
+          '<label for="wiz-d4b">Result (1 to 4). Paste Avrae output or type.</label><input type="text" id="wiz-d4b" inputmode="numeric" placeholder="1-4" autocomplete="off">' +
+          '<button type="button" id="btn-use-d4b" class="wizard-btn">Use result</button>';
+        document.getElementById('btn-copy-d4b').addEventListener('click', function() { copyToClipboard('!r 1d4'); });
+        document.getElementById('btn-use-d4b').addEventListener('click', function() {
+          var d4Input = document.getElementById('wiz-d4b');
+          var rawD4 = d4Input && d4Input.value ? d4Input.value.trim() : '';
+          var d4 = parseDiscordRoll(rawD4);
+          if (d4 === null) d4 = parseInt(rawD4, 10);
+          if (isNaN(d4) || d4 < 1 || d4 > 4) { alert('Enter or paste the result from Discord (1 to 4).'); return; }
+          state.nextClueCompromised = false;
+          var compEntry = getEntry('compromised', d4);
+          compromisedText = compEntry ? compEntry.text : '';
+          if (approachVal === 'social' && margin >= 5) secondLead = true;
+          if (divinePressure) state.heat = Math.min(5, state.heat + 1);
+          addLog('Progress SUCCESS. Total ' + total + ' (from Discord). Compromised clue d4 = ' + d4 + ' (from Discord). Margin ' + margin + ', ' + qualityLabel, 'progress');
+          state.lastProgress = { success: true, total: total, margin: margin, qualityLabel: qualityLabel, approach: approachVal, compromisedText: compromisedText, secondLead: secondLead };
+          renderProgress();
+          document.getElementById('btn-next').disabled = false;
+          saveState();
+        });
+        return;
+      }
+      if (approachVal === 'social' && margin >= 5) secondLead = true;
+      if (divinePressure) state.heat = Math.min(5, state.heat + 1);
+      addLog('Progress SUCCESS. Total ' + total + ' (from Discord). Margin ' + margin + ', ' + qualityLabel, 'progress');
+      state.lastProgress = { success: true, total: total, margin: margin, qualityLabel: qualityLabel, approach: approachVal, compromisedText: undefined, secondLead: secondLead };
+      renderProgress();
+      document.getElementById('btn-next').disabled = false;
+      saveState();
+    });
+  }
+
+  function renderPressure() {
+    var el = document.getElementById('panel-pressure');
+    var bonus = (state.lastProgress && !state.lastProgress.success) ? 2 : 0;
+    var cmd = '!r 1d6+' + state.heat + (bonus ? '+' + bonus : '');
+    var html = '<div class="roll-flow"><p>1. Copy the Avrae roll command (1d6 + Heat' + (bonus ? ' + 2 (Progress failed)' : '') + ').</p><p>2. Paste in Discord and run Avrae.</p><p>3. Enter the <strong>total</strong> from Discord.</p></div>';
+    html += '<p><span class="roll-cmd">' + cmd + '</span></p>';
+    html += '<button type="button" id="btn-copy-pressure" class="wizard-btn secondary">Copy roll command</button>';
+    html += '<label for="wiz-pressure-total">Total from Discord. Paste Avrae output or type the number.</label><input type="text" id="wiz-pressure-total" inputmode="numeric" placeholder="Paste or type total" autocomplete="off">';
+    html += '<button type="button" id="btn-use-pressure" class="wizard-btn">Use result</button>';
+    if (state.lastPressure) {
+      html += '<div class="result-box"><p><strong>Roll total: ' + state.lastPressure.rollTotal + '</strong> (from Discord)</p><p>' + escapeHtml(state.lastPressure.text) + '</p></div>';
+    }
+    el.innerHTML = html;
+    document.getElementById('btn-copy-pressure').addEventListener('click', function() { copyToClipboard(cmd); });
+    document.getElementById('btn-use-pressure').addEventListener('click', function() {
+      var input = document.getElementById('wiz-pressure-total');
+      var raw = input && input.value ? input.value.trim() : '';
+      var base = parseDiscordRoll(raw);
+      if (base === null) base = parseInt(raw, 10);
+      if (isNaN(base) || base < 1 || base > 20) { alert('Enter or paste the total from Discord (1d6 + Heat' + (bonus ? ' + 2' : '') + ').'); return; }
+      var entry = getEntry('pressure', base >= 10 ? 10 : base);
+      var text = entry ? entry.text : 'Result ' + base;
+      applyPressureEffects(entry);
+      state.lastPressure = { rollTotal: base, tableResultKey: base >= 10 ? '10+' : String(base), text: text, effectsApplied: true };
+      addLog('Pressure: total ' + base + ' (from Discord). ' + text, 'pressure');
+      renderPressure();
+      document.getElementById('btn-next').disabled = false;
+      saveState();
+    });
+    document.getElementById('btn-next').disabled = !state.lastPressure;
+  }
+
+  function renderRevealWrap() {
+    var el = document.getElementById('panel-reveal');
+    var html = '<div class="roll-flow"><p>1. Copy: <span class="roll-cmd">!r 1d8</span></p><p>2. Paste in Discord and run Avrae.</p><p>3. Enter the result (1 to 8) from Discord.</p></div>';
+    html += '<button type="button" id="btn-copy-reveal" class="wizard-btn secondary">Copy roll command</button>';
+    html += '<label for="wiz-reveal-result">Result from Discord (1 to 8). Paste Avrae output or type the number.</label><input type="text" id="wiz-reveal-result" inputmode="numeric" placeholder="Paste or type 1-8" autocomplete="off">';
+    html += '<button type="button" id="btn-use-reveal" class="wizard-btn">Use result</button>';
+    if (state.lastReveal) {
+      html += '<div class="result-box"><p><strong>Reveal ' + state.lastReveal.roll + '</strong>';
+      if (state.lastReveal.isSite) html += ' (Site: ' + escapeHtml(state.lastReveal.siteName || '') + ')';
+      html += '</p><p>' + escapeHtml(state.lastReveal.text) + '</p></div>';
+      if (state.lastReveal.siteName === 'Sealed Family Chapel' && state.encounterSites && state.encounterSites['Sealed Family Chapel']) {
+        var enc = state.encounterSites['Sealed Family Chapel'];
+        html += '<div class="chapel-panel"><details open><summary>Boxed text</summary><p>' + escapeHtml(enc.boxedText) + '</p></details>';
+        html += '<details><summary>C1</summary><p>' + escapeHtml(enc.areas.C1) + '</p></details>';
+        html += '<details><summary>C2</summary><p>' + escapeHtml(enc.areas.C2) + '</p></details>';
+        html += '<details><summary>C3</summary><p>' + escapeHtml(enc.areas.C3) + '</p></details>';
+        html += '<details><summary>Outcomes</summary><p>' + escapeHtml(enc.outcomes) + '</p></details></div>';
+      }
+      html += '<h3 class="wrap-heading">Wrap</h3>';
+      html += '<p>Hook: ' + (state.lastHook ? escapeHtml(state.lastHook.text) : '') + '</p>';
+      html += '<p>Approach: ' + (state.lastProgress ? state.lastProgress.approach : '') + '. Progress: ' + (state.lastProgress ? state.lastProgress.qualityLabel : '') + '</p>';
+      html += '<p>Pressure: ' + (state.lastPressure ? state.lastPressure.rollTotal : '') + '. Reveal: ' + (state.lastReveal ? state.lastReveal.roll : '') + '</p>';
+      html += '<p>Heat: ' + state.heat + '. Doom: ' + (state.doomEnabled ? state.doom : 'off') + '</p>';
+      html += '<label for="wiz-lead">Add lead</label><input type="text" id="wiz-lead" placeholder="Next lead">';
+      html += '<button type="button" id="btn-add-lead" class="wizard-btn secondary">Add lead</button>';
+      html += '<label for="wiz-clue">Add clue</label><input type="text" id="wiz-clue" placeholder="Clue">';
+      html += '<button type="button" id="btn-add-clue" class="wizard-btn secondary">Add clue</button>';
+      html += '<button type="button" id="btn-copy-discord" class="wizard-btn secondary">Copy Discord block</button>';
+      html += '<button type="button" id="btn-copy-avrae" class="wizard-btn secondary">Copy Avrae command</button>';
+    }
+    el.innerHTML = html;
+    if (!state.lastReveal) {
+      document.getElementById('btn-copy-reveal').addEventListener('click', function() { copyToClipboard('!r 1d8'); });
+      document.getElementById('btn-use-reveal').addEventListener('click', function() {
+        var input = document.getElementById('wiz-reveal-result');
+        var raw = input && input.value ? input.value.trim() : '';
+        var roll = parseDiscordRoll(raw);
+        if (roll === null) roll = parseInt(raw, 10);
+        if (isNaN(roll) || roll < 1 || roll > 8) { alert('Enter or paste the result from Discord (1 to 8).'); return; }
+        var revEntry = getEntry('reveal', roll);
+        var text = revEntry ? revEntry.text : '';
+        var trigger = state.heat >= 3 || state.doom >= 3 || (state.lastProgress && state.lastProgress.margin >= 10) || (state.lastPressure && state.lastPressure.rollTotal >= 9);
+        var convertSite = [2, 5, 7].indexOf(roll) !== -1;
+        if (trigger && convertSite) {
+          el.innerHTML = '<div class="roll-flow"><p>Reveal ' + roll + ' triggered a Site. Roll for site in Discord.</p><p>1. Copy: <span class="roll-cmd">!r 1d8</span></p><p>2. Paste in Discord, run Avrae.</p><p>3. Enter result (1 to 8):</p></div>' +
+            '<button type="button" id="btn-copy-site" class="wizard-btn secondary">Copy !r 1d8</button>' +
+            '<label for="wiz-site-result">Site result (1 to 8). Paste Avrae output or type.</label><input type="text" id="wiz-site-result" inputmode="numeric" placeholder="1-8" autocomplete="off">' +
+            '<button type="button" id="btn-use-site" class="wizard-btn">Use result</button>';
+          document.getElementById('btn-copy-site').addEventListener('click', function() { copyToClipboard('!r 1d8'); });
+          document.getElementById('btn-use-site').addEventListener('click', function() {
+            var siteInput = document.getElementById('wiz-site-result');
+            var rawSite = siteInput && siteInput.value ? siteInput.value.trim() : '';
+            var siteRoll = parseDiscordRoll(rawSite);
+            if (siteRoll === null) siteRoll = parseInt(rawSite, 10);
+            if (isNaN(siteRoll) || siteRoll < 1 || siteRoll > 8) { alert('Enter or paste the result from Discord (1 to 8).'); return; }
+            var siteEntry = getEntry('siteTable', siteRoll);
+            var siteName = siteEntry && siteEntry.name ? siteEntry.name : ('Site ' + siteRoll);
+            addLog('Reveal ' + roll + ' (from Discord). Site trigger. Site roll ' + siteRoll + ' (from Discord): ' + siteName, 'reveal');
+            state.lastReveal = { roll: roll, type: 'reveal', isSite: true, siteRoll: siteRoll, siteName: siteName, text: text };
+            renderRevealWrap();
+            document.getElementById('btn-next').disabled = false;
+            saveState();
+          });
+          return;
+        }
+        addLog('Reveal ' + roll + ' (from Discord): ' + text, 'reveal');
+        state.lastReveal = { roll: roll, type: 'reveal', isSite: false, siteRoll: null, siteName: null, text: text };
+        renderRevealWrap();
+        document.getElementById('btn-next').disabled = false;
+        saveState();
+      });
+      document.getElementById('btn-next').disabled = !state.lastReveal;
+      return;
+    }
+    document.getElementById('btn-add-lead').addEventListener('click', function() {
+      var input = document.getElementById('wiz-lead');
+      var t = (input && input.value || '').trim();
+      if (t) { state.notes.leads.push(t); input.value = ''; saveState(); addLog('Lead added: ' + t, 'general'); }
+    });
+    document.getElementById('btn-add-clue').addEventListener('click', function() {
+      var input = document.getElementById('wiz-clue');
+      var t = (input && input.value || '').trim();
+      if (t) { state.notes.clues.push(t); input.value = ''; saveState(); addLog('Clue added: ' + t, 'general'); }
+    });
+    document.getElementById('btn-copy-discord').addEventListener('click', function() {
+      var parts = [];
+      if (state.lastReveal && state.lastReveal.siteName === 'Sealed Family Chapel' && state.encounterSites && state.encounterSites['Sealed Family Chapel'])
+        parts.push('**Scene**\n' + state.encounterSites['Sealed Family Chapel'].boxedText);
+      parts.push('**Rolls** Progress: ' + (state.lastProgress ? state.lastProgress.total + ' (margin ' + state.lastProgress.margin + ')' : '') + ', Pressure: ' + (state.lastPressure ? state.lastPressure.rollTotal : '') + ', Reveal: ' + (state.lastReveal ? state.lastReveal.roll : ''));
+      parts.push('**Heat:** ' + state.heat + ' **Doom:** ' + (state.doomEnabled ? state.doom : 'off'));
+      parts.push('**Next lead:** ' + (state.lastProgress ? state.lastProgress.qualityLabel : ''));
+      var block = parts.join('\n\n');
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(block);
+      else { var ta = document.createElement('textarea'); ta.value = block; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }
+      addLog('Discord block copied', 'general');
+    });
+    document.getElementById('btn-copy-avrae').addEventListener('click', function() {
+      var cmd = '!check ' + sanitizeForAvrae(state.progressSkillName);
+      if (state.progressAdv) cmd += ' adv';
+      if (state.progressDis) cmd += ' dis';
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(cmd);
+      else { var ta = document.createElement('textarea'); ta.value = cmd; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }
+      addLog('Avrae command copied', 'general');
+    });
+    document.getElementById('btn-next').disabled = false;
+  }
+
+  document.getElementById('btn-back').addEventListener('click', function() {
+    if (state.currentStepIndex > 0) showStep(state.currentStepIndex - 1);
+  });
+
+  document.getElementById('btn-next').addEventListener('click', function() {
+    if (state.currentStepIndex < 4) showStep(state.currentStepIndex + 1);
+    else {
+      state.currentStepIndex = 0;
+      state.lastHook = null;
+      state.lastProgress = null;
+      state.lastPressure = null;
+      state.lastReveal = null;
+      state.episode++;
+      addLog('Episode complete. Starting next (episode ' + state.episode + ')', 'general');
+      showStep(0);
+    }
+  });
+
+  document.getElementById('btn-reroll').addEventListener('click', function() {
+    if (!confirm('Reroll this step and clear all later steps. Continue?')) return;
+    var step = state.currentStepIndex;
+    if (step === 1) { state.lastHook = null; state.lastProgress = null; state.lastPressure = null; state.lastReveal = null; addLog('Reroll: Hook cleared', 'general'); }
+    if (step === 2) { state.lastProgress = null; state.lastPressure = null; state.lastReveal = null; addLog('Reroll: Progress cleared', 'general'); }
+    if (step === 3) { state.lastPressure = null; state.lastReveal = null; addLog('Reroll: Pressure cleared', 'general'); }
+    if (step === 4) { state.lastReveal = null; addLog('Reroll: Reveal cleared', 'general'); }
+    renderStep(step);
+    document.getElementById('btn-next').disabled = !canGoNext();
+    saveState();
+  });
+
+  document.getElementById('btn-new-episode').addEventListener('click', function() {
+    state.currentStepIndex = 0;
+    state.lastHook = null;
+    state.lastProgress = null;
+    state.lastPressure = null;
+    state.lastReveal = null;
+    state.episode++;
+    addLog('Start New Episode (episode ' + state.episode + ')', 'general');
+    showStep(0);
+  });
+
+  document.getElementById('btn-reset-episode').addEventListener('click', function() {
+    if (!confirm('Reset episode only? Step data will be cleared. Notes, Heat, Doom, and Log are kept.')) return;
+    state.currentStepIndex = 0;
+    state.lastHook = null;
+    state.lastProgress = null;
+    state.lastPressure = null;
+    state.lastReveal = null;
+    addLog('Reset episode only', 'general');
+    showStep(0);
+  });
+
+  document.getElementById('wiz-import-pdf').addEventListener('click', function() {
+    document.getElementById('wiz-import-pdf-file').click();
+  });
+  document.getElementById('wiz-import-pdf-file').addEventListener('change', handlePdfImport);
+
+  document.getElementById('btn-reset-all').addEventListener('click', function() {
+    if (!confirm('Reset everything? All data including notes and log will be cleared.')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    state.caseDC = 15;
+    state.heat = 0;
+    state.doomEnabled = false;
+    state.doom = 0;
+    state.episode = 1;
+    state.currentStepIndex = 0;
+    state.lastHook = null;
+    state.lastProgress = null;
+    state.lastPressure = null;
+    state.lastReveal = null;
+    state.notes = { leads: [], clues: [] };
+    state.log = [];
+    state.disadvantageNextProgress = false;
+    state.nextClueCompromised = false;
+    state.progressSkillName = '';
+    state.progressModifier = 0;
+    state.progressAdv = false;
+    state.progressDis = false;
+    state.lastSkillPerApproach = { legwork: '', social: '', shadow: '', divine: '' };
+    state.profileSkills = {};
+    state.characterName = '';
+    state.characterGold = undefined;
+    state.tables = deepCopy(TABLES);
+    state.encounterSites = deepCopy(ENCOUNTER_SITES);
+    addLog('Reset everything', 'general');
+    showStep(0);
+    saveState();
+    updateCharacterHeader();
+  });
+
+  loadState();
+  updateCharacterHeader();
+  renderLog();
+  showStep(state.currentStepIndex);
+})();
+  </script>
+</body>
+</html>

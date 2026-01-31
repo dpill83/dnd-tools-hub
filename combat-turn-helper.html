@@ -4,1345 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>D&D 5e Combat Turn Helper</title>
-    <style>
-        :root {
-            --primary-color: #1a472a;
-            --primary-light: #2d5a3d;
-            --secondary-color: #8b4513;
-            --accent-color: #d4af37;
-            --background: #f5f5f5;
-            --surface: #ffffff;
-            --text: #333333;
-            --text-light: #666666;
-            --border: #dddddd;
-            --error: #dc3545;
-            --warning: #ffc107;
-            --success: #28a745;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --shadow-hover: rgba(0, 0, 0, 0.15);
-        }
-
-        /* Dark Mode CSS Variables */
-        .dark-mode {
-            --primary-color: #4a9b5f;
-            --primary-light: #5cb377;
-            --secondary-color: #a67c52;
-            --accent-color: #f4d03f;
-            --background: #1a1a1a;
-            --surface: #2d2d2d;
-            --text: #e0e0e0;
-            --text-light: #b0b0b0;
-            --border: #404040;
-            --error: #ff6b7a;
-            --warning: #ffd54f;
-            --success: #66bb6a;
-            --shadow: rgba(0, 0, 0, 0.3);
-            --shadow-hover: rgba(0, 0, 0, 0.4);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: var(--text);
-            background-color: var(--background);
-            padding: 1rem;
-            min-height: 100vh;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: var(--surface);
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px var(--shadow);
-            min-height: calc(100vh - 2rem);
-            transition: background-color 0.3s ease;
-        }
-
-
-        /* Reaction Widget (NOT YOUR TURN Screen) */
-        .reaction-widget-large {
-            background-color: rgba(0, 0, 0, 0.05);
-            border: 2px solid var(--primary-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            text-align: center;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
-
-        .dark-mode .reaction-widget-large {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .reaction-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .reaction-label-large {
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: var(--text);
-        }
-
-        .reaction-status-large {
-            min-width: 120px;
-            text-align: center;
-            font-size: 1rem;
-            padding: 0.5rem 1rem;
-            font-weight: 600;
-            border-radius: 4px;
-        }
-
-        /* tracker-status classes (only used by reaction widget on NOT YOUR TURN screen) */
-        .tracker-status.available {
-            background-color: var(--success);
-            color: white;
-            cursor: pointer;
-        }
-
-        .tracker-status.available:hover {
-            opacity: 0.8;
-        }
-
-        .tracker-status.used {
-            background-color: var(--error);
-            color: white;
-            cursor: pointer;
-        }
-
-        .tracker-status.used:hover {
-            opacity: 0.8;
-        }
-
-        .tracker-status.reserved {
-            background-color: var(--warning);
-            color: var(--text);
-            cursor: not-allowed;
-        }
-
-        .reaction-hint {
-            font-size: 0.875rem;
-            color: var(--text-light);
-            margin: 0;
-        }
-
-        /* Reactions Reference */
-        .reactions-reference {
-            background-color: rgba(0, 0, 0, 0.03);
-            border-left: 4px solid var(--accent-color);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .dark-mode .reactions-reference {
-            background-color: rgba(255, 255, 255, 0.03);
-        }
-
-        .reactions-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .reaction-item {
-            font-size: 0.875rem;
-            color: var(--text);
-            padding: 0.5rem;
-            background-color: rgba(0, 0, 0, 0.02);
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .reaction-item:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-
-        .dark-mode .reaction-item {
-            background-color: rgba(255, 255, 255, 0.02);
-        }
-
-        .dark-mode .reaction-item:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .reaction-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .reaction-item-title {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .reaction-item-subtitle {
-            color: var(--text-light);
-        }
-
-        .reaction-item-expand-icon {
-            font-size: 0.75rem;
-            transition: transform 0.2s;
-            color: var(--text-light);
-        }
-
-        .reaction-item.expanded .reaction-item-expand-icon {
-            transform: rotate(90deg);
-        }
-
-        .reaction-item-details {
-            display: none;
-            margin-top: 0.75rem;
-            padding-top: 0.75rem;
-            border-top: 1px solid var(--border);
-            font-size: 0.85rem;
-            line-height: 1.6;
-        }
-
-        .reaction-item.expanded .reaction-item-details {
-            display: block;
-        }
-
-        .reaction-item-details p {
-            margin-bottom: 0.5rem;
-        }
-
-        .reaction-item-details ul {
-            margin-left: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .reaction-item-details li {
-            margin-bottom: 0.25rem;
-        }
-
-        .reaction-page-numbers {
-            margin-top: 0.5rem;
-            padding-top: 0.5rem;
-            border-top: 1px solid var(--border);
-            font-size: 0.8rem;
-            color: var(--text-light);
-            font-style: italic;
-        }
-
-        /* Screen Views */
-        .screen {
-            display: none;
-        }
-
-        .screen.active {
-            display: block;
-        }
-
-        /* End Turn Container */
-        .end-turn-container {
-            background-color: var(--surface);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 4px var(--shadow);
-        }
-
-        .headline {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        /* End Turn screen specific spacing */
-        #screen-end-turn .headline {
-            margin-bottom: 1rem;
-        }
-
-        .headline.not-your-turn {
-            color: var(--text-light);
-        }
-
-        /* Button Grid */
-        .button-grid {
-            display: grid;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        /* Action grid for organizing action buttons */
-        .action-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-        }
-
-        @media (max-width: 480px) {
-            .action-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        /* Collapsible Section */
-        .collapsible-section {
-            margin-bottom: 1rem;
-        }
-
-        .collapsible-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem 1rem;
-            background-color: rgba(0, 0, 0, 0.03);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
-        .dark-mode .collapsible-header {
-            background-color: rgba(255, 255, 255, 0.03);
-        }
-
-        .collapsible-header:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-
-        .dark-mode .collapsible-header:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .collapsible-header-text {
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .collapsible-icon {
-            transition: transform 0.2s;
-            color: var(--text-light);
-        }
-
-        .collapsible-section.expanded .collapsible-icon {
-            transform: rotate(90deg);
-        }
-
-        .collapsible-content {
-            display: none;
-            margin-top: 0.75rem;
-        }
-
-        .collapsible-section.expanded .collapsible-content {
-            display: block;
-        }
-
-        /* Spells Panel */
-        .spells-panel {
-            margin: 1rem 0;
-        }
-
-        .spells-section {
-            margin-bottom: 1rem;
-        }
-
-        .spells-section-title {
-            font-weight: 600;
-            font-size: 0.95rem;
-            color: var(--text);
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .spells-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .spell-item {
-            padding: 0.5rem 0.75rem;
-            background-color: rgba(0, 0, 0, 0.02);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 0.9rem;
-            color: var(--text);
-        }
-
-        .dark-mode .spell-item {
-            background-color: rgba(255, 255, 255, 0.02);
-        }
-
-        .spell-slots-info {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            margin-top: 0.25rem;
-        }
-
-        .spell-slots-remaining {
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        .spell-slots-empty {
-            color: var(--text-light);
-            font-style: italic;
-        }
-
-        .spell-item {
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-        }
-
-        .spell-item:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-            transform: translateX(2px);
-        }
-
-        .dark-mode .spell-item:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .spell-item:active {
-            transform: translateX(0);
-        }
-
-        /* Spell Selection Screen */
-        .spell-selection-content {
-            margin: 1rem 0;
-        }
-
-        /* Turn Log */
-        .turn-log {
-            margin: 1rem 0;
-            padding: 0.75rem;
-            background-color: rgba(0, 0, 0, 0.02);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            font-size: 0.875rem;
-        }
-
-        .dark-mode .turn-log {
-            background-color: rgba(255, 255, 255, 0.02);
-        }
-
-        .turn-log-header {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .turn-log-clear {
-            font-size: 0.75rem;
-            color: var(--text-light);
-            cursor: pointer;
-            text-decoration: underline;
-        }
-
-        .turn-log-clear:hover {
-            color: var(--text);
-        }
-
-        .turn-log-entry {
-            padding: 0.25rem 0;
-            color: var(--text);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .turn-log-entry:last-child {
-            border-bottom: none;
-        }
-
-        .turn-log-entry-time {
-            color: var(--text-light);
-            font-size: 0.75rem;
-            margin-right: 0.5rem;
-        }
-
-        .turn-log-empty {
-            color: var(--text-light);
-            font-style: italic;
-            text-align: center;
-            padding: 0.5rem 0;
-        }
-
-        /* Spell Slot Spending Dialog */
-        .spell-slot-dialog {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .spell-slot-dialog.active {
-            display: flex;
-        }
-
-        .spell-slot-dialog-content {
-            background-color: var(--surface);
-            padding: 1.5rem;
-            border-radius: 8px;
-            max-width: 400px;
-            width: 90%;
-        }
-
-        .spell-slot-dialog-message {
-            margin-bottom: 1rem;
-            font-size: 1rem;
-            line-height: 1.5;
-        }
-
-        .spell-slot-dialog-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-        }
-
-        .collapsible-section.expanded .collapsible-content {
-            display: block;
-        }
-
-        /* Minor buttons container (Settings and Reset) */
-        .minor-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .minor-buttons .btn {
-            flex: 1;
-        }
-
-        /* End Turn screen - reduce button grid spacing */
-        #screen-end-turn .button-grid {
-            margin-bottom: 0;
-            margin-top: 1rem;
-        }
-
-        .btn {
-            padding: 1rem 1.5rem;
-            font-size: 1.125rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-light);
-            box-shadow: 0 4px 8px var(--shadow-hover);
-        }
-
-        .btn-primary:active {
-            transform: scale(0.98);
-        }
-
-        .btn-secondary {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background-color: #6b3410;
-            box-shadow: 0 4px 8px var(--shadow-hover);
-        }
-
-        .btn-accent {
-            background-color: var(--accent-color);
-            color: #1a1a1a;
-            font-weight: 600;
-        }
-
-        .btn-accent:hover {
-            background-color: #c19d2e;
-            box-shadow: 0 4px 8px var(--shadow-hover);
-        }
-
-        .dark-mode .btn-accent {
-            color: #1a1a1a;
-        }
-
-        .btn-danger {
-            background-color: var(--error);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #c82333;
-            box-shadow: 0 4px 8px var(--shadow-hover);
-        }
-
-        .btn-success {
-            background-color: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background-color: #218838;
-            box-shadow: 0 4px 8px var(--shadow-hover);
-        }
-
-        .btn-small {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            min-height: 44px;
-        }
-
-        /* Big Button Mode */
-        .big-button-mode .btn {
-            min-height: 80px;
-            font-size: 1.5rem;
-            padding: 1.25rem 2rem;
-        }
-
-        .big-button-mode .btn-small {
-            min-height: 60px;
-            font-size: 1.125rem;
-            padding: 0.75rem 1.5rem;
-        }
-
-        /* DM Panel */
-
-        /* Detail Content */
-        .detail-content {
-            margin-bottom: 2rem;
-            line-height: 1.8;
-        }
-
-        .detail-content p {
-            margin-bottom: 1rem;
-        }
-
-        .detail-content ul {
-            margin-left: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .detail-content li {
-            margin-bottom: 0.5rem;
-        }
-
-        /* D&D Character Sheet Style Speed Display */
-        .speed-display {
-            margin: 1.5rem auto;
-            max-width: 200px;
-            border: 2px solid var(--text);
-            border-radius: 6px;
-            background: var(--surface);
-            overflow: hidden;
-            box-shadow: 0 2px 4px var(--shadow);
-        }
-
-        .speed-display-value {
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            padding: 1rem;
-            text-align: center;
-            border-bottom: 2px solid var(--text);
-        }
-
-        .speed-display-value .speed-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--text);
-            line-height: 1.2;
-        }
-
-        .speed-display-value .speed-unit {
-            font-size: 1.25rem;
-            color: var(--text);
-            margin-left: 0.25rem;
-        }
-
-        .speed-display-value .speed-type {
-            font-size: 0.75rem;
-            color: var(--text-light);
-            text-transform: uppercase;
-            margin-top: 0.25rem;
-            letter-spacing: 0.5px;
-        }
-
-        .speed-display-label {
-            padding: 0.5rem;
-            text-align: center;
-            background: var(--surface);
-            font-weight: 600;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text);
-        }
-
-        .dark-mode .speed-display-value {
-            background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%);
-        }
-
-        /* Modal Body (used in attack tree) */
-        .modal-body {
-            margin-bottom: 1.5rem;
-            line-height: 1.8;
-        }
-
-        .modal-body p {
-            margin-bottom: 0.75rem;
-        }
-
-        .modal-body ul {
-            margin-left: 1.5rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .modal-body li {
-            margin-bottom: 0.5rem;
-        }
-
-        /* Decision Helper Box */
-        .decision-helper-box {
-            display: none;
-            background-color: rgba(0, 0, 0, 0.03);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.75rem;
-            margin-bottom: 1rem;
-            font-size: 0.875rem;
-        }
-
-        .dark-mode .decision-helper-box {
-            background-color: rgba(255, 255, 255, 0.03);
-        }
-
-        .decision-helper-prompt {
-            color: var(--text);
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-            padding: 0.25rem;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-        }
-
-        .decision-helper-prompt:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-
-        .dark-mode .decision-helper-prompt:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .decision-helper-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-
-        .decision-helper-chip {
-            background-color: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 0.375rem 0.75rem;
-            font-size: 0.8rem;
-            color: var(--text);
-            cursor: pointer;
-            transition: all 0.2s;
-            touch-action: manipulation;
-        }
-
-        .decision-helper-chip:hover {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        .decision-helper-chip:active {
-            transform: scale(0.95);
-        }
-
-        /* Attack Tree */
-        .attack-tree {
-            display: none;
-        }
-
-        .attack-tree.active {
-            display: block;
-        }
-
-        .attack-step {
-            display: none;
-        }
-
-        .attack-step.active {
-            display: block;
-        }
-
-        .help-text {
-            font-size: 0.875rem;
-            color: var(--text-light);
-            font-style: italic;
-            margin: 0.5rem 0;
-            padding: 0.5rem;
-            background-color: rgba(0, 0, 0, 0.05);
-            border-radius: 4px;
-            transition: background-color 0.3s ease;
-        }
-
-        .dark-mode .help-text {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        /* End Turn Checklist */
-        .checklist-screen {
-            list-style: none;
-            margin-bottom: 1rem;
-            padding: 0;
-        }
-
-        /* End Turn screen - reduce checklist spacing */
-        #screen-end-turn .checklist-screen {
-            margin-bottom: 0.5rem;
-        }
-
-        .checklist-screen li {
-            padding: 0.75rem;
-            margin-bottom: 0.5rem;
-            background-color: rgba(0, 0, 0, 0.03);
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background-color 0.3s ease;
-        }
-
-        .dark-mode .checklist-screen li {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .checklist-screen .status {
-            padding: 0.25rem 0.75rem;
-            border-radius: 4px;
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-
-        .status.used {
-            background-color: var(--error);
-            color: white;
-        }
-
-        .status.unused {
-            background-color: var(--success);
-            color: white;
-        }
-
-        .status.available {
-            background-color: var(--success);
-            color: white;
-        }
-
-        .status.reserved {
-            background-color: var(--warning);
-            color: var(--text);
-        }
-
-        /* Navigation */
-        .nav-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .nav-buttons .btn {
-            flex: 1;
-        }
-
-
-        /* Responsive */
-        @media (max-width: 480px) {
-            .container {
-                padding: 0.75rem;
-            }
-
-            .headline {
-                font-size: 1.5rem;
-            }
-
-            .btn {
-                font-size: 1rem;
-                padding: 0.875rem 1.25rem;
-            }
-        }
-
-        /* Dash Active Note */
-        .dash-note {
-            background-color: rgba(74, 155, 95, 0.1);
-            border-left: 4px solid var(--primary-color);
-            padding: 0.75rem;
-            margin-bottom: 1rem;
-            border-radius: 4px;
-            font-size: 0.875rem;
-            transition: background-color 0.3s ease;
-        }
-
-        .dark-mode .dash-note {
-            background-color: rgba(74, 155, 95, 0.2);
-        }
-
-        /* DM Panel (compact) */
-        .dm-panel-compact {
-            margin-bottom: 1rem;
-            padding: 0.75rem;
-            background-color: rgba(212, 175, 55, 0.1);
-            border-left: 3px solid var(--accent-color);
-            border-radius: 4px;
-            font-size: 0.875rem;
-            text-align: center;
-        }
-
-        .dark-mode .dm-panel-compact {
-            background-color: rgba(244, 208, 63, 0.1);
-        }
-
-        .dm-panel-compact .dm-label {
-            font-weight: 600;
-            color: var(--secondary-color);
-            margin-bottom: 0.25rem;
-        }
-
-        .dark-mode .dm-panel-compact .dm-label {
-            color: var(--accent-color);
-        }
-
-        .dm-panel-compact .dm-resources {
-            display: inline-flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            justify-content: center;
-        }
-
-        .dm-panel-compact .dm-resource-item {
-            display: inline-block;
-            padding: 0.2rem 0.5rem;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            font-size: 0.8rem;
-        }
-
-        .dark-mode .dm-panel-compact .dm-resource-item {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Character Setup (compact) */
-        .character-setup-compact {
-            margin-top: 0.75rem;
-            padding: 0.75rem;
-            background-color: rgba(0, 0, 0, 0.03);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 0.85rem;
-        }
-
-        .dark-mode .character-setup-compact {
-            background-color: rgba(255, 255, 255, 0.03);
-        }
-
-        .setup-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.75rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .setup-row label {
-            font-weight: 600;
-            color: var(--text);
-            white-space: nowrap;
-        }
-
-        .setup-row select {
-            flex: 1;
-            padding: 0.45rem 0.6rem;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            background-color: var(--surface);
-            color: var(--text);
-        }
-
-        .setup-toggles {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            justify-content: center;
-        }
-
-        .setup-toggles label {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            color: var(--text);
-        }
-
-        .setup-toggles input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-        }
-
-        /* Toast Notification */
-        .toast {
-            position: fixed;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background-color: var(--error);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            z-index: 10000;
-            opacity: 0;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            font-size: 0.9rem;
-            font-weight: 500;
-            max-width: 90%;
-            text-align: center;
-        }
-
-        .toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        /* Reset Confirm Dialog */
-        .reset-dialog {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .reset-dialog.active {
-            display: flex;
-        }
-
-        .reset-dialog-content {
-            background-color: var(--surface);
-            padding: 1.5rem;
-            border-radius: 8px;
-            max-width: 400px;
-            width: 90%;
-        }
-
-        .reset-dialog-message {
-            margin-bottom: 1.5rem;
-            font-size: 1.125rem;
-        }
-
-        .reset-dialog-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-        }
-
-        /* End Turn Safety Net Dialog */
-        .end-turn-dialog {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .end-turn-dialog.active {
-            display: flex;
-        }
-
-        .end-turn-dialog-content {
-            background-color: var(--surface);
-            padding: 1.5rem;
-            border-radius: 8px;
-            max-width: 400px;
-            width: 90%;
-        }
-
-        .end-turn-dialog-message {
-            margin-bottom: 1rem;
-            font-size: 1rem;
-            line-height: 1.5;
-        }
-
-        .end-turn-dialog-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            flex-wrap: wrap;
-        }
-
-        .end-turn-dialog-quick-actions {
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border);
-            display: none;
-        }
-
-        .end-turn-dialog-quick-actions.show {
-            display: block;
-        }
-
-
-        .end-turn-dialog-quick-buttons {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        /* Import Character Confirmation Dialog */
-        .import-confirm-dialog {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .import-confirm-dialog.active {
-            display: flex;
-        }
-
-        .import-confirm-dialog-content {
-            background-color: var(--surface);
-            padding: 1.5rem;
-            border-radius: 8px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .import-confirm-dialog-header {
-            margin-bottom: 1rem;
-        }
-
-        .import-confirm-dialog-header h2 {
-            margin: 0;
-            font-size: 1.25rem;
-            color: var(--text);
-        }
-
-        .import-confirm-dialog-body {
-            flex: 1;
-            overflow-y: auto;
-            margin-bottom: 1.5rem;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        .import-confirm-dialog-body .profile-item {
-            margin-bottom: 0.75rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .import-confirm-dialog-body .profile-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .import-confirm-dialog-body .profile-label {
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 0.25rem;
-        }
-
-        .import-confirm-dialog-body .profile-value {
-            color: var(--text-light);
-        }
-
-        .import-confirm-dialog-body .profile-value.empty {
-            color: var(--text-light);
-            font-style: italic;
-        }
-
-        .import-confirm-dialog-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            flex-wrap: wrap;
-        }
-
-        /* Default hidden elements (JS will reveal when needed) */
-        #dash-note {
-            display: none;
-        }
-
-        /* Used buttons grid */
-        .used-grid {
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .btn.used {
-            background-color: rgba(0, 0, 0, 0.1);
-            opacity: 0.8;
-        }
-
-        .dark-mode .btn.used {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .btn.used:hover {
-            opacity: 0.9;
-        }
-
-        /* Common utility classes (avoid inline styles) */
-        .start-turn-grid {
-            margin-bottom: 1.5rem;
-        }
-
-        .section-title {
-            margin-bottom: 0.75rem;
-            color: var(--primary-color);
-            font-size: 1rem;
-        }
-
-        /* Tooltip */
-        .help-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background-color: var(--text-light);
-            color: var(--surface);
-            font-size: 0.75rem;
-            font-weight: bold;
-            cursor: help;
-            margin-left: 0.5rem;
-            vertical-align: middle;
-            transition: background-color 0.2s;
-        }
-
-        .help-icon:hover {
-            background-color: var(--primary-color);
-        }
-
-        .tooltip {
-            position: relative;
-            display: inline-block;
-        }
-
-        .tooltip-content {
-            visibility: hidden;
-            position: absolute;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--text);
-            color: var(--surface);
-            text-align: left;
-            padding: 0.75rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            white-space: normal;
-            width: 250px;
-            z-index: 1000;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            opacity: 0;
-            transition: opacity 0.3s, visibility 0.3s;
-        }
-
-        .tooltip-content::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 6px;
-            border-style: solid;
-            border-color: var(--text) transparent transparent transparent;
-        }
-
-        .tooltip:hover .tooltip-content,
-        .tooltip.active .tooltip-content {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .hint-text {
-            text-align: center;
-            margin-top: 1.5rem;
-            color: var(--text-light);
-            font-size: 0.9rem;
-        }
-
-        .tight-top {
-            margin-top: 0.5rem;
-        }
-
-        .muted-center {
-            text-align: center;
-            color: var(--text-light);
-            margin: 0;
-        }
-    </style>
+    <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="combat-turn-helper.css">
     <!-- PDF.js for PDF text extraction -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
@@ -1359,8 +22,15 @@
             configureWorker();
         })();
     </script>
+    <script src="character-sheet-importer.js"></script>
+    <script src="theme.js"></script>
 </head>
 <body>
+    <header class="combat-tool-header">
+        <a href="index.html" class="theme-toggle" aria-label="Go to home"><span class="theme-icon">&#127968;</span></a>
+        <span class="combat-tool-title">Combat Turn Helper</span>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode"><span class="theme-icon">&#127769;</span></button>
+    </header>
     <div class="container">
         <!-- Home Screen -->
         <div class="screen active" id="screen-home">
@@ -1371,12 +41,12 @@
                     <span class="collapsible-icon">▶</span>
                 </div>
                 <div class="collapsible-content">
-                    <div style="padding: 0.75rem; background-color: rgba(0, 0, 0, 0.03); border-radius: 4px; font-size: 0.875rem; line-height: 1.6;">
-                        <p style="margin-bottom: 0.5rem;"><strong>🏃 Movement:</strong> Move up to your speed. You can split this before and after your action.</p>
-                        <p style="margin-bottom: 0.5rem;"><strong>⚔️ Action:</strong> Most common actions are Attack or Cast a Spell. You can also Dash, Dodge, Help, and more.</p>
-                        <p style="margin-bottom: 0.5rem;"><strong>✨ Bonus Action:</strong> Only if you have a feature that grants one (like Rage, Cunning Action, or a spell).</p>
-                        <p style="margin-bottom: 0.5rem;"><strong>🤏 Interaction:</strong> One free object interaction per turn (draw weapon, open door, pick up item).</p>
-                        <p style="margin: 0;"><strong>⚡ Reaction:</strong> Tracked on the "NOT YOUR TURN" screen. You get one per round.</p>
+                    <div class="help-content-box">
+                        <p><strong>🏃 Movement:</strong> Move up to your speed. You can split this before and after your action.</p>
+                        <p><strong>⚔️ Action:</strong> Most common actions are Attack or Cast a Spell. You can also Dash, Dodge, Help, and more.</p>
+                        <p><strong>✨ Bonus Action:</strong> Only if you have a feature that grants one (like Rage, Cunning Action, or a spell).</p>
+                        <p><strong>🤏 Interaction:</strong> One free object interaction per turn (draw weapon, open door, pick up item).</p>
+                        <p><strong>⚡ Reaction:</strong> Tracked on the "NOT YOUR TURN" screen. You get one per round.</p>
                     </div>
                 </div>
             </div>
@@ -1420,7 +90,8 @@
             <!-- Common Reactions Reference -->
             <div class="reactions-reference" id="reactions-reference-container">
                 <h3 class="section-title">Common Reactions:</h3>
-                <div class="reactions-list">
+                <div class="reactions-list" id="reactions-list">
+                    <!-- Non-spell reactions (always shown) -->
                     <div class="reaction-item" onclick="toggleReactionDetail(this)">
                         <div class="reaction-item-header">
                             <div class="reaction-item-title">
@@ -1436,71 +107,6 @@
                             <p>You can avoid provoking an opportunity attack by taking the Disengage action. You also don't provoke an opportunity attack when you teleport or when someone or something moves you without using your movement, action, or reaction.</p>
                             <div class="reaction-page-numbers">
                                 PHB 2014: p.195 | PHB 2024: [PAGE_PLACEHOLDER]
-                            </div>
-                        </div>
-                    </div>
-                    <div class="reaction-item" onclick="toggleReactionDetail(this)">
-                        <div class="reaction-item-header">
-                            <div class="reaction-item-title">
-                                <span>🛡️</span>
-                                <strong>Shield</strong>
-                                <span class="reaction-item-subtitle">- When hit by an attack (+5 AC)</span>
-                            </div>
-                            <span class="reaction-item-expand-icon">▶</span>
-                        </div>
-                        <div class="reaction-item-details">
-                            <p><strong>1st-level abjuration spell</strong></p>
-                            <p><strong>Casting Time:</strong> 1 reaction, which you take when you are hit by an attack or targeted by the magic missile spell</p>
-                            <p><strong>Range:</strong> Self</p>
-                            <p><strong>Components:</strong> V, S</p>
-                            <p><strong>Duration:</strong> 1 round</p>
-                            <p>An invisible barrier of magical force appears and protects you. Until the start of your next turn, you have a +5 bonus to AC, including against the triggering attack, and you take no damage from magic missile.</p>
-                            <div class="reaction-page-numbers">
-                                PHB 2014: p.275 | PHB 2024: [PAGE_PLACEHOLDER]
-                            </div>
-                        </div>
-                    </div>
-                    <div class="reaction-item" onclick="toggleReactionDetail(this)">
-                        <div class="reaction-item-header">
-                            <div class="reaction-item-title">
-                                <span>✨</span>
-                                <strong>Counterspell</strong>
-                                <span class="reaction-item-subtitle">- When enemy casts a spell</span>
-                            </div>
-                            <span class="reaction-item-expand-icon">▶</span>
-                        </div>
-                        <div class="reaction-item-details">
-                            <p><strong>3rd-level abjuration spell</strong></p>
-                            <p><strong>Casting Time:</strong> 1 reaction, which you take when you see a creature within 60 feet of you casting a spell</p>
-                            <p><strong>Range:</strong> 60 feet</p>
-                            <p><strong>Components:</strong> S</p>
-                            <p><strong>Duration:</strong> Instantaneous</p>
-                            <p>You attempt to interrupt a creature in the process of casting a spell. If the creature is casting a spell of 3rd level or lower, its spell fails and has no effect. If it is casting a spell of 4th level or higher, make an ability check using your spellcasting ability. The DC equals 10 + the spell's level. On a success, the creature's spell fails and has no effect.</p>
-                            <p><strong>At Higher Levels:</strong> When you cast this spell using a spell slot of 4th level or higher, the interrupted spell has no effect if its level is less than or equal to the level of the spell slot you used.</p>
-                            <div class="reaction-page-numbers">
-                                PHB 2014: p.228 | PHB 2024: [PAGE_PLACEHOLDER]
-                            </div>
-                        </div>
-                    </div>
-                    <div class="reaction-item" onclick="toggleReactionDetail(this)">
-                        <div class="reaction-item-header">
-                            <div class="reaction-item-title">
-                                <span>⚡</span>
-                                <strong>Absorb Elements</strong>
-                                <span class="reaction-item-subtitle">- When hit by elemental damage</span>
-                            </div>
-                            <span class="reaction-item-expand-icon">▶</span>
-                        </div>
-                        <div class="reaction-item-details">
-                            <p><strong>1st-level abjuration spell</strong></p>
-                            <p><strong>Casting Time:</strong> 1 reaction, which you take when you take acid, cold, fire, lightning, or thunder damage</p>
-                            <p><strong>Range:</strong> Self</p>
-                            <p><strong>Components:</strong> S</p>
-                            <p><strong>Duration:</strong> 1 round</p>
-                            <p>The spell captures some of the incoming energy, lessening its effect on you and storing it for your next melee attack. You have resistance to the triggering damage type until the start of your next turn. Also, the first time you hit with a melee attack on your next turn, the target takes an extra 1d6 damage of the triggering type, and the spell ends.</p>
-                            <p><strong>At Higher Levels:</strong> When you cast this spell using a spell slot of 2nd level or higher, the extra damage increases by 1d6 for each slot level above 1st.</p>
-                            <div class="reaction-page-numbers">
-                                PHB 2014: [PAGE_PLACEHOLDER] | PHB 2024: [PAGE_PLACEHOLDER]
                             </div>
                         </div>
                     </div>
@@ -1523,6 +129,8 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Spell reactions will be dynamically added here -->
+                    <div id="spell-reactions-container"></div>
                 </div>
             </div>
 
@@ -1972,6 +580,11 @@
                     <button class="btn btn-secondary btn-small" onclick="closeResetDialog()">Cancel</button>
                     <button class="btn btn-danger btn-small" onclick="confirmReset()">Reset All</button>
                 </div>
+                <div class="reset-dialog-rest">
+                    <span class="reset-dialog-rest-label">Rest:</span>
+                    <button class="btn btn-secondary btn-small" onclick="handleLongRest()">Long Rest</button>
+                    <button class="btn btn-secondary btn-small" onclick="handleShortRest()">Short Rest</button>
+                </div>
             </div>
         </div>
 
@@ -2285,6 +898,9 @@
             if (referenceContainer) {
                 referenceContainer.style.display = prefs.trackReaction ? 'block' : 'none';
             }
+            
+            // Update reaction spells list
+            updateReactionSpells();
         }
 
         // Update home buttons - dynamically create and place in available/used sections
@@ -2567,10 +1183,16 @@
 
         // Handle spell cast
         function handleSpellCast(spellName, level, actionType) {
-            // level 0 = cantrip, level >= 1 = leveled spell
+            // level 0 = cantrip, level >= 1 = leveled spell (from UI)
             // actionType = 'action' or 'bonus'
-            
-            if (level === 0) {
+            // Resolve actual level from profile so cantrips never consume slots.
+            const profile = getActiveCharacterProfile();
+            let actualLevel = getSpellLevelForSlot(spellName, profile);
+            if (profile && profile.cantrips && profile.cantrips.some(c => String(c).trim().toLowerCase() === String(spellName).trim().toLowerCase())) {
+                actualLevel = 0;
+            }
+
+            if (actualLevel === 0) {
                 // Cantrip - no slot needed, just log it and mark action as used
                 logSpellCast(spellName, 0);
                 if (actionType === 'action') {
@@ -2582,45 +1204,89 @@
                 saveState();
                 updateUI();
                 showToast(`Cast: ${spellName}`);
-                // Return to home screen
                 showScreen('screen-home');
-            } else {
-                // Leveled spell - check if slots available and prompt
-                const profile = getActiveCharacterProfile();
-                if (!profile || !profile.spellSlots || !profile.spellSlots[level]) {
-                    showToast(`No spell slots available for level ${level}`);
-                    return;
-                }
+                return;
+            }
 
-                const totalSlots = profile.spellSlots[level] || 0;
-                const usedSlots = state.spellSlotsUsed[level] || 0;
-                const remainingSlots = totalSlots - usedSlots;
-
-                if (remainingSlots <= 0) {
-                    showToast(`No level ${level} spell slots remaining`);
-                    return;
-                }
-
-                // Store pending cast (including action type)
-                pendingSpellCast = { spellName, level, actionType };
-
-                // Show prompt dialog if confirmSpends is enabled, otherwise auto-confirm
+            // Leveled spell - check for free cast (X/LR, X/SR) before slot
+            const freeInfo = getSpellFreeCastInfo(spellName, profile);
+            if (freeInfo && freeInfo.freeUsesRemaining > 0) {
+                pendingSpellCast = {
+                    spellName,
+                    level: actualLevel,
+                    actionType,
+                    isFreeCast: true,
+                    freeUseRestType: freeInfo.freeUseRestType,
+                    freeUsesRemaining: freeInfo.freeUsesRemaining
+                };
                 if (prefs.confirmSpends) {
                     const dialog = document.getElementById('spell-slot-dialog');
                     const message = document.getElementById('spell-slot-dialog-message');
-                    message.textContent = `Cast ${spellName}? Spend a level ${level} spell slot? (${remainingSlots - 1}/${totalSlots} remaining)`;
+                    message.textContent = `Use free cast of ${spellName}? (${freeInfo.freeUsesRemaining}/${freeInfo.freeUsesMax} ${freeInfo.freeUseRestType} remaining)`;
                     dialog.classList.add('active');
                 } else {
                     confirmSpellSlotSpend();
                 }
+                return;
+            }
+
+            // Leveled spell - use slot
+            if (!profile || !profile.spellSlots || !profile.spellSlots[actualLevel]) {
+                showToast(`No spell slots available for level ${actualLevel}`);
+                return;
+            }
+
+            const totalSlots = profile.spellSlots[actualLevel] || 0;
+            const usedSlots = state.spellSlotsUsed[actualLevel] || 0;
+            const remainingSlots = totalSlots - usedSlots;
+
+            if (remainingSlots <= 0) {
+                showToast(`No level ${actualLevel} spell slots remaining`);
+                return;
+            }
+
+            pendingSpellCast = { spellName, level: actualLevel, actionType };
+
+            if (prefs.confirmSpends) {
+                const dialog = document.getElementById('spell-slot-dialog');
+                const message = document.getElementById('spell-slot-dialog-message');
+                message.textContent = `Cast ${spellName}? Spend a level ${actualLevel} spell slot? (${remainingSlots - 1}/${totalSlots} remaining)`;
+                dialog.classList.add('active');
+            } else {
+                confirmSpellSlotSpend();
             }
         }
 
-        // Confirm spell slot spending
+        // Confirm spell slot spending (or free cast)
         function confirmSpellSlotSpend() {
             if (!pendingSpellCast) return;
 
-            const { spellName, level, actionType } = pendingSpellCast;
+            const { spellName, level, actionType, isFreeCast, freeUseRestType, freeUsesRemaining } = pendingSpellCast;
+
+            if (isFreeCast) {
+                const characterId = getActiveCharacterId();
+                const next = Math.max(0, (freeUsesRemaining || 0) - 1);
+                setSpellFreeUsesRemaining(characterId, spellName, next);
+
+                if (actionType === 'action') {
+                    state.action = 'used';
+                    state.actionUsedBy = 'spell';
+                } else if (actionType === 'bonus') {
+                    state.bonusAction = 'used';
+                }
+                logSpellCast(spellName, level);
+                saveState();
+                closeSpellSlotDialog();
+                updateUI();
+                const profile = getActiveCharacterProfile();
+                const normalized = CharacterSheetImporter.getNormalizedSpells(profile);
+                const spell = normalized.find(s => s.name === spellName);
+                const max = spell?.freeUsesMax ?? 1;
+                showToast(`Cast: ${spellName} (${next}/${max} ${freeUseRestType} remaining)`);
+                pendingSpellCast = null;
+                showScreen('screen-home');
+                return;
+            }
 
             // Decrement slot
             if (!state.spellSlotsUsed[level]) {
@@ -2628,34 +1294,23 @@
             }
             state.spellSlotsUsed[level]++;
 
-            // Mark action/bonus action as used
             if (actionType === 'action') {
                 state.action = 'used';
                 state.actionUsedBy = 'spell';
             } else if (actionType === 'bonus') {
                 state.bonusAction = 'used';
             }
-
-            // Log the cast
             logSpellCast(spellName, level);
-
-            // Save state
             saveState();
-
-            // Close dialog
             closeSpellSlotDialog();
-
-            // Update UI
             updateUI();
 
-            // Show toast
             const profile = getActiveCharacterProfile();
             const totalSlots = profile?.spellSlots?.[level] || 0;
             const usedSlots = state.spellSlotsUsed[level] || 0;
             const remainingSlots = totalSlots - usedSlots;
             showToast(`Cast: ${spellName} (${remainingSlots}/${totalSlots} slots remaining)`);
 
-            // Clear pending and return to home
             pendingSpellCast = null;
             showScreen('screen-home');
         }
@@ -3359,6 +2014,39 @@
             document.getElementById('reset-dialog').classList.remove('active');
         }
 
+        function resetFreeUsesForRest(restType) {
+            const profile = getActiveCharacterProfile();
+            const characterId = getActiveCharacterId();
+            if (!profile || !characterId) return;
+            const normalized = CharacterSheetImporter.getNormalizedSpells(profile);
+            const map = loadSpellFreeUsesState();
+            if (!map[characterId]) map[characterId] = {};
+            let changed = false;
+            normalized.forEach(spell => {
+                if (spell.freeUseRestType === restType && spell.freeUsesMax > 0) {
+                    map[characterId][spell.name] = spell.freeUsesMax;
+                    changed = true;
+                }
+            });
+            if (changed) saveSpellFreeUsesState(map);
+        }
+
+        function handleLongRest() {
+            resetFreeUsesForRest('LR');
+            state.spellSlotsUsed = {};
+            saveState();
+            closeResetDialog();
+            updateUI();
+            showToast('Long rest: spell slots and 1/LR free casts restored');
+        }
+
+        function handleShortRest() {
+            resetFreeUsesForRest('SR');
+            closeResetDialog();
+            updateUI();
+            showToast('Short rest: 1/SR free casts restored');
+        }
+
         function confirmReset() {
             // Clear localStorage
             localStorage.removeItem('combatTurnState');
@@ -3700,418 +2388,6 @@
             reader.readAsText(file);
         }
 
-        async function extractPdfData(file) {
-            try {
-                if (typeof pdfjsLib === 'undefined') {
-                    throw new Error('PDF.js library not loaded');
-                }
-
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                const numPages = pdf.numPages;
-                let fullText = '';
-
-                // Extract text content from pages
-                for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-                    const page = await pdf.getPage(pageNum);
-                    const textContent = await page.getTextContent();
-                    const pageText = textContent.items.map(item => item.str).join(' ');
-                    
-                    // Normalize: collapse multiple spaces to single spaces
-                    const normalizedPageText = pageText.replace(/\s+/g, ' ').trim();
-                    
-                    // Preserve newlines at page boundaries
-                    if (fullText && normalizedPageText) {
-                        fullText += '\n';
-                    }
-                    fullText += normalizedPageText;
-                }
-
-                // Extract form field values (AcroForm fields) into a map
-                const fieldMap = {}; // Object map: { fieldNameOrLabel: value }
-
-                try {
-                    // Method 1: Try getFieldObjects() if available
-                    if (pdf.getFieldObjects && typeof pdf.getFieldObjects === 'function') {
-                        const fieldObjects = await pdf.getFieldObjects();
-                        if (fieldObjects && Array.isArray(fieldObjects)) {
-                            for (const field of fieldObjects) {
-                                if (field && field.fieldName && field.fieldValue) {
-                                    const name = String(field.fieldName).trim();
-                                    const value = String(field.fieldValue).trim();
-                                    if (name && value && value !== '' && value !== 'null' && value !== 'undefined') {
-                                        fieldMap[name] = value;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } catch (e) {
-                    console.log('getFieldObjects() not available or failed:', e.message);
-                }
-
-                // Method 2: Extract annotations from each page (may contain form fields)
-                try {
-                    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-                        const page = await pdf.getPage(pageNum);
-                        const annotations = await page.getAnnotations();
-                        
-                        if (annotations && Array.isArray(annotations)) {
-                            // DEBUG: Log annotation structure for first page
-                            if (pageNum === 1 && annotations.length > 0) {
-                                console.log('Sample annotation structure (first annotation):', JSON.stringify(annotations[0], null, 2));
-                            }
-                            
-                            for (const annotation of annotations) {
-                                // Check for form field annotations - try multiple property names
-                                const fieldName = annotation.fieldName || annotation.T || annotation.FT || annotation.name;
-                                const fieldValue = annotation.fieldValue || annotation.V || annotation.value || annotation.defaultFieldValue;
-                                
-                                if (fieldName && fieldValue) {
-                                    const name = String(fieldName).trim();
-                                    const value = String(fieldValue).trim();
-                                    if (name && value && value !== '' && value !== 'null' && value !== 'undefined') {
-                                        // Store in map (overwrite if duplicate, keeping last value)
-                                        if (!fieldMap[name] || value.length > fieldMap[name].length) {
-                                            fieldMap[name] = value;
-                                        }
-                                    }
-                                }
-                                
-                                // Also check annotation subtype for widget annotations (form fields)
-                                if (annotation.subtype === 'Widget' && annotation.fieldName) {
-                                    const name = String(annotation.fieldName).trim();
-                                    // Try to get value from various possible locations
-                                    let value = annotation.fieldValue || annotation.V || annotation.value;
-                                    if (value) {
-                                        value = String(value).trim();
-                                        if (value && value !== '' && value !== 'null' && value !== 'undefined') {
-                                            if (!fieldMap[name] || value.length > fieldMap[name].length) {
-                                                fieldMap[name] = value;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } catch (e) {
-                    console.log('getAnnotations() extraction failed:', e.message);
-                }
-
-                // Method 3: Try accessing AcroForm dictionary directly via PDF.js internals
-                try {
-                    // Access PDF catalog and AcroForm
-                    const pdfDocument = pdf;
-                    
-                    // Try to get the PDF's catalog (root dictionary)
-                    if (pdfDocument._pdfInfo) {
-                        // Log structure for debugging
-                        console.log('PDF info structure keys:', Object.keys(pdfDocument._pdfInfo));
-                    }
-                    
-                    // Try accessing through PDF.js internal structures
-                    // Note: This may vary by PDF.js version
-                    if (pdfDocument.catalog && pdfDocument.catalog.acroForm) {
-                        const acroForm = pdfDocument.catalog.acroForm;
-                        console.log('Found AcroForm in catalog:', acroForm);
-                    }
-                    
-                    // Alternative: Try to access via transport
-                    if (pdfDocument.transport && pdfDocument.transport.pdfInfo) {
-                        const pdfInfo = pdfDocument.transport.pdfInfo;
-                        if (pdfInfo.AcroForm) {
-                            console.log('Found AcroForm in transport.pdfInfo');
-                        }
-                    }
-                } catch (e) {
-                    console.log('AcroForm direct access failed:', e.message);
-                }
-
-                // DEBUG: Log field extraction results
-                console.log('=== FORM FIELD EXTRACTION DEBUG ===');
-                const fieldCount = Object.keys(fieldMap).length;
-                console.log('Number of fields found:', fieldCount);
-                const fieldKeys = Object.keys(fieldMap);
-                if (fieldKeys.length > 0) {
-                    console.log('Sample field keys (first 20):', fieldKeys.slice(0, 20));
-                    console.log('Sample field values:', Object.fromEntries(
-                        fieldKeys.slice(0, 10).map(key => [key, fieldMap[key]])
-                    ));
-                }
-
-                // Return both text and fieldMap
-                return { text: fullText, fieldMap: fieldMap };
-            } catch (error) {
-                console.error('Error extracting PDF text:', error);
-                throw new Error('Failed to extract text from PDF: ' + error.message);
-            }
-        }
-
-        // Helper function to find a field key using fuzzy matching
-        function findKey(fieldMap, possibleKeys) {
-            if (!fieldMap || typeof fieldMap !== 'object' || Object.keys(fieldMap).length === 0) {
-                return null;
-            }
-            
-            // Handle array of possible keys
-            if (!Array.isArray(possibleKeys)) {
-                possibleKeys = [possibleKeys];
-            }
-            
-            // First try exact match (case-insensitive)
-            const fieldKeys = Object.keys(fieldMap);
-            for (const key of possibleKeys) {
-                const exactMatch = fieldKeys.find(fk => fk.toLowerCase() === key.toLowerCase());
-                if (exactMatch) return exactMatch;
-            }
-            
-            // Then try partial match (contains)
-            for (const key of possibleKeys) {
-                const partialMatch = fieldKeys.find(fk => 
-                    fk.toLowerCase().includes(key.toLowerCase()) || 
-                    key.toLowerCase().includes(fk.toLowerCase())
-                );
-                if (partialMatch) return partialMatch;
-            }
-            
-            // Finally try fuzzy match (word boundaries)
-            for (const key of possibleKeys) {
-                const keyWords = key.toLowerCase().split(/\s+/);
-                const fuzzyMatch = fieldKeys.find(fk => {
-                    const fkLower = fk.toLowerCase();
-                    return keyWords.every(word => fkLower.includes(word));
-                });
-                if (fuzzyMatch) return fuzzyMatch;
-            }
-            
-            return null;
-        }
-
-        function parseFromFields(fieldMap, textFallback) {
-            const profile = {
-                name: '',
-                className: '',
-                level: 0,
-                ac: undefined,
-                hpMax: undefined,
-                speed: undefined,
-                initiativeBonus: undefined,
-                spellAttackBonus: undefined,
-                spellSaveDC: undefined,
-                spellSlots: {},
-                cantrips: [],
-                spells: [],
-                rawText: textFallback || '',
-                rawFields: fieldMap || {}
-            };
-
-            // Helper to parse numeric value from field
-            const parseNumeric = (value) => {
-                if (!value) return undefined;
-                const str = String(value).trim();
-                // Extract first number (handles "+2", "16", "30 ft", etc.)
-                const match = str.match(/([+-]?\d+)/);
-                return match ? parseInt(match[1], 10) : undefined;
-            };
-
-            // Use fieldMap as source of truth - only parse if fieldMap exists and has entries
-            const hasFieldMap = fieldMap && typeof fieldMap === 'object' && Object.keys(fieldMap).length > 0;
-
-            if (hasFieldMap) {
-                // Parse Name from fieldMap
-                if (fieldMap.CharacterName) {
-                    profile.name = String(fieldMap.CharacterName).trim();
-                }
-
-                // Parse Class + Level from fieldMap
-                const classLevelKey = findKey(fieldMap, ['CLASS  LEVEL', 'Class Level', 'ClassLevel', 'CLASSLEVEL']);
-                if (classLevelKey && fieldMap[classLevelKey]) {
-                    const classLevelStr = String(fieldMap[classLevelKey]).trim();
-                    // Match "Cleric 2" or "Cleric2" pattern
-                    const classLevelMatch = classLevelStr.match(/\b(barbarian|bard|cleric|druid|fighter|monk|paladin|ranger|rogue|sorcerer|warlock|wizard)\s*(\d+)\b/i);
-                    if (classLevelMatch) {
-                        profile.className = classLevelMatch[1].charAt(0).toUpperCase() + classLevelMatch[1].slice(1).toLowerCase();
-                        profile.level = parseInt(classLevelMatch[2], 10);
-                    }
-                }
-
-                // Parse AC (Armor Class) from fieldMap
-                const acKey = findKey(fieldMap, ['ARMOR CLASS', 'AC', 'ArmorClass', 'Armor Class']);
-                if (acKey && fieldMap[acKey]) {
-                    profile.ac = parseNumeric(fieldMap[acKey]);
-                }
-
-                // Parse HP Max from fieldMap
-                const hpMaxKey = findKey(fieldMap, ['Max HP', 'HPMax', 'HP Max', 'MAX HP', 'Hit Points']);
-                if (hpMaxKey && fieldMap[hpMaxKey]) {
-                    const hpValue = String(fieldMap[hpMaxKey]).trim();
-                    // Handle "15/15" format - take the second number
-                    const hpMatch = hpValue.match(/(\d+)\s*\/\s*(\d+)/);
-                    if (hpMatch) {
-                        profile.hpMax = parseInt(hpMatch[2], 10);
-                    } else {
-                        profile.hpMax = parseNumeric(hpValue);
-                    }
-                }
-
-                // Parse Speed from fieldMap
-                const speedKey = findKey(fieldMap, ['SPEED', 'Speed', 'WALKING', 'Walking']);
-                if (speedKey && fieldMap[speedKey]) {
-                    profile.speed = parseNumeric(fieldMap[speedKey]);
-                }
-
-                // Parse Initiative Bonus from fieldMap
-                const initiativeKey = findKey(fieldMap, ['INITIATIVE', 'Initiative', 'InitiativeBonus']);
-                if (initiativeKey && fieldMap[initiativeKey]) {
-                    profile.initiativeBonus = parseNumeric(fieldMap[initiativeKey]);
-                }
-
-                // Parse Spell Save DC from exact field (no fuzzy search)
-                if (fieldMap.spellSaveDC0) {
-                    profile.spellSaveDC = parseInt(fieldMap.spellSaveDC0, 10);
-                }
-
-                // Parse Spell Attack Bonus from exact field (no fuzzy search)
-                if (fieldMap.spellAtkBonus0) {
-                    const bonusStr = String(fieldMap.spellAtkBonus0).trim();
-                    profile.spellAttackBonus = parseNumeric(bonusStr);
-                }
-
-                // Parse Spellcasting Ability (optional, for reference)
-                if (fieldMap.spellCastingAbility0) {
-                    profile.spellcastingAbility = String(fieldMap.spellCastingAbility0).trim();
-                }
-
-                // Parse Spell Slots from exact field spellSlotHeader1
-                profile.spellSlots = {};
-                if (fieldMap.spellSlotHeader1) {
-                    const slotValue = String(fieldMap.spellSlotHeader1).trim();
-                    const m = slotValue.match(/(\d+)\s+Slots/i);
-                    if (m) {
-                        profile.spellSlots[1] = parseInt(m[1], 10);
-                    }
-                }
-                // Do NOT populate levels 2-9
-
-                // Build spell rows from spellName0 through spellName21 (all spell names in order)
-                const rows = [];
-                for (let i = 0; i <= 21; i++) {
-                    const v = fieldMap[`spellName${i}`];
-                    if (typeof v === 'string' && v.trim()) {
-                        rows.push(v.trim());
-                    }
-                }
-
-                // Find header positions in the array (if headers are in spellName fields)
-                const cantripHeaderIndex = rows.findIndex(row => /^===.*CANTRIPS.*===/i.test(row));
-                const lvl1HeaderIndex = rows.findIndex(row => /^===.*1ST.*LEVEL.*===/i.test(row));
-
-                // Split cantrips and spells
-                let cantrips = [];
-                let spellsLvl1 = [];
-
-                if (cantripHeaderIndex >= 0 && lvl1HeaderIndex >= 0) {
-                    // Headers found in array - split between them
-                    cantrips = rows.slice(cantripHeaderIndex + 1, lvl1HeaderIndex);
-                    spellsLvl1 = rows.slice(lvl1HeaderIndex + 1);
-                } else {
-                    // Headers not in array - use fixed split (first 6 are cantrips for this PDF)
-                    // spellHeader0 and spellHeader1 are in separate fields, so we use fixed split
-                    cantrips = rows.slice(0, 6); // Guidance..Spare the Dying
-                    spellsLvl1 = rows.slice(6);  // Healing Word..Bless
-                }
-
-                // Filter out header-like values starting with "==="
-                const filterHeaders = (arr) => {
-                    return arr.filter(item => !item.startsWith('==='));
-                };
-
-                // Deduplicate while preserving order
-                const deduplicate = (arr) => {
-                    const seen = new Set();
-                    const result = [];
-                    for (const item of arr) {
-                        if (!seen.has(item)) {
-                            seen.add(item);
-                            result.push(item);
-                        }
-                    }
-                    return result;
-                };
-
-                // Process and assign
-                cantrips = filterHeaders(cantrips);
-                spellsLvl1 = filterHeaders(spellsLvl1);
-                
-                profile.cantrips = deduplicate(cantrips);
-                profile.spells = deduplicate(spellsLvl1);
-            }
-
-            // FALLBACK: Use regex on textFallback ONLY if fieldMap is missing or empty
-            if (!hasFieldMap && textFallback) {
-                // Fallback for Name (only if not found in fieldMap)
-                if (!profile.name) {
-                    const lines = textFallback.split('\n').map(line => line.trim()).filter(line => line);
-                    for (let i = 0; i < Math.min(10, lines.length); i++) {
-                        const line = lines[i];
-                        if (!line.toLowerCase().includes('character') && 
-                            !line.toLowerCase().includes('sheet') &&
-                            !line.toLowerCase().includes('d&d') &&
-                            line.length > 2 && line.length < 50) {
-                            profile.name = line;
-                            break;
-                        }
-                    }
-                }
-
-                // Fallback for Class + Level (only if not found in fieldMap)
-                if (!profile.className || !profile.level) {
-                    const classLevelMatch = textFallback.match(/\b(barbarian|bard|cleric|druid|fighter|monk|paladin|ranger|rogue|sorcerer|warlock|wizard)\s+(\d+)\b/i);
-                    if (classLevelMatch) {
-                        profile.className = classLevelMatch[1].charAt(0).toUpperCase() + classLevelMatch[1].slice(1).toLowerCase();
-                        profile.level = parseInt(classLevelMatch[2], 10);
-                    }
-                }
-
-                // Fallback for AC (only if not found in fieldMap)
-                if (profile.ac === undefined) {
-                    const acMatch = textFallback.match(/\b(?:ac|armor\s+class)[:\s]+(\d+)\b/i);
-                    if (acMatch) {
-                        profile.ac = parseInt(acMatch[1], 10);
-                    }
-                }
-
-                // Fallback for HP Max (only if not found in fieldMap)
-                if (profile.hpMax === undefined) {
-                    const hpMatch = textFallback.match(/\b(?:hit\s+points|hp)[:\s]+(?:(\d+)\s*\/\s*)?(\d+)\b/i);
-                    if (hpMatch) {
-                        profile.hpMax = parseInt(hpMatch[2] || hpMatch[1], 10);
-                    }
-                }
-
-                // Fallback for Speed (only if not found in fieldMap)
-                if (profile.speed === undefined) {
-                    const speedMatch = textFallback.match(/\bspeed[:\s]+(\d+)\s*(?:ft|feet)?\b/i);
-                    if (speedMatch) {
-                        profile.speed = parseInt(speedMatch[1], 10);
-                    }
-                }
-
-                // Fallback for Initiative (only if not found in fieldMap)
-                if (profile.initiativeBonus === undefined) {
-                    const initiativeMatch = textFallback.match(/\binitiative[:\s]*([+-]?\d+)\b/i);
-                    if (initiativeMatch) {
-                        profile.initiativeBonus = parseInt(initiativeMatch[1], 10);
-                    }
-                }
-
-                // No fallback for spell-related fields - we use exact field names only
-            }
-
-            return profile;
-        }
-
         function applyCharacterProfileToSettings(profile) {
             // Apply settings based on profile
             prefs.bonusActionEnabled = true;
@@ -4213,6 +2489,10 @@
             addItem('Spell Slots', profile.spellSlots);
             addItem('Cantrips', profile.cantrips);
             addItem('Spells', profile.spells);
+            const skillsStr = profile.skills && Object.keys(profile.skills).length > 0
+                ? Object.entries(profile.skills).map(([k, v]) => `${k} ${v >= 0 ? '+' : ''}${v}`).join(', ')
+                : null;
+            addItem('Skills', skillsStr);
 
             // DEBUG SECTION
             if (extractedText) {
@@ -4269,7 +2549,7 @@
                 showToast('Parsing PDF...');
                 
                 // Extract text and fieldMap from PDF
-                const { text, fieldMap } = await extractPdfData(file);
+                const { text, fieldMap } = await CharacterSheetImporter.extractPdfData(file);
                 
                 // DEBUG: Log extracted text info
                 console.log('=== PDF EXTRACTION DEBUG ===');
@@ -4316,7 +2596,8 @@
                 }
                 
                 // Parse into character profile using fieldMap as source of truth, text as fallback
-                const profile = parseFromFields(fieldMap || {}, text);
+                const profile = CharacterSheetImporter.parseFromFields(fieldMap || {}, text);
+                CharacterSheetImporter.normalizeProfileSpells(profile);
                 
                 // Safety check: Text/fields found but parsing failed
                 const hasCoreFields = profile.name || profile.className || profile.ac !== undefined || 
@@ -4429,6 +2710,17 @@
 
         let currentPromptIndex = 0;
 
+        const CLERIC_DEFENSE_SPELLS = ['Shield of Faith', 'Sanctuary'];
+
+        function getClericDefenseSpellSuggestions(profile) {
+            if (!profile) return [];
+            const normalized = CharacterSheetImporter.getNormalizedSpells(profile);
+            const known = normalized.map(s => s.name);
+            return CLERIC_DEFENSE_SPELLS.filter(name =>
+                known.some(k => k.trim().toLowerCase() === name.trim().toLowerCase())
+            );
+        }
+
         function getHelperPresetChips(preset) {
             const chips = {
                 cleric: [
@@ -4487,7 +2779,20 @@
                 // Update chips based on preset
                 chipsContainer.innerHTML = '';
                 if (prefs.helperPreset && prefs.helperPreset !== 'none') {
-                    const chips = getHelperPresetChips(prefs.helperPreset);
+                    let chips = getHelperPresetChips(prefs.helperPreset);
+                    if (prefs.helperPreset === 'cleric') {
+                        const profile = getActiveCharacterProfile();
+                        const knownDefense = getClericDefenseSpellSuggestions(profile);
+                        chips = chips.map(chip => {
+                            if (chip.if === 'Need defense?') {
+                                const then = knownDefense.length
+                                    ? 'Dodge / ' + knownDefense.join(' / ')
+                                    : 'Dodge';
+                                return { if: chip.if, then };
+                            }
+                            return chip;
+                        });
+                    }
                     chips.forEach(chip => {
                         const chipEl = document.createElement('button');
                         chipEl.className = 'decision-helper-chip';
@@ -4626,55 +2931,6 @@
             }
         }
 
-        // Theme Management - Listen to hub's theme preference
-        (function() {
-            const THEME_KEY = 'dnd-hub-theme';
-            const DARK_MODE_CLASS = 'dark-mode';
-
-            function applyTheme(theme) {
-                const html = document.documentElement;
-                if (theme === 'dark') {
-                    html.classList.add(DARK_MODE_CLASS);
-                } else {
-                    html.classList.remove(DARK_MODE_CLASS);
-                }
-            }
-
-            function checkTheme() {
-                const saved = localStorage.getItem(THEME_KEY);
-                if (saved) {
-                    applyTheme(saved);
-                } else {
-                    // Check system preference if hub hasn't set one
-                    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                        applyTheme('dark');
-                    } else {
-                        applyTheme('light');
-                    }
-                }
-            }
-
-            function initTheme() {
-                checkTheme();
-                
-                // Listen for storage events (if opened in different tab)
-                window.addEventListener('storage', function(e) {
-                    if (e.key === THEME_KEY) {
-                        applyTheme(e.newValue || 'light');
-                    }
-                });
-                
-                // Fallback polling at slower rate (1000ms) for same-tab changes
-                setInterval(checkTheme, 1000);
-            }
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initTheme);
-            } else {
-                initTheme();
-            }
-        })();
-
         // Toggle reaction detail expansion
         function toggleReactionDetail(element) {
             element.classList.toggle('expanded');
@@ -4686,6 +2942,189 @@
             if (section) {
                 section.classList.toggle('expanded');
             }
+        }
+
+        // ============================================================================
+        // CHARACTER PROFILE HELPERS
+        // ============================================================================
+
+        /**
+         * Get active character profile from localStorage
+         * Returns null if no character is loaded
+         */
+        function getActiveCharacterProfile() {
+            // Check for character profile in localStorage
+            // Try multiple possible keys for backward compatibility
+            const possibleKeys = [
+                'activeCharacterId',
+                'characterProfile',
+                'characterProfileV1'
+            ];
+            
+            for (const key of possibleKeys) {
+                const activeId = localStorage.getItem(key);
+                if (activeId) {
+                    // Try to get profile by ID
+                    const profileKey = `characterProfileV1:${activeId}`;
+                    const profileData = localStorage.getItem(profileKey);
+                    if (profileData) {
+                        try {
+                            return JSON.parse(profileData);
+                        } catch (e) {
+                            console.error('Failed to parse character profile:', e);
+                        }
+                    }
+                }
+            }
+            
+            // Fallback: try direct characterProfile key
+            const directProfile = localStorage.getItem('characterProfile');
+            if (directProfile) {
+                try {
+                    return JSON.parse(directProfile);
+                } catch (e) {
+                    console.error('Failed to parse character profile:', e);
+                }
+            }
+            
+            return null;
+        }
+
+        // ============================================================================
+        // SPELL NORMALIZATION AND FIXES
+        // ============================================================================
+
+        function getCantrips(profile) {
+            const normalized = CharacterSheetImporter.getNormalizedSpells(profile);
+            return normalized.filter(s => s.levelGroup === 'cantrip').map(s => s.name);
+        }
+
+        /**
+         * Get spells by level from normalized spells
+         */
+        function getSpellsByLevel(profile, level) {
+            const normalized = CharacterSheetImporter.getNormalizedSpells(profile);
+            return normalized.filter(s => s.levelGroup === level).map(s => s.name);
+        }
+
+        /**
+         * Get bonus action spells from normalized spells
+         */
+        function getBonusActionSpellsFromNormalized(profile) {
+            const normalized = CharacterSheetImporter.getNormalizedSpells(profile);
+            return normalized.filter(s => s.isBonusAction).map(s => s.name);
+        }
+
+        /**
+         * Get reaction spells from normalized spells
+         */
+        function getReactionSpells(profile) {
+            const normalized = CharacterSheetImporter.getNormalizedSpells(profile);
+            return normalized.filter(s => s.isReaction);
+        }
+
+        /**
+         * Get spell level for slot consumption
+         * Returns 0 for cantrips, or the numeric level for leveled spells
+         */
+        function getSpellLevelForSlot(spellName, profile) {
+            const normalized = CharacterSheetImporter.getNormalizedSpells(profile);
+            const spell = normalized.find(s => s.name === spellName);
+            if (!spell) return 1; // Default fallback
+            return spell.levelGroup === 'cantrip' ? 0 : spell.levelGroup;
+        }
+
+        const SPELL_FREE_USES_KEY = 'spellFreeUsesState';
+
+        function loadSpellFreeUsesState() {
+            try {
+                const raw = localStorage.getItem(SPELL_FREE_USES_KEY);
+                return raw ? JSON.parse(raw) : {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function saveSpellFreeUsesState(obj) {
+            localStorage.setItem(SPELL_FREE_USES_KEY, JSON.stringify(obj));
+        }
+
+        function getSpellFreeUsesRemaining(characterId, spellName) {
+            if (!characterId) return undefined;
+            const map = loadSpellFreeUsesState();
+            const byChar = map[characterId];
+            return byChar && typeof byChar[spellName] === 'number' ? byChar[spellName] : undefined;
+        }
+
+        function setSpellFreeUsesRemaining(characterId, spellName, remaining) {
+            const map = loadSpellFreeUsesState();
+            if (!map[characterId]) map[characterId] = {};
+            map[characterId][spellName] = remaining;
+            saveSpellFreeUsesState(map);
+        }
+
+        /**
+         * Get free-cast info for a spell (X/LR or X/SR from spellNotes).
+         * Returns { freeUsesMax, freeUsesRemaining, freeUseRestType } or null.
+         */
+        function getSpellFreeCastInfo(spellName, profile) {
+            if (!profile) return null;
+            const normalized = CharacterSheetImporter.getNormalizedSpells(profile);
+            const spell = normalized.find(s => s.name === spellName);
+            if (!spell || !spell.freeUsesMax || !spell.freeUseRestType) return null;
+            const characterId = getActiveCharacterId();
+            let remaining = getSpellFreeUsesRemaining(characterId, spellName);
+            if (remaining === undefined) remaining = spell.freeUsesMax;
+            return {
+                freeUsesMax: spell.freeUsesMax,
+                freeUsesRemaining: remaining,
+                freeUseRestType: spell.freeUseRestType
+            };
+        }
+
+        /**
+         * Update reaction section with actual reaction spells from character
+         */
+        function updateReactionSpells() {
+            const container = document.getElementById('spell-reactions-container');
+            if (!container) return;
+
+            // Get active character profile
+            const profile = getActiveCharacterProfile();
+            if (!profile) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const reactionSpells = getReactionSpells(profile);
+            
+            if (reactionSpells.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            reactionSpells.forEach(spell => {
+                const levelText = spell.levelGroup === 'cantrip' ? 'Cantrip' : `Level ${spell.levelGroup}`;
+                html += `<div class="reaction-item" onclick="toggleReactionDetail(this)">`;
+                html += `<div class="reaction-item-header">`;
+                html += `<div class="reaction-item-title">`;
+                html += `<span>✨</span>`;
+                html += `<strong>${spell.name}</strong>`;
+                html += `<span class="reaction-item-subtitle">- ${levelText} (Reaction)</span>`;
+                html += `</div>`;
+                html += `<span class="reaction-item-expand-icon">▶</span>`;
+                html += `</div>`;
+                html += `<div class="reaction-item-details">`;
+                html += `<p><strong>${levelText} spell</strong></p>`;
+                if (spell.castingTime) {
+                    html += `<p><strong>Casting Time:</strong> ${spell.castingTime}</p>`;
+                }
+                html += `</div>`;
+                html += `</div>`;
+            });
+
+            container.innerHTML = html;
         }
 
         // Auto-detect mobile and enable big buttons by default

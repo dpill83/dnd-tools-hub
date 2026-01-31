@@ -1,0 +1,1345 @@
+/* Combat Turn Helper – component styles. Load after global.css. */
+
+.combat-tool-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--border);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.combat-tool-header a.theme-toggle {
+    text-decoration: none;
+}
+
+.combat-tool-title {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1.25rem;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: var(--surface);
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px var(--shadow);
+    min-height: calc(100vh - 2rem);
+    transition: background-color 0.3s ease;
+}
+
+
+/* Reaction Widget (NOT YOUR TURN Screen) */
+.reaction-widget-large {
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark-mode .reaction-widget-large {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.reaction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.reaction-label-large {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--text);
+}
+
+.reaction-status-large {
+    min-width: 120px;
+    text-align: center;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    border-radius: 4px;
+}
+
+/* tracker-status classes (only used by reaction widget on NOT YOUR TURN screen) */
+.tracker-status.available {
+    background-color: var(--success);
+    color: white;
+    cursor: pointer;
+}
+
+.tracker-status.available:hover {
+    opacity: 0.8;
+}
+
+.tracker-status.used {
+    background-color: var(--error);
+    color: white;
+    cursor: pointer;
+}
+
+.tracker-status.used:hover {
+    opacity: 0.8;
+}
+
+.tracker-status.reserved {
+    background-color: var(--warning);
+    color: var(--text);
+    cursor: not-allowed;
+}
+
+.reaction-hint {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    margin: 0;
+}
+
+/* Reactions Reference */
+.reactions-reference {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-left: 4px solid var(--accent-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.dark-mode .reactions-reference {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.reactions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.reaction-item {
+    font-size: 0.875rem;
+    color: var(--text);
+    padding: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.reaction-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.dark-mode .reaction-item {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.dark-mode .reaction-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.reaction-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.reaction-item-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.reaction-item-subtitle {
+    color: var(--text-light);
+}
+
+.reaction-item-expand-icon {
+    font-size: 0.75rem;
+    transition: transform 0.2s;
+    color: var(--text-light);
+}
+
+.reaction-item.expanded .reaction-item-expand-icon {
+    transform: rotate(90deg);
+}
+
+.reaction-item-details {
+    display: none;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+.reaction-item.expanded .reaction-item-details {
+    display: block;
+}
+
+.reaction-item-details p {
+    margin-bottom: 0.5rem;
+}
+
+.reaction-item-details ul {
+    margin-left: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.reaction-item-details li {
+    margin-bottom: 0.25rem;
+}
+
+.reaction-page-numbers {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.8rem;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+/* Screen Views */
+.screen {
+    display: none;
+}
+
+.screen.active {
+    display: block;
+}
+
+/* End Turn Container */
+.end-turn-container {
+    background-color: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px var(--shadow);
+}
+
+.headline {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+/* End Turn screen specific spacing */
+#screen-end-turn .headline {
+    margin-bottom: 1rem;
+}
+
+.headline.not-your-turn {
+    color: var(--text-light);
+}
+
+/* Button Grid */
+.button-grid {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Action grid for organizing action buttons */
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 480px) {
+    .action-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Collapsible Section */
+.collapsible-section {
+    margin-bottom: 1rem;
+}
+
+.collapsible-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background-color: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.dark-mode .collapsible-header {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.collapsible-header:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.dark-mode .collapsible-header:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.collapsible-header-text {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.collapsible-icon {
+    transition: transform 0.2s;
+    color: var(--text-light);
+}
+
+.collapsible-section.expanded .collapsible-icon {
+    transform: rotate(90deg);
+}
+
+.collapsible-content {
+    display: none;
+    margin-top: 0.75rem;
+}
+
+.collapsible-section.expanded .collapsible-content {
+    display: block;
+}
+
+.help-content-box {
+    padding: 0.75rem;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+.dark-mode .help-content-box {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.help-content-box p {
+    margin-bottom: 0.5rem;
+}
+
+.help-content-box p:last-child {
+    margin: 0;
+}
+
+/* Spells Panel */
+.spells-panel {
+    margin: 1rem 0;
+}
+
+.spells-section {
+    margin-bottom: 1rem;
+}
+
+.spells-section-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.spells-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.spell-item {
+    padding: 0.5rem 0.75rem;
+    background-color: rgba(0, 0, 0, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+.dark-mode .spell-item {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.spell-slots-info {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: 0.25rem;
+}
+
+.spell-slots-remaining {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.spell-slots-empty {
+    color: var(--text-light);
+    font-style: italic;
+}
+
+.spell-item {
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.spell-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    transform: translateX(2px);
+}
+
+.dark-mode .spell-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.spell-item:active {
+    transform: translateX(0);
+}
+
+/* Spell Selection Screen */
+.spell-selection-content {
+    margin: 1rem 0;
+}
+
+/* Turn Log */
+.turn-log {
+    margin: 1rem 0;
+    padding: 0.75rem;
+    background-color: rgba(0, 0, 0, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 0.875rem;
+}
+
+.dark-mode .turn-log {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.turn-log-header {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.turn-log-clear {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.turn-log-clear:hover {
+    color: var(--text);
+}
+
+.turn-log-entry {
+    padding: 0.25rem 0;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+}
+
+.turn-log-entry:last-child {
+    border-bottom: none;
+}
+
+.turn-log-entry-time {
+    color: var(--text-light);
+    font-size: 0.75rem;
+    margin-right: 0.5rem;
+}
+
+.turn-log-empty {
+    color: var(--text-light);
+    font-style: italic;
+    text-align: center;
+    padding: 0.5rem 0;
+}
+
+/* Spell Slot Spending Dialog */
+.spell-slot-dialog {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.spell-slot-dialog.active {
+    display: flex;
+}
+
+.spell-slot-dialog-content {
+    background-color: var(--surface);
+    padding: 1.5rem;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%;
+}
+
+.spell-slot-dialog-message {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.spell-slot-dialog-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.collapsible-section.expanded .collapsible-content {
+    display: block;
+}
+
+/* Minor buttons container (Settings and Reset) */
+.minor-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.minor-buttons .btn {
+    flex: 1;
+}
+
+/* End Turn screen - reduce button grid spacing */
+#screen-end-turn .button-grid {
+    margin-bottom: 0;
+    margin-top: 1rem;
+}
+
+.btn {
+    padding: 1rem 1.5rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-light);
+    box-shadow: 0 4px 8px var(--shadow-hover);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #6b3410;
+    box-shadow: 0 4px 8px var(--shadow-hover);
+}
+
+.btn-accent {
+    background-color: var(--accent-color);
+    color: #1a1a1a;
+    font-weight: 600;
+}
+
+.btn-accent:hover {
+    background-color: #c19d2e;
+    box-shadow: 0 4px 8px var(--shadow-hover);
+}
+
+.dark-mode .btn-accent {
+    color: #1a1a1a;
+}
+
+.btn-danger {
+    background-color: var(--error);
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    box-shadow: 0 4px 8px var(--shadow-hover);
+}
+
+.btn-success {
+    background-color: var(--success);
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    box-shadow: 0 4px 8px var(--shadow-hover);
+}
+
+.btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    min-height: 44px;
+}
+
+/* Big Button Mode */
+.big-button-mode .btn {
+    min-height: 80px;
+    font-size: 1.5rem;
+    padding: 1.25rem 2rem;
+}
+
+.big-button-mode .btn-small {
+    min-height: 60px;
+    font-size: 1.125rem;
+    padding: 0.75rem 1.5rem;
+}
+
+/* DM Panel */
+
+/* Detail Content */
+.detail-content {
+    margin-bottom: 2rem;
+    line-height: 1.8;
+}
+
+.detail-content p {
+    margin-bottom: 1rem;
+}
+
+.detail-content ul {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.detail-content li {
+    margin-bottom: 0.5rem;
+}
+
+/* D&D Character Sheet Style Speed Display */
+.speed-display {
+    margin: 1.5rem auto;
+    max-width: 200px;
+    border: 2px solid var(--text);
+    border-radius: 6px;
+    background: var(--surface);
+    overflow: hidden;
+    box-shadow: 0 2px 4px var(--shadow);
+}
+
+.speed-display-value {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 2px solid var(--text);
+}
+
+.speed-display-value .speed-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.speed-display-value .speed-unit {
+    font-size: 1.25rem;
+    color: var(--text);
+    margin-left: 0.25rem;
+}
+
+.speed-display-value .speed-type {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+    letter-spacing: 0.5px;
+}
+
+.speed-display-label {
+    padding: 0.5rem;
+    text-align: center;
+    background: var(--surface);
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text);
+}
+
+.dark-mode .speed-display-value {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 100%);
+}
+
+/* Modal Body (used in attack tree) */
+.modal-body {
+    margin-bottom: 1.5rem;
+    line-height: 1.8;
+}
+
+.modal-body p {
+    margin-bottom: 0.75rem;
+}
+
+.modal-body ul {
+    margin-left: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.modal-body li {
+    margin-bottom: 0.5rem;
+}
+
+/* Decision Helper Box */
+.decision-helper-box {
+    display: none;
+    background-color: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.dark-mode .decision-helper-box {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.decision-helper-prompt {
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.decision-helper-prompt:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.dark-mode .decision-helper-prompt:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.decision-helper-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.decision-helper-chip {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+    touch-action: manipulation;
+}
+
+.decision-helper-chip:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.decision-helper-chip:active {
+    transform: scale(0.95);
+}
+
+/* Attack Tree */
+.attack-tree {
+    display: none;
+}
+
+.attack-tree.active {
+    display: block;
+}
+
+.attack-step {
+    display: none;
+}
+
+.attack-step.active {
+    display: block;
+}
+
+.help-text {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    font-style: italic;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.dark-mode .help-text {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* End Turn Checklist */
+.checklist-screen {
+    list-style: none;
+    margin-bottom: 1rem;
+    padding: 0;
+}
+
+/* End Turn screen - reduce checklist spacing */
+#screen-end-turn .checklist-screen {
+    margin-bottom: 0.5rem;
+}
+
+.checklist-screen li {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+.dark-mode .checklist-screen li {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.checklist-screen .status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.status.used {
+    background-color: var(--error);
+    color: white;
+}
+
+.status.unused {
+    background-color: var(--success);
+    color: white;
+}
+
+.status.available {
+    background-color: var(--success);
+    color: white;
+}
+
+.status.reserved {
+    background-color: var(--warning);
+    color: var(--text);
+}
+
+/* Navigation */
+.nav-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.nav-buttons .btn {
+    flex: 1;
+}
+
+
+/* Responsive */
+@media (max-width: 480px) {
+    .container {
+        padding: 0.75rem;
+    }
+
+    .headline {
+        font-size: 1.5rem;
+    }
+
+    .btn {
+        font-size: 1rem;
+        padding: 0.875rem 1.25rem;
+    }
+}
+
+/* Dash Active Note */
+.dash-note {
+    background-color: rgba(74, 155, 95, 0.1);
+    border-left: 4px solid var(--primary-color);
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    transition: background-color 0.3s ease;
+}
+
+.dark-mode .dash-note {
+    background-color: rgba(74, 155, 95, 0.2);
+}
+
+/* DM Panel (compact) */
+.dm-panel-compact {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background-color: rgba(212, 175, 55, 0.1);
+    border-left: 3px solid var(--accent-color);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.dark-mode .dm-panel-compact {
+    background-color: rgba(244, 208, 63, 0.1);
+}
+
+.dm-panel-compact .dm-label {
+    font-weight: 600;
+    color: var(--secondary-color);
+    margin-bottom: 0.25rem;
+}
+
+.dark-mode .dm-panel-compact .dm-label {
+    color: var(--accent-color);
+}
+
+.dm-panel-compact .dm-resources {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.dm-panel-compact .dm-resource-item {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.dark-mode .dm-panel-compact .dm-resource-item {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Character Setup (compact) */
+.character-setup-compact {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background-color: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.dark-mode .character-setup-compact {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.setup-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.setup-row label {
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+}
+
+.setup-row select {
+    flex: 1;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background-color: var(--surface);
+    color: var(--text);
+}
+
+.setup-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.setup-toggles label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    color: var(--text);
+}
+
+.setup-toggles input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+}
+
+/* Toast Notification */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background-color: var(--error);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 500;
+    max-width: 90%;
+    text-align: center;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Reset Confirm Dialog */
+.reset-dialog {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.reset-dialog.active {
+    display: flex;
+}
+
+.reset-dialog-content {
+    background-color: var(--surface);
+    padding: 1.5rem;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%;
+}
+
+.reset-dialog-message {
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+}
+
+.reset-dialog-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.reset-dialog-rest {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.reset-dialog-rest-label {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-right: 0.25rem;
+}
+
+/* End Turn Safety Net Dialog */
+.end-turn-dialog {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.end-turn-dialog.active {
+    display: flex;
+}
+
+.end-turn-dialog-content {
+    background-color: var(--surface);
+    padding: 1.5rem;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%;
+}
+
+.end-turn-dialog-message {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.end-turn-dialog-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.end-turn-dialog-quick-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    display: none;
+}
+
+.end-turn-dialog-quick-actions.show {
+    display: block;
+}
+
+
+.end-turn-dialog-quick-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Import Character Confirmation Dialog */
+.import-confirm-dialog {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.import-confirm-dialog.active {
+    display: flex;
+}
+
+.import-confirm-dialog-content {
+    background-color: var(--surface);
+    padding: 1.5rem;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.import-confirm-dialog-header {
+    margin-bottom: 1rem;
+}
+
+.import-confirm-dialog-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text);
+}
+
+.import-confirm-dialog-body {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.import-confirm-dialog-body .profile-item {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.import-confirm-dialog-body .profile-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.import-confirm-dialog-body .profile-label {
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+}
+
+.import-confirm-dialog-body .profile-value {
+    color: var(--text-light);
+}
+
+.import-confirm-dialog-body .profile-value.empty {
+    color: var(--text-light);
+    font-style: italic;
+}
+
+.import-confirm-dialog-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+/* Default hidden elements (JS will reveal when needed) */
+#dash-note {
+    display: none;
+}
+
+/* Used buttons grid */
+.used-grid {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.btn.used {
+    background-color: rgba(0, 0, 0, 0.1);
+    opacity: 0.8;
+}
+
+.dark-mode .btn.used {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn.used:hover {
+    opacity: 0.9;
+}
+
+/* Common utility classes (avoid inline styles) */
+.start-turn-grid {
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    margin-bottom: 0.75rem;
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+/* Tooltip */
+.help-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: var(--text-light);
+    color: var(--surface);
+    font-size: 0.75rem;
+    font-weight: bold;
+    cursor: help;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+    transition: background-color 0.2s;
+}
+
+.help-icon:hover {
+    background-color: var(--primary-color);
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip-content {
+    visibility: hidden;
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--text);
+    color: var(--surface);
+    text-align: left;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    white-space: normal;
+    width: 250px;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.tooltip-content::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: var(--text) transparent transparent transparent;
+}
+
+.tooltip:hover .tooltip-content,
+.tooltip.active .tooltip-content {
+    visibility: visible;
+    opacity: 1;
+}
+
+.hint-text {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.tight-top {
+    margin-top: 0.5rem;
+}
+
+.muted-center {
+    text-align: center;
+    color: var(--text-light);
+    margin: 0;
+}

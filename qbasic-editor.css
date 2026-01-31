@@ -1,0 +1,240 @@
+/* QBasic-style text editor: match classic QBasic IDE look */
+/* Lock to viewport so the browser window has no scrollbars */
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+    margin: 0;
+}
+body {
+    padding: 0;
+}
+
+.qb-page {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    padding: 0;
+    font-family: Consolas, "Courier New", monospace;
+}
+
+/* Top menu bar: yellowish-gold, dark text */
+.qb-menu-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem 0.35rem;
+    background: #d4a84b;
+    border-bottom: 1px solid #b8922e;
+}
+
+.qb-menu-items {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 13px;
+    color: #000080;
+    font-weight: 600;
+}
+
+.qb-menu-file-wrap {
+    position: relative;
+}
+
+.qb-menu-trigger {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: #000080;
+    background: transparent;
+    border: none;
+    padding: 0.2rem 0.4rem;
+    cursor: pointer;
+}
+
+.qb-menu-trigger:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.qb-file-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin: 0;
+    padding: 0.25rem 0;
+    list-style: none;
+    background: #e8e0b0;
+    border: 1px solid #b8922e;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    min-width: 8rem;
+    z-index: 10;
+    display: none;
+}
+
+.qb-file-dropdown.open {
+    display: block;
+}
+
+.qb-file-dropdown button {
+    display: block;
+    width: 100%;
+    font-family: inherit;
+    font-size: 13px;
+    color: #000080;
+    background: none;
+    border: none;
+    padding: 0.35rem 1rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.qb-file-dropdown button:hover {
+    background: #d4a84b;
+}
+
+.qb-menu-static {
+    color: #000080;
+}
+
+.qb-doc-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.15rem 0.6rem;
+    background: #e8e8e8;
+    color: #000;
+    font-size: 12px;
+    border: 1px solid #a0a0a0;
+    box-shadow: inset 1px 1px 0 #fff;
+}
+
+.qb-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.qb-menu-btn {
+    padding: 0.2rem 0.4rem;
+    background: #d4a84b;
+    color: #000080;
+    border: 1px solid #b8922e;
+    border-radius: 2px;
+    font-size: 1rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.qb-menu-btn:hover {
+    background: #c49a3d;
+}
+
+/* Editor area: bordered frame, royal blue, light borders */
+.qb-editor-frame {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    border: 1px solid #808080;
+    border-top: 1px solid #c0c0c0;
+    border-left: 1px solid #a0a0a0;
+    background: #0000aa;
+}
+
+#qb-editor {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    box-sizing: border-box;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 16px;
+    line-height: 1.4;
+    background: #0000aa;
+    color: #00ffff;
+    border: none;
+    resize: none;
+    outline: none;
+}
+
+#qb-editor::placeholder {
+    color: rgba(0, 255, 255, 0.5);
+}
+
+#qb-editor:focus {
+    outline: none;
+}
+
+/* Scrollbars: grey, retro */
+#qb-editor::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+}
+
+#qb-editor::-webkit-scrollbar-track {
+    background: #0000aa;
+}
+
+#qb-editor::-webkit-scrollbar-thumb {
+    background: #606060;
+    border: 1px solid #404040;
+}
+
+#qb-editor::-webkit-scrollbar-thumb:hover {
+    background: #707070;
+}
+
+/* Dotted separator above Immediate */
+.qb-immediate-sep {
+    height: 0;
+    border-top: 2px dotted #6080a0;
+    background: #0000aa;
+}
+
+/* Immediate bar: same blue, label on right */
+.qb-immediate-bar {
+    min-height: 1.5rem;
+    padding: 0.2rem 0.75rem;
+    background: #0000aa;
+    color: #00ffff;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.qb-immediate-label {
+    color: #00ffff;
+}
+
+/* Bottom status bar: light blue/cyan, dark text */
+.qb-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.2rem 0.5rem;
+    background: #55aaff;
+    color: #000080;
+    font-size: 12px;
+    border-top: 1px solid #4090dd;
+}
+
+.qb-status-keys {
+    font-weight: 600;
+}
+
+.qb-status-pos {
+    background: #4080c0;
+    color: #fff;
+    padding: 0.1rem 0.4rem;
+    margin: -0.1rem -0.5rem -0.1rem 0;
+    min-width: 6rem;
+    text-align: right;
+}

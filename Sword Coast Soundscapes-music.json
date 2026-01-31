@@ -1,0 +1,1852 @@
+{
+  "version": 1,
+  "settings": {
+    "playbackMode": "newTab",
+    "customColors": null,
+    "cardsPerRow": 1,
+    "cardSize": "medium",
+    "startFromBeginning": true
+  },
+  "folders": [
+    {
+      "id": "folder-Combat",
+      "name": "Combat",
+      "order": 0
+    },
+    {
+      "id": "folder-Exploration",
+      "name": "Exploration",
+      "order": 1
+    },
+    {
+      "id": "folder-Narrative",
+      "name": "Narrative",
+      "order": 2
+    },
+    {
+      "id": "folder-Nautical",
+      "name": "Nautical",
+      "order": 3
+    },
+    {
+      "id": "folder-Social",
+      "name": "Social",
+      "order": 4
+    },
+    {
+      "id": "folder-Spooky",
+      "name": "Spooky",
+      "order": 5
+    }
+  ],
+  "profiles": [
+    {
+      "id": "id-sword-coast-soundscapes-1",
+      "folderId": "folder-Spooky",
+      "order": 0,
+      "name": "Dark Woods - [JTS]",
+      "url": "https://www.youtube.com/watch?v=1kd-qnKrpZc",
+      "icon": "⚔️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-2",
+      "folderId": "folder-Nautical",
+      "order": 1,
+      "name": "Ominous Beach - [JTS]",
+      "url": "https://www.youtube.com/watch?v=XKzVEGZ46nE",
+      "icon": "🍺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-3",
+      "folderId": "folder-Nautical",
+      "order": 2,
+      "name": "Maelstrom - [JTS]",
+      "url": "https://www.youtube.com/watch?v=3WntNxBfbQc",
+      "icon": "⛺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-4",
+      "folderId": "folder-Nautical",
+      "order": 3,
+      "name": "Open Waters - [JTS]",
+      "url": "https://www.youtube.com/watch?v=lPKwGsltjqY",
+      "icon": "🌙"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-5",
+      "folderId": "folder-Exploration",
+      "order": 4,
+      "name": "Journey Through Savalria",
+      "url": "https://www.youtube.com/watch?v=uRYA3tb4NAs",
+      "icon": "🏰"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-6",
+      "folderId": "folder-Exploration",
+      "order": 5,
+      "name": "Encampment",
+      "url": "https://www.youtube.com/watch?v=nBbksJKsF6E",
+      "icon": "🌲"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-7",
+      "folderId": "folder-Exploration",
+      "order": 6,
+      "name": "Tiamat's Temple - [ToD]",
+      "url": "https://www.youtube.com/watch?v=M8RuJN78r9M",
+      "icon": "🕳️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-8",
+      "folderId": "folder-Narrative",
+      "order": 7,
+      "name": "Well of Dragons - [ToD]",
+      "url": "https://www.youtube.com/watch?v=9QyiPjGW6VU",
+      "icon": "🔥"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-9",
+      "folderId": "folder-Social",
+      "order": 8,
+      "name": "City of Thay - [ToD]",
+      "url": "https://www.youtube.com/watch?v=T-SgXdW3MMU",
+      "icon": "🌧️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-10",
+      "folderId": "folder-Exploration",
+      "order": 9,
+      "name": "Xonthal's Tower - [ToD]",
+      "url": "https://www.youtube.com/watch?v=Hop4fmtKU8U",
+      "icon": "🌊"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-11",
+      "folderId": "folder-Exploration",
+      "order": 10,
+      "name": "Xonthal's Maze - [ToD]",
+      "url": "https://www.youtube.com/watch?v=owkIgeSc7gE",
+      "icon": "🏘️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-12",
+      "folderId": "folder-Exploration",
+      "order": 11,
+      "name": "Neronvains Stronghold - [ToD]",
+      "url": "https://www.youtube.com/watch?v=6PNtouRVdz8",
+      "icon": "🐉"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-13",
+      "folderId": "folder-Social",
+      "order": 12,
+      "name": "Christmas Fireplace",
+      "url": "https://www.youtube.com/watch?v=fNbKK4ars3w",
+      "icon": "🦇"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-14",
+      "folderId": "folder-Narrative",
+      "order": 13,
+      "name": "Altland - [ToD]",
+      "url": "https://www.youtube.com/watch?v=BeKPixPQMok",
+      "icon": "📜"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-15",
+      "folderId": "folder-Narrative",
+      "order": 14,
+      "name": "Tomb of Diderius - [ToD]",
+      "url": "https://www.youtube.com/watch?v=Ri9-CsT5jt4",
+      "icon": "🕯️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-16",
+      "folderId": "folder-Exploration",
+      "order": 15,
+      "name": "Serpent Hills - [ToD]",
+      "url": "https://www.youtube.com/watch?v=2jEBxCKo2pQ",
+      "icon": "🎵"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-17",
+      "folderId": "folder-Exploration",
+      "order": 16,
+      "name": "Boarskyr Bridge - [ToD]",
+      "url": "https://www.youtube.com/watch?v=De54SIizUSU",
+      "icon": "⚡"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-18",
+      "folderId": "folder-Exploration",
+      "order": 17,
+      "name": "Ice Caves - [ToD]",
+      "url": "https://www.youtube.com/watch?v=FZcO8uldc8k",
+      "icon": "❄️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-19",
+      "folderId": "folder-Exploration",
+      "order": 18,
+      "name": "Oyaviggaton - [ToD]",
+      "url": "https://www.youtube.com/watch?v=7dtPXkqckII",
+      "icon": "🌿"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-20",
+      "folderId": "folder-Nautical",
+      "order": 19,
+      "name": "Sea of Moving Ice - [ToD]",
+      "url": "https://www.youtube.com/watch?v=nmrUUh8GhFk",
+      "icon": "🗡️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-21",
+      "folderId": "folder-Nautical",
+      "order": 20,
+      "name": "Aboard the Frostskimmr - [ToD]",
+      "url": "https://www.youtube.com/watch?v=clDXa18upk0",
+      "icon": "⚔️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-22",
+      "folderId": "folder-Narrative",
+      "order": 21,
+      "name": "Skyreach Castle - [ToD]",
+      "url": "https://www.youtube.com/watch?v=j8yR-MAx9m4",
+      "icon": "🍺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-23",
+      "folderId": "folder-Narrative",
+      "order": 22,
+      "name": "Parnast - [ToD]",
+      "url": "https://www.youtube.com/watch?v=zWgYfyNKTgo",
+      "icon": "⛺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-24",
+      "folderId": "folder-Exploration",
+      "order": 23,
+      "name": "Parnast Hunting Lodge - [ToD]",
+      "url": "https://www.youtube.com/watch?v=FKBH6o5BHEQ",
+      "icon": "🌙"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-25",
+      "folderId": "folder-Exploration",
+      "order": 24,
+      "name": "Naerytar Dungeon - [ToD]",
+      "url": "https://www.youtube.com/watch?v=4_lp8FOj7jo",
+      "icon": "🏰"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-26",
+      "folderId": "folder-Exploration",
+      "order": 25,
+      "name": "Castle Naerytar - [ToD]",
+      "url": "https://www.youtube.com/watch?v=ST8vT0dN4UY",
+      "icon": "🌲"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-27",
+      "folderId": "folder-Exploration",
+      "order": 26,
+      "name": "Mere of Dead Men - [ToD]",
+      "url": "https://www.youtube.com/watch?v=rf9yc7gVtxY",
+      "icon": "🕳️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-28",
+      "folderId": "folder-Exploration",
+      "order": 27,
+      "name": "Carnath Roadhouse - [ToD]",
+      "url": "https://www.youtube.com/watch?v=08hUvZWTrCE",
+      "icon": "🔥"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-29",
+      "folderId": "folder-Exploration",
+      "order": 28,
+      "name": "Dragon Hatchery - [ToD]",
+      "url": "https://www.youtube.com/watch?v=mQ43gYLQY7M",
+      "icon": "🌧️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-30",
+      "folderId": "folder-Combat",
+      "order": 29,
+      "name": "Raider Camp - [ToD]",
+      "url": "https://www.youtube.com/watch?v=fXySSmVhGh8",
+      "icon": "🌊"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-31",
+      "folderId": "folder-Combat",
+      "order": 30,
+      "name": "Tracking the Raiders - [ToD]",
+      "url": "https://www.youtube.com/watch?v=klVLwrNIT6M",
+      "icon": "🏘️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-32",
+      "folderId": "folder-Combat",
+      "order": 31,
+      "name": "Besieged fort - [ToD]",
+      "url": "https://www.youtube.com/watch?v=zc2QIqKjOlY",
+      "icon": "🐉"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-33",
+      "folderId": "folder-Combat",
+      "order": 32,
+      "name": "Greenest in Flames - [ToD]",
+      "url": "https://www.youtube.com/watch?v=RGkEbL3aAPo",
+      "icon": "🦇"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-34",
+      "folderId": "folder-Exploration",
+      "order": 33,
+      "name": "Road to Greenest - [ToD]",
+      "url": "https://www.youtube.com/watch?v=31LBOI6od-E",
+      "icon": "📜"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-35",
+      "folderId": "folder-Social",
+      "order": 34,
+      "name": "Snow Tavern",
+      "url": "https://www.youtube.com/watch?v=VeWrUoNB8DA",
+      "icon": "🕯️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-36",
+      "folderId": "folder-Nautical",
+      "order": 35,
+      "name": "Frozen Harbour",
+      "url": "https://www.youtube.com/watch?v=vH2REHic5CA",
+      "icon": "🎵"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-37",
+      "folderId": "folder-Social",
+      "order": 36,
+      "name": "Snow Village",
+      "url": "https://www.youtube.com/watch?v=Purjkatwxeg",
+      "icon": "⚡"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-38",
+      "folderId": "folder-Social",
+      "order": 37,
+      "name": "Shrine of Savras - [DIP]",
+      "url": "https://www.youtube.com/watch?v=32UEUeuBdIg",
+      "icon": "❄️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-39",
+      "folderId": "folder-Exploration",
+      "order": 38,
+      "name": "Woodland Manse (Interior) - [DIP]",
+      "url": "https://www.youtube.com/watch?v=PZmoT7-AB-A",
+      "icon": "🌿"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-40",
+      "folderId": "folder-Exploration",
+      "order": 39,
+      "name": "Woodland Manse - [DIP]",
+      "url": "https://www.youtube.com/watch?v=YfpFbR3aXyk",
+      "icon": "🗡️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-41",
+      "folderId": "folder-Exploration",
+      "order": 40,
+      "name": "Umbrage Hill (Interior) - [DIP]",
+      "url": "https://www.youtube.com/watch?v=K7TZgWPsRWk",
+      "icon": "⚔️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-42",
+      "folderId": "folder-Exploration",
+      "order": 41,
+      "name": "Umbrage Hill - [DIP]",
+      "url": "https://www.youtube.com/watch?v=fqka4sNcVu8",
+      "icon": "🍺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-43",
+      "folderId": "folder-Exploration",
+      "order": 42,
+      "name": "Mountain's Toe Gold Mine - [DIP]",
+      "url": "https://www.youtube.com/watch?v=qCk50SepH_E",
+      "icon": "⛺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-44",
+      "folderId": "folder-Exploration",
+      "order": 43,
+      "name": "Loggers Camp - [DIP]",
+      "url": "https://www.youtube.com/watch?v=mJ3kdLz9420",
+      "icon": "🌙"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-45",
+      "folderId": "folder-Exploration",
+      "order": 44,
+      "name": "Tower Of Storms Interior - [DIP]",
+      "url": "https://www.youtube.com/watch?v=RWDrg-Acs5Q",
+      "icon": "🏰"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-46",
+      "folderId": "folder-Exploration",
+      "order": 45,
+      "name": "Tower Of Storms - [DIP]",
+      "url": "https://www.youtube.com/watch?v=aWdKaOzRRKM",
+      "icon": "🌲"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-47",
+      "folderId": "folder-Exploration",
+      "order": 46,
+      "name": "Icespire Hold - [DIP]",
+      "url": "https://www.youtube.com/watch?v=MiSh_qsOhvg",
+      "icon": "🕳️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-48",
+      "folderId": "folder-Exploration",
+      "order": 47,
+      "name": "Icespire Peak - [DIP]",
+      "url": "https://www.youtube.com/watch?v=w8wOB0ZyhAY",
+      "icon": "🔥"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-49",
+      "folderId": "folder-Exploration",
+      "order": 48,
+      "name": "Gnomengarde Caves - [DIP]",
+      "url": "https://www.youtube.com/watch?v=u1Nz4sGpeJQ",
+      "icon": "🌧️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-50",
+      "folderId": "folder-Exploration",
+      "order": 49,
+      "name": "Gnomengarde - [DIP]",
+      "url": "https://www.youtube.com/watch?v=AdU5oaT1XLQ",
+      "icon": "🌊"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-51",
+      "folderId": "folder-Exploration",
+      "order": 50,
+      "name": "Falcon's Hunting Lodge Interior - [DIP]",
+      "url": "https://www.youtube.com/watch?v=_cH7n7RmRLc",
+      "icon": "🏘️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-52",
+      "folderId": "folder-Exploration",
+      "order": 51,
+      "name": "Falcon's Hunting Lodge - [DIP]",
+      "url": "https://www.youtube.com/watch?v=TPNnaDbKq2Y",
+      "icon": "🐉"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-53",
+      "folderId": "folder-Combat",
+      "order": 52,
+      "name": "Dwarven Temple - [DIP]",
+      "url": "https://www.youtube.com/watch?v=aCGvV_Pl_tQ",
+      "icon": "🦇"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-54",
+      "folderId": "folder-Combat",
+      "order": 53,
+      "name": "Dwarven Excavation - [DIP]",
+      "url": "https://www.youtube.com/watch?v=v39xruyWG7w",
+      "icon": "📜"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-55",
+      "folderId": "folder-Spooky",
+      "order": 54,
+      "name": "Dragon Barrow Catacombs - [DIP]",
+      "url": "https://www.youtube.com/watch?v=Mj_IWFjpVqw",
+      "icon": "🕯️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-56",
+      "folderId": "folder-Exploration",
+      "order": 55,
+      "name": "Dragon Barrow - [DIP]",
+      "url": "https://www.youtube.com/watch?v=lHPYglfHh58",
+      "icon": "🎵"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-57",
+      "folderId": "folder-Exploration",
+      "order": 56,
+      "name": "Circle of Thunder Caves - [DIP]",
+      "url": "https://www.youtube.com/watch?v=iiUFDbD_JCY",
+      "icon": "⚡"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-58",
+      "folderId": "folder-Exploration",
+      "order": 57,
+      "name": "Circle of Thunder - [DIP]",
+      "url": "https://www.youtube.com/watch?v=yo1G8lm13Dg",
+      "icon": "❄️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-59",
+      "folderId": "folder-Social",
+      "order": 58,
+      "name": "Butterskull Ranchouse - [DIP]",
+      "url": "https://www.youtube.com/watch?v=ceHoePKzRW4",
+      "icon": "🌿"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-60",
+      "folderId": "folder-Exploration",
+      "order": 59,
+      "name": "Butterskull Ranch - [DIP]",
+      "url": "https://www.youtube.com/watch?v=tIL_29ax8Qw",
+      "icon": "🗡️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-61",
+      "folderId": "folder-Social",
+      "order": 60,
+      "name": "Axeholm Haunted Hall - [DIP]",
+      "url": "https://www.youtube.com/watch?v=tNPOQ477jzE",
+      "icon": "⚔️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-62",
+      "folderId": "folder-Exploration",
+      "order": 61,
+      "name": "Axeholm - [DIP]",
+      "url": "https://www.youtube.com/watch?v=rK-3mpNE3g0",
+      "icon": "🍺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-63",
+      "folderId": "folder-Exploration",
+      "order": 62,
+      "name": "Triboar Trail - [DIP]",
+      "url": "https://www.youtube.com/watch?v=8TDdxSeGzPg",
+      "icon": "⛺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-64",
+      "folderId": "folder-Exploration",
+      "order": 63,
+      "name": "Sword Mountains - [DIP]",
+      "url": "https://www.youtube.com/watch?v=KogueXr3Cyg",
+      "icon": "🌙"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-65",
+      "folderId": "folder-Exploration",
+      "order": 64,
+      "name": "Conyberry - [DIP]",
+      "url": "https://www.youtube.com/watch?v=aAWPNcmwKiY",
+      "icon": "🏰"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-66",
+      "folderId": "folder-Exploration",
+      "order": 65,
+      "name": "Neverwinter Wood - [DIP]",
+      "url": "https://www.youtube.com/watch?v=ynzm6jGMuYQ",
+      "icon": "🌲"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-67",
+      "folderId": "folder-Social",
+      "order": 66,
+      "name": "Alderleaf Farm - [PHA]",
+      "url": "https://www.youtube.com/watch?v=8o_cNCCu6Sk",
+      "icon": "🕳️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-68",
+      "folderId": "folder-Social",
+      "order": 67,
+      "name": "Edermath Orchard - [PHA]",
+      "url": "https://www.youtube.com/watch?v=ovBRjzof-4k",
+      "icon": "🔥"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-69",
+      "folderId": "folder-Social",
+      "order": 68,
+      "name": "Townmaster's Hall - [PHA]",
+      "url": "https://www.youtube.com/watch?v=Otu362HDdxA",
+      "icon": "🌧️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-70",
+      "folderId": "folder-Social",
+      "order": 69,
+      "name": "Barthen's Provisions - [PHA]",
+      "url": "https://www.youtube.com/watch?v=ItLiNp5R6xM",
+      "icon": "🌊"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-71",
+      "folderId": "folder-Social",
+      "order": 70,
+      "name": "Miner's Exchange - [PHA]",
+      "url": "https://www.youtube.com/watch?v=NrX8lvhUtpo",
+      "icon": "🏘️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-72",
+      "folderId": "folder-Social",
+      "order": 71,
+      "name": "Lionshield Coster - [PHA]",
+      "url": "https://www.youtube.com/watch?v=e2PVjftJUIM",
+      "icon": "🐉"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-73",
+      "folderId": "folder-Social",
+      "order": 72,
+      "name": "Shrine Of Luck - [PHA]",
+      "url": "https://www.youtube.com/watch?v=FGiap6DS6Q4",
+      "icon": "🦇"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-74",
+      "folderId": "folder-Social",
+      "order": 73,
+      "name": "Sleeping Giant Tap Room - [PHA]",
+      "url": "https://www.youtube.com/watch?v=l2N2SDze7KQ",
+      "icon": "📜"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-75",
+      "folderId": "folder-Social",
+      "order": 74,
+      "name": "Stonehill Inn - [PHA]",
+      "url": "https://www.youtube.com/watch?v=2UKiqi60YlA",
+      "icon": "🕯️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-76",
+      "folderId": "folder-Social",
+      "order": 75,
+      "name": "Phandalin Streets - [PHA]",
+      "url": "https://www.youtube.com/watch?v=pOPLDhKn9cg",
+      "icon": "🎵"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-77",
+      "folderId": "folder-Social",
+      "order": 76,
+      "name": "Storm City",
+      "url": "https://www.youtube.com/watch?v=Aky0aoTDhc4",
+      "icon": "⚡"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-78",
+      "folderId": "folder-Combat",
+      "order": 77,
+      "name": "Warp Storm",
+      "url": "https://www.youtube.com/watch?v=rnM8BkNyVEo",
+      "icon": "❄️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-79",
+      "folderId": "folder-Exploration",
+      "order": 78,
+      "name": "Standing Stones - [GoS]",
+      "url": "https://www.youtube.com/watch?v=r2vrUYzSBBo",
+      "icon": "🌿"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-80",
+      "folderId": "folder-Combat",
+      "order": 79,
+      "name": "Black Powder Warfare",
+      "url": "https://www.youtube.com/watch?v=nq8ES02WZ_I",
+      "icon": "🗡️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-81",
+      "folderId": "folder-Nautical",
+      "order": 80,
+      "name": "Sea Grove of Obad Hai - [GoS]",
+      "url": "https://www.youtube.com/watch?v=ProUI9dRFPQ",
+      "icon": "⚔️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-82",
+      "folderId": "folder-Nautical",
+      "order": 81,
+      "name": "Saltmarsh Weekly Market - [GoS]",
+      "url": "https://www.youtube.com/watch?v=MNhqyKxMMf8",
+      "icon": "🍺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-83",
+      "folderId": "folder-Nautical",
+      "order": 82,
+      "name": "Saltmarsh City Gates - [GoS]",
+      "url": "https://www.youtube.com/watch?v=JoA3gvS2x3Q",
+      "icon": "⛺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-84",
+      "folderId": "folder-Nautical",
+      "order": 83,
+      "name": "Crabber's Cove - [GoS]",
+      "url": "https://www.youtube.com/watch?v=lDsV5BmWzwY",
+      "icon": "🌙"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-85",
+      "folderId": "folder-Social",
+      "order": 84,
+      "name": "Empty Net Tavern - [GoS]",
+      "url": "https://www.youtube.com/watch?v=y1EvJTzlIis",
+      "icon": "🏰"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-86",
+      "folderId": "folder-Nautical",
+      "order": 85,
+      "name": "Saltmarsh Town - [GoS]",
+      "url": "https://www.youtube.com/watch?v=OTnp7QnsUhg",
+      "icon": "🌲"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-87",
+      "folderId": "folder-Combat",
+      "order": 86,
+      "name": "Naval Battle",
+      "url": "https://www.youtube.com/watch?v=_-ck4DAGtzs",
+      "icon": "🕳️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-88",
+      "folderId": "folder-Narrative",
+      "order": 87,
+      "name": "Varnhold",
+      "url": "https://www.youtube.com/watch?v=9Fa0jWXzmI0",
+      "icon": "🔥"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-89",
+      "folderId": "folder-Nautical",
+      "order": 88,
+      "name": "Yawning Portal - [DH]",
+      "url": "https://www.youtube.com/watch?v=OhYfyVRZNQ4",
+      "icon": "🌧️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-90",
+      "folderId": "folder-Spooky",
+      "order": 89,
+      "name": "Kolat Towers - [DH]",
+      "url": "https://www.youtube.com/watch?v=9L4FVNWgmms",
+      "icon": "🌊"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-91",
+      "folderId": "folder-Narrative",
+      "order": 90,
+      "name": "Waterdeep in Winter - [DH]",
+      "url": "https://www.youtube.com/watch?v=TnNjXOIZvIs",
+      "icon": "🏘️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-92",
+      "folderId": "folder-Nautical",
+      "order": 91,
+      "name": "Sea Maiden's Faire - [DH]",
+      "url": "https://www.youtube.com/watch?v=bacXrofFE-I",
+      "icon": "🐉"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-93",
+      "folderId": "folder-Narrative",
+      "order": 92,
+      "name": "Waterdeep in Autumn - [DH]",
+      "url": "https://www.youtube.com/watch?v=ikWFbtx63nY",
+      "icon": "🦇"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-94",
+      "folderId": "folder-Spooky",
+      "order": 93,
+      "name": "Xanathars Lair - [DH]",
+      "url": "https://www.youtube.com/watch?v=Idhf_hMkEGM",
+      "icon": "📜"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-95",
+      "folderId": "folder-Narrative",
+      "order": 94,
+      "name": "Waterdeep in Spring - [DH]",
+      "url": "https://www.youtube.com/watch?v=YJW8AuJ0oIA",
+      "icon": "🕯️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-96",
+      "folderId": "folder-Spooky",
+      "order": 95,
+      "name": "Temple of Asmodeus - [DH]",
+      "url": "https://www.youtube.com/watch?v=UxOLopND4CA",
+      "icon": "🎵"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-97",
+      "folderId": "folder-Narrative",
+      "order": 96,
+      "name": "Waterdeep In Summer - [DH]",
+      "url": "https://www.youtube.com/watch?v=aTaIFSnReOs",
+      "icon": "⚡"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-98",
+      "folderId": "folder-Combat",
+      "order": 97,
+      "name": "Full Scale War",
+      "url": "https://www.youtube.com/watch?v=0rl7AatkjfA",
+      "icon": "❄️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-99",
+      "folderId": "folder-Social",
+      "order": 98,
+      "name": "Cloud City",
+      "url": "https://www.youtube.com/watch?v=mGi-Hyg7D9Y",
+      "icon": "🌿"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-100",
+      "folderId": "folder-Narrative",
+      "order": 99,
+      "name": "The Highest Peak",
+      "url": "https://www.youtube.com/watch?v=tRXiKBpiN7E",
+      "icon": "🗡️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-101",
+      "folderId": "folder-Narrative",
+      "order": 100,
+      "name": "Abandoned Swamp House",
+      "url": "https://www.youtube.com/watch?v=NnbXs3ZT3_U",
+      "icon": "⚔️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-102",
+      "folderId": "folder-Spooky",
+      "order": 101,
+      "name": "Death God's Nursery - [ToA]",
+      "url": "https://www.youtube.com/watch?v=aHcpTbM_NgQ",
+      "icon": "🍺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-103",
+      "folderId": "folder-Narrative",
+      "order": 102,
+      "name": "Gears of Hate - [ToA]",
+      "url": "https://www.youtube.com/watch?v=uSzLSOgKrck",
+      "icon": "⛺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-104",
+      "folderId": "folder-Narrative",
+      "order": 103,
+      "name": "Tomb of the Nine Gods - [ToA]",
+      "url": "https://www.youtube.com/watch?v=yP9BCYR2UOw",
+      "icon": "🌙"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-105",
+      "folderId": "folder-Narrative",
+      "order": 104,
+      "name": "The Great Rift - [ToA]",
+      "url": "https://www.youtube.com/watch?v=H-LkR-ku5DU",
+      "icon": "🏰"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-106",
+      "folderId": "folder-Narrative",
+      "order": 105,
+      "name": "Kir Sabal - [ToA]",
+      "url": "https://www.youtube.com/watch?v=a5gbCoaUe3A",
+      "icon": "🌲"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-107",
+      "folderId": "folder-Narrative",
+      "order": 106,
+      "name": "Nangalore - [ToA]",
+      "url": "https://www.youtube.com/watch?v=IXWaNgp6Z4Q",
+      "icon": "🕳️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-108",
+      "folderId": "folder-Exploration",
+      "order": 107,
+      "name": "Wyrmheart Mine - [ToA]",
+      "url": "https://www.youtube.com/watch?v=F41CoM8gIqA",
+      "icon": "🔥"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-109",
+      "folderId": "folder-Social",
+      "order": 108,
+      "name": "Lost City of Omu - [ToA]",
+      "url": "https://www.youtube.com/watch?v=ZO1Z3_Xlqqk",
+      "icon": "🌧️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-110",
+      "folderId": "folder-Narrative",
+      "order": 109,
+      "name": "Kingdom Death - Gorm Climate [ReUpload]",
+      "url": "https://www.youtube.com/watch?v=sPOi8rGmzmo",
+      "icon": "🌊"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-111",
+      "folderId": "folder-Exploration",
+      "order": 110,
+      "name": "Mbala - [ToA]",
+      "url": "https://www.youtube.com/watch?v=_neELgwbnb8",
+      "icon": "🏘️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-112",
+      "folderId": "folder-Exploration",
+      "order": 111,
+      "name": "Fort Beluarian - [ToA]",
+      "url": "https://www.youtube.com/watch?v=l19-xlbotmY",
+      "icon": "🐉"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-113",
+      "folderId": "folder-Narrative",
+      "order": 112,
+      "name": "Jahaka Anchorage - [ToA]",
+      "url": "https://www.youtube.com/watch?v=ADq3UZ17hTE",
+      "icon": "🦇"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-114",
+      "folderId": "folder-Narrative",
+      "order": 113,
+      "name": "Dungrunglung - [ToA]",
+      "url": "https://www.youtube.com/watch?v=k7WLYRzjXDU",
+      "icon": "📜"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-115",
+      "folderId": "folder-Narrative",
+      "order": 114,
+      "name": "Hrakhamar - [ToA]",
+      "url": "https://www.youtube.com/watch?v=uYzGjmiz_Ok",
+      "icon": "🕯️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-116",
+      "folderId": "folder-Narrative",
+      "order": 115,
+      "name": "Ataaz Muhahah - [ToA]",
+      "url": "https://www.youtube.com/watch?v=teEsBsYZ_mA",
+      "icon": "🎵"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-117",
+      "folderId": "folder-Spooky",
+      "order": 116,
+      "name": "Fane Of The Night Serpent - [ToA]",
+      "url": "https://www.youtube.com/watch?v=SmgZtO20wAc",
+      "icon": "⚡"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-118",
+      "folderId": "folder-Exploration",
+      "order": 117,
+      "name": "Aldani Basin - [ToA]",
+      "url": "https://www.youtube.com/watch?v=k2GNSAmFEEU",
+      "icon": "❄️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-119",
+      "folderId": "folder-Exploration",
+      "order": 118,
+      "name": "Camp Vengeance - [ToA]",
+      "url": "https://www.youtube.com/watch?v=MYyxHrnHWlo",
+      "icon": "🌿"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-120",
+      "folderId": "folder-Narrative",
+      "order": 119,
+      "name": "Merchant Prince's Villa - [ToA]",
+      "url": "https://www.youtube.com/watch?v=86wQZMTgGqY",
+      "icon": "🗡️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-121",
+      "folderId": "folder-Nautical",
+      "order": 120,
+      "name": "Port Nyanzaru - [ToA]",
+      "url": "https://www.youtube.com/watch?v=KV0bxX0fhXw",
+      "icon": "⚔️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-122",
+      "folderId": "folder-Exploration",
+      "order": 121,
+      "name": "Burning Forest",
+      "url": "https://www.youtube.com/watch?v=S3C1LfiLob8",
+      "icon": "🍺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-123",
+      "folderId": "folder-Exploration",
+      "order": 122,
+      "name": "Torchlit Dungeon",
+      "url": "https://www.youtube.com/watch?v=mEYR1wMWhjY",
+      "icon": "⛺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-124",
+      "folderId": "folder-Narrative",
+      "order": 123,
+      "name": "On The March",
+      "url": "https://www.youtube.com/watch?v=u6aCMcMt-nI",
+      "icon": "🌙"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-125",
+      "folderId": "folder-Narrative",
+      "order": 124,
+      "name": "Blacksmith",
+      "url": "https://www.youtube.com/watch?v=lxKVT1r4sgU",
+      "icon": "🏰"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-126",
+      "folderId": "folder-Social",
+      "order": 125,
+      "name": "Coastal Town",
+      "url": "https://www.youtube.com/watch?v=CY97XoaEjFg",
+      "icon": "🌲"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-127",
+      "folderId": "folder-Narrative",
+      "order": 126,
+      "name": "Woodland Hut",
+      "url": "https://www.youtube.com/watch?v=kufAqxUEkIU",
+      "icon": "🕳️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-128",
+      "folderId": "folder-Narrative",
+      "order": 127,
+      "name": "Quiet Graveyard",
+      "url": "https://www.youtube.com/watch?v=k2dnJXHWLrY",
+      "icon": "🔥"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-129",
+      "folderId": "folder-Narrative",
+      "order": 128,
+      "name": "Dockside Market",
+      "url": "https://www.youtube.com/watch?v=YZkFjWJVt6c",
+      "icon": "🌧️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-130",
+      "folderId": "folder-Social",
+      "order": 129,
+      "name": "Evening Forest Village",
+      "url": "https://www.youtube.com/watch?v=rTl65Nqsfpw",
+      "icon": "🌊"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-131",
+      "folderId": "folder-Spooky",
+      "order": 130,
+      "name": "Mists of Ravenloft - [CoS]",
+      "url": "https://www.youtube.com/watch?v=J41ipvUvIzI",
+      "icon": "🏘️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-132",
+      "folderId": "folder-Spooky",
+      "order": 131,
+      "name": "Amber Temple - [CoS]",
+      "url": "https://www.youtube.com/watch?v=Dd91LPwFAMk",
+      "icon": "🐉"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-133",
+      "folderId": "folder-Exploration",
+      "order": 132,
+      "name": "Wizard Of The Wines - [CoS]",
+      "url": "https://www.youtube.com/watch?v=4hT8zvR-nkg",
+      "icon": "🦇"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-134",
+      "folderId": "folder-Narrative",
+      "order": 133,
+      "name": "Slave Market of Thay",
+      "url": "https://www.youtube.com/watch?v=mDK9En7z1iA",
+      "icon": "📜"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-135",
+      "folderId": "folder-Exploration",
+      "order": 134,
+      "name": "Ruins of Berez - [CoS]",
+      "url": "https://www.youtube.com/watch?v=9MsH9vN1aFQ",
+      "icon": "🕯️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-136",
+      "folderId": "folder-Exploration",
+      "order": 135,
+      "name": "Generic Dungeon",
+      "url": "https://www.youtube.com/watch?v=wScEFaoqwPM",
+      "icon": "🎵"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-137",
+      "folderId": "folder-Exploration",
+      "order": 136,
+      "name": "Van Richten's Tower - [CoS]",
+      "url": "https://www.youtube.com/watch?v=1u7rJTtlbKw",
+      "icon": "⚡"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-138",
+      "folderId": "folder-Exploration",
+      "order": 137,
+      "name": "Tsolenka Pass - [CoS]",
+      "url": "https://www.youtube.com/watch?v=L_eIOeXIEfo",
+      "icon": "❄️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-139",
+      "folderId": "folder-Narrative",
+      "order": 138,
+      "name": "Madhouse - [CoS]",
+      "url": "https://www.youtube.com/watch?v=1gDfJHT5n0U",
+      "icon": "🌿"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-140",
+      "folderId": "folder-Narrative",
+      "order": 139,
+      "name": "Abbey of St Markovia - [CoS]",
+      "url": "https://www.youtube.com/watch?v=8AODR94oNMo",
+      "icon": "🗡️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-141",
+      "folderId": "folder-Social",
+      "order": 140,
+      "name": "Village of Krezk - [CoS]",
+      "url": "https://www.youtube.com/watch?v=ZRnLm7BJMnw",
+      "icon": "⚔️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-142",
+      "folderId": "folder-Narrative",
+      "order": 141,
+      "name": "Potion Shop [ReUpload]",
+      "url": "https://www.youtube.com/watch?v=FayeYc2yoOo",
+      "icon": "🍺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-143",
+      "folderId": "folder-Spooky",
+      "order": 142,
+      "name": "Death House Dungeon - [CoS]",
+      "url": "https://www.youtube.com/watch?v=eqUiXz1tcmM",
+      "icon": "⛺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-144",
+      "folderId": "folder-Exploration",
+      "order": 143,
+      "name": "Argynvostholt - [CoS]",
+      "url": "https://www.youtube.com/watch?v=K08IQhgXDWQ",
+      "icon": "🌙"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-145",
+      "folderId": "folder-Spooky",
+      "order": 144,
+      "name": "Old Bonegrinder - [CoS]",
+      "url": "https://www.youtube.com/watch?v=J63qJ_GFV_k",
+      "icon": "🏰"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-146",
+      "folderId": "folder-Spooky",
+      "order": 145,
+      "name": "Death House - [CoS]",
+      "url": "https://www.youtube.com/watch?v=GOTyzCntzJo",
+      "icon": "🌲"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-147",
+      "folderId": "folder-Social",
+      "order": 146,
+      "name": "Town Of Vallaki - [CoS]",
+      "url": "https://www.youtube.com/watch?v=2UPkwe_5p_w",
+      "icon": "🕳️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-148",
+      "folderId": "folder-Social",
+      "order": 147,
+      "name": "Village of Barovia - [CoS]",
+      "url": "https://www.youtube.com/watch?v=nnEGIH1mXwI",
+      "icon": "🔥"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-149",
+      "folderId": "folder-Spooky",
+      "order": 148,
+      "name": "Catacombs - [CoS]",
+      "url": "https://www.youtube.com/watch?v=WPpVMmTt74Q",
+      "icon": "🌧️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-150",
+      "folderId": "folder-Spooky",
+      "order": 149,
+      "name": "Svalich Woods - [CoS]",
+      "url": "https://www.youtube.com/watch?v=eePl-I8heFc",
+      "icon": "🌊"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-151",
+      "folderId": "folder-Narrative",
+      "order": 150,
+      "name": "Desert Oasis",
+      "url": "https://www.youtube.com/watch?v=XnUyOmQU7s4",
+      "icon": "🏘️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-152",
+      "folderId": "folder-Spooky",
+      "order": 151,
+      "name": "Castle Ravenloft - [CoS]",
+      "url": "https://www.youtube.com/watch?v=rfA-pzDkERs",
+      "icon": "🐉"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-153",
+      "folderId": "folder-Exploration",
+      "order": 152,
+      "name": "Desert Cave",
+      "url": "https://www.youtube.com/watch?v=qcuB-O0LFiA",
+      "icon": "🦇"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-154",
+      "folderId": "folder-Combat",
+      "order": 153,
+      "name": "Battle Aftermath",
+      "url": "https://www.youtube.com/watch?v=r7vBL4BquOU",
+      "icon": "📜"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-155",
+      "folderId": "folder-Narrative",
+      "order": 154,
+      "name": "Desert Settlement",
+      "url": "https://www.youtube.com/watch?v=L6nYMDvQRfY",
+      "icon": "🕯️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-156",
+      "folderId": "folder-Exploration",
+      "order": 155,
+      "name": "Jungles of Chult - [ToA]",
+      "url": "https://www.youtube.com/watch?v=lbPUywvfhaE",
+      "icon": "🎵"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-157",
+      "folderId": "folder-Social",
+      "order": 156,
+      "name": "Snow Village",
+      "url": "https://www.youtube.com/watch?v=HkIzMuvIhNQ",
+      "icon": "⚡"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-158",
+      "folderId": "folder-Narrative",
+      "order": 157,
+      "name": "Underwater",
+      "url": "https://www.youtube.com/watch?v=NY3XkLe6oKQ",
+      "icon": "❄️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-159",
+      "folderId": "folder-Narrative",
+      "order": 158,
+      "name": "Nessus - 9th Circle Of Hell",
+      "url": "https://www.youtube.com/watch?v=nosKm1iRIOk",
+      "icon": "🌿"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-160",
+      "folderId": "folder-Exploration",
+      "order": 159,
+      "name": "Castle Naerytar",
+      "url": "https://www.youtube.com/watch?v=ImLj-ArdmMs",
+      "icon": "🗡️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-161",
+      "folderId": "folder-Social",
+      "order": 160,
+      "name": "Crowded Local Tavern",
+      "url": "https://www.youtube.com/watch?v=EULoybB2Nsw",
+      "icon": "⚔️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-162",
+      "folderId": "folder-Narrative",
+      "order": 161,
+      "name": "Lake Of Death",
+      "url": "https://www.youtube.com/watch?v=WtR3rkmlC7U",
+      "icon": "🍺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-163",
+      "folderId": "folder-Exploration",
+      "order": 162,
+      "name": "Night Forest",
+      "url": "https://www.youtube.com/watch?v=L3dEOA4giio",
+      "icon": "⛺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-164",
+      "folderId": "folder-Social",
+      "order": 163,
+      "name": "Woodland Village",
+      "url": "https://www.youtube.com/watch?v=-IEAfnRneP4",
+      "icon": "🌙"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-165",
+      "folderId": "folder-Narrative",
+      "order": 164,
+      "name": "Woodland Waterfall",
+      "url": "https://www.youtube.com/watch?v=fEgFDTkjprM",
+      "icon": "🏰"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-166",
+      "folderId": "folder-Exploration",
+      "order": 165,
+      "name": "Uneasy Forest",
+      "url": "https://www.youtube.com/watch?v=QQg0br-eZUg",
+      "icon": "🌲"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-167",
+      "folderId": "folder-Exploration",
+      "order": 166,
+      "name": "Peaceful Forest",
+      "url": "https://www.youtube.com/watch?v=qrqzMy2gF8g",
+      "icon": "🕳️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-168",
+      "folderId": "folder-Exploration",
+      "order": 167,
+      "name": "Forest Creek",
+      "url": "https://www.youtube.com/watch?v=mk58c70aLcA",
+      "icon": "🔥"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-169",
+      "folderId": "folder-Spooky",
+      "order": 168,
+      "name": "The Underdark",
+      "url": "https://www.youtube.com/watch?v=NMUoicf5kYw",
+      "icon": "🌧️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-170",
+      "folderId": "folder-Narrative",
+      "order": 169,
+      "name": "Minderhals Forge",
+      "url": "https://www.youtube.com/watch?v=UUrXaIrCVxM",
+      "icon": "🌊"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-171",
+      "folderId": "folder-Exploration",
+      "order": 170,
+      "name": "Dusty Dungeon",
+      "url": "https://www.youtube.com/watch?v=Ias7pnRfYRs",
+      "icon": "🏘️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-172",
+      "folderId": "folder-Narrative",
+      "order": 171,
+      "name": "Brooding Wood Clearing",
+      "url": "https://www.youtube.com/watch?v=BagZxkrxaC0",
+      "icon": "🐉"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-173",
+      "folderId": "folder-Social",
+      "order": 172,
+      "name": "Study Room/Library",
+      "url": "https://www.youtube.com/watch?v=K5e1wQlTrRs",
+      "icon": "🦇"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-174",
+      "folderId": "folder-Exploration",
+      "order": 173,
+      "name": "Damp Cave",
+      "url": "https://www.youtube.com/watch?v=3Hwr_BaekgM",
+      "icon": "📜"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-175",
+      "folderId": "folder-Narrative",
+      "order": 174,
+      "name": "Fetid Swamp",
+      "url": "https://www.youtube.com/watch?v=juMabblyLZU",
+      "icon": "🕯️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-176",
+      "folderId": "folder-Narrative",
+      "order": 175,
+      "name": "Small Marketplace",
+      "url": "https://www.youtube.com/watch?v=x2UulCWGess",
+      "icon": "🎵"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-177",
+      "folderId": "folder-Narrative",
+      "order": 176,
+      "name": "Horse And Cart",
+      "url": "https://www.youtube.com/watch?v=65TV8jhp9Ns",
+      "icon": "⚡"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-178",
+      "folderId": "folder-Narrative",
+      "order": 177,
+      "name": "Horseback Travelling",
+      "url": "https://www.youtube.com/watch?v=PIvykxZ0ppQ",
+      "icon": "❄️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-179",
+      "folderId": "folder-Narrative",
+      "order": 178,
+      "name": "In The Rain",
+      "url": "https://www.youtube.com/watch?v=KSSpVMIgN2Y",
+      "icon": "🌿"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-180",
+      "folderId": "folder-Narrative",
+      "order": 179,
+      "name": "Cania - 8th Circle Of Hell",
+      "url": "https://www.youtube.com/watch?v=7AR6Mh6B2mg",
+      "icon": "🗡️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-181",
+      "folderId": "folder-Narrative",
+      "order": 180,
+      "name": "Maladomini - 7th Circle Of Hell",
+      "url": "https://www.youtube.com/watch?v=IYhtR7MiVb4",
+      "icon": "⚔️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-182",
+      "folderId": "folder-Narrative",
+      "order": 181,
+      "name": "Malbolge - 6th Circle Of Hell",
+      "url": "https://www.youtube.com/watch?v=xcCmC4M_E-o",
+      "icon": "🍺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-183",
+      "folderId": "folder-Narrative",
+      "order": 182,
+      "name": "Stygia - 5th Circle Of Hell",
+      "url": "https://www.youtube.com/watch?v=_dsOKaFk6Ws",
+      "icon": "⛺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-184",
+      "folderId": "folder-Narrative",
+      "order": 183,
+      "name": "Phlegethos - 4th Circle Of Hell",
+      "url": "https://www.youtube.com/watch?v=XdrkkiYYZsM",
+      "icon": "🌙"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-185",
+      "folderId": "folder-Narrative",
+      "order": 184,
+      "name": "Minauros - 3rd Circle of Hell",
+      "url": "https://www.youtube.com/watch?v=3VD8RIR4x-M",
+      "icon": "🏰"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-186",
+      "folderId": "folder-Narrative",
+      "order": 185,
+      "name": "Dis - 2nd Circle of Hell",
+      "url": "https://www.youtube.com/watch?v=2KMMEDFtDd8",
+      "icon": "🌲"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-187",
+      "folderId": "folder-Social",
+      "order": 186,
+      "name": "Evening Town",
+      "url": "https://www.youtube.com/watch?v=bSbYpFMNxLI",
+      "icon": "🕳️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-188",
+      "folderId": "folder-Narrative",
+      "order": 187,
+      "name": "Rocky Shore",
+      "url": "https://www.youtube.com/watch?v=WcqURB6_E5I",
+      "icon": "🔥"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-189",
+      "folderId": "folder-Narrative",
+      "order": 188,
+      "name": "Evening Plains",
+      "url": "https://www.youtube.com/watch?v=S8BOUkg7tN8",
+      "icon": "🌧️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-190",
+      "folderId": "folder-Social",
+      "order": 189,
+      "name": "Daytime Tavern",
+      "url": "https://www.youtube.com/watch?v=ICk6BdQ9EWk",
+      "icon": "🌊"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-191",
+      "folderId": "folder-Narrative",
+      "order": 190,
+      "name": "Avernus - 1st Circle of Hell",
+      "url": "https://www.youtube.com/watch?v=aaktyV_zdwg",
+      "icon": "🏘️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-192",
+      "folderId": "folder-Narrative",
+      "order": 191,
+      "name": "Bar Room Brawl",
+      "url": "https://www.youtube.com/watch?v=0p79IBaksXU",
+      "icon": "🐉"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-193",
+      "folderId": "folder-Social",
+      "order": 192,
+      "name": "Quiet Tavern",
+      "url": "https://www.youtube.com/watch?v=atp0MuIQc_M",
+      "icon": "🦇"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-194",
+      "folderId": "folder-Social",
+      "order": 193,
+      "name": "Tavern Cellar",
+      "url": "https://www.youtube.com/watch?v=EtWDUD2IP4M",
+      "icon": "📜"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-195",
+      "folderId": "folder-Social",
+      "order": 194,
+      "name": "Tavern Party",
+      "url": "https://www.youtube.com/watch?v=FM3Ep3yka44",
+      "icon": "🕯️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-196",
+      "folderId": "folder-Nautical",
+      "order": 195,
+      "name": "Ship In Storm",
+      "url": "https://www.youtube.com/watch?v=f43ANvCEltQ",
+      "icon": "🎵"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-197",
+      "folderId": "folder-Nautical",
+      "order": 196,
+      "name": "Ship At Shore",
+      "url": "https://www.youtube.com/watch?v=K3VNYPYUTRE",
+      "icon": "⚡"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-198",
+      "folderId": "folder-Nautical",
+      "order": 197,
+      "name": "Large Ship Sailing",
+      "url": "https://www.youtube.com/watch?v=iC4zLP31nd4",
+      "icon": "❄️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-199",
+      "folderId": "folder-Nautical",
+      "order": 198,
+      "name": "Ship Cabin",
+      "url": "https://www.youtube.com/watch?v=D4juEBifIMk",
+      "icon": "🌿"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-200",
+      "folderId": "folder-Spooky",
+      "order": 199,
+      "name": "The Great Abyss (10 Hour Special)",
+      "url": "https://www.youtube.com/watch?v=NtblaMOAS3U",
+      "icon": "🗡️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-201",
+      "folderId": "folder-Narrative",
+      "order": 200,
+      "name": "Peaceful Hamlet",
+      "url": "https://www.youtube.com/watch?v=_CA1bTX0Vz0",
+      "icon": "⚔️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-202",
+      "folderId": "folder-Social",
+      "order": 201,
+      "name": "Forest Town",
+      "url": "https://www.youtube.com/watch?v=WJ35b9nMfQM",
+      "icon": "🍺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-203",
+      "folderId": "folder-Nautical",
+      "order": 202,
+      "name": "Deserted Beach",
+      "url": "https://www.youtube.com/watch?v=mMSa-3xSKk0",
+      "icon": "⛺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-204",
+      "folderId": "folder-Social",
+      "order": 203,
+      "name": "Rainy Village (Night)",
+      "url": "https://www.youtube.com/watch?v=pC1gJKzhU_M",
+      "icon": "🌙"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-205",
+      "folderId": "folder-Combat",
+      "order": 204,
+      "name": "Abandoned Warehouse",
+      "url": "https://www.youtube.com/watch?v=ZiSRAVJD-Bg",
+      "icon": "🏰"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-206",
+      "folderId": "folder-Narrative",
+      "order": 205,
+      "name": "[Neverwinter Series] - Docks at Night",
+      "url": "https://www.youtube.com/watch?v=DWGrFtyAFVc",
+      "icon": "🌲"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-207",
+      "folderId": "folder-Narrative",
+      "order": 206,
+      "name": "[Neverwinter Series] - Riftmarket",
+      "url": "https://www.youtube.com/watch?v=su8Ll4l2jUg",
+      "icon": "🕳️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-208",
+      "folderId": "folder-Narrative",
+      "order": 207,
+      "name": "Underground Stream",
+      "url": "https://www.youtube.com/watch?v=T-FzyvF0ceg",
+      "icon": "🔥"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-209",
+      "folderId": "folder-Narrative",
+      "order": 208,
+      "name": "[NeverWinter Series] - Docks",
+      "url": "https://www.youtube.com/watch?v=35H1tJ-VUQ8",
+      "icon": "🌧️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-210",
+      "folderId": "folder-Narrative",
+      "order": 209,
+      "name": "[NeverWinter Series] - House of Knowledge",
+      "url": "https://www.youtube.com/watch?v=Ujfz6r_oHmg",
+      "icon": "🌊"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-211",
+      "folderId": "folder-Nautical",
+      "order": 210,
+      "name": "Port During Storm",
+      "url": "https://www.youtube.com/watch?v=eGCsUNVxEd8",
+      "icon": "🏘️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-212",
+      "folderId": "folder-Exploration",
+      "order": 211,
+      "name": "Dusty Hideout Cave",
+      "url": "https://www.youtube.com/watch?v=EH3F1_rMQdk",
+      "icon": "🐉"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-213",
+      "folderId": "folder-Social",
+      "order": 212,
+      "name": "Town Square Daytime",
+      "url": "https://www.youtube.com/watch?v=NeOg8iCFfTA",
+      "icon": "🦇"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-214",
+      "folderId": "folder-Narrative",
+      "order": 213,
+      "name": "Highland Sunset",
+      "url": "https://www.youtube.com/watch?v=jcwuMMQ_J8E",
+      "icon": "📜"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-215",
+      "folderId": "folder-Exploration",
+      "order": 214,
+      "name": "Wave Echo Cave [Requested]",
+      "url": "https://www.youtube.com/watch?v=Z-pbILkmhMk",
+      "icon": "🕯️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-216",
+      "folderId": "folder-Nautical",
+      "order": 215,
+      "name": "Calm Sea Sailing",
+      "url": "https://www.youtube.com/watch?v=Lyt7enNpwvk",
+      "icon": "🎵"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-217",
+      "folderId": "folder-Exploration",
+      "order": 216,
+      "name": "Forest Daytime",
+      "url": "https://www.youtube.com/watch?v=6Em9tLXbhfo",
+      "icon": "⚡"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-218",
+      "folderId": "folder-Narrative",
+      "order": 217,
+      "name": "Plains at Sunrise",
+      "url": "https://www.youtube.com/watch?v=q89BgsmHFMc",
+      "icon": "❄️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-219",
+      "folderId": "folder-Nautical",
+      "order": 218,
+      "name": "Lakeside Harbour at Night",
+      "url": "https://www.youtube.com/watch?v=b4DuIgBWxtE",
+      "icon": "🌿"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-220",
+      "folderId": "folder-Spooky",
+      "order": 219,
+      "name": "Dark, Dank Cave",
+      "url": "https://www.youtube.com/watch?v=E72yDpAfrgY",
+      "icon": "🗡️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-221",
+      "folderId": "folder-Combat",
+      "order": 220,
+      "name": "Battlefield",
+      "url": "https://www.youtube.com/watch?v=x7QdTwSzyvQ",
+      "icon": "⚔️"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-222",
+      "folderId": "folder-Narrative",
+      "order": 221,
+      "name": "Icy Storm (Northern Wastes)",
+      "url": "https://www.youtube.com/watch?v=PVbz9jObl4w",
+      "icon": "🍺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-223",
+      "folderId": "folder-Exploration",
+      "order": 222,
+      "name": "Night Camp in Woods",
+      "url": "https://www.youtube.com/watch?v=7KFoj-SOfHs",
+      "icon": "⛺"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-224",
+      "folderId": "folder-Social",
+      "order": 223,
+      "name": "City Sewer",
+      "url": "https://www.youtube.com/watch?v=9QZ_2wKbb5o",
+      "icon": "🌙"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-225",
+      "folderId": "folder-Exploration",
+      "order": 224,
+      "name": "Quiet Forest at Night",
+      "url": "https://www.youtube.com/watch?v=vefCdLtCjyE",
+      "icon": "🏰"
+    },
+    {
+      "id": "id-sword-coast-soundscapes-226",
+      "folderId": "folder-Narrative",
+      "order": 225,
+      "name": "Creepy Quiet Castle (Cragmaw Castle)",
+      "url": "https://www.youtube.com/watch?v=hlbxUJ3Dgho",
+      "icon": "🌲"
+    }
+  ]
+}

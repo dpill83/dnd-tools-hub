@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ambience Sounds - D&D Tools Hub</title>
+    <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="ambience-sounds.css">
+</head>
+<body>
+    <div class="ambience-page" id="ambience-page">
+        <header class="ambience-header">
+            <div class="header-content">
+                <h1>Ambience Sounds</h1>
+                <p class="header-subtitle">Save YouTube links as ambience profiles. Organize in folders, reorder cards, and play in a new tab or embedded.</p>
+            </div>
+            <div class="header-actions">
+                <button type="button" id="ambience-settings-btn" class="ambience-btn" aria-label="Settings">&#9881;</button>
+                <a href="index.html" class="theme-toggle" aria-label="Go to home"><span class="theme-icon">&#127968;</span></a>
+                <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode"><span class="theme-icon">&#127769;</span></button>
+            </div>
+        </header>
+
+        <main class="ambience-main">
+            <div class="folder-bar">
+                <label for="ambience-folder-filter" class="sr-only">Filter by folder</label>
+                <select id="ambience-folder-filter" class="folder-filter" aria-label="Filter by folder">
+                    <option value="">All</option>
+                </select>
+                <button type="button" id="ambience-add-folder-btn" class="ambience-btn secondary" aria-label="Add folder">+ Folder</button>
+            </div>
+
+            <div id="ambience-embed-area" class="embed-area hidden" aria-live="polite">
+                <div class="embed-header">
+                    <span id="ambience-embed-title">Now playing</span>
+                    <button type="button" id="ambience-embed-close" class="ambience-btn small" aria-label="Close player">&#10005;</button>
+                </div>
+                <div class="embed-wrapper">
+                    <iframe id="ambience-embed-frame" title="YouTube embed" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+
+            <div class="cards-grid cards-per-row-1 card-size-medium" id="ambience-cards-grid" role="list">
+                <div class="card add-new-card" id="ambience-add-new-card" role="listitem" tabindex="0">
+                    <div class="card-add-new-inner">
+                        <span class="card-add-icon" aria-hidden="true">+</span>
+                        <span class="card-label">Add New</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div id="ambience-form-overlay" class="modal-overlay" aria-hidden="true">
+            <div class="modal-dialog" role="dialog" aria-labelledby="ambience-form-title" aria-modal="true">
+                <h2 id="ambience-form-title">Add ambience</h2>
+                <form id="ambience-form" class="ambience-form">
+                    <div class="form-group icon-group">
+                        <label>Icon</label>
+                        <div class="icon-options">
+                            <div class="emoji-grid" id="ambience-emoji-grid"></div>
+                            <div class="icon-upload-row">
+                                <label class="upload-label">
+                                    <input type="file" id="ambience-icon-file" accept="image/*" class="sr-only">
+                                    <span class="ambience-btn secondary">Upload image</span>
+                                </label>
+                                <span class="icon-preview" id="ambience-icon-preview"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ambience-form-name">Name</label>
+                        <input type="text" id="ambience-form-name" required maxlength="100" placeholder="e.g. Tavern" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="ambience-form-url">YouTube URL</label>
+                        <input type="url" id="ambience-form-url" required placeholder="https://www.youtube.com/watch?v=..." autocomplete="off">
+                        <span class="form-error hidden" id="ambience-form-url-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="ambience-form-folder">Folder</label>
+                        <select id="ambience-form-folder">
+                            <option value="">Uncategorized</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="ambience-form-cancel" class="ambience-btn secondary">Cancel</button>
+                        <button type="submit" id="ambience-form-save" class="ambience-btn primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="ambience-settings-overlay" class="modal-overlay" aria-hidden="true">
+            <div class="modal-dialog settings-dialog" role="dialog" aria-labelledby="ambience-settings-title" aria-modal="true">
+                <h2 id="ambience-settings-title">Settings</h2>
+                <div class="settings-section">
+                    <h3>Playback</h3>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="playbackMode" value="newTab" id="playback-newTab">
+                            Open in new tab
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="playbackMode" value="embed" id="playback-embed">
+                            Play embedded on page
+                        </label>
+                        <label class="radio-label checkbox-label">
+                            <input type="checkbox" id="setting-start-from-beginning" checked aria-describedby="start-from-beginning-desc">
+                            Start videos from beginning
+                        </label>
+                        <p id="start-from-beginning-desc" class="setting-desc">Adds &amp;t=0 (new tab) or start=0 (embed) so each video starts at 0:00.</p>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3>Layout</h3>
+                    <div class="layout-row">
+                        <label for="setting-cards-per-row">Cards per row</label>
+                        <select id="setting-cards-per-row" aria-label="Cards per row">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                    </div>
+                    <div class="layout-row">
+                        <label for="setting-card-size">Card size</label>
+                        <select id="setting-card-size" aria-label="Card size">
+                            <option value="small">Small</option>
+                            <option value="medium">Medium</option>
+                            <option value="large">Large</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3>Appearance</h3>
+                    <div class="color-overrides">
+                        <div class="color-row">
+                            <label for="setting-primary">Primary</label>
+                            <input type="color" id="setting-primary" aria-label="Primary color">
+                            <input type="text" id="setting-primary-hex" class="hex-input" maxlength="7" placeholder="#1a472a">
+                        </div>
+                        <div class="color-row">
+                            <label for="setting-accent">Accent</label>
+                            <input type="color" id="setting-accent" aria-label="Accent color">
+                            <input type="text" id="setting-accent-hex" class="hex-input" maxlength="7" placeholder="#d4af37">
+                        </div>
+                        <div class="color-row">
+                            <label for="setting-card">Card background</label>
+                            <input type="color" id="setting-card" aria-label="Card background">
+                            <input type="text" id="setting-card-hex" class="hex-input" maxlength="7" placeholder="#f8f9fa">
+                        </div>
+                    </div>
+                    <button type="button" id="ambience-reset-colors" class="ambience-btn secondary">Use hub defaults</button>
+                </div>
+                <div class="settings-section">
+                    <h3>Data</h3>
+                    <div class="layout-row">
+                        <label for="ambience-preset-select">Load preset</label>
+                        <select id="ambience-preset-select" aria-label="Load preset">
+                            <option value="">— Select preset —</option>
+                            <option value="Bardify Music">Bardify Music</option>
+                            <option value="Sword Coast Soundscapes">Sword Coast Soundscapes</option>
+                        </select>
+                    </div>
+                    <div class="data-actions">
+                        <button type="button" id="ambience-export-btn" class="ambience-btn secondary">Export</button>
+                        <button type="button" id="ambience-import-btn" class="ambience-btn secondary">Import file</button>
+                        <input type="file" id="ambience-import-file" accept=".json,application/json" class="sr-only">
+                    </div>
+                </div>
+                <div class="settings-section" id="ambience-folders-settings">
+                    <h3>Folders</h3>
+                    <ul id="ambience-folders-list" class="folders-list"></ul>
+                    <button type="button" id="ambience-add-folder-settings" class="ambience-btn secondary">Add folder</button>
+                </div>
+                <div class="settings-section" id="ambience-playlists-settings">
+                    <h3>Playlists</h3>
+                    <ul id="ambience-playlists-list" class="folders-list"></ul>
+                    <button type="button" id="ambience-add-playlist-settings" class="ambience-btn secondary">Add playlist</button>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="ambience-settings-close" class="ambience-btn primary">Done</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="ambience-import-choice-overlay" class="modal-overlay" aria-hidden="true">
+            <div class="modal-dialog small" role="dialog" aria-labelledby="import-choice-title" aria-modal="true">
+                <h2 id="import-choice-title">Import</h2>
+                <p>How do you want to import?</p>
+                <div class="modal-actions">
+                    <button type="button" id="ambience-import-replace" class="ambience-btn primary">Replace current data</button>
+                    <button type="button" id="ambience-import-merge" class="ambience-btn secondary">Merge (keep existing, add from file)</button>
+                    <button type="button" id="ambience-import-cancel" class="ambience-btn secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="theme.js"></script>
+    <script src="presets/bardify-music.js"></script>
+    <script src="presets/sword-coast-soundscapes-music.js"></script>
+    <script src="ambience-sounds.js"></script>
+</body>
+</html>

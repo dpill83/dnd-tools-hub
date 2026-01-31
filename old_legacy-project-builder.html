@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Legacy Project Builder (Wizard)</title>
+  <link rel="stylesheet" href="global.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .wizard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border);
+    }
+    .wizard-header h1 { color: var(--primary-color); font-size: 1.5rem; margin-bottom: 0.25rem; }
+    .wizard-intro { margin: 0; }
+    .wizard-header .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .wizard-header a.theme-toggle { text-decoration: none; }
+    .app { max-width: 560px; margin: 0 auto; }
+    .wizard-card {
+      background: var(--surface);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px var(--shadow);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .step-indicator { font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.25rem; }
+    .step-title { font-size: 1.25rem; color: var(--primary-color); margin-bottom: 1rem; font-weight: 600; }
+    .step-content { min-height: 120px; }
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+    .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; gap: 0.5rem; flex-wrap: wrap; }
+    .nav-row .left { display: flex; gap: 0.5rem; }
+    .wizard-btn {
+      padding: 0.5rem 1rem;
+      min-height: 44px;
+      border: 1px solid var(--primary-color);
+      background: var(--primary-color);
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    .wizard-btn:hover:not(:disabled) { background: var(--primary-light); }
+    .wizard-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .wizard-btn.secondary { background: var(--surface); color: var(--primary-color); }
+    .reset-row { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border); }
+    .wizard-card label { display: block; margin-top: 0.5rem; }
+    .wizard-card input[type="number"], .wizard-card input[type="text"], .wizard-card input[type="checkbox"],
+    .wizard-card select, .wizard-card textarea { padding: 0.4rem; border: 1px solid var(--border); border-radius: 4px; font-size: 1rem; margin-top: 0.25rem; }
+    .wizard-card textarea { width: 100%; min-height: 60px; font-family: inherit; }
+    .result-box { background: var(--card-bg); padding: 0.75rem; border-radius: 6px; margin-top: 0.75rem; }
+    .project-card { border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; margin-bottom: 0.5rem; background: var(--card-bg); }
+    .project-card h4 { margin: 0 0 0.25rem; font-size: 1rem; }
+    .eligibility-warn { color: var(--warning); }
+    .eligibility-ok { color: var(--success); }
+    .copy-block { font-family: monospace; font-size: 0.85rem; background: var(--card-bg); padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0; }
+    @media (max-width: 480px) {
+      .nav-row { flex-direction: column; align-items: stretch; }
+      .nav-row .left { justify-content: center; }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    (function configureWorker() {
+      if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      } else { setTimeout(configureWorker, 100); }
+    })();
+  </script>
+  <script src="character-sheet-importer.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="wizard-header">
+      <div>
+        <h1>Legacy Project Builder (Wizard)</h1>
+        <p class="intro wizard-intro">Build and track D&D 5e Legacy Projects per character. Import PDF or enter manually, then follow the wizard steps.</p>
+      </div>
+      <div class="header-actions">
+        <button type="button" id="lpb-import-pdf" class="wizard-btn secondary" aria-label="Import character sheet PDF">Import PDF</button>
+        <input type="file" id="lpb-import-pdf-file" accept=".pdf" style="display:none;" aria-label="Select character sheet PDF">
+        <a href="index.html" class="theme-toggle" aria-label="Go to home"><span class="theme-icon">&#127968;</span></a>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode"><span class="theme-icon">&#127769;</span></button>
+      </div>
+    </header>
+    <div class="app">
+      <div class="wizard-card">
+        <p class="step-indicator" id="step-indicator" aria-live="polite">Step 1 of 9: Character</p>
+        <h1 class="step-title" id="step-title">Character</h1>
+        <div class="step-content">
+          <div id="panel-character" class="step-panel active"></div>
+          <div id="panel-projects" class="step-panel"></div>
+          <div id="panel-setup" class="step-panel"></div>
+          <div id="panel-tier" class="step-panel"></div>
+          <div id="panel-track" class="step-panel"></div>
+          <div id="panel-pieces" class="step-panel"></div>
+          <div id="panel-progress" class="step-panel"></div>
+          <div id="panel-completion" class="step-panel"></div>
+          <div id="panel-export" class="step-panel"></div>
+        </div>
+        <div class="nav-row">
+          <div class="left">
+            <button type="button" id="btn-back" class="wizard-btn secondary" disabled aria-label="Previous step">Back</button>
+          </div>
+          <button type="button" id="btn-next" class="wizard-btn" aria-label="Next step">Next</button>
+        </div>
+        <div class="reset-row">
+          <button type="button" id="btn-reset" class="wizard-btn secondary">Reset</button>
+          <button type="button" id="btn-save-json" class="wizard-btn secondary">Save JSON</button>
+          <button type="button" id="btn-load-json" class="wizard-btn secondary">Load JSON</button>
+          <input type="file" id="lpb-load-file" accept=".json" style="display:none;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="theme.js"></script>
+  <script src="legacy-project-builder.js"></script>
+</body>
+</html>

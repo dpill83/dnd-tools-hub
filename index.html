@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>D&D Tools Hub</title>
+    <link rel="stylesheet" href="global.css">
     <link rel="stylesheet" href="hub.css">
 </head>
 <body>
@@ -23,7 +24,8 @@
         <main class="hub-main">
             <div class="tools-grid">
                 <!-- AI DM Prompt Builder Tool -->
-                <a href="ai-dm-prompt-builder.html" class="tool-card">
+                <a href="ai-dm-prompt-builder.html" class="tool-card" data-tool-href="ai-dm-prompt-builder.html">
+                    <button type="button" class="tool-card-star" aria-label="Star this tool" title="Star to pin to top">☆</button>
                     <div class="tool-icon">🤖</div>
                     <h2 class="tool-title">AI DM Prompt Builder</h2>
                     <p class="tool-description">
@@ -32,7 +34,8 @@
                 </a>
 
                 <!-- Adventure Packet Builder Tool -->
-                <a href="adventure-packet-builder.html" class="tool-card">
+                <a href="adventure-packet-builder.html" class="tool-card" data-tool-href="adventure-packet-builder.html">
+                    <button type="button" class="tool-card-star" aria-label="Star this tool" title="Star to pin to top">☆</button>
                     <div class="tool-icon">📦</div>
                     <h2 class="tool-title">Adventure Packet Builder</h2>
                     <p class="tool-description">
@@ -41,7 +44,8 @@
                 </a>
 
                 <!-- Adventure Maker Tool -->
-                <a href="adventure-maker.html" class="tool-card">
+                <a href="adventure-maker.html" class="tool-card" data-tool-href="adventure-maker.html">
+                    <button type="button" class="tool-card-star" aria-label="Star this tool" title="Star to pin to top">☆</button>
                     <div class="tool-icon">✍️</div>
                     <h2 class="tool-title">Adventure Maker</h2>
                     <p class="tool-description">
@@ -50,7 +54,8 @@
                 </a>
 
                 <!-- Combat Turn Helper Tool -->
-                <a href="combat-turn-helper.html" class="tool-card">
+                <a href="combat-turn-helper.html" class="tool-card" data-tool-href="combat-turn-helper.html">
+                    <button type="button" class="tool-card-star" aria-label="Star this tool" title="Star to pin to top">☆</button>
                     <div class="tool-icon">⚔️</div>
                     <h2 class="tool-title">Combat Turn Helper</h2>
                     <p class="tool-description">
@@ -58,12 +63,63 @@
                     </p>
                 </a>
 
+                <!-- Cassalanter Inquiry Runner Tool -->
+                <a href="cassalanter-inquiry-runner.html" class="tool-card" data-tool-href="cassalanter-inquiry-runner.html">
+                    <button type="button" class="tool-card-star" aria-label="Star this tool" title="Star to pin to top">☆</button>
+                    <div class="tool-icon">🔍</div>
+                    <h2 class="tool-title">Brother George Ward's Cassalanter Inquiry</h2>
+                    <p class="tool-description">
+                        Waterdeep-style investigation episode runner for solo play. Run Hook, Progress, Pressure, and Reveal; track Case DC, Heat, and Doom; roll dice in-app and export to Discord or Avrae.
+                    </p>
+                </a>
+
+                <!-- Cassalanter Inquiry Wizard Tool -->
+                <a href="cassalanter-inquiry-wizard.html" class="tool-card" data-tool-href="cassalanter-inquiry-wizard.html">
+                    <button type="button" class="tool-card-star" aria-label="Star this tool" title="Star to pin to top">☆</button>
+                    <div class="tool-icon">📋</div>
+                    <h2 class="tool-title">Cassalanter Inquiry (Wizard)</h2>
+                    <p class="tool-description">
+                        Guided wizard for the same investigation episode. One step per screen: Setup, Hook, Progress, Pressure, Reveal and Wrap. Back/Next, reroll, and reset options.
+                    </p>
+                </a>
+
                 <!-- Playstyle Quiz Tool -->
-                <a href="playstyle-quiz.html" class="tool-card">
+                <a href="playstyle-quiz.html" class="tool-card" data-tool-href="playstyle-quiz.html">
+                    <button type="button" class="tool-card-star" aria-label="Star this tool" title="Star to pin to top">☆</button>
                     <div class="tool-icon">🎯</div>
                     <h2 class="tool-title">Playstyle Quiz</h2>
                     <p class="tool-description">
                         Discover your D&D playstyle preferences with a forced-choice quiz. Answer 15 questions to learn whether you prefer narrative, tactical combat, exploration, or other playstyles.
+                    </p>
+                </a>
+
+                <!-- Legacy Project Builder Tool -->
+                <a href="legacy-project-builder.html" class="tool-card" data-tool-href="legacy-project-builder.html">
+                    <button type="button" class="tool-card-star" aria-label="Star this tool" title="Star to pin to top">☆</button>
+                    <div class="tool-icon">🏛️</div>
+                    <h2 class="tool-title">Legacy Project Builder</h2>
+                    <p class="tool-description">
+                        Build and track D&D 5e Legacy Projects per character. Wizard steps: Character, Projects, Setup, Tier, Track Math, Pieces, Progress, Completion, Export. PDF import, active project cap, AI prompt templates.
+                    </p>
+                </a>
+
+                <!-- Ambience Sounds Tool -->
+                <a href="ambience-sounds.html" class="tool-card" data-tool-href="ambience-sounds.html">
+                    <button type="button" class="tool-card-star" aria-label="Star this tool" title="Star to pin to top">☆</button>
+                    <div class="tool-icon">🔊</div>
+                    <h2 class="tool-title">Ambience Sounds</h2>
+                    <p class="tool-description">
+                        Save YouTube links as ambience profiles. Organize in folders, reorder cards with drag-and-drop, customize colors, and choose to open in a new tab or play embedded. Export and import your data.
+                    </p>
+                </a>
+
+                <!-- QBasic-Style Editor Tool -->
+                <a href="qbasic-editor.html" class="tool-card" data-tool-href="qbasic-editor.html">
+                    <button type="button" class="tool-card-star" aria-label="Star this tool" title="Star to pin to top">☆</button>
+                    <div class="tool-icon">📝</div>
+                    <h2 class="tool-title">QBasic-Style Editor</h2>
+                    <p class="tool-description">
+                        Quick plain-text editor with a QBasic look—like an easy-to-reach Notepad++. Autosaves to your browser.
                     </p>
                 </a>
 
@@ -86,6 +142,7 @@
         </footer>
     </div>
 
+    <script src="hub.js"></script>
     <script src="theme.js"></script>
 </body>
 </html>

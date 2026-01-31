@@ -1,0 +1,35 @@
+=== PIECE_PROPERTIES (d20) ===
+1. Requires a rare or exotic material from a distant location.
+2. Involves knowledge lost to time; must be researched or recovered.
+3. Needs the aid of a skilled specialist or craftsman.
+4. Tied to a ritual or ceremony that must be performed correctly.
+5. Involves a significant sacrifice—time, gold, or something personal.
+6. Connected to a specific place of power or historical significance.
+7. Requires the blessing or permission of an authority figure.
+8. Involves a creature, ally, or contact who must be convinced or recruited.
+9. Tied to a seasonal event, celestial alignment, or auspicious date.
+10. Requires overcoming a trial, challenge, or test of worthiness.
+11. Involves recovering something stolen, lost, or hidden long ago.
+12. Connected to a bloodline, oath, or inherited obligation.
+13. Requires collaboration with an unusual or unexpected ally.
+14. Tied to a secret that must be discovered or revealed.
+15. Involves a dangerous journey or expedition to obtain it.
+16. Requires appeasing or bargaining with a powerful entity.
+17. Connected to a past failure that must be redeemed or corrected.
+18. Involves a creative or artistic component—song, craft, or ritual art.
+19. Tied to the death or passing of something significant.
+20. Requires uniting disparate parties or reconciling old conflicts.
+
+=== COMPLICATIONS (d12) ===
+1. A rival or enemy seeks the same piece or aims to obstruct you.
+2. Time pressure: a deadline or window of opportunity is closing.
+3. The cost or requirement has increased unexpectedly.
+4. A key contact, ally, or resource has become unavailable.
+5. New information reveals the piece is harder to obtain than expected.
+6. Your actions have drawn unwanted attention from powerful forces.
+7. A previous choice or commitment now conflicts with this goal.
+8. The piece is guarded, hidden, or claimed by another party.
+9. A moral or ethical dilemma complicates the path forward.
+10. Physical or logistical barriers block access to what you need.
+11. Trust has been broken; an ally or source has betrayed or deceived you.
+12. The piece itself carries a curse, cost, or unintended consequence.

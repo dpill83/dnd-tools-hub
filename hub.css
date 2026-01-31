@@ -1,51 +1,36 @@
-/* Hub Page Styles with Light/Dark Mode Support */
+/* Hub Page Styles – depends on global.css for variables, reset, body, theme-toggle */
 
-/* CSS Variables for Light Mode (default) */
 :root {
-    --hub-bg: #f5f5f5;
-    --hub-surface: #ffffff;
-    --hub-text: #333333;
-    --hub-text-light: #666666;
-    --hub-border: #dddddd;
-    --hub-primary: #1a472a;
-    --hub-primary-light: #2d5a3d;
-    --hub-accent: #d4af37;
-    --hub-shadow: rgba(0, 0, 0, 0.1);
-    --hub-shadow-hover: rgba(0, 0, 0, 0.15);
-    --hub-card-bg: #ffffff;
-    --hub-card-hover-bg: #f8f9fa;
+    --hub-bg: var(--background);
+    --hub-surface: var(--surface);
+    --hub-text: var(--text);
+    --hub-text-light: var(--text-light);
+    --hub-border: var(--border);
+    --hub-primary: var(--primary-color);
+    --hub-primary-light: var(--primary-light);
+    --hub-accent: var(--accent-color);
+    --hub-shadow: var(--shadow);
+    --hub-shadow-hover: var(--shadow-hover);
+    --hub-card-bg: var(--surface);
+    --hub-card-hover-bg: var(--card-bg);
 }
 
-/* CSS Variables for Dark Mode */
 .dark-mode {
-    --hub-bg: #1a1a1a;
-    --hub-surface: #2d2d2d;
-    --hub-text: #e0e0e0;
-    --hub-text-light: #b0b0b0;
-    --hub-border: #404040;
-    --hub-primary: #4a9b5f;
-    --hub-primary-light: #5cb377;
-    --hub-accent: #f4d03f;
-    --hub-shadow: rgba(0, 0, 0, 0.3);
-    --hub-shadow-hover: rgba(0, 0, 0, 0.4);
-    --hub-card-bg: #2d2d2d;
-    --hub-card-hover-bg: #353535;
-}
-
-/* Reset and Base Styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+    --hub-bg: var(--background);
+    --hub-surface: var(--surface);
+    --hub-text: var(--text);
+    --hub-text-light: var(--text-light);
+    --hub-border: var(--border);
+    --hub-primary: var(--primary-color);
+    --hub-primary-light: var(--primary-light);
+    --hub-accent: var(--accent-color);
+    --hub-shadow: var(--shadow);
+    --hub-shadow-hover: var(--shadow-hover);
+    --hub-card-bg: var(--surface);
+    --hub-card-hover-bg: var(--card-bg);
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    line-height: 1.6;
-    color: var(--hub-text);
-    background-color: var(--hub-bg);
-    transition: background-color 0.3s ease, color 0.3s ease;
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
@@ -81,42 +66,6 @@ body {
 .header-subtitle {
     color: var(--hub-text-light);
     font-size: 1.1rem;
-}
-
-/* Theme Toggle Button */
-.theme-toggle {
-    background: var(--hub-surface);
-    border: 2px solid var(--hub-border);
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    cursor: pointer;
-    font-size: 1.5rem;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 56px;
-    min-height: 56px;
-}
-
-.theme-toggle:hover {
-    background: var(--hub-card-hover-bg);
-    border-color: var(--hub-primary);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px var(--hub-shadow);
-}
-
-.theme-toggle:active {
-    transform: translateY(0);
-}
-
-.theme-icon {
-    display: block;
-    transition: transform 0.3s ease;
-}
-
-.theme-toggle:hover .theme-icon {
-    transform: rotate(15deg);
 }
 
 /* Main Content */
@@ -172,6 +121,32 @@ body {
 
 .tool-card:hover::before {
     transform: scaleX(1);
+}
+
+/* Star button on tool cards */
+.tool-card-star {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.25rem;
+    color: var(--hub-text-light);
+    transition: color 0.2s ease, transform 0.2s ease;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.tool-card-star:hover {
+    color: var(--hub-primary);
+    transform: scale(1.15);
+}
+
+.tool-card-star.starred {
+    color: var(--hub-primary);
 }
 
 .tool-card.coming-soon {
@@ -310,21 +285,4 @@ body {
     .tool-icon {
         font-size: 2.5rem;
     }
-}
-
-/* Accessibility */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-button:focus-visible,
-a:focus-visible {
-    outline: 2px solid var(--hub-primary);
-    outline-offset: 2px;
 }
