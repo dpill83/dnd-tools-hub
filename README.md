@@ -148,7 +148,7 @@ A web-based D&D 5e toolkit for Dungeon Masters and players. The central hub ([in
   - Custom output: `python youtube_channel_videos.py "https://www.youtube.com/@ChannelName" output.txt`
 - **Output:** Plain text file with one line per video: title and URL (e.g. `Title | https://www.youtube.com/watch?v=...`). Channel URLs are the primary use; playlist URLs work the same way.
 
-**Convert to ambience import:** [music_txt_to_ambience_json.py](music_txt_to_ambience_json.py) turns a `*-music.txt` file into ambience-sounds import JSON (folders, profiles with emojis, settings). Usage: `python music_txt_to_ambience_json.py "ChannelName-music.txt"` (writes `ChannelName-music.json` by default). Import the JSON via Ambience Sounds.
+**Convert to Songbook import:** [music_txt_to_ambience_json.py](music_txt_to_ambience_json.py) turns a `*-music.txt` file into Songbook import JSON (folders, profiles with emojis, settings). Usage: `python music_txt_to_ambience_json.py "ChannelName-music.txt"` (writes `ChannelName-music.json` by default). Import the JSON via Songbook.
 
 ---
 

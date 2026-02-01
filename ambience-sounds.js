@@ -541,7 +541,7 @@
             pop.appendChild(msg);
         } else {
             ['ambience', 'sfx'].forEach(function (type) {
-                var label = type === 'ambience' ? 'Ambience' : 'Sound Effect';
+                var label = type === 'ambience' ? 'Song' : 'Sound Effect';
                 var btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'ambience-btn secondary slot-menu-btn';
@@ -572,7 +572,7 @@
     function openFormModal(profileId) {
         editingProfileId = profileId || null;
         const title = document.getElementById('ambience-form-title');
-        title.textContent = profileId ? 'Edit ambience' : 'Add ambience';
+        title.textContent = profileId ? 'Edit song' : 'Add song';
         renderFoldersInForm();
         renderEmojiGrid(null);
         const nameInput = document.getElementById('ambience-form-name');
@@ -1163,7 +1163,7 @@
         const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'ambience-sounds-backup.json';
+        a.download = 'songbook-backup.json';
         a.click();
         URL.revokeObjectURL(a.href);
     }

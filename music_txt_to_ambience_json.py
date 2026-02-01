@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Convert a youtube_channel_videos.py output file (title | url per line) into
-ambience-sounds import JSON: folders, profiles with emojis, and settings.
+Songbook import JSON: folders, profiles with emojis, and settings.
 """
 
 import argparse
@@ -9,7 +9,7 @@ import json
 import re
 import sys
 
-# Same emoji set as ambience-sounds.js; rotate so each profile gets one
+# Same emoji set as Songbook (ambience-sounds.js); rotate so each profile gets one
 EMOJIS = ["⚔️", "🍺", "⛺", "🌙", "🏰", "🌲", "🕳️", "🔥", "🌧️", "🌊", "🏘️", "🐉", "🦇", "📜", "🕯️", "🎵", "⚡", "❄️", "🌿", "🗡️"]
 
 
@@ -67,7 +67,7 @@ def default_settings():
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Convert title|url text file to ambience-sounds import JSON."
+        description="Convert title|url text file to Songbook import JSON."
     )
     parser.add_argument(
         "input",
