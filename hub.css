@@ -222,6 +222,13 @@ body {
     transition: transform 0.3s ease;
 }
 
+.tool-logo {
+    width: 4rem;
+    height: 4rem;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
 .tool-card:hover .tool-icon {
     transform: scale(1.1) rotate(5deg);
 }
@@ -308,6 +315,11 @@ body {
         font-size: 3rem;
     }
 
+    .tool-logo {
+        width: 3rem;
+        height: 3rem;
+    }
+
     .tool-title {
         font-size: 1.25rem;
     }
@@ -333,5 +345,10 @@ body {
 
     .tool-icon {
         font-size: 2.5rem;
+    }
+
+    .tool-logo {
+        width: 2.5rem;
+        height: 2.5rem;
     }
 }

@@ -39,37 +39,61 @@
 
 .ambience-header {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
     margin-bottom: 1.25rem;
     padding-bottom: 1rem;
     border-bottom: 2px solid var(--border);
 }
 
+.ambience-header .header-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.header-logo {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
 @media (min-width: 480px) {
-    .ambience-header {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: flex-start;
-        flex-wrap: wrap;
+    .header-logo {
+        width: 52px;
+        height: 52px;
     }
 }
 
-.ambience-header .header-content h1 {
+.ambience-header .header-title {
     color: var(--primary-color);
-    font-size: 1.75rem;
-    margin-bottom: 0.25rem;
+    font-size: 1.35rem;
+    margin: 0;
 }
 
-.ambience-header .header-subtitle {
-    color: var(--text-light);
-    font-size: 0.95rem;
+@media (min-width: 480px) {
+    .ambience-header .header-title {
+        font-size: 1.75rem;
+    }
 }
 
 .header-actions {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.35rem;
     align-items: center;
+    flex-shrink: 0;
+}
+
+.ambience-header .header-actions .ambience-btn,
+.ambience-header .header-actions .theme-toggle {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0.35rem;
 }
 
 .ambience-btn {
@@ -177,6 +201,18 @@
     padding: 0.5rem 0.75rem 0.75rem;
 }
 
+.embed-slots.player-slots-per-row-1 {
+    grid-template-columns: repeat(1, 1fr);
+}
+
+.embed-slots.player-slots-per-row-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.embed-slots.player-slots-per-row-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
 .embed-slot {
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -240,10 +276,6 @@
 
 .embed-slot.collapsed .embed-slot-wrapper {
     display: none;
-}
-
-.embed-slot-youtube {
-    white-space: nowrap;
 }
 
 .embed-slot-volume-wrap {
@@ -645,7 +677,7 @@
     color: var(--accent-color);
 }
 
-.card-actions .playlist-btn {
+.card-actions .card-link-btn {
     font-size: 1rem;
 }
 

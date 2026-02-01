@@ -11,13 +11,13 @@
     <div class="ambience-page" id="ambience-page">
         <header class="ambience-header">
             <div class="header-content">
-                <h1>Songbook</h1>
-                <p class="header-subtitle">Save YouTube links as song profiles. Organize in folders, reorder cards, and play in a new tab or embedded.</p>
+                <img src="assets/songbook-logo-nobg.png" alt="" class="header-logo">
+                <h1 class="header-title">Songbook</h1>
             </div>
             <div class="header-actions">
                 <button type="button" id="ambience-settings-btn" class="ambience-btn" aria-label="Settings">&#9881;</button>
-                <a href="index.html" class="theme-toggle" aria-label="Go to home"><span class="theme-icon">&#127968;</span></a>
-                <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode"><span class="theme-icon">&#127769;</span></button>
+                <a href="index.html" class="theme-toggle ambience-btn" aria-label="Go to home"><span class="theme-icon">&#127968;</span></a>
+                <button type="button" id="theme-toggle" class="theme-toggle ambience-btn" aria-label="Toggle dark mode"><span class="theme-icon">&#127769;</span></button>
             </div>
         </header>
 
@@ -160,6 +160,14 @@
                             <option value="small">Small</option>
                             <option value="medium">Medium</option>
                             <option value="large">Large</option>
+                        </select>
+                    </div>
+                    <div class="layout-row">
+                        <label for="setting-player-slots-per-row">Player slots per row</label>
+                        <select id="setting-player-slots-per-row" aria-label="Player slots per row">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
                         </select>
                     </div>
                 </div>

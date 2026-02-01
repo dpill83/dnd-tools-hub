@@ -21,7 +21,13 @@
                     </ul>
                 </div>
                 <input type="file" id="qb-file-input" accept=".txt,.nfo,.md,.log,.csv,.json,.xml,.ini,.cfg,.yml,.yaml,.html,.css,.js,.ts,.tsx,.jsx,text/plain" aria-hidden="true" tabindex="-1">
-                <span class="qb-menu-static">Edit View Search Run Debug Options Help</span>
+                <div class="qb-menu-file-wrap">
+                    <button type="button" class="qb-menu-trigger" id="qb-view-trigger" aria-haspopup="true" aria-expanded="false" aria-label="View menu">View</button>
+                    <ul class="qb-file-dropdown" id="qb-view-dropdown" role="menu" aria-label="View">
+                        <li role="none"><button type="button" role="menuitem" id="qb-view-wordwrap">Word wrap: On</button></li>
+                    </ul>
+                </div>
+                <span class="qb-menu-static">Search Run Debug Options Help</span>
             </nav>
             <div class="qb-doc-title" id="qb-doc-title">Untitled</div>
             <div class="qb-header-actions">
@@ -50,12 +56,15 @@
 (function() {
     'use strict';
     var STORAGE_KEY = 'qbasic-editor-content';
+    var TITLE_KEY = 'qbasic-editor-title';
+    var WRAP_KEY = 'qbasic-editor-wordwrap';
     var DEBOUNCE_MS = 400;
     var editor = document.getElementById('qb-editor');
     var statusPos = document.getElementById('qb-status-pos');
     var saveTimer = null;
 
     editor.value = localStorage.getItem(STORAGE_KEY) || '';
+    editor.setAttribute('wrap', localStorage.getItem(WRAP_KEY) === 'off' ? 'off' : 'soft');
 
     function save() {
         localStorage.setItem(STORAGE_KEY, editor.value);
@@ -88,7 +97,15 @@
         editor.value = '';
         saveNow();
         updateLineCol();
-        if (docTitle) docTitle.textContent = 'Untitled';
+        setDocTitle('Untitled');
+    }
+
+    function setDocTitle(name) {
+        var el = document.getElementById('qb-doc-title');
+        if (el) {
+            el.textContent = name;
+            localStorage.setItem(TITLE_KEY, name);
+        }
     }
 
     editor.addEventListener('keydown', function(e) {
@@ -129,6 +146,7 @@
 
     var fileInput = document.getElementById('qb-file-input');
     var docTitle = document.getElementById('qb-doc-title');
+    docTitle.textContent = localStorage.getItem(TITLE_KEY) || 'Untitled';
 
     document.getElementById('qb-file-new').addEventListener('click', function() {
         newDoc();
@@ -152,12 +170,45 @@
             editor.value = typeof reader.result === 'string' ? reader.result : '';
             saveNow();
             updateLineCol();
-            docTitle.textContent = file.name;
+            setDocTitle(file.name);
         };
         reader.readAsText(file);
     });
 
-    document.addEventListener('click', closeFileMenu);
+    var viewTrigger = document.getElementById('qb-view-trigger');
+    var viewDropdown = document.getElementById('qb-view-dropdown');
+    var wordwrapBtn = document.getElementById('qb-view-wordwrap');
+
+    function closeViewMenu() {
+        viewDropdown.classList.remove('open');
+        viewTrigger.setAttribute('aria-expanded', 'false');
+    }
+
+    function updateWordWrapLabel() {
+        var on = editor.getAttribute('wrap') !== 'off';
+        wordwrapBtn.textContent = on ? 'Word wrap: On' : 'Word wrap: Off';
+    }
+
+    viewTrigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var open = viewDropdown.classList.toggle('open');
+        viewTrigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
+    wordwrapBtn.addEventListener('click', function() {
+        var on = editor.getAttribute('wrap') !== 'off';
+        editor.setAttribute('wrap', on ? 'off' : 'soft');
+        localStorage.setItem(WRAP_KEY, on ? 'off' : 'soft');
+        updateWordWrapLabel();
+        closeViewMenu();
+    });
+
+    updateWordWrapLabel();
+
+    document.addEventListener('click', function() {
+        closeFileMenu();
+        closeViewMenu();
+    });
 })();
     </script>
 </body>

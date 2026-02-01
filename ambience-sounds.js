@@ -21,7 +21,8 @@
                 floatingPlayer: false,
                 embedMinimized: false,
                 audioOnly: false,
-                alwaysCollapseLayers: false
+                alwaysCollapseLayers: false,
+                playerSlotsPerRow: 3
             },
             folders: [],
             profiles: [],
@@ -397,11 +398,12 @@
             starBtn.className = 'star-btn' + (p.starred ? ' starred' : '');
             starBtn.setAttribute('aria-label', p.starred ? 'Unstar' : 'Star');
             starBtn.textContent = p.starred ? '\u2605' : '\u2606';
-            const playlistBtn = document.createElement('button');
-            playlistBtn.type = 'button';
-            playlistBtn.className = 'playlist-btn';
-            playlistBtn.setAttribute('aria-label', 'Add to playlist');
-            playlistBtn.textContent = '\u2630';
+            const linkBtn = document.createElement('button');
+            linkBtn.type = 'button';
+            linkBtn.className = 'card-link-btn';
+            linkBtn.setAttribute('aria-label', 'Open in YouTube');
+            linkBtn.setAttribute('title', 'Open in YouTube');
+            linkBtn.textContent = '\uD83D\uDD17';
             const editBtn = document.createElement('button');
             editBtn.type = 'button';
             editBtn.setAttribute('aria-label', 'Edit');
@@ -411,7 +413,7 @@
             delBtn.setAttribute('aria-label', 'Delete');
             delBtn.textContent = '\uD83D\uDDD1';
             actions.appendChild(starBtn);
-            actions.appendChild(playlistBtn);
+            actions.appendChild(linkBtn);
             actions.appendChild(editBtn);
             actions.appendChild(delBtn);
             li.appendChild(actions);
@@ -423,9 +425,11 @@
                 saveState(state);
                 renderCards();
             });
-            playlistBtn.addEventListener('click', function (e) {
+            linkBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
-                openPlaylistDropdown(playlistBtn, p.id);
+                if (p.url && isValidYouTubeUrl(p.url)) {
+                    window.open(appendStartParam(p.url), '_blank');
+                }
             });
             editBtn.addEventListener('click', function (e) { e.stopPropagation(); openFormModal(p.id); });
             delBtn.addEventListener('click', function (e) {
@@ -541,7 +545,7 @@
             pop.appendChild(msg);
         } else {
             ['ambience', 'sfx'].forEach(function (type) {
-                var label = type === 'ambience' ? 'Song' : 'Sound Effect';
+                var label = type === 'ambience' ? 'Ambience' : 'Sound Effect';
                 var btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'ambience-btn secondary slot-menu-btn';
@@ -742,10 +746,13 @@
         document.getElementById('setting-card-hex').value = card;
         const perRow = Math.min(4, Math.max(1, parseInt((state.settings && state.settings.cardsPerRow) || 1, 10) || 1));
         const cardSize = (state.settings && state.settings.cardSize) || 'medium';
+        const playerSlotsPerRow = Math.min(3, Math.max(1, parseInt((state.settings && state.settings.playerSlotsPerRow) || 3, 10) || 3));
         const perRowEl = document.getElementById('setting-cards-per-row');
         const sizeEl = document.getElementById('setting-card-size');
+        const playerSlotsEl = document.getElementById('setting-player-slots-per-row');
         if (perRowEl) perRowEl.value = String(perRow);
         if (sizeEl) sizeEl.value = ['small', 'medium', 'large'].includes(cardSize) ? cardSize : 'medium';
+        if (playerSlotsEl) playerSlotsEl.value = String(playerSlotsPerRow);
         renderFoldersList();
         renderPlaylistsList();
         document.getElementById('ambience-settings-overlay').classList.add('open');
@@ -773,6 +780,11 @@
             const s = sizeEl.value;
             state.settings.cardSize = ['small', 'medium', 'large'].includes(s) ? s : 'medium';
         }
+        const playerSlotsEl = document.getElementById('setting-player-slots-per-row');
+        if (playerSlotsEl) {
+            const n = parseInt(playerSlotsEl.value, 10);
+            state.settings.playerSlotsPerRow = (n >= 1 && n <= 3) ? n : 3;
+        }
         const primary = document.getElementById('setting-primary-hex').value.trim();
         const accent = document.getElementById('setting-accent-hex').value.trim();
         const card = document.getElementById('setting-card-hex').value.trim();
@@ -787,6 +799,7 @@
         saveState(state);
         applyGridLayout();
         applyEmbedLayout();
+        applyPlayerSlotsPerRow();
         var alwaysCollapse = state.settings && state.settings.alwaysCollapseLayers === true;
         document.querySelectorAll('.embed-slot').forEach(function (slotEl) {
             if (alwaysCollapse) slotEl.classList.add('collapsed');
@@ -853,7 +866,6 @@
             '<input type="range" class="embed-slot-volume" data-slot="' + slotId + '" min="0" max="100" value="100" aria-label="Volume ' + labelText + '">' +
             '</label>' +
             '<button type="button" class="ambience-btn small embed-slot-play-pause" data-slot="' + slotId + '" aria-label="Pause">&#9208;</button>' +
-            '<button type="button" class="ambience-btn small embed-slot-youtube" data-slot="' + slotId + '" aria-label="Open in YouTube" title="Open in YouTube">YouTube</button>' +
             '<button type="button" class="ambience-btn small embed-slot-close" data-slot="' + slotId + '" aria-label="Stop ' + labelText + '">&#10005;</button>' +
             '</div>' +
             '<div class="embed-slot-wrapper">' +
@@ -939,7 +951,6 @@
                 '<input type="range" class="embed-slot-volume" data-slot="' + slotId + '" min="0" max="100" value="100" aria-label="Volume ' + labelText + '">' +
                 '</label>' +
                 '<button type="button" class="ambience-btn small embed-slot-play-pause" data-slot="' + slotId + '" aria-label="Pause">&#9208;</button>' +
-                '<button type="button" class="ambience-btn small embed-slot-youtube" data-slot="' + slotId + '" aria-label="Open in YouTube" title="Open in YouTube">YouTube</button>' +
                 '<button type="button" class="ambience-btn small embed-slot-close" data-slot="' + slotId + '" aria-label="Stop ' + labelText + '">&#10005;</button>' +
                 '</div>' +
                 '<div class="embed-slot-wrapper">' +
@@ -972,6 +983,14 @@
             area.style.right = '';
             area.style.bottom = '';
         }
+    }
+
+    function applyPlayerSlotsPerRow() {
+        var container = document.getElementById('ambience-embed-slots');
+        if (!container) return;
+        var n = Math.min(3, Math.max(1, parseInt((state.settings && state.settings.playerSlotsPerRow) || 3, 10) || 3));
+        container.classList.remove('player-slots-per-row-1', 'player-slots-per-row-2', 'player-slots-per-row-3');
+        container.classList.add('player-slots-per-row-' + n);
     }
 
     function bindFloatingEmbedDrag() {
@@ -1319,6 +1338,15 @@
             state.settings.customColors = null;
             clearCustomColors();
             saveState(state);
+            var primary = '#1a472a';
+            var accent = '#d4af37';
+            var card = '#f8f9fa';
+            document.getElementById('setting-primary').value = primary;
+            document.getElementById('setting-primary-hex').value = primary;
+            document.getElementById('setting-accent').value = accent;
+            document.getElementById('setting-accent-hex').value = accent;
+            document.getElementById('setting-card').value = card;
+            document.getElementById('setting-card-hex').value = card;
         });
         document.getElementById('ambience-embed-minimize').addEventListener('click', function (e) {
             e.stopPropagation();
@@ -1335,17 +1363,6 @@
                 if (closeBtn) {
                     var slotId = closeBtn.getAttribute('data-slot');
                     if (slotId) removeLayer(slotId);
-                    return;
-                }
-                var ytBtn = e.target.closest('.embed-slot-youtube');
-                if (ytBtn) {
-                    e.stopPropagation();
-                    var slotId = ytBtn.getAttribute('data-slot');
-                    var layer = slotId ? getLayerBySlotId(slotId) : null;
-                    if (layer && layer.embedUrl) {
-                        var videoId = getVideoId(layer.embedUrl);
-                        if (videoId) window.open('https://www.youtube.com/watch?v=' + videoId, '_blank');
-                    }
                     return;
                 }
                 var playBtn = e.target.closest('.embed-slot-play-pause');
@@ -1440,6 +1457,7 @@
         }
         applyGridLayout();
         applyEmbedLayout();
+        applyPlayerSlotsPerRow();
         renderEmbedSlots();
         var area = document.getElementById('ambience-embed-area');
         var layers = state.embedSlots && state.embedSlots.layers ? state.embedSlots.layers : [];
