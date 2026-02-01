@@ -158,28 +158,203 @@
     display: none;
 }
 
-.embed-header {
+/* Floating player: fixed position, bottom-left so it stays visible (avoids taskbar/tray in bottom-right) */
+.embed-area.floating {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    width: 100%;
+    max-width: 320px;
+    z-index: 900;
+    margin-bottom: 0;
+    box-shadow: 0 8px 24px var(--shadow);
+}
+
+.embed-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem 0.75rem;
+}
+
+.embed-slot {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    min-width: 0;
+}
+
+.embed-slot-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5rem 0.75rem;
-    background: var(--card-bg);
+    padding: 0.35rem 0.5rem;
+    background: var(--surface);
     border-bottom: 1px solid var(--border);
+    gap: 0.25rem;
 }
 
-.embed-wrapper {
+.embed-slot-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+}
+
+.embed-slot-wrapper {
     position: relative;
     padding-bottom: 56.25%;
     height: 0;
 }
 
-.embed-wrapper iframe {
+.embed-slot-frame {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
 }
+
+.embed-slot.empty .embed-slot-wrapper {
+    display: none;
+}
+
+.embed-slot.empty .embed-slot-header .embed-slot-close,
+.embed-slot.empty .embed-slot-header .embed-slot-play-pause,
+.embed-slot.empty .embed-slot-header .embed-slot-volume-wrap {
+    display: none;
+}
+
+.embed-slot-label[role="button"] {
+    cursor: pointer;
+}
+
+.embed-slot-label[role="button"]:hover {
+    text-decoration: underline;
+}
+
+.embed-slot.collapsed .embed-slot-wrapper {
+    display: none;
+}
+
+.embed-slot-youtube {
+    white-space: nowrap;
+}
+
+.embed-slot-volume-wrap {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.embed-slot-volume {
+    width: 60px;
+    min-width: 50px;
+    height: 24px;
+    margin: 0;
+    vertical-align: middle;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+.embed-area.floating .embed-slots {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.embed-area.floating .embed-slot-wrapper {
+    max-height: 100px;
+}
+
+.embed-area.floating.minimized .embed-slots {
+    display: none;
+}
+
+/* Audio only: hide video, keep audio playing (iframe kept at 1px so playback continues) */
+.embed-area.audio-only .embed-slot-wrapper {
+    height: 1px;
+    padding-bottom: 0;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.embed-area.audio-only .embed-slot-frame {
+    width: 1px;
+    height: 1px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    clip: rect(0, 0, 0, 0);
+}
+
+.embed-area:not(.floating) .embed-minimize {
+    display: none;
+}
+
+.embed-area.floating .embed-header {
+    cursor: grab;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.embed-area.floating .embed-header:active {
+    cursor: grabbing;
+}
+
+.embed-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.embed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background: var(--card-bg);
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+}
+
+.embed-header #ambience-embed-title,
+.embed-header .ambience-btn {
+    color: var(--text);
+}
+
+/* Force embed area + header to use dark theme values in dark mode.
+   Uses explicit hex so custom colors on the page don't override. */
+.dark-mode .embed-area {
+    background-color: #2d2d2d;
+    border-color: #404040;
+}
+
+.dark-mode .embed-area .embed-header {
+    background-color: #353535;
+    color: #e0e0e0;
+    border-bottom-color: #404040;
+}
+
+.dark-mode .embed-area .embed-header #ambience-embed-title,
+.dark-mode .embed-area .embed-header .ambience-btn {
+    color: #e0e0e0;
+}
+
+.dark-mode .embed-area .embed-header .ambience-btn {
+    background-color: #2d2d2d;
+    border-color: #404040;
+}
+
+.dark-mode .embed-area .embed-header .ambience-btn:hover {
+    background-color: #353535;
+    border-color: var(--primary-color);
+}
+
 
 .cards-grid {
     display: grid;
@@ -345,12 +520,15 @@
 }
 
 .card-add-new-inner {
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     text-align: center;
+    width: 100%;
 }
 
 .card-add-new-card .card-add-icon,
@@ -502,6 +680,36 @@
     cursor: pointer;
 }
 
+/* Slot menu: centered overlay with dimmed background */
+.slot-menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.slot-menu-dialog {
+    background: var(--surface);
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 8px 24px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 220px;
+}
+
+.slot-menu-dialog .slot-menu-btn {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+}
+
 .modal-overlay {
     display: none;
     position: fixed;
@@ -644,6 +852,27 @@
 
 .settings-section {
     margin-bottom: 1rem;
+}
+
+.settings-section.collapsible .settings-section-toggle {
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.settings-section.collapsible .settings-section-toggle::after {
+    content: '\25BC';
+    font-size: 0.75em;
+    margin-left: 0.35rem;
+    opacity: 0.8;
+}
+
+.settings-section.collapsible.collapsed .settings-section-toggle::after {
+    content: '\25B6';
+}
+
+.settings-section.collapsible.collapsed .settings-section-content {
+    display: none;
 }
 
 .radio-group,

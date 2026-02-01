@@ -39,13 +39,14 @@
             </div>
 
             <div id="ambience-embed-area" class="embed-area hidden" aria-live="polite">
-                <div class="embed-header">
-                    <span id="ambience-embed-title">Now playing</span>
-                    <button type="button" id="ambience-embed-close" class="ambience-btn small" aria-label="Close player">&#10005;</button>
+                <div class="embed-header" id="ambience-embed-drag-handle">
+                    <span id="ambience-embed-title">Player</span>
+                    <div class="embed-header-actions">
+                        <button type="button" id="ambience-embed-minimize" class="ambience-btn small embed-minimize" aria-label="Minimize player" title="Minimize">&#8211;</button>
+                        <button type="button" id="ambience-embed-close" class="ambience-btn small" aria-label="Close all">&#10005;</button>
+                    </div>
                 </div>
-                <div class="embed-wrapper">
-                    <iframe id="ambience-embed-frame" title="YouTube embed" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
+                <div class="embed-slots" id="ambience-embed-slots"></div>
             </div>
 
             <div class="cards-grid cards-per-row-1 card-size-medium" id="ambience-cards-grid" role="list">
@@ -121,10 +122,25 @@
                         </label>
                         <p id="embed-note" class="setting-desc" style="margin-top:0;">Embedded playback requires serving from a web server (http://). Opens in new tab when opened as a file.</p>
                         <label class="radio-label checkbox-label">
+                            <input type="checkbox" id="setting-floating-player" aria-describedby="floating-player-desc">
+                            Floating player (when embedded)
+                        </label>
+                        <p id="floating-player-desc" class="setting-desc">Player stays in a corner so you can scroll the cards while it plays. Drag the header to move it.</p>
+                        <label class="radio-label checkbox-label">
+                            <input type="checkbox" id="setting-audio-only" aria-describedby="audio-only-desc">
+                            Audio only (hide video in player)
+                        </label>
+                        <p id="audio-only-desc" class="setting-desc">Only the audio plays; the video area is hidden so you just hear the ambience.</p>
+                        <label class="radio-label checkbox-label">
                             <input type="checkbox" id="setting-start-from-beginning" checked aria-describedby="start-from-beginning-desc">
                             Start videos from beginning
                         </label>
                         <p id="start-from-beginning-desc" class="setting-desc">Adds &amp;t=0 (new tab) or start=0 (embed) so each video starts at 0:00.</p>
+                        <label class="radio-label checkbox-label">
+                            <input type="checkbox" id="setting-always-collapse-layers" aria-describedby="always-collapse-layers-desc">
+                            Always collapse layers
+                        </label>
+                        <p id="always-collapse-layers-desc" class="setting-desc">New layers start collapsed so only the header bar is visible. Turn off to keep layers expanded.</p>
                     </div>
                 </div>
                 <div class="settings-section">
@@ -184,10 +200,12 @@
                         <input type="file" id="ambience-import-file" accept=".json,application/json" class="sr-only">
                     </div>
                 </div>
-                <div class="settings-section" id="ambience-folders-settings">
-                    <h3>Folders</h3>
-                    <ul id="ambience-folders-list" class="folders-list"></ul>
-                    <button type="button" id="ambience-add-folder-settings" class="ambience-btn secondary">Add folder</button>
+                <div class="settings-section collapsible collapsed" id="ambience-folders-settings">
+                    <h3 class="settings-section-toggle" id="ambience-folders-toggle" tabindex="0" role="button" aria-expanded="false" aria-controls="ambience-folders-content">Folders</h3>
+                    <div class="settings-section-content" id="ambience-folders-content">
+                        <ul id="ambience-folders-list" class="folders-list"></ul>
+                        <button type="button" id="ambience-add-folder-settings" class="ambience-btn secondary">Add folder</button>
+                    </div>
                 </div>
                 <div class="settings-section" id="ambience-playlists-settings">
                     <h3>Playlists</h3>

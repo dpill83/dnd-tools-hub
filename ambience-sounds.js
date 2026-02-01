@@ -4,6 +4,7 @@
     const STORAGE_KEY = 'dnd-ambience-sounds';
     const SCHEMA_VERSION = 2;
     const MAX_ICON_BYTES = 80 * 1024;
+    const MAX_EMBED_LAYERS = 6;
 
     const EMOJIS = ['⚔️', '🍺', '⛺', '🌙', '🏰', '🌲', '🕳️', '🔥', '🌧️', '🌊', '🏘️', '🐉', '🦇', '📜', '🕯️', '🎵', '⚡', '❄️', '🌿', '🗡️'];
 
@@ -16,11 +17,16 @@
                 cardsPerRow: 1,
                 cardSize: 'medium',
                 startFromBeginning: true,
-                cardSort: 'manual'
+                cardSort: 'manual',
+                floatingPlayer: false,
+                embedMinimized: false,
+                audioOnly: false,
+                alwaysCollapseLayers: false
             },
             folders: [],
             profiles: [],
-            playlists: []
+            playlists: [],
+            embedSlots: { layers: [] }
         };
     }
 
@@ -33,6 +39,18 @@
             data.folders = Array.isArray(data.folders) ? data.folders : [];
             data.playlists = Array.isArray(data.playlists) ? data.playlists : [];
             data.settings = data.settings || defaultState().settings;
+            var oldSlots = data.embedSlots;
+            if (oldSlots && (oldSlots.layer1 != null || oldSlots.layer2 != null || oldSlots.soundEffect != null)) {
+                var layers = [];
+                [oldSlots.layer1, oldSlots.layer2].forEach(function (slot) {
+                    if (slot && slot.embedUrl) layers.push({ id: 'layer-' + layers.length, type: 'ambience', profileId: slot.profileId, name: slot.name, embedUrl: slot.embedUrl, loop: slot.loop });
+                });
+                if (oldSlots.soundEffect && oldSlots.soundEffect.embedUrl) layers.push({ id: 'layer-' + layers.length, type: 'sfx', profileId: oldSlots.soundEffect.profileId, name: oldSlots.soundEffect.name, embedUrl: oldSlots.soundEffect.embedUrl, loop: oldSlots.soundEffect.loop });
+                data.embedSlots = { layers: layers };
+            } else if (!data.embedSlots || !Array.isArray(data.embedSlots.layers)) {
+                data.embedSlots = { layers: [] };
+            }
+            if (!data.embedSlots.layers) data.embedSlots.layers = [];
             data.profiles.forEach(function (p) {
                 p.starred = p.starred === true;
             });
@@ -44,7 +62,19 @@
 
     function saveState(state) {
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            var toSave = {
+                version: state.version,
+                settings: state.settings,
+                folders: state.folders,
+                profiles: state.profiles,
+                playlists: state.playlists,
+                embedSlots: {
+                    layers: (state.embedSlots && state.embedSlots.layers || []).map(function (l) {
+                        return { id: l.id, type: l.type, profileId: l.profileId, name: l.name, embedUrl: l.embedUrl, loop: l.loop };
+                    })
+                }
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
         } catch (e) {
             console.error('Failed to save ambience state:', e);
         }
@@ -65,7 +95,8 @@
         options = options || {};
         const id = getVideoId(url);
         if (!id) return null;
-        var parts = ['autoplay=1'];
+        var parts = [];
+        if (options.autoplay !== false) parts.push('autoplay=1');
         if (state.settings && state.settings.startFromBeginning) parts.push('start=0');
         if (options.loop) {
             parts.push('loop=1');
@@ -77,6 +108,7 @@
         } catch (_) {}
         parts.push('rel=0');
         parts.push('modestbranding=1');
+        parts.push('enablejsapi=1');
         return 'https://www.youtube.com/embed/' + id + '?' + parts.join('&');
     }
 
@@ -108,6 +140,79 @@
     let filterFolderId = '';
     let editingProfileId = null;
     let pendingImportData = null;
+    var pendingYTPlayers = [];
+
+    function loadYouTubeAPI() {
+        if (window.YT && window.YT.Player) return;
+        if (document.querySelector('script[src*="youtube.com/iframe_api"]')) return;
+        var tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        var first = document.getElementsByTagName('script')[0];
+        if (first && first.parentNode) first.parentNode.insertBefore(tag, first);
+    }
+
+    function updatePlayPauseButton(slotId, playerState) {
+        var btn = document.querySelector('.embed-slot-play-pause[data-slot="' + slotId + '"]');
+        if (!btn) return;
+        var playing = playerState === 1;
+        btn.textContent = playing ? '\u23F8' : '\u25B6';
+        btn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+    }
+
+    function getLayerBySlotId(slotId) {
+        var layers = state.embedSlots && state.embedSlots.layers;
+        if (!layers) return null;
+        for (var i = 0; i < layers.length; i++) if (layers[i].id === slotId) return layers[i];
+        return null;
+    }
+
+    function attachYTPlayer(frame, slotId, slotEl) {
+        if (!window.YT || !window.YT.Player) return;
+        try {
+            new window.YT.Player(frame, {
+                events: {
+                    onReady: function (ev) {
+                        var layer = getLayerBySlotId(slotId);
+                        if (layer) layer.player = ev.target;
+                        var volEl = slotEl && slotEl.querySelector('.embed-slot-volume');
+                        if (layer && layer.player && volEl) layer.player.setVolume(parseInt(volEl.value, 10) || 100);
+                        updatePlayPauseButton(slotId, ev.target.getPlayerState ? ev.target.getPlayerState() : 0);
+                    },
+                    onStateChange: function (ev) {
+                        updatePlayPauseButton(slotId, ev.data);
+                    }
+                }
+            });
+        } catch (e) {
+            console.warn('YouTube player init failed', e);
+        }
+    }
+
+    function attachYTPlayerWhenReady(frame, slotId, slotEl) {
+        function doAttach() {
+            if (window.YT && window.YT.Player) {
+                attachYTPlayer(frame, slotId, slotEl);
+            } else {
+                pendingYTPlayers.push({ frame: frame, slotId: slotId, slotEl: slotEl });
+            }
+        }
+        var layers = state.embedSlots && state.embedSlots.layers;
+        var hasOtherPlayer = layers && layers.some(function (l) {
+            return l.id !== slotId && l.player;
+        });
+        if (hasOtherPlayer) {
+            setTimeout(doAttach, 100);
+        } else {
+            doAttach();
+        }
+    }
+
+    window.onYouTubeIframeAPIReady = function () {
+        pendingYTPlayers.forEach(function (args) {
+            attachYTPlayer(args.frame, args.slotId, args.slotEl);
+        });
+        pendingYTPlayers.length = 0;
+    };
 
     function getProfilesForView() {
         const list = state.profiles.slice();
@@ -413,16 +518,55 @@
             }
             return;
         }
-        var embedUrl = getEmbedUrl(url, { loop: loop });
-        if (!embedUrl) return;
-        var frame = document.getElementById('ambience-embed-frame');
-        var area = document.getElementById('ambience-embed-area');
-        var titleEl = document.getElementById('ambience-embed-title');
-        if (frame && area && titleEl) {
-            frame.src = embedUrl;
-            titleEl.textContent = profile.name || 'Now playing';
-            area.classList.remove('hidden');
+        openSlotMenu(profile);
+    }
+
+    function openSlotMenu(profile) {
+        var existing = document.getElementById('ambience-slot-menu-overlay');
+        if (existing) existing.remove();
+        var overlay = document.createElement('div');
+        overlay.id = 'ambience-slot-menu-overlay';
+        overlay.className = 'slot-menu-overlay';
+        overlay.setAttribute('aria-hidden', 'false');
+        var pop = document.createElement('div');
+        pop.id = 'ambience-slot-menu';
+        pop.className = 'slot-menu-dialog';
+        pop.setAttribute('role', 'dialog');
+        pop.setAttribute('aria-label', 'Add as');
+        var layers = state.embedSlots && state.embedSlots.layers ? state.embedSlots.layers : [];
+        if (layers.length >= MAX_EMBED_LAYERS) {
+            var msg = document.createElement('p');
+            msg.className = 'slot-menu-message';
+            msg.textContent = 'Maximum layers (' + MAX_EMBED_LAYERS + ') reached.';
+            pop.appendChild(msg);
+        } else {
+            ['ambience', 'sfx'].forEach(function (type) {
+                var label = type === 'ambience' ? 'Ambience' : 'Sound Effect';
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'ambience-btn secondary slot-menu-btn';
+                btn.textContent = label;
+                btn.addEventListener('click', function () {
+                    addLayer(profile, type);
+                    close();
+                });
+                pop.appendChild(btn);
+            });
         }
+        overlay.appendChild(pop);
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click', function (ev) {
+            if (ev.target === overlay) close();
+        });
+        function close() {
+            var el = document.getElementById('ambience-slot-menu-overlay');
+            if (el) el.remove();
+            document.removeEventListener('keydown', onKey);
+        }
+        function onKey(e) {
+            if (e.key === 'Escape') close();
+        }
+        document.addEventListener('keydown', onKey);
     }
 
     function openFormModal(profileId) {
@@ -577,6 +721,15 @@
         const startFromBeginning = state.settings && state.settings.startFromBeginning !== false;
         const startEl = document.getElementById('setting-start-from-beginning');
         if (startEl) startEl.checked = startFromBeginning;
+        const floatingPlayer = state.settings && state.settings.floatingPlayer === true;
+        const floatingEl = document.getElementById('setting-floating-player');
+        if (floatingEl) floatingEl.checked = floatingPlayer;
+        const audioOnly = state.settings && state.settings.audioOnly === true;
+        const audioOnlyEl = document.getElementById('setting-audio-only');
+        if (audioOnlyEl) audioOnlyEl.checked = audioOnly;
+        const alwaysCollapseLayers = state.settings && state.settings.alwaysCollapseLayers === true;
+        const alwaysCollapseEl = document.getElementById('setting-always-collapse-layers');
+        if (alwaysCollapseEl) alwaysCollapseEl.checked = alwaysCollapseLayers;
         const colors = (state.settings && state.settings.customColors) || {};
         const primary = colors['--primary-color'] || '#1a472a';
         const accent = colors['--accent-color'] || '#d4af37';
@@ -604,6 +757,12 @@
         state.settings.playbackMode = document.getElementById('playback-newTab').checked ? 'newTab' : 'embed';
         const startEl = document.getElementById('setting-start-from-beginning');
         if (startEl) state.settings.startFromBeginning = startEl.checked;
+        const floatingEl = document.getElementById('setting-floating-player');
+        if (floatingEl) state.settings.floatingPlayer = floatingEl.checked;
+        const audioOnlyEl = document.getElementById('setting-audio-only');
+        if (audioOnlyEl) state.settings.audioOnly = audioOnlyEl.checked;
+        const alwaysCollapseEl = document.getElementById('setting-always-collapse-layers');
+        if (alwaysCollapseEl) state.settings.alwaysCollapseLayers = alwaysCollapseEl.checked;
         const perRowEl = document.getElementById('setting-cards-per-row');
         const sizeEl = document.getElementById('setting-card-size');
         if (perRowEl) {
@@ -627,8 +786,230 @@
         }
         saveState(state);
         applyGridLayout();
+        applyEmbedLayout();
+        var alwaysCollapse = state.settings && state.settings.alwaysCollapseLayers === true;
+        document.querySelectorAll('.embed-slot').forEach(function (slotEl) {
+            if (alwaysCollapse) slotEl.classList.add('collapsed');
+            else slotEl.classList.remove('collapsed');
+        });
         document.getElementById('ambience-settings-overlay').classList.remove('open');
         document.getElementById('ambience-settings-overlay').setAttribute('aria-hidden', 'true');
+    }
+
+    function getNextSlotId() {
+        var layers = state.embedSlots && state.embedSlots.layers ? state.embedSlots.layers : [];
+        var max = -1;
+        layers.forEach(function (l) {
+            var n = parseInt(String(l.id).replace(/^layer-/, ''), 10);
+            if (!isNaN(n) && n > max) max = n;
+        });
+        return 'layer-' + (max + 1);
+    }
+
+    function addLayer(profile, type) {
+        state.embedSlots = state.embedSlots || { layers: [] };
+        if (!state.embedSlots.layers) state.embedSlots.layers = [];
+        if (state.embedSlots.layers.length >= MAX_EMBED_LAYERS) return;
+        var url = profile.url;
+        if (!url) return;
+        var loop = profile.loop === true;
+        var autoplay = type !== 'sfx';
+        var embedUrl = getEmbedUrl(url, { loop: loop, autoplay: autoplay });
+        if (!embedUrl) return;
+        loadYouTubeAPI();
+        var slotId = getNextSlotId();
+        state.embedSlots.layers.push({
+            id: slotId,
+            type: type,
+            profileId: profile.id,
+            name: profile.name || 'Unnamed',
+            embedUrl: embedUrl,
+            loop: loop
+        });
+        saveState(state);
+        appendSlot(state.embedSlots.layers[state.embedSlots.layers.length - 1], state.embedSlots.layers.length);
+        var area = document.getElementById('ambience-embed-area');
+        if (area) {
+            applyEmbedLayout();
+            area.classList.remove('hidden');
+        }
+    }
+
+    function appendSlot(layer, oneBasedIndex) {
+        var container = document.getElementById('ambience-embed-slots');
+        if (!container || !layer) return;
+        var n = oneBasedIndex;
+        var typeLabel = layer.type === 'ambience' ? 'ambience' : 'sfx';
+        var labelText = 'Layer ' + n + ' (' + typeLabel + ')';
+        var slotId = layer.id;
+        var slotEl = document.createElement('div');
+        slotEl.className = 'embed-slot' + ((state.settings && state.settings.alwaysCollapseLayers) ? ' collapsed' : '');
+        slotEl.id = 'embed-slot-' + slotId;
+        slotEl.dataset.slot = slotId;
+        slotEl.innerHTML =
+            '<div class="embed-slot-header">' +
+            '<span class="embed-slot-label" data-slot="' + slotId + '" tabindex="0" role="button">' + (layer.name || labelText) + '</span>' +
+            '<label class="embed-slot-volume-wrap"><span class="sr-only">Volume ' + labelText + '</span>' +
+            '<input type="range" class="embed-slot-volume" data-slot="' + slotId + '" min="0" max="100" value="100" aria-label="Volume ' + labelText + '">' +
+            '</label>' +
+            '<button type="button" class="ambience-btn small embed-slot-play-pause" data-slot="' + slotId + '" aria-label="Pause">&#9208;</button>' +
+            '<button type="button" class="ambience-btn small embed-slot-youtube" data-slot="' + slotId + '" aria-label="Open in YouTube" title="Open in YouTube">YouTube</button>' +
+            '<button type="button" class="ambience-btn small embed-slot-close" data-slot="' + slotId + '" aria-label="Stop ' + labelText + '">&#10005;</button>' +
+            '</div>' +
+            '<div class="embed-slot-wrapper">' +
+            '<iframe class="embed-slot-frame" data-slot="' + slotId + '" title="YouTube ' + labelText + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>' +
+            '</div>';
+        container.appendChild(slotEl);
+        var frame = slotEl.querySelector('.embed-slot-frame');
+        var labelEl = slotEl.querySelector('.embed-slot-label');
+        if (labelEl) labelEl.textContent = layer.name || labelText;
+        frame.onload = function () {
+            attachYTPlayerWhenReady(frame, slotId, slotEl);
+        };
+        frame.src = layer.embedUrl;
+    }
+
+    function removeLayer(slotId) {
+        state.embedSlots = state.embedSlots || { layers: [] };
+        var layers = state.embedSlots.layers || [];
+        var idx = -1;
+        for (var i = 0; i < layers.length; i++) {
+            if (layers[i].id === slotId) { idx = i; break; }
+        }
+        if (idx === -1) return;
+        var layer = layers[idx];
+        if (layer.player && typeof layer.player.destroy === 'function') {
+            try { layer.player.destroy(); } catch (_) {}
+        }
+        var slotEl = document.getElementById('embed-slot-' + slotId);
+        if (slotEl) slotEl.remove();
+        state.embedSlots.layers.splice(idx, 1);
+        saveState(state);
+        var container = document.getElementById('ambience-embed-slots');
+        if (container && state.embedSlots.layers.length > 0) {
+            state.embedSlots.layers.forEach(function (l, i) {
+                var el = document.getElementById('embed-slot-' + l.id);
+                if (el) {
+                    var lbl = el.querySelector('.embed-slot-label');
+                    var typeLabel = l.type === 'ambience' ? 'ambience' : 'sfx';
+                    if (lbl) lbl.textContent = l.name || ('Layer ' + (i + 1) + ' (' + typeLabel + ')');
+                }
+            });
+        }
+        var area = document.getElementById('ambience-embed-area');
+        if (area && (!state.embedSlots.layers || state.embedSlots.layers.length === 0)) {
+            area.classList.add('hidden');
+        }
+    }
+
+    function clearAllSlots() {
+        state.embedSlots = state.embedSlots || { layers: [] };
+        var layers = state.embedSlots.layers || [];
+        layers.forEach(function (layer) {
+            if (layer.player && typeof layer.player.destroy === 'function') {
+                try { layer.player.destroy(); } catch (_) {}
+            }
+        });
+        state.embedSlots.layers = [];
+        saveState(state);
+        var container = document.getElementById('ambience-embed-slots');
+        if (container) container.innerHTML = '';
+        var area = document.getElementById('ambience-embed-area');
+        if (area) area.classList.add('hidden');
+    }
+
+    function renderEmbedSlots() {
+        var container = document.getElementById('ambience-embed-slots');
+        if (!container) return;
+        var layers = state.embedSlots && state.embedSlots.layers ? state.embedSlots.layers : [];
+        container.innerHTML = '';
+        layers.forEach(function (layer, index) {
+            var n = index + 1;
+            var typeLabel = layer.type === 'ambience' ? 'ambience' : 'sfx';
+            var labelText = 'Layer ' + n + ' (' + typeLabel + ')';
+            var slotId = layer.id;
+            var slotEl = document.createElement('div');
+            slotEl.className = 'embed-slot' + ((state.settings && state.settings.alwaysCollapseLayers) ? ' collapsed' : '');
+            slotEl.id = 'embed-slot-' + slotId;
+            slotEl.dataset.slot = slotId;
+            slotEl.innerHTML =
+                '<div class="embed-slot-header">' +
+                '<span class="embed-slot-label" data-slot="' + slotId + '" tabindex="0" role="button">' + (layer.name || labelText) + '</span>' +
+                '<label class="embed-slot-volume-wrap"><span class="sr-only">Volume ' + labelText + '</span>' +
+                '<input type="range" class="embed-slot-volume" data-slot="' + slotId + '" min="0" max="100" value="100" aria-label="Volume ' + labelText + '">' +
+                '</label>' +
+                '<button type="button" class="ambience-btn small embed-slot-play-pause" data-slot="' + slotId + '" aria-label="Pause">&#9208;</button>' +
+                '<button type="button" class="ambience-btn small embed-slot-youtube" data-slot="' + slotId + '" aria-label="Open in YouTube" title="Open in YouTube">YouTube</button>' +
+                '<button type="button" class="ambience-btn small embed-slot-close" data-slot="' + slotId + '" aria-label="Stop ' + labelText + '">&#10005;</button>' +
+                '</div>' +
+                '<div class="embed-slot-wrapper">' +
+                '<iframe class="embed-slot-frame" data-slot="' + slotId + '" title="YouTube ' + labelText + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>' +
+                '</div>';
+            container.appendChild(slotEl);
+            var frame = slotEl.querySelector('.embed-slot-frame');
+            var labelEl = slotEl.querySelector('.embed-slot-label');
+            if (labelEl) labelEl.textContent = layer.name || labelText;
+            frame.onload = function () {
+                attachYTPlayerWhenReady(frame, slotId, slotEl);
+            };
+            frame.src = layer.embedUrl;
+        });
+    }
+
+    function applyEmbedLayout() {
+        var area = document.getElementById('ambience-embed-area');
+        if (!area) return;
+        var mode = (state.settings && state.settings.playbackMode) || 'newTab';
+        var floating = mode === 'embed' && (state.settings && state.settings.floatingPlayer === true);
+        var minimized = (state.settings && state.settings.embedMinimized === true) && floating;
+        var audioOnly = state.settings && state.settings.audioOnly === true;
+        if (floating) area.classList.add('floating'); else area.classList.remove('floating');
+        if (minimized) area.classList.add('minimized'); else area.classList.remove('minimized');
+        if (audioOnly) area.classList.add('audio-only'); else area.classList.remove('audio-only');
+        if (floating) {
+            area.style.left = '';
+            area.style.top = '';
+            area.style.right = '';
+            area.style.bottom = '';
+        }
+    }
+
+    function bindFloatingEmbedDrag() {
+        var area = document.getElementById('ambience-embed-area');
+        var handle = document.getElementById('ambience-embed-drag-handle');
+        if (!area || !handle) return;
+        var dragging = false;
+        var startX, startY, startLeft, startTop;
+        function onMouseDown(e) {
+            if (!area.classList.contains('floating')) return;
+            if (e.target.closest('.embed-header-actions')) return;
+            e.preventDefault();
+            var rect = area.getBoundingClientRect();
+            startLeft = rect.left;
+            startTop = rect.top;
+            startX = e.clientX;
+            startY = e.clientY;
+            dragging = true;
+            area.style.right = '';
+            area.style.bottom = '';
+            area.style.left = startLeft + 'px';
+            area.style.top = startTop + 'px';
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        }
+        function onMouseMove(e) {
+            if (!dragging) return;
+            var dx = e.clientX - startX;
+            var dy = e.clientY - startY;
+            area.style.left = (startLeft + dx) + 'px';
+            area.style.top = (startTop + dy) + 'px';
+        }
+        function onMouseUp() {
+            dragging = false;
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        }
+        handle.addEventListener('mousedown', onMouseDown);
     }
 
     function renderFoldersList() {
@@ -918,18 +1299,104 @@
         }
         document.getElementById('ambience-add-folder-btn').addEventListener('click', addFolder);
         document.getElementById('ambience-add-folder-settings').addEventListener('click', addFolder);
+        var foldersSection = document.getElementById('ambience-folders-settings');
+        var foldersToggle = document.getElementById('ambience-folders-toggle');
+        if (foldersSection && foldersToggle) {
+            function toggleFoldersSection() {
+                var collapsed = foldersSection.classList.toggle('collapsed');
+                foldersToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            }
+            foldersToggle.addEventListener('click', toggleFoldersSection);
+            foldersToggle.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleFoldersSection();
+                }
+            });
+        }
         document.getElementById('ambience-add-playlist-settings').addEventListener('click', addPlaylist);
         document.getElementById('ambience-reset-colors').addEventListener('click', function () {
             state.settings.customColors = null;
             clearCustomColors();
             saveState(state);
         });
-        document.getElementById('ambience-embed-close').addEventListener('click', function () {
-            var area = document.getElementById('ambience-embed-area');
-            var frame = document.getElementById('ambience-embed-frame');
-            if (area) area.classList.add('hidden');
-            if (frame) frame.src = '';
+        document.getElementById('ambience-embed-minimize').addEventListener('click', function (e) {
+            e.stopPropagation();
+            state.settings = state.settings || {};
+            state.settings.embedMinimized = !state.settings.embedMinimized;
+            saveState(state);
+            applyEmbedLayout();
         });
+        document.getElementById('ambience-embed-close').addEventListener('click', clearAllSlots);
+        var embedSlotsEl = document.getElementById('ambience-embed-slots');
+        if (embedSlotsEl) {
+            embedSlotsEl.addEventListener('click', function (e) {
+                var closeBtn = e.target.closest('.embed-slot-close');
+                if (closeBtn) {
+                    var slotId = closeBtn.getAttribute('data-slot');
+                    if (slotId) removeLayer(slotId);
+                    return;
+                }
+                var ytBtn = e.target.closest('.embed-slot-youtube');
+                if (ytBtn) {
+                    e.stopPropagation();
+                    var slotId = ytBtn.getAttribute('data-slot');
+                    var layer = slotId ? getLayerBySlotId(slotId) : null;
+                    if (layer && layer.embedUrl) {
+                        var videoId = getVideoId(layer.embedUrl);
+                        if (videoId) window.open('https://www.youtube.com/watch?v=' + videoId, '_blank');
+                    }
+                    return;
+                }
+                var playBtn = e.target.closest('.embed-slot-play-pause');
+                if (playBtn) {
+                    e.stopPropagation();
+                    var slotId = playBtn.getAttribute('data-slot');
+                    var layer = slotId ? getLayerBySlotId(slotId) : null;
+                    if (!layer || !layer.player) return;
+                    try {
+                        if (typeof layer.player.getPlayerState !== 'function') return;
+                        var stateCode = layer.player.getPlayerState();
+                        if (stateCode === 1) layer.player.pauseVideo(); else layer.player.playVideo();
+                    } catch (err) {
+                        console.warn('Play/pause failed for slot ' + slotId, err);
+                    }
+                }
+            });
+            embedSlotsEl.addEventListener('click', function (e) {
+                var label = e.target.closest('.embed-slot-label[data-slot]');
+                if (label) {
+                    e.preventDefault();
+                    var slotId = label.getAttribute('data-slot');
+                    var slotEl = document.getElementById('embed-slot-' + slotId);
+                    if (slotEl) slotEl.classList.toggle('collapsed');
+                }
+            });
+            embedSlotsEl.addEventListener('keydown', function (e) {
+                var label = e.target.closest('.embed-slot-label[data-slot]');
+                if (label && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    var slotId = label.getAttribute('data-slot');
+                    var slotEl = document.getElementById('embed-slot-' + slotId);
+                    if (slotEl) slotEl.classList.toggle('collapsed');
+                }
+            });
+            embedSlotsEl.addEventListener('input', function (e) {
+                var input = e.target.closest('.embed-slot-volume');
+                if (!input) return;
+                var slotId = input.getAttribute('data-slot');
+                var layer = slotId ? getLayerBySlotId(slotId) : null;
+                if (!layer || !layer.player) return;
+                try {
+                    if (typeof layer.player.setVolume === 'function') {
+                        layer.player.setVolume(parseInt(input.value, 10) || 0);
+                    }
+                } catch (err) {
+                    console.warn('Volume failed for slot ' + slotId, err);
+                }
+            });
+        }
+        bindFloatingEmbedDrag();
         document.getElementById('ambience-icon-file').addEventListener('change', function () {
             var grid = document.getElementById('ambience-emoji-grid');
             if (grid) grid.querySelectorAll('button').forEach(function (b) { b.classList.remove('selected'); });
@@ -967,10 +1434,19 @@
     }
 
     function init() {
+        loadYouTubeAPI();
         if (state.settings && state.settings.customColors) {
             applyCustomColors(state.settings.customColors);
         }
         applyGridLayout();
+        applyEmbedLayout();
+        renderEmbedSlots();
+        var area = document.getElementById('ambience-embed-area');
+        var layers = state.embedSlots && state.embedSlots.layers ? state.embedSlots.layers : [];
+        if (area) {
+            if (layers.length === 0) area.classList.add('hidden');
+            else area.classList.remove('hidden');
+        }
         renderFolderFilter();
         var sortEl = document.getElementById('ambience-sort');
         if (sortEl) sortEl.value = (state.settings && state.settings.cardSort) || 'manual';
