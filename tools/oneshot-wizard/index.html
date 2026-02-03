@@ -569,6 +569,13 @@
                     <div id="successMessage"></div>
 
                     <div class="export-options">
+                        <label style="font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">Load saved session</label>
+                        <div class="button-group" style="align-items: center;">
+                            <select id="savedSessionsSelect" style="flex: 1;">
+                                <option value="">— Choose a saved session —</option>
+                            </select>
+                            <button type="button" class="export-button" onclick="loadFromLocalStorage()" style="min-width: 100px;">Load selected</button>
+                        </div>
                         <button class="export-button" onclick="exportDMSheet()">📄 Download DM Sheet (HTML)</button>
                         <button class="export-button" onclick="exportPlayerHook()">🎭 Download Player Hook (HTML)</button>
                         <button class="export-button" onclick="exportJSON()">⚙ Export JSON (Full State)</button>
@@ -700,10 +707,7 @@
                     icon: '🎯',
                     beats: ['Set challenge', 'Rising difficulty', 'Resolution']
                 }
-            },
-            npcNames: ['Marta', 'Vex', 'Aldric', 'Silene', 'Thorne', 'Kaida', 'Bron', 'Lyssa', 'Garrick', 'Elara'],
-            npcRoles: ['merchant', 'guard captain', 'scholar', 'informant', 'patron', 'rival', 'ally', 'tempter'],
-            clueTypes: ['rumor', 'physical evidence', 'npc testimony', 'written note', 'symbol/sign']
+            }
         };
 
         // Simple seeded RNG
@@ -764,10 +768,13 @@
         // ACT GENERATION ENGINE
         // ============================================================
 
-        function generateAct(type, anchors, seed) {
+        function generateAct(type, anchors, seed, actIndex, totalActs) {
             const rng = new SeededRandom(seed);
             const typeData = LANES.actTypes[type];
             const theme = anchors.theme ? LANES.themes[anchors.theme] : null;
+
+            const isLastAct = (actIndex + 1) === totalActs;
+            const exitTrigger = isLastAct ? 'Conclusion / finale' : `Proceed to Act ${actIndex + 2}`;
 
             const objectives = {
                 roleplay: [
@@ -807,28 +814,8 @@
                 type,
                 objective,
                 beats,
-                exitTrigger: `Proceed to Act ${state.acts.length + 2}`
+                exitTrigger
             };
-        }
-
-        function generateNPC(theme, seed) {
-            const rng = new SeededRandom(seed);
-            const name = rng.pick(LANES.npcNames);
-            const role = rng.pick(LANES.npcRoles);
-            const secret = theme ? rng.pick(theme.keywords) : 'hidden agenda';
-            return { name, role, secret };
-        }
-
-        function generateClues(theme, count, seed) {
-            const rng = new SeededRandom(seed);
-            const themeData = LANES.themes[theme];
-            const clues = [];
-            for (let i = 0; i < count; i++) {
-                const keyword = rng.pick(themeData?.keywords || ['mystery']);
-                const type = rng.pick(LANES.clueTypes);
-                clues.push(`[${type}] "${keyword}"`);
-            }
-            return clues;
         }
 
         // ============================================================
@@ -837,10 +824,13 @@
 
         function buildDMSheet() {
             let html = '';
-            html += `<h2>THRESHOLD: ${state.anchors.theme?.toUpperCase() || 'UNKNOWN'}</h2>`;
+            html += `<h2>THEME: ${state.anchors.theme?.toUpperCase() || 'UNKNOWN'}</h2>`;
             html += `<div class="dm-sheet-row"><span class="dm-sheet-label">Villain:</span><span class="dm-sheet-value">${state.anchors.villain || '—'}</span></div>`;
             html += `<div class="dm-sheet-row"><span class="dm-sheet-label">Location:</span><span class="dm-sheet-value">${state.anchors.location || '—'}</span></div>`;
             html += `<div class="dm-sheet-row"><span class="dm-sheet-label">Party Level:</span><span class="dm-sheet-value">${state.meta.level}</span></div>`;
+            if (state.meta.boundaries && state.meta.boundaries.length > 0) {
+                html += `<div class="dm-sheet-row"><span class="dm-sheet-label">Content boundaries:</span><span class="dm-sheet-value">${state.meta.boundaries.join(', ')}</span></div>`;
+            }
 
             html += `<h2>Clock (${state.anchors.clockSteps} Steps)</h2>`;
             for (let i = 1; i <= state.anchors.clockSteps; i++) {
@@ -935,7 +925,11 @@
             md += `## Anchors\n`;
             md += `- **Theme:** ${state.anchors.theme}\n`;
             md += `- **Villain:** ${state.anchors.villain}\n`;
-            md += `- **Location:** ${state.anchors.location}\n\n`;
+            md += `- **Location:** ${state.anchors.location}\n`;
+            if (state.meta.boundaries && state.meta.boundaries.length > 0) {
+                md += `- **Content boundaries:** ${state.meta.boundaries.join(', ')}\n`;
+            }
+            md += `\n`;
             state.acts.forEach((act, idx) => {
                 md += `## Act ${idx + 1}: ${act.type}\n`;
                 md += `**Objective:** ${act.objective}\n\n`;
@@ -955,7 +949,60 @@
             };
             saved.push(session);
             localStorage.setItem('oneShotSessions', JSON.stringify(saved));
+            populateSavedSessionsSelect();
             showSuccess('Session saved to browser!');
+        }
+
+        function populateSavedSessionsSelect() {
+            const saved = JSON.parse(localStorage.getItem('oneShotSessions') || '[]');
+            const sel = document.getElementById('savedSessionsSelect');
+            sel.innerHTML = '<option value="">— Choose a saved session —</option>';
+            saved.slice().reverse().forEach((s, i) => {
+                const date = s.savedAt ? new Date(s.savedAt).toLocaleString() : 'Unknown';
+                const id = s.id || i;
+                const opt = document.createElement('option');
+                opt.value = id;
+                opt.textContent = `${date} (${id})`;
+                sel.appendChild(opt);
+            });
+        }
+
+        function loadFromLocalStorage() {
+            const id = document.getElementById('savedSessionsSelect').value;
+            if (!id) {
+                showSuccess('Select a session first.');
+                return;
+            }
+            const saved = JSON.parse(localStorage.getItem('oneShotSessions') || '[]');
+            const session = saved.find(s => s.id === id);
+            if (!session) {
+                showSuccess('Session not found.');
+                return;
+            }
+            const acts = session.acts || [];
+            const locked = (session.locked && session.locked.length === acts.length) ? session.locked : acts.map(() => false);
+            state = {
+                meta: session.meta || state.meta,
+                anchors: session.anchors || state.anchors,
+                acts,
+                locked,
+                carryovers: session.carryovers || []
+            };
+            rng = new SeededRandom(state.meta.seed || '');
+            document.getElementById('partyLevel').value = state.meta.level;
+            document.getElementById('partySize').value = state.meta.partySize;
+            document.getElementById('sessionLength').value = state.meta.duration;
+            document.getElementById('tone').value = state.meta.tone;
+            document.getElementById('seed').value = state.meta.seed || '';
+            document.getElementById('boundaries').value = (state.meta.boundaries || []).join(', ');
+            document.getElementById('themeSelect').value = state.anchors.theme || '';
+            document.getElementById('villainSelect').value = state.anchors.villain || '';
+            document.getElementById('locationSelect').value = state.anchors.location || '';
+            document.getElementById('clockSteps').value = state.anchors.clockSteps;
+            document.getElementById('clockDisplay').textContent = `${state.anchors.clockSteps} steps`;
+            renderActCards();
+            updateDMSheetPreview();
+            showSuccess('Session loaded.');
         }
 
         function showSuccess(msg) {
@@ -979,7 +1026,7 @@
                     state.meta.duration = parseFloat(document.getElementById('sessionLength').value);
                     state.meta.tone = document.getElementById('tone').value;
                     state.meta.seed = document.getElementById('seed').value;
-                    state.meta.boundaries = document.getElementById('boundaries').value.split(',').map(b => b.trim());
+                    state.meta.boundaries = document.getElementById('boundaries').value.split(',').map(b => b.trim()).filter(b => b.length > 0);
                     rng = new SeededRandom(state.meta.seed);
                 } else if (currentStep === 2) {
                     state.anchors.theme = document.getElementById('themeSelect').value;
@@ -987,13 +1034,13 @@
                     state.anchors.location = document.getElementById('locationSelect').value;
                     state.anchors.clockSteps = parseInt(document.getElementById('clockSteps').value);
                     
-                    // Auto-generate acts when moving to step 3
-                    if (state.acts.length === 0) {
-                        const actTypeKeys = Object.keys(LANES.actTypes).slice(0, 3);
-                        state.acts = actTypeKeys.map((type, idx) => 
-                            generateAct(type, state.anchors, `${state.meta.seed}-act${idx}`)
-                        );
-                    }
+                    // Auto-generate acts when moving to step 3 (always regenerate so anchors are reflected)
+                    const actTypeKeys = Object.keys(LANES.actTypes).slice(0, 3);
+                    const totalActs = actTypeKeys.length;
+                    state.acts = actTypeKeys.map((type, idx) =>
+                        generateAct(type, state.anchors, `${state.meta.seed}-act${idx}`, idx, totalActs)
+                    );
+                    state.locked = state.acts.map(() => false);
                     renderActCards();
                 }
 
@@ -1001,6 +1048,7 @@
                 document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
                 document.querySelectorAll('.step')[currentStep - 1].classList.add('active');
                 document.getElementById('stepNumber').textContent = currentStep;
+                if (currentStep === 4) populateSavedSessionsSelect();
                 updateDMSheetPreview();
             }
         }
@@ -1037,6 +1085,7 @@
                 document.getElementById('villainSelect').value = '';
                 document.getElementById('locationSelect').value = '';
                 document.getElementById('clockSteps').value = 6;
+                document.getElementById('clockDisplay').textContent = '6 steps';
                 updateDMSheetPreview();
             }
         }
@@ -1082,7 +1131,8 @@
             if (!state.locked[idx]) {
                 const actTypes = Object.keys(LANES.actTypes);
                 const newType = rng.pick(actTypes);
-                state.acts[idx] = generateAct(newType, state.anchors, `${state.meta.seed}-act${idx}-${Math.random()}`);
+                const totalActs = state.acts.length;
+                state.acts[idx] = generateAct(newType, state.anchors, `${state.meta.seed}-act${idx}-${Math.random()}`, idx, totalActs);
                 renderActCards();
                 updateDMSheetPreview();
             } else {
