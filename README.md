@@ -27,13 +27,15 @@ A web-based D&D 5e toolkit for Dungeon Masters and players. The central hub ([in
 
 ## Tools (per page)
 
+Tools live in `tools/<name>/` with `index.html` as the entry point.
+
 ### AI DM Prompt Builder
 
-**Page:** [ai-dm-prompt-builder.html](ai-dm-prompt-builder.html)
+**Page:** [tools/ai-dm-prompt-builder/](tools/ai-dm-prompt-builder/)
 
 - **Purpose:** Build prompts for AI (ChatGPT, Claude, etc.) to run D&D 5e adventures as DM.
-- **CSS:** global.css, styles.css
-- **Scripts:** theme.js, [script.js](script.js)
+- **CSS:** global.css, styles.css (from root)
+- **Scripts:** theme.js (from root), [script.js](tools/ai-dm-prompt-builder/script.js)
 - **Features:**
   - Manual Builder (DMG-style adventure structure)
   - AI Assistant tab with **AI prompt generator** (party level, tone, length, hook)
@@ -46,7 +48,7 @@ A web-based D&D 5e toolkit for Dungeon Masters and players. The central hub ([in
 
 ### Adventure Packet Builder
 
-**Page:** [adventure-packet-builder.html](adventure-packet-builder.html)
+**Page:** [tools/adventure-packet-builder/](tools/adventure-packet-builder/)
 
 - **Purpose:** Build Adventure Packets for LM Studio (first DM message after system prompt).
 - **CSS:** global.css, styles.css
@@ -62,7 +64,7 @@ A web-based D&D 5e toolkit for Dungeon Masters and players. The central hub ([in
 
 ### Adventure Maker
 
-**Page:** [adventure-maker.html](adventure-maker.html)
+**Page:** [tools/adventure-maker/](tools/adventure-maker/)
 
 - **Purpose:** Author D&D 5e adventures for AI deep research (campaign context, progressive disclosure).
 - **CSS:** global.css, styles.css (+ inline Adventure Maker step-nav/layout)
@@ -76,7 +78,7 @@ A web-based D&D 5e toolkit for Dungeon Masters and players. The central hub ([in
 
 ### Combat Turn Helper
 
-**Page:** [combat-turn-helper.html](combat-turn-helper.html)
+**Page:** [tools/combat-turn-helper/](tools/combat-turn-helper/)
 
 - **Purpose:** Guide players through a D&D 5e combat turn (decision tree).
 - **CSS:** global.css, [combat-turn-helper.css](combat-turn-helper.css)
@@ -92,7 +94,7 @@ A web-based D&D 5e toolkit for Dungeon Masters and players. The central hub ([in
 
 ### Brother George Ward's Cassalanter Inquiry (Runner)
 
-**Page:** [cassalanter-inquiry-runner.html](cassalanter-inquiry-runner.html)
+**Page:** [tools/cassalanter-inquiry-runner/](tools/cassalanter-inquiry-runner/)
 
 - **Purpose:** Waterdeep-style investigation episode runner for solo play (Hook, Progress, Pressure, Reveal).
 - **CSS:** global.css, styles.css (+ inline runner layout/panels)
@@ -107,7 +109,7 @@ A web-based D&D 5e toolkit for Dungeon Masters and players. The central hub ([in
 
 ### Cassalanter Inquiry (Wizard)
 
-**Page:** [cassalanter-inquiry-wizard.html](cassalanter-inquiry-wizard.html)
+**Page:** [tools/cassalanter-inquiry-wizard/](tools/cassalanter-inquiry-wizard/)
 
 - **Purpose:** Guided wizard for the same investigation episode (one step per screen).
 - **CSS:** global.css, styles.css (+ inline wizard card/step styles)
@@ -122,7 +124,7 @@ A web-based D&D 5e toolkit for Dungeon Masters and players. The central hub ([in
 
 ### Playstyle Quiz
 
-**Page:** [playstyle-quiz.html](playstyle-quiz.html)
+**Page:** [tools/playstyle-quiz/](tools/playstyle-quiz/)
 
 - **Purpose:** Forced-choice quiz to discover D&D playstyle (narrative, tactical, exploration, etc.).
 - **CSS:** global.css, [playstyle-quiz.css](playstyle-quiz.css)
@@ -139,16 +141,16 @@ A web-based D&D 5e toolkit for Dungeon Masters and players. The central hub ([in
 
 ### YouTube channel video list
 
-**Script:** [youtube_channel_videos.py](youtube_channel_videos.py)
+**Script:** [tools/songbook/youtube_channel_videos.py](tools/songbook/youtube_channel_videos.py)
 
 - **Purpose:** Scrape all video titles and URLs from a YouTube channel (or playlist) and write them to a text file. One line per video: `title | url`.
 - **Prerequisite:** `pip install -r requirements.txt` (or `pip install yt-dlp`).
 - **Usage:**
-  - `python youtube_channel_videos.py "https://www.youtube.com/@ChannelName"` (writes to `ChannelName-music.txt` by default)
-  - Custom output: `python youtube_channel_videos.py "https://www.youtube.com/@ChannelName" output.txt`
+  - `python tools/songbook/youtube_channel_videos.py "https://www.youtube.com/@ChannelName"` (writes to `ChannelName-music.txt` by default)
+  - Custom output: `python tools/songbook/youtube_channel_videos.py "https://www.youtube.com/@ChannelName" output.txt`
 - **Output:** Plain text file with one line per video: title and URL (e.g. `Title | https://www.youtube.com/watch?v=...`). Channel URLs are the primary use; playlist URLs work the same way.
 
-**Convert to Songbook import:** [music_txt_to_ambience_json.py](music_txt_to_ambience_json.py) turns a `*-music.txt` file into Songbook import JSON (folders, profiles with emojis, settings). Usage: `python music_txt_to_ambience_json.py "ChannelName-music.txt"` (writes `ChannelName-music.json` by default). Import the JSON via Songbook.
+**Convert to Songbook import:** [tools/songbook/music_txt_to_ambience_json.py](tools/songbook/music_txt_to_ambience_json.py) turns a `*-music.txt` file into Songbook import JSON (folders, profiles with emojis, settings). Usage: `python tools/songbook/music_txt_to_ambience_json.py "ChannelName-music.txt"` (writes `ChannelName-music.json` by default). Import the JSON via Songbook.
 
 ---
 
@@ -163,10 +165,13 @@ HTML/CSS/JS only; localStorage where needed; PDF.js via CDN for PDF tools; no bu
 | Page | CSS | Scripts | Key features |
 |------|-----|---------|--------------|
 | [index.html](index.html) | global.css, hub.css | theme.js | Hub navigation |
-| [ai-dm-prompt-builder.html](ai-dm-prompt-builder.html) | global.css, styles.css | theme.js, script.js | AI prompt, Run Prompt, JSON import/export |
-| [adventure-packet-builder.html](adventure-packet-builder.html) | global.css, styles.css | theme.js, adventure-packet-builder.js | AI prompt, LM Studio packet, JSON import/export |
-| [adventure-maker.html](adventure-maker.html) | global.css, styles.css + inline | theme.js, adventure-maker.js | Step authoring, JSON import/export |
-| [combat-turn-helper.html](combat-turn-helper.html) | global.css, combat-turn-helper.css | PDF.js, character-sheet-importer.js, theme.js | PDF import, JSON import/export, turn tracking, reaction widget |
-| [cassalanter-inquiry-runner.html](cassalanter-inquiry-runner.html) | global.css, styles.css + inline | theme.js | Case DC/Heat/Doom, dice, Discord/Avrae export |
-| [cassalanter-inquiry-wizard.html](cassalanter-inquiry-wizard.html) | global.css, styles.css + inline | PDF.js, character-sheet-importer.js, theme.js | PDF import, wizard steps, Discord/Avrae |
-| [playstyle-quiz.html](playstyle-quiz.html) | global.css, playstyle-quiz.css | theme.js, playstyle-quiz.js | 15-question quiz, results, Copy/Share |
+| [tools/ai-dm-prompt-builder/](tools/ai-dm-prompt-builder/) | global.css, styles.css | theme.js, script.js | AI prompt, Run Prompt, JSON import/export |
+| [tools/adventure-packet-builder/](tools/adventure-packet-builder/) | global.css, styles.css | theme.js, adventure-packet-builder.js | AI prompt, LM Studio packet, JSON import/export |
+| [tools/adventure-maker/](tools/adventure-maker/) | global.css, styles.css + inline | theme.js, adventure-maker.js | Step authoring, JSON import/export |
+| [tools/combat-turn-helper/](tools/combat-turn-helper/) | global.css, combat-turn-helper.css | PDF.js, character-sheet-importer.js, theme.js | PDF import, JSON import/export, turn tracking, reaction widget |
+| [tools/cassalanter-inquiry-runner/](tools/cassalanter-inquiry-runner/) | global.css, styles.css + inline | theme.js | Case DC/Heat/Doom, dice, Discord/Avrae export |
+| [tools/cassalanter-inquiry-wizard/](tools/cassalanter-inquiry-wizard/) | global.css, styles.css + inline | PDF.js, character-sheet-importer.js, theme.js | PDF import, wizard steps, Discord/Avrae |
+| [tools/playstyle-quiz/](tools/playstyle-quiz/) | global.css, playstyle-quiz.css | theme.js, playstyle-quiz.js | 15-question quiz, results, Copy/Share |
+| [tools/legacy-project-builder/](tools/legacy-project-builder/) | global.css, styles.css | PDF.js, character-sheet-importer.js, theme.js, legacy-project-builder.js | PDF import, wizard steps, JSON import/export |
+| [tools/songbook/](tools/songbook/) | global.css, ambience-sounds.css | theme.js, ambience-sounds.js, presets | YouTube music links, folders, export/import |
+| [tools/qbasic-editor/](tools/qbasic-editor/) | global.css, qbasic-editor.css | theme.js | Plain-text editor, autosave |

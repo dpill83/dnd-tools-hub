@@ -359,6 +359,14 @@
     color: var(--text);
 }
 
+.embed-title-clickable {
+    cursor: pointer;
+}
+
+.embed-title-clickable:hover {
+    text-decoration: underline;
+}
+
 /* Force embed area + header to use dark theme values in dark mode.
    Uses explicit hex so custom colors on the page don't override. */
 .dark-mode .embed-area {

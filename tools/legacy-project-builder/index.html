@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Legacy Project Builder (Wizard)</title>
-  <link rel="stylesheet" href="global.css">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="../global.css">
+  <link rel="stylesheet" href="../styles.css">
   <style>
     .wizard-header {
       display: flex;
@@ -231,7 +231,7 @@
       } else { setTimeout(configureWorker, 100); }
     })();
   </script>
-  <script src="character-sheet-importer.js"></script>
+  <script src="../character-sheet-importer.js"></script>
 </head>
 <body>
   <div class="container">
@@ -242,7 +242,7 @@
       </div>
       <div class="header-actions">
         <input type="file" id="lpb-import-pdf-file" accept=".pdf" style="display:none;" aria-label="Select character sheet PDF">
-        <a href="index.html" class="theme-toggle" aria-label="Go to home"><span class="theme-icon">&#127968;</span></a>
+        <a href="../index.html" class="theme-toggle" aria-label="Go to home"><span class="theme-icon">&#127968;</span></a>
         <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode"><span class="theme-icon">&#127769;</span></button>
       </div>
     </header>
@@ -278,7 +278,7 @@
     <div id="lpb-tooltip-popover" class="lpb-tooltip-popover" role="tooltip" aria-hidden="true"></div>
   </div>
 
-  <script src="theme.js"></script>
+  <script src="../theme.js"></script>
   <script src="legacy-project-builder.js"></script>
 </body>
 </html>

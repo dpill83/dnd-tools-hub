@@ -1356,6 +1356,30 @@
             applyEmbedLayout();
         });
         document.getElementById('ambience-embed-close').addEventListener('click', clearAllSlots);
+        var embedTitleEl = document.getElementById('ambience-embed-title');
+        if (embedTitleEl) {
+            function toggleAllSlots() {
+                var container = document.getElementById('ambience-embed-slots');
+                if (!container) return;
+                var slots = container.querySelectorAll('.embed-slot');
+                var allCollapsed = slots.length > 0 && Array.prototype.every.call(slots, function (el) { return el.classList.contains('collapsed'); });
+                slots.forEach(function (slotEl) {
+                    if (allCollapsed) slotEl.classList.remove('collapsed');
+                    else slotEl.classList.add('collapsed');
+                });
+            }
+            embedTitleEl.addEventListener('click', function (e) {
+                e.stopPropagation();
+                toggleAllSlots();
+            });
+            embedTitleEl.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleAllSlots();
+                }
+            });
+        }
         var embedSlotsEl = document.getElementById('ambience-embed-slots');
         if (embedSlotsEl) {
             embedSlotsEl.addEventListener('click', function (e) {

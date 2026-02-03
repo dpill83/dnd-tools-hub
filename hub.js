@@ -4,16 +4,16 @@
     const STORAGE_KEY = 'dnd-hub-starred';
     const SORT_STORAGE_KEY = 'dnd-hub-sort';
     const DEFAULT_ORDER = [
-        'ai-dm-prompt-builder.html',
-        'adventure-packet-builder.html',
-        'adventure-maker.html',
-        'combat-turn-helper.html',
-        'cassalanter-inquiry-runner.html',
-        'cassalanter-inquiry-wizard.html',
-        'playstyle-quiz.html',
-        'legacy-project-builder.html',
-        'ambience-sounds.html',
-        'qbasic-editor.html'
+        'tools/ai-dm-prompt-builder/',
+        'tools/adventure-packet-builder/',
+        'tools/adventure-maker/',
+        'tools/combat-turn-helper/',
+        'tools/cassalanter-inquiry-runner/',
+        'tools/cassalanter-inquiry-wizard/',
+        'tools/playstyle-quiz/',
+        'tools/legacy-project-builder/',
+        'tools/songbook/',
+        'tools/qbasic-editor/'
     ];
 
     function getStarred() {

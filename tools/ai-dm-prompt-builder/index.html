@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adventure Packet Builder for LM Studio</title>
-    <link rel="stylesheet" href="global.css">
-    <link rel="stylesheet" href="styles.css">
+    <title>AI DM Prompt Builder - Build Prompts for ChatGPT to Run Adventures</title>
+    <link rel="stylesheet" href="../global.css">
+    <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
     <div class="container">
@@ -13,17 +13,20 @@
         <header>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <div>
-                    <h1>Adventure Packet Builder</h1>
-                    <p class="intro">Build Adventure Packets for LM Studio. Use the AI Assistant to generate prompts for ChatGPT to create adventures, then convert them into formatted packets. Or manually build adventures following DMG principles.</p>
+                    <h1>AI DM Prompt Builder</h1>
+                    <p class="intro">Build prompts for AI (ChatGPT, Claude, etc.) to run D&D 5e adventures as your Dungeon Master. Create adventure structures following DMG principles, then generate ready-to-use prompts that let AI DM your sessions.</p>
                 </div>
                 <div style="display: flex; gap: 0.5rem; align-items: center;">
-                    <a href="index.html" class="theme-toggle" aria-label="Go to home" style="text-decoration: none;">
+                    <a href="../index.html" class="theme-toggle" aria-label="Go to home" style="text-decoration: none;">
                         <span class="theme-icon">🏠</span>
                     </a>
                     <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
                         <span class="theme-icon">🌙</span>
                     </button>
                 </div>
+            </div>
+            <div class="warning-box">
+                <strong>🤖 AI DM Focus:</strong> This tool builds prompts specifically designed for AI to run adventures at the table. The "Run Prompt" generates a complete prompt you paste into ChatGPT to start DMing immediately.
             </div>
         </header>
 
@@ -41,7 +44,7 @@
         <section id="ai-assistant-section" class="tab-content" style="display: none;">
             <div class="ai-assistant-container">
                 <h2>AI Adventure Generator</h2>
-                <p class="help-text">Generate a prompt for ChatGPT to create your adventure, then paste the AI's JSON response to auto-fill the form. After that, switch to Manual Builder to generate the Adventure Packet for LM Studio.</p>
+                <p class="help-text">Generate a prompt for AI to create your adventure, then paste the AI's response to auto-fill the form.</p>
 
                 <!-- Prompt Generator Panel -->
                 <div class="form-section">
@@ -105,7 +108,7 @@
                 <!-- AI Response Parser Panel -->
                 <div class="form-section">
                     <h3>2. Paste AI Response & Fill Form</h3>
-                    <p class="help-text">After ChatGPT generates the adventure, paste its JSON response below and click "Parse & Fill Form" to automatically populate all fields. Then switch to Manual Builder to generate the Adventure Packet.</p>
+                    <p class="help-text">After the AI generates the adventure, paste its JSON response below and click "Parse & Fill Form" to automatically populate all fields.</p>
                     
                     <div class="form-group">
                         <label for="ai-response-input">AI Response (JSON)</label>
@@ -215,51 +218,48 @@
         <section id="manual-builder-section" class="tab-content">
         <!-- Interactive Form Section -->
         <form id="adventure-form">
-            <!-- Top-Level Fields -->
-            <section class="form-section" id="section-top">
-                <h2>Adventure Overview</h2>
+            <!-- Section 1: Premise -->
+            <section class="form-section" id="section-premise">
+                <h2>1. Premise (Situation)</h2>
+                
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="title">Title</label>
-                        <input type="text" id="title" name="title" placeholder="e.g., The Curse of Strahd, Lost Mine of Phandelver">
+                        <label for="party-level">Party Level *</label>
+                        <input type="number" id="party-level" name="partyLevel" min="1" max="20" required>
                     </div>
                     <div class="form-group">
-                        <label for="party-level">Level</label>
-                        <input type="number" id="party-level" name="partyLevel" min="1" max="20" placeholder="Party level">
-                    </div>
-                    <div class="form-group">
-                        <label for="party-size">Player Count</label>
+                        <label for="party-size">Party Size</label>
                         <input type="number" id="party-size" name="partySize" min="1" max="10" value="4">
                     </div>
                     <div class="form-group">
                         <label for="tone">Tone</label>
-                        <input type="text" id="tone" name="tone" placeholder="e.g., Heroic, Grimdark, Mystery">
+                        <select id="tone" name="tone">
+                            <option value="">Select tone...</option>
+                            <option value="Heroic">Heroic</option>
+                            <option value="Grimdark">Grimdark</option>
+                            <option value="Mystery">Mystery</option>
+                            <option value="Horror">Horror</option>
+                            <option value="Comedy">Comedy</option>
+                            <option value="Political">Political</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <input type="text" id="tone-other" name="toneOther" placeholder="Specify tone" style="display:none;">
                     </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="setting">Setting</label>
-                        <input type="text" id="setting" name="setting" placeholder="Broad — e.g., Waterdeep, Dock Ward">
-                    </div>
-                    <div class="form-group">
-                        <label for="starting-location">Starting Location</label>
-                        <input type="text" id="starting-location" name="startingLocation" placeholder="Optional, specific — e.g., The Yawning Portal">
-                    </div>
-                </div>
-            </section>
-
-            <!-- Section 1: Premise -->
-            <section class="form-section" id="section-premise">
-                <h2>1. Premise (Situation)</h2>
-
-                <div class="form-group">
-                    <label for="situation">Situation</label>
-                    <textarea id="situation" name="situation" rows="3" placeholder="What's happening in the world?"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="conflict">Conflict</label>
-                    <textarea id="conflict" name="conflict" rows="3" placeholder="What problem needs heroes?"></textarea>
+                    <label for="location">Primary Location</label>
+                    <input type="text" id="location" name="location" placeholder="e.g., Village of Barovia, Waterdeep, etc.">
+                </div>
+
+                <div class="form-group">
+                    <label for="situation">Situation *</label>
+                    <textarea id="situation" name="situation" rows="3" required placeholder="What's happening in the world?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="conflict">Conflict *</label>
+                    <textarea id="conflict" name="conflict" rows="3" required placeholder="What problem needs heroes?"></textarea>
                 </div>
 
                 <div class="form-group">
@@ -283,11 +283,11 @@
                 <h2>2. Draw In the Players (Hook)</h2>
 
                 <div class="form-group">
-                    <label>Hook Type</label>
+                    <label>Hook Type *</label>
                     <div class="radio-group">
-                        <label><input type="radio" name="hookType" value="Patron"> Patron</label>
-                        <label><input type="radio" name="hookType" value="Supernatural"> Supernatural</label>
-                        <label><input type="radio" name="hookType" value="Happenstance"> Happenstance</label>
+                        <label><input type="radio" name="hookType" value="Patron" required> Patron</label>
+                        <label><input type="radio" name="hookType" value="Supernatural" required> Supernatural</label>
+                        <label><input type="radio" name="hookType" value="Happenstance" required> Happenstance</label>
                     </div>
                 </div>
 
@@ -402,31 +402,60 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="form-group" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid var(--border);">
+                    <label for="title">Adventure Title *</label>
+                    <p class="help-text" style="margin-top: 0.25rem; margin-bottom: 0.75rem;">Decide on the title after you've developed your adventure based on all the details above.</p>
+                    <input type="text" id="title" name="title" required placeholder="e.g., The Curse of Strahd, Lost Mine of Phandelver, etc.">
+                </div>
             </section>
         </form>
 
-        <!-- Packet Output Section -->
+        <!-- Output Section -->
         <section class="output-section">
-            <h2>Packet Output</h2>
-            <p class="help-text" style="margin-bottom: 1rem;">Generate an Adventure Packet from the form, then copy or export it to paste into LM Studio as the first DM message after your system prompt.</p>
+            <h2>Generate AI DM Prompt</h2>
+
+            <div class="form-group">
+                <label>Template Type</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="templateType" value="build" checked> Build Prompt (Generate Adventure Content)</label>
+                    <label><input type="radio" name="templateType" value="run"> Run Prompt (Act as DM at Table) ⭐</label>
+                </div>
+                <p class="help-text" style="margin-top: 0.5rem;">⭐ <strong>Recommended:</strong> Use "Run Prompt" to generate a complete prompt for ChatGPT/Claude to DM your adventure. This is the main feature of this tool.</p>
+            </div>
+
             <div class="button-group">
-                <button type="button" id="generate-btn" class="btn-primary" onclick="generatePacket()">Generate Packet</button>
-                <button type="button" id="copy-packet-btn" class="btn-secondary" onclick="copyPacket()">Copy Packet</button>
-                <button type="button" id="export-txt-btn" class="btn-secondary" onclick="exportPacketTxt()">Export Packet .txt</button>
+                <button type="button" id="generate-btn" class="btn-primary" onclick="generateTemplate()">Generate Template</button>
+                <button type="button" id="copy-btn" class="btn-secondary" onclick="copyToClipboard()" disabled>Copy to Clipboard</button>
+                <button type="button" id="export-run-prompt-btn" class="btn-primary" onclick="exportRunPrompt()">Export DM Prompt (Paste to AI)</button>
                 <button type="button" id="export-json-btn" class="btn-secondary" onclick="exportJSON()">Export JSON</button>
                 <button type="button" id="import-json-btn" class="btn-secondary" onclick="document.getElementById('import-file').click()">Import JSON</button>
                 <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importJSON(event)">
                 <button type="button" id="clear-btn" class="btn-secondary" onclick="clearForm()">Clear Form</button>
             </div>
-            <div class="form-group" style="margin-top: 1rem;">
-                <label for="packet-output">Adventure Packet</label>
-                <textarea id="packet-output" name="packetOutput" rows="24" readonly placeholder="Click Generate Packet to build the Adventure Packet from the form..."></textarea>
+            
+            <div class="help-text" style="margin-top: 0.5rem; margin-bottom: 1rem;">
+                <strong>💡 To run this adventure with AI:</strong> Select "Run Prompt" above, click "Generate Template", then "Copy to Clipboard" OR use "Export DM Prompt" to save as a file. Paste the generated prompt directly into ChatGPT/Claude - it will start DMing immediately. Do NOT paste raw JSON files - use the generated Run Prompt instead.
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="live-preview" onchange="toggleLivePreview()"> Live Preview (debounced)
+                </label>
+            </div>
+
+            <div id="validation-errors" class="error-box" style="display:none;"></div>
+            <div id="validation-warnings" class="warning-box" style="display:none;"></div>
+
+            <div class="form-group">
+                <label for="template-output">Generated Template</label>
+                <textarea id="template-output" name="templateOutput" rows="20" readonly placeholder="Generated template will appear here..."></textarea>
             </div>
         </section>
         </section> <!-- End Manual Builder Tab Content -->
     </div>
 
-    <script src="theme.js"></script>
-    <script src="adventure-packet-builder.js"></script>
+    <script src="../theme.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

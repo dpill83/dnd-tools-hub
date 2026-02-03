@@ -1,0 +1,1465 @@
+Welcome to the D&D 5e wiki.
+Looking for rules from the 2024 sourcebooks?
+2024 Ruleset
+This wiki hosts DND 5e content that is setting-specific, play-test content, or unofficial 'homebrew' content. Some content found on this page may not be suitable for play at your table. Check with your DM to see if what you find here is a good fit for your table.
+To join the discussion on this site, we now have a
+Discord
+server set up.
+Spells
+Races
+Backgrounds
+Heroic Chronicle
+Classes
+Items
+Feats
+Racial Feats
+Miscellaneous
+Homebrew
+UA
+All Spells
+•
+Artificer Spells
+•
+Bard Spells
+•
+Cleric Spells
+•
+Druid Spells
+•
+Paladin Spells
+•
+Ranger Spells
+•
+Sorcerer Spells
+•
+Warlock Spells
+•
+Wizard Spells
+School
+•
+Abjuration
+•
+Conjuration
+•
+Divination
+•
+Enchantment
+•
+Evocation
+•
+Illusion
+•
+Necromancy
+•
+Transmutation
+All Lineages
+Common
+Dragonborn
+Dwarf
+Elf
+Gnome
+Half-Elf
+Half-Orc
+Halfling
+Human
+Tiefling
+Exotic
+Aarakocra
+Aasimar
+Changeling
+Deep Gnome
+Duergar
+Eladrin
+Fairy
+Firbolg
+Genasi (Air)
+Genasi (Earth)
+Genasi (Fire)
+Genasi (Water)
+Githyanki
+Githzerai
+Goliath
+Harengon
+Kenku
+Locathah
+Owlin
+Satyr
+Sea Elf
+Shadar-Kai
+Tabaxi
+Tortle
+Triton
+Verdan
+Monstrous
+Bugbear
+Centaur
+Goblin
+Grung
+Hobgoblin
+Kobold
+Lizardfolk
+Minotaur
+Orc
+Shifter
+Yuan-Ti
+Setting Specific
+Dragonlance
+Eberron
+Plane Shift
+Ravenloft
+Ravnica
+Spelljammer
+Theros
+Custom
+Unearthed Arcana
+Common Backgrounds
+Setting Specific
+•
+Acolyte
+•
+Anthropologist
+•
+Archaeologist
+•
+Athlete
+•
+Charlatan
+•
+City Watch
+•
+Clan Crafter
+•
+Cloistered Scholar
+•
+Courtier
+•
+Criminal
+•
+Entertainer
+•
+Faceless
+•
+Faction Agent
+•
+Far Traveler
+•
+Feylost
+•
+Fisher
+•
+Folk Hero
+•
+Giant Foundling
+•
+Gladiator
+•
+Guild Artisan
+•
+Guild Merchant
+•
+Haunted One
+•
+Hermit
+•
+House Agent
+•
+Inheritor
+•
+Investigator (SCAG)
+•
+Investigator (VRGR)
+•
+Knight
+•
+Knight of the Order
+•
+Marine
+•
+Mercenary Veteran
+•
+Noble
+•
+Outlander
+•
+Pirate
+•
+Rewarded
+•
+Ruined
+•
+Rune Carver
+•
+Sage
+•
+Sailor
+•
+Shipwright
+•
+Smuggler
+•
+Soldier
+•
+Spy
+•
+Urban Bounty Hunter
+•
+Urchin
+•
+Uthgardt Tribe Member
+•
+Waterdhavian Noble
+•
+Witchlight Hand
+AL: Curse of Strahd
+•
+Black Fist Double Agent
+•
+Dragon Casualty
+•
+Iron Route Bandit
+•
+Phlan Insurgent
+•
+Stojanow Prisoner
+•
+Ticklebelly Nomad
+AL: Mulmaster
+•
+Caravan Specialist
+•
+Earthspur Miner
+•
+Harborfolk
+•
+Mulmaster Aristocrat
+•
+Phlan Refugee
+AL: Hillsfar
+•
+Cormanthor Refugee
+•
+Gate Urchin
+•
+Hillsfar Merchant
+•
+Hillsfar Smuggler
+•
+Secret Identity
+•
+Shade Fanatic
+•
+Trade Sheriff
+Unearthed Arcana
+None Available
+Homebrew
+•
+Ashari
+Acquisitions inc.
+•
+Celebrity Adventurer's Scion
+•
+Failed Merchant
+•
+Gambler
+•
+Plaintiff
+•
+Rival Intern
+Amonkhet
+•
+Dissenter
+•
+Initiate
+•
+Vizier
+Dragonlance
+•
+Knight of Solamnia
+•
+Mage of High Sorcery
+Innistrad
+•
+Inquisitor
+Planescape
+•
+Gate Warden
+•
+Planar Philosopher
+Ravnica
+•
+Azorius Functionary
+•
+Boros Legionnaire
+•
+Dimir Operative
+•
+Golgari Agent
+•
+Gruul Anarch
+•
+Izzet Engineer
+•
+Orzhov Representative
+•
+Rakdos Cultist
+•
+Selesnya Initiate
+•
+Simic Scientist
+Strixhaven
+•
+Lorehold Student
+•
+Prismari Student
+•
+Quandrix Student
+•
+Silverquill Student
+•
+Witherbloom Student
+Wildemount
+•
+Grinner
+•
+Volstrucker Agent
+Spelljammer
+•
+Astral Drifter
+•
+Wildspacer
+Optional Features
+Heroic Chronicle
+The Heroic Chronicle is a system that allows players and Dungeon Masters to work together to build a compelling character story. It even allows characters to gain additional proficiencies, magic items, spells, or feats before the campaign begins.
+•
+Wildemount
+•
+Sword Coast (D&D Beyond)
+•
+This is Your Life
+The
+Artificer
+Makers of magic-infused objects, artificers are defined by their inventive nature. They see magic as a complex system waiting to be decoded and controlled. Instead of ephemeral spells, they seek to craft durable, useful, marvelous magical items.
+Published
+•
+Alchemist
+•
+Armorer
+•
+Artillerist
+•
+Battle Smith
+Unearthed Arcana
+(a)
+None Available
+Quick Links
+•
+Infusions
+The
+Barbarian
+For some, their rage springs from a communion with fierce animal spirits. Others draw from a roiling reservoir of anger at a world full of pain. For every barbarian, rage is a power that fuels not just a battle frenzy but also uncanny reflexes, resilience, and feats of strength.
+Published
+•
+Path of the Ancestral Guardian
+•
+Path of the Battlerager
+•
+Path of the Beast
+•
+Path of the Berserker
+•
+Path of the Giant
+•
+Path of the Storm Herald
+•
+Path of the Totem Warrior
+•
+Path of Wild Magic
+•
+Path of the Zealot
+Unearthed Arcana
+(a)
+None Available
+The
+Bard
+Whether scholar, skald, or scoundrel, a bard weaves magic through words and music to inspire allies, demoralize foes, manipulate minds, create illusions, and even heal wounds. The bard is a master of song, speech, and the magic they contain.
+Published
+•
+College of Creation
+•
+College of Eloquence
+•
+College of Glamour
+•
+College of Lore
+•
+College of Spirits
+•
+College of Swords
+•
+College of Valor
+•
+College of Whispers
+Unearthed Arcana
+(a)
+None Available
+The
+Blood Hunter (Homebrew)
+Often feared or misunderstood, and driven by an unending drive to destroy the wicked, blood hunters are clever, arcane warriors who have bound their essence to the dark creatures they hunt to better stalk and survive their prey. Armed with the rites of forbidden blood magic and a willingness to sacrifice their own vitality and humanity for the cause, they protect the realms from the shadows, ever vigilant to avoid becoming the same monsters they choose to hunt.
+Published
+•
+Order of the Ghostslayer
+•
+Order of the Lycan
+•
+Order of the Mutant
+•
+Order of the Profane Soul
+Quick Links
+•
+Blood Curse
+•
+Mutagens
+The
+Cleric
+Clerics are intermediaries between the mortal world and the distant planes of the gods. As varied as the gods they serve, clerics strive to embody the handiwork of their deities. No ordinary priest, a cleric is imbued with divine magic.
+Published
+•
+Arcana Domain
+•
+Death Domain
+•
+Forge Domain
+•
+Grave Domain
+•
+Knowledge Domain
+•
+Life Domain
+•
+Light Domain
+•
+Nature Domain
+•
+Order Domain
+•
+Peace Domain
+•
+Tempest Domain
+•
+Trickery Domain
+•
+Twilight Domain
+•
+War Domain
+Amonkhet
+•
+Ambition Domain
+•
+Solidarity Domain
+•
+Strength Domain
+•
+Zeal Domain
+Unearthed Arcana
+(a)
+•
+Fate Domain
+The
+Druid
+Whether calling on the elemental forces of nature or emulating the creatures of the animal world, druids are an embodiment of nature's resilience, cunning, and fury. They claim no mastery over nature, but see themselves as extensions of nature's indomitable will.
+Published
+•
+Circle of Dreams
+•
+Circle of the Land
+•
+Circle of the Moon
+•
+Circle of the Shepherd
+•
+Circle of Spores
+•
+Circle of Stars
+•
+Circle of Wildfire
+Unearthed Arcana
+(a)
+•
+Circle of the Primeval
+The
+Fighter
+Fighters share an unparalleled mastery with weapons and armor, and a thorough knowledge of the skills of combat. They are well acquainted with death, both meting it out and staring it defiantly in the face.
+Published
+•
+Arcane Archer
+•
+Banneret
+•
+Battle Master
+•
+Cavalier
+•
+Champion
+•
+Echo Knight
+•
+Eldritch Knight
+•
+Psi Warrior
+•
+Rune Knight
+•
+Samurai
+Unearthed Arcana
+(a)
+None Available
+Quick Links
+•
+Battle Maneuvers
+The
+Monk
+Monks are united in their ability to magically harness the energy that flows in their bodies. Whether channeled as a striking display of combat prowess or a subtler focus of defensive ability and speed, this energy infuses all that a monk does.
+Published
+•
+Way of Mercy
+•
+Way of the Ascendant Dragon
+•
+Way of the Astral Self
+•
+Way of the Drunken Master
+•
+Way of the Four Elements
+•
+Way of the Kensei
+•
+Way of the Long Death
+•
+Way of the Open Hand
+•
+Way of Shadow
+•
+Way of the Sun Soul
+Unearthed Arcana
+(a)
+None Available
+Quick Links
+•
+Disciplines
+The
+Paladin
+Whether sworn before a god's altar and the witness of a priest, in a sacred glade before nature spirits and fey beings, or in a moment of desperation and grief with the dead as the only witness, a paladin's oath is a powerful bond.
+Published
+•
+Oath of the Ancients
+•
+Oath of Conquest
+•
+Oath of the Crown
+•
+Oath of Devotion
+•
+Oath of Glory
+•
+Oath of Redemption
+•
+Oath of Vengeance
+•
+Oath of the Watchers
+•
+Oathbreaker
+Unearthed Arcana
+(a)
+None Available
+The
+Ranger
+Far from the bustle of cities and towns, past the hedges that shelter the most distant farms from the terrors of the wild, amid the dense-packed trees of trackless forests and across wide and empty plains, rangers keep their unending watch.
+Published
+•
+Beast Master Conclave
+•
+Drakewarden
+•
+Fey Wanderer
+•
+Gloom Stalker Conclave
+•
+Horizon Walker Conclave
+•
+Hunter Conclave
+•
+Monster Slayer Conclave
+•
+Swarmkeeper
+Unearthed Arcana
+(a)
+None Available
+The
+Rogue
+Rogues rely on skill, stealth, and their foes' vulnerabilities to get the upper hand in any situation. They have a knack for finding the solution to just about any problem, demonstrating a resourcefulness and versatility that is the cornerstone of any successful adventuring party.
+Published
+•
+Arcane Trickster
+•
+Assassin
+•
+Inquisitive
+•
+Mastermind
+•
+Phantom
+•
+Scout
+•
+Soulknife
+•
+Swashbuckler
+•
+Thief
+Unearthed Arcana
+(a)
+None Available
+The
+Sorcerer
+Sorcerers carry a magical birthright conferred upon them by an exotic bloodline, some otherworldly influence, or exposure to unknown cosmic forces. No one chooses sorcery; the power chooses the sorcerer.
+Published
+•
+Aberrant Mind
+•
+Clockwork Soul
+•
+Draconic Bloodline
+•
+Divine Soul
+•
+Lunar Sorcery
+•
+Shadow Magic
+•
+Storm Sorcery
+•
+Wild Magic
+Kaladesh
+•
+Pyromancy
+Unearthed Arcana
+(a)
+None Available
+The
+Warlock
+Warlocks are seekers of the knowledge that lies hidden in the fabric of the multiverse. Through pacts made with mysterious beings of supernatural power, warlocks unlock magical effects both subtle and spectacular.
+Published
+•
+Archfey
+•
+Celestial
+•
+Fathomless
+•
+Fiend
+•
+The Genie
+•
+Great Old One
+•
+Hexblade
+•
+Undead
+•
+Undying
+Unearthed Arcana
+(a)
+None Available
+Quick Links
+•
+Eldritch Invocations
+The
+Wizard
+Wizards are supreme magic-users, defined and united as a class by the spells they cast. Drawing on the subtle weave of magic that permeates the cosmos, wizards cast spells of explosive fire, arcing lightning, subtle deception, brute-force mind control, and much more.
+Published
+•
+School of Abjuration
+•
+School of Bladesinging
+•
+School of Chronurgy
+•
+School of Conjuration
+•
+School of Divination
+•
+School of Enchantment
+•
+School of Evocation
+•
+School of Graviturgy
+•
+School of Illusion
+•
+School of Necromancy
+•
+Order of Scribes
+•
+School of Transmutation
+•
+School of War Magic
+Unearthed Arcana
+(a)
+None Available
+Items
+•
+Adventuring Gear
+•
+Armor and Shields
+•
+Trinkets
+•
+Weapons
+•
+Firearms
+•
+Explosives
+•
+Wondrous Items
+•
+Currency
+•
+Poisons
+•
+Tools
+•
+Siege Equipment
+Feats
+Published
+•
+Aberrant Dragonmark
+•
+Actor
+•
+Alert
+•
+Artificer Initiate
+•
+Athlete
+•
+Cartomancer
+•
+Charger
+•
+Chef
+•
+Crossbow Expert
+•
+Crusher
+•
+Defensive Duelist
+•
+Dual Wielder
+•
+Dungeon Delver
+•
+Durable
+•
+Eldritch Adept
+•
+Elemental Adept
+•
+Ember of the Fire Giant
+•
+Fey Touched
+•
+Fighting Initiate
+•
+Fury of the Frost Giant
+•
+Gift of the Chromatic Dragon
+•
+Gift of the Gem Dragon
+•
+Gift of the Metallic Dragon
+•
+Grappler
+•
+Great Weapon Master
+•
+Guile of the Cloud Giant
+•
+Gunner
+•
+Healer
+•
+Heavily Armored
+•
+Heavy Armor Master
+.
+•
+Inspiring Leader
+•
+Keen Mind
+•
+Keenness of the Stone Giant
+•
+Lightly Armored
+•
+Linguist
+•
+Lucky
+•
+Mage Slayer
+•
+Magic Initiate
+•
+Martial Adept
+•
+Medium Armor Master
+•
+Metamagic Adept
+•
+Mobile
+•
+Moderately Armored
+•
+Mounted Combatant
+•
+Observant
+•
+Piercer
+•
+Poisoner
+•
+Polearm Master
+•
+Resilient
+•
+Ritual Caster
+•
+Rune Shaper
+•
+Savage Attacker
+•
+Sentinel
+•
+Shadow Touched
+•
+Sharpshooter
+•
+Shield Master
+•
+Skill Expert
+.
+•
+Skilled
+•
+Skulker
+•
+Slasher
+•
+Soul of the Storm Giant
+•
+Spell Sniper
+•
+Strike of the Giants
+•
+Tavern Brawler
+•
+Telekinetic
+•
+Telepathic
+•
+Tough
+•
+Vigor of the Hill Giant
+•
+War Caster
+•
+Weapon Master
+Planescape
+•
+Agent of Order
+•
+Baleful Scion
+•
+Cohort of Chaos
+•
+Outlands Envoy
+•
+Planar Wanderer
+•
+Righteous Heritor
+•
+Scion of the Outer Planes
+Strixhaven
+•
+Strixhaven Initiate
+•
+Strixhaven Mascot
+Dragonlance
+•
+Adept of the Black Robes
+•
+Adept of the Red Robes
+•
+Adept of the White Robes
+•
+Divinely Favored
+•
+Initiate of High Sorcery
+•
+Knight of the Crown
+•
+Knight of the Rose
+•
+Knight of the Sword
+•
+Squire of Solamnia
+Unearthed Arcana
+None Available
+.
+Plane Shift
+•
+Servo Crafting
+•
+Quicksmithing
+Homebrew
+•
+Cruel
+•
+Flash Recall
+•
+Mystic Conflux
+•
+Remarkable Recovery
+•
+Spelldriver
+•
+Thrown Arms Master
+•
+Vital Sacrifice
+Racial Feats
+Published
+•
+Bountiful Luck
+•
+Dragon Fear
+•
+Dragon Hide
+•
+Dwarven Fortitude
+•
+Drow High Magic
+•
+Elven Accuracy
+•
+Fade Away
+•
+Fey Teleportation
+•
+Flames of Phlegethos
+•
+Infernal Constitution
+•
+Orcish Fury
+•
+Prodigy
+•
+Revenant Blade
+•
+Second Chance
+•
+Squat Nimbleness
+•
+Svirfneblin Magic
+•
+Wood Elf Magic
+Unearthed Arcana
+•
+Barbed Hide
+•
+Critter Friend
+•
+Dragon Wings
+•
+Everybody's Friend
+•
+Grudge Bearer
+•
+Human Determination
+•
+Orcish Aggression
+•
+Wonder Maker
+Plane Shift
+•
+Vampiric Exultation
+Miscellaneous
+Sidekicks
+•
+Expert
+•
+Spellcaster
+•
+Warrior
+Survivors
+Blessings
+Charms
+Dark Gifts
+Draconic Gifts
+Epic Boons
+Mounts & Vehicles
+Supernatural Gifts
+Madness
+Alternate Rules
+Spell Points
+Homebrew Subclasses
+A selection of homebrew subclasses released through unofficial channels by WotC affiliated DM's
+Artificer
+•
+Forge Adept
+•
+Mastermaker
+•
+Maverick
+Barbarian
+•
+Path of the Juggernaut
+•
+Path of the Juggernaut Reborn
+•
+Path of the Depths
+Bard
+•
+College of the Dirge Singer
+•
+College of the Maestro
+•
+College of Tragedy
+Cleric
+•
+Beauty Domain
+•
+Blood Domain
+•
+Blood Domain Reborn
+•
+Mind Domain
+•
+Moon Domain
+Druid
+•
+Circle of the Blighted
+•
+Circle of the Forged
+Fighter
+•
+Gunslinger
+•
+Renegade
+Monk
+•
+Way of the Cobalt Soul
+•
+Way of the Living Weapon
+•
+Way of the Soul Knife
+Paladin
+•
+Oath of the Open Sea
+Ranger
+None Available
+Rogue
+•
+Wild Card
+Sorcerer
+•
+Runechild
+•
+Runechild Reborn
+Warlock
+•
+Kraken
+Wizard
+•
+Blood Magic
+Archived Unearthed Arcana
+Unearthed Arcana (UA) is playtest material released by Wizards of the Coast. UA included in this section has either been superseded by a more recent UA release, by officially published material, or enough time has passed since its release that official publication is unlikely.
+Artificer
+•
+Archivist
+•
+Armorer
+Barbarian
+•
+Path of the Beast
+•
+Path of the Giant
+•
+Path of the Wild Soul
+Bard
+•
+College of Creation
+•
+College of Satire
+•
+College of Spirits
+•
+Mage of Silverquill
+Cleric
+•
+City Domain
+•
+Protection Domain
+•
+Twilight Domain
+•
+Unity Domain
+Druid
+•
+Circle of Stars
+•
+Circle of Twilight
+•
+Circle of Wildfire
+•
+Mage of Prismari
+•
+Mage of Witherbloom
+Fighter
+•
+Arcane Archer
+•
+Arcane Archer Revised
+•
+Brute
+•
+Cavalier
+•
+Knight
+•
+Monster Hunter
+•
+Psi Knight
+•
+Psychic Warrior
+•
+Rune Knight
+•
+Samurai
+•
+Scout
+•
+Sharpshooter
+Monk
+•
+Way of the Ascendant Dragon
+•
+Way of the Astral Self
+•
+Way of Mercy
+•
+Way of Tranquility
+Mystic
+•
+Avatar
+•
+Awakened
+•
+The Immortal
+•
+Nomad
+•
+Soul Knife
+•
+Wu Jen
+Paladin
+•
+Oath of Heroism
+•
+Oath of Treachery
+•
+Oath of Redemption
+•
+Oath of the Watchers
+Ranger
+•
+Revised Ranger
+•
+Beast Master
+•
+Hunter
+•
+Deep Stalker
+•
+Ambuscade Ranger
+•
+Guardian
+•
+Seeker
+•
+Stalker
+•
+Ranger No Spells
+•
+Deep Stalker
+•
+Drakewarden
+•
+Fey Wanderer
+•
+Primeval Guardian Conclave
+•
+Swarmkeeper
+Rogue
+•
+Phantom
+•
+Revived
+•
+Soulknife (2019)
+•
+Soulknife (2020)
+Rune Scribe
+Sorcerer
+•
+Aberrant Mind
+•
+Clockwork Soul
+•
+Favored Soul
+•
+Favored Soul Revisited
+•
+Giant Soul
+•
+Lunar Magic
+•
+Mage of Prismari
+•
+Mage of Quandrix
+•
+Phoenix Sorcery
+•
+Psionic Soul
+•
+Sea Sorcery
+•
+Shadow
+•
+Stone Sorcery
+Warlock
+•
+Celestial
+•
+Genie
+•
+Ghost in the Machine
+•
+Hexblade
+•
+Lurker in the Deep
+•
+Mage of SIlverquill
+•
+Mage of WItherbloom
+•
+Noble Genie
+•
+Raven Queen
+•
+Seeker
+•
+Undead
+•
+Undying Light
+Wizard
+•
+Artificer
+•
+School of Invention
+•
+School of Lore Mastery
+•
+Mage of Lorehold
+•
+Mage of Prismari
+•
+Mage of Quandrix
+•
+Mage of Silverquill
+•
+School of Onomancy
+•
+Order of Scribes
+•
+Psionics
+•
+School of Technomancy
+•
+School of Theurgy
+Feats
+•
+Acrobat
+•
+Adept of the Black Robes
+•
+Adept of the Red Robes
+•
+Adept of the White Robes
+•
+Agent of Order
+•
+Alchemist
+•
+Animal Handler
+•
+Arcanist
+•
+Baleful Scion
+•
+Blade Mastery
+•
+Brawny
+•
+Burglar
+•
+Cartomancer
+•
+Cohort of Chaos
+•
+Diplomat
+•
+Divine Communications
+•
+Divinely Favored
+•
+Dragonmark
+•
+Elemental Touched
+•
+Ember of the Fire Giant
+•
+Ember of the Fire Giant (Revised)
+•
+Empathic
+•
+Fell Handed
+•
+Flail Mastery
+•
+Fury of the Frost Giant
+•
+Fury of the Frost Giant (Revised)
+•
+Guile of the Cloud Giant
+.
+•
+Guile of the Cloud Giant (Revised)
+•
+Gourmand
+•
+Greater Dragonmark
+•
+Historian
+•
+Initiate of High Sorcery
+•
+Investigator
+•
+Keenness of the Stone Giant
+•
+Keenness of the Stone Giant (Revised)
+•
+Knight of the Crown
+•
+Knight of the Sword
+•
+Knight of the Rose
+•
+Master of Disguise
+•
+Medic
+•
+Menacing
+•
+Metabolic Control
+•
+Naturalist
+•
+Outlands Envoy
+•
+Outsized Might
+•
+Perceptive
+•
+Performer
+•
+Planar Wanderer
+•
+Practiced Expert
+•
+Quick-Fingered
+•
+Righteous Heritor
+.
+•
+Rune Carver Adept
+•
+Rune Carver Adept (Revised)
+•
+Rune Carver Apprentice
+•
+Rune Carver Apprentice (Revised)
+•
+Scion of the Outer Planes
+•
+Scion of Elemental Air
+•
+Scion of Elemental Earth
+•
+Scion of Elemental Fire
+•
+Scion of Elemental Water
+•
+Shield Training
+•
+Silver-Tongued
+•
+Spear Mastery
+•
+Soul of the Storm Giant
+•
+Soul of the Storm Giant (Revised)
+•
+Squire of Solamnia
+•
+Stealthy
+•
+Strike of the Giants
+•
+Survivalist
+•
+Tandem Tactician
+•
+Theologian
+•
+Tower of Iron Will
+•
+Tracker
+•
+Vigor of the Hill Giant
+•
+Vigor of the Hill Giant (Revised)
+•
+Wild Talent
+Backgrounds
+•
+Gate Warden
+•
+Giant Foundling
+•
+Knight of Solamnia
+•
+Mage of High Sorcery
+•
+Planar Philosopher
+•
+Rune Carver

@@ -4,29 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Songbook - D&D Tools Hub</title>
-    <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="../global.css">
     <link rel="stylesheet" href="ambience-sounds.css">
 </head>
 <body>
     <div class="ambience-page" id="ambience-page">
         <header class="ambience-header">
             <div class="header-content">
-                <img src="assets/songbook-logo-nobg.png" alt="" class="header-logo">
+                <img src="../assets/songbook-logo-nobg.png" alt="" class="header-logo">
                 <h1 class="header-title">Songbook</h1>
             </div>
             <div class="header-actions">
                 <button type="button" id="ambience-settings-btn" class="ambience-btn" aria-label="Settings">&#9881;</button>
-                <a href="index.html" class="theme-toggle ambience-btn" aria-label="Go to home"><span class="theme-icon">&#127968;</span></a>
+                <a href="../index.html" class="theme-toggle ambience-btn" aria-label="Go to home"><span class="theme-icon">&#127968;</span></a>
                 <button type="button" id="theme-toggle" class="theme-toggle ambience-btn" aria-label="Toggle dark mode"><span class="theme-icon">&#127769;</span></button>
             </div>
         </header>
 
         <main class="ambience-main">
+            <div id="ambience-embed-area" class="embed-area hidden" aria-live="polite">
+                <div class="embed-header" id="ambience-embed-drag-handle">
+                    <span id="ambience-embed-title" class="embed-title-clickable" title="Collapse or expand all" role="button" tabindex="0">Player</span>
+                    <div class="embed-header-actions">
+                        <button type="button" id="ambience-embed-minimize" class="ambience-btn small embed-minimize" aria-label="Minimize player" title="Minimize">&#8211;</button>
+                        <button type="button" id="ambience-embed-close" class="ambience-btn small" aria-label="Close all">&#10005;</button>
+                    </div>
+                </div>
+                <div class="embed-slots" id="ambience-embed-slots"></div>
+            </div>
+
             <div class="folder-bar">
                 <label for="ambience-folder-filter" class="sr-only">Filter by folder</label>
                 <select id="ambience-folder-filter" class="folder-filter" aria-label="Filter by folder">
                     <option value="">All</option>
                 </select>
+                <button type="button" id="ambience-add-folder-btn" class="ambience-btn secondary" aria-label="Add folder">+ Folder</button>
                 <label for="ambience-sort" class="sr-only">Sort by</label>
                 <select id="ambience-sort" class="folder-filter sort-select" aria-label="Sort by">
                     <option value="manual">Manual order</option>
@@ -35,18 +47,6 @@
                     <option value="emoji">Emoji</option>
                     <option value="folder">Folder</option>
                 </select>
-                <button type="button" id="ambience-add-folder-btn" class="ambience-btn secondary" aria-label="Add folder">+ Folder</button>
-            </div>
-
-            <div id="ambience-embed-area" class="embed-area hidden" aria-live="polite">
-                <div class="embed-header" id="ambience-embed-drag-handle">
-                    <span id="ambience-embed-title">Player</span>
-                    <div class="embed-header-actions">
-                        <button type="button" id="ambience-embed-minimize" class="ambience-btn small embed-minimize" aria-label="Minimize player" title="Minimize">&#8211;</button>
-                        <button type="button" id="ambience-embed-close" class="ambience-btn small" aria-label="Close all">&#10005;</button>
-                    </div>
-                </div>
-                <div class="embed-slots" id="ambience-embed-slots"></div>
             </div>
 
             <div class="cards-grid cards-per-row-1 card-size-medium" id="ambience-cards-grid" role="list">
@@ -239,7 +239,7 @@
         </div>
     </div>
 
-    <script src="theme.js"></script>
+    <script src="../theme.js"></script>
     <script src="presets/bardify-music.js"></script>
     <script src="presets/sword-coast-soundscapes-music.js"></script>
     <script src="ambience-sounds.js"></script>
