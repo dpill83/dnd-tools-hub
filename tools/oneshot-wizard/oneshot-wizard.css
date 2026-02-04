@@ -1,0 +1,14 @@
+.oneshot-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: var(--bg-card, #242424);
+    border-bottom: 1px solid var(--border-color, #3a3a3a);
+}
+
+.oneshot-header .theme-toggle {
+    text-decoration: none;
+    padding: 6px 10px;
+}

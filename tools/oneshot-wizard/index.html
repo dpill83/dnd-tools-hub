@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>One Shot Slot Machine Wizard</title>
+    <link rel="stylesheet" href="../../global.css">
+    <link rel="stylesheet" href="oneshot-wizard.css">
     <style>
         * {
             margin: 0;
@@ -430,6 +432,10 @@
     </style>
 </head>
 <body>
+    <header class="oneshot-header">
+        <a href="../../index.html" class="theme-toggle" aria-label="Go to home"><span class="theme-icon">&#127968;</span></a>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode"><span class="theme-icon">&#127769;</span></button>
+    </header>
     <div class="container">
         <!-- WIZARD PANEL -->
         <div class="panel">
@@ -442,22 +448,22 @@
                     <div class="step-title">Session Config</div>
                     
                     <div class="form-group">
-                        <label>Party Level</label>
+                        <label for="partyLevel">Party Level</label>
                         <input type="number" id="partyLevel" min="1" max="20" value="5">
                     </div>
 
                     <div class="form-group">
-                        <label>Party Size</label>
+                        <label for="partySize">Party Size</label>
                         <input type="number" id="partySize" min="1" max="8" value="4">
                     </div>
 
                     <div class="form-group">
-                        <label>Session Length (hours)</label>
+                        <label for="sessionLength">Session Length (hours)</label>
                         <input type="number" id="sessionLength" min="1" max="8" step="0.5" value="3">
                     </div>
 
                     <div class="form-group">
-                        <label>Tone</label>
+                        <label for="tone">Tone</label>
                         <select id="tone">
                             <option value="serious">Serious</option>
                             <option value="heroic" selected>Heroic</option>
@@ -467,12 +473,12 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Seed (for repeatable rolls, optional)</label>
+                        <label for="seed">Seed (for repeatable rolls, optional)</label>
                         <input type="text" id="seed" placeholder="leave blank for random">
                     </div>
 
                     <div class="form-group">
-                        <label>Content Boundaries (comma separated)</label>
+                        <label for="boundaries">Content Boundaries (comma separated)</label>
                         <textarea id="boundaries" rows="3" placeholder="e.g., no spiders, no child harm"></textarea>
                     </div>
 
@@ -533,7 +539,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Clock Length (steps)</label>
+                        <label for="clockSteps">Clock Length (steps)</label>
                         <input type="range" id="clockSteps" min="4" max="8" value="6">
                         <div class="range-display">
                             <span>4 steps</span>
@@ -1153,5 +1159,6 @@
         // Initialize preview on page load
         updateDMSheetPreview();
     </script>
+    <script src="../../theme.js"></script>
 </body>
 </html>
