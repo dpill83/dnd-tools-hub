@@ -7,6 +7,7 @@
         'tools/ai-dm-prompt-builder/',
         'tools/adventure-packet-builder/',
         'tools/adventure-maker/',
+        'tools/char-sheet/',
         'tools/combat-turn-helper/',
         'tools/cassalanter-inquiry-runner/',
         'tools/cassalanter-inquiry-wizard/',
