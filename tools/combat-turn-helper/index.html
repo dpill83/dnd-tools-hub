@@ -660,7 +660,7 @@
             classKey: '',
             canHealingWord: false,
             canOffhandAttack: false,
-            bonusActionEnabled: false,
+            bonusActionEnabled: true,
             // Must-have settings
             trackReaction: true,
             trackInteraction: true,
@@ -703,7 +703,7 @@
             }
             // Backward compatibility: ensure defaults for all settings
             if (prefs.bonusActionEnabled === undefined) {
-                prefs.bonusActionEnabled = false;
+                prefs.bonusActionEnabled = true;
             }
             if (prefs.trackReaction === undefined) {
                 prefs.trackReaction = true;
@@ -863,7 +863,7 @@
                 available.push('Movement');
             }
             // Only count Bonus Action if enabled
-            if (prefs.bonusActionEnabled && state.bonusAction === 'available' && hasBonusActionOptions()) {
+            if (prefs.bonusActionEnabled && state.bonusAction === 'available') {
                 count++;
                 available.push('Bonus Action');
             }
@@ -952,11 +952,11 @@
                 }
             }
             
-            // BONUS ACTION button (only if options available)
-            if (state.bonusAction === 'available' && hasBonusActionOptions()) {
+            // BONUS ACTION button (when enabled in settings)
+            if (prefs.bonusActionEnabled && state.bonusAction === 'available') {
                 const btn = createButton('✨ BONUS ACTION', 'btn-primary', () => handleBonusActionClick());
                 availableContainer.appendChild(btn);
-            } else if (state.bonusAction === 'used' && hasBonusActionOptions()) {
+            } else if (prefs.bonusActionEnabled && state.bonusAction === 'used') {
                 const btn = createButton('✅ ✨ BONUS ACTION', 'btn-primary used', () => handleUndoBonusAction());
                 usedContainer.appendChild(btn);
             }
@@ -995,7 +995,12 @@
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.remove('active');
             });
-            document.getElementById(screenId).classList.add('active');
+            const target = document.getElementById(screenId);
+            target.classList.add('active');
+            target.classList.add('screen-entering');
+            setTimeout(function () {
+                target.classList.remove('screen-entering');
+            }, 250);
             
             // Update decision helper when ACTION screen is shown
             if (screenId === 'screen-action') {
@@ -1067,7 +1072,32 @@
         function showSpellSelection(actionType) {
             const profile = getActiveCharacterProfile();
             if (!profile) {
-                showToast('No character loaded');
+                // Allow generic "Cast a Spell" flow even without a character loaded.
+                if (actionType === 'bonus') {
+                    state.pendingAction = 'bonus-action';
+                    state.pendingBonusActionType = 'cast-spell';
+
+                    const detail = bonusActionDetails?.['cast-spell'];
+                    if (detail) {
+                        document.getElementById('bonus-action-detail-title').textContent = detail.title;
+                        document.getElementById('bonus-action-detail-content').innerHTML = detail.content;
+                        showScreen('screen-bonus-action-detail');
+                    } else {
+                        showToast('No character loaded');
+                    }
+                    return;
+                }
+
+                state.pendingAction = 'action';
+                state.pendingActionType = 'cast-spell';
+                const detail = actionDetails?.['cast-spell'];
+                if (detail) {
+                    document.getElementById('action-detail-title').textContent = detail.title;
+                    document.getElementById('action-detail-content').innerHTML = detail.content;
+                    showScreen('screen-action-detail');
+                } else {
+                    showToast('No character loaded');
+                }
                 return;
             }
 
@@ -1126,9 +1156,11 @@
                         const usedSlots = state.spellSlotsUsed[level] || 0;
                         const remainingSlots = totalSlots - usedSlots;
 
-                        // Get action spells for this level
-                        const actionSpells = getActionSpells(profile);
-                        if (actionSpells.length === 0 && level === 1) return; // Skip if no action spells
+                        // Get action spells for this specific level (from normalized spells)
+                        const spellsForLevel = getSpellsByLevel(profile, level);
+                        const bonusActionSpells = getBonusActionSpellsFromNormalized(profile);
+                        const actionSpellsForLevel = spellsForLevel.filter(s => !bonusActionSpells.includes(s));
+                        if (actionSpellsForLevel.length === 0 && level === 1) return; // Skip if no action spells
 
                         html += '<div class="spells-section">';
                         html += `<div class="spells-section-title">Level ${level}`;
@@ -1143,14 +1175,14 @@
                         }
                         html += '</div>';
 
-                        if (level === 1 && actionSpells.length > 0) {
+                        if (actionSpellsForLevel.length > 0) {
                             html += '<div class="spells-list">';
-                            const sortedSpells = [...actionSpells].sort((a, b) => a.localeCompare(b));
+                            const sortedSpells = [...actionSpellsForLevel].sort((a, b) => a.localeCompare(b));
                             sortedSpells.forEach(spell => {
                                 html += `<div class="spell-item" onclick="handleSpellCast('${spell.replace(/'/g, "\\'")}', ${level}, 'action')">${spell}</div>`;
                             });
                             html += '</div>';
-                        } else if (level > 1) {
+                        } else {
                             html += '<div class="spells-list">';
                             html += '<div class="spell-item" style="color: var(--text-light); font-style: italic;">No spells of this level</div>';
                             html += '</div>';
@@ -1474,10 +1506,6 @@
                 showToast('Bonus Action already used.');
                 return;
             }
-            if (!hasBonusActionOptions()) {
-                showToast('No bonus actions configured.');
-                return;
-            }
             renderBonusActionOptions();
             showScreen('screen-bonus-action');
         }
@@ -1511,11 +1539,21 @@
                 container.appendChild(btn);
             }
 
+            // When no configured options and no bonus action spells, show generic options so the step is still usable
             if (options.length === 0 && !hasBonusActionSpells) {
-                const wrap = document.createElement('div');
-                wrap.className = 'detail-content';
-                wrap.innerHTML = '<p class="muted-center">All set.</p>';
-                container.appendChild(wrap);
+                const genericOptions = [
+                    { key: 'cast-spell', label: '✨ Cast a Spell' },
+                    { key: 'class-feature', label: '🎭 Class Feature' },
+                    { key: 'offhand-attack', label: '🗡️ Offhand Attack' }
+                ];
+                genericOptions.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-primary';
+                    btn.type = 'button';
+                    btn.textContent = opt.label;
+                    btn.onclick = () => showBonusActionDetail(opt.key);
+                    container.appendChild(btn);
+                });
                 return;
             }
 
@@ -1679,7 +1717,7 @@
         const actionDetails = {
             'search': {
                 title: '🔍 Search',
-                content: '<p><strong>Make a Perception or Investigation check to find hidden objects, creatures, or details.</strong></p><p>When you take the Search action, you devote your attention to finding something. Depending on the nature of your search, the DM might have you make a Wisdom (Perception) check or an Intelligence (Investigation) check.</p>'
+                content: '<p><strong>Make a Wisdom (Insight, Medicine, Perception, or Survival) check.</strong></p><p>When you take the Search action, you make a Wisdom check to discern something that isn\'t obvious. The DM chooses which skill applies based on what you\'re trying to detect.</p><table style="width:100%; border-collapse:collapse; margin:0.75rem 0;"><thead><tr><th style="text-align:left; padding:0.25rem 0.5rem; border-bottom:1px solid var(--border);">Skill</th><th style="text-align:left; padding:0.25rem 0.5rem; border-bottom:1px solid var(--border);">Thing to Detect</th></tr></thead><tbody><tr><td style="padding:0.25rem 0.5rem; border-bottom:1px solid var(--border);"><strong>Insight</strong></td><td style="padding:0.25rem 0.5rem; border-bottom:1px solid var(--border);">Creature\'s state of mind</td></tr><tr><td style="padding:0.25rem 0.5rem; border-bottom:1px solid var(--border);"><strong>Medicine</strong></td><td style="padding:0.25rem 0.5rem; border-bottom:1px solid var(--border);">Creature\'s ailment or cause of death</td></tr><tr><td style="padding:0.25rem 0.5rem; border-bottom:1px solid var(--border);"><strong>Perception</strong></td><td style="padding:0.25rem 0.5rem; border-bottom:1px solid var(--border);">Concealed creature or object</td></tr><tr><td style="padding:0.25rem 0.5rem; border-bottom:1px solid var(--border);"><strong>Survival</strong></td><td style="padding:0.25rem 0.5rem; border-bottom:1px solid var(--border);">Tracks or food</td></tr></tbody></table><p class="muted-center"><em>Ask your DM which skill fits the situation.</em></p>'
             },
             'ready': {
                 title: '⏳ Ready',
@@ -1724,18 +1762,19 @@
             if (detail) {
                 state.pendingAction = 'action';
                 state.pendingActionType = actionType;
-                if (prefs.confirmSpends) {
-                    document.getElementById('action-detail-title').textContent = detail.title;
-                    document.getElementById('action-detail-content').innerHTML = detail.content;
-                    showScreen('screen-action-detail');
-                } else {
-                    confirmActionDetail();
-                }
+                // Always show action details so the player can read the rules first.
+                document.getElementById('action-detail-title').textContent = detail.title;
+                document.getElementById('action-detail-content').innerHTML = detail.content;
+                showScreen('screen-action-detail');
             }
         }
 
         // Bonus Action Details
         const bonusActionDetails = {
+            'cast-spell': {
+                title: actionDetails?.['cast-spell']?.title || '✨ Cast a Spell',
+                content: actionDetails?.['cast-spell']?.content || '<p><strong>Cast a spell with casting time of 1 bonus action.</strong></p>'
+            },
             'healing-word': {
                 title: '💚 Healing Word',
                 content: '<p><strong>Cast Healing Word as a bonus action. Target regains hit points.</strong></p><p>A creature of your choice that you can see within range regains hit points equal to 1d4 + your spellcasting ability modifier. This spell has no effect on undead or constructs.</p><p><strong>At Higher Levels:</strong> When you cast this spell using a spell slot of 2nd level or higher, the healing increases by 1d4 for each slot level above 1st.</p>'
@@ -1753,18 +1792,16 @@
         function showBonusActionDetail(bonusType) {
             let detail = bonusActionDetails[bonusType];
             if (bonusType === 'class-feature') {
-                detail = getClassFeatureBonusAction();
+                const classDetail = getClassFeatureBonusAction();
+                if (classDetail) detail = classDetail;
             }
             if (detail) {
                 state.pendingAction = 'bonus-action';
                 state.pendingBonusActionType = bonusType;
-                if (prefs.confirmSpends) {
-                    document.getElementById('bonus-action-detail-title').textContent = detail.title;
-                    document.getElementById('bonus-action-detail-content').innerHTML = detail.content;
-                    showScreen('screen-bonus-action-detail');
-                } else {
-                    confirmBonusAction();
-                }
+                // Always show bonus action details so the player can read the rules first.
+                document.getElementById('bonus-action-detail-title').textContent = detail.title;
+                document.getElementById('bonus-action-detail-content').innerHTML = detail.content;
+                showScreen('screen-bonus-action-detail');
             } else {
                 showToast('No class bonus action configured.');
             }
@@ -1887,7 +1924,7 @@
             
             // Only show Bonus Action in checklist if enabled
             const bonusActionItem = document.getElementById('checklist-bonus-action').parentElement;
-            if (prefs.bonusActionEnabled && hasBonusActionOptions()) {
+            if (prefs.bonusActionEnabled) {
                 bonusActionItem.style.display = '';
                 document.getElementById('checklist-bonus-action').textContent = state.bonusAction === 'used' ? 'Used' : 'Unused';
                 document.getElementById('checklist-bonus-action').className = 'status ' + (state.bonusAction === 'used' ? 'used' : 'unused');
@@ -1937,7 +1974,7 @@
                     quickButtonsEl.appendChild(btn);
                 }
                 
-                if (prefs.bonusActionEnabled && state.bonusAction === 'available' && hasBonusActionOptions()) {
+                if (prefs.bonusActionEnabled && state.bonusAction === 'available') {
                     const btn = document.createElement('button');
                     btn.className = 'btn btn-secondary btn-small';
                     btn.textContent = 'Mark Bonus Action Used';
@@ -2291,11 +2328,10 @@
             localStorage.removeItem(CHARACTER_PROFILE_PREFIX + activeId);
             localStorage.removeItem(ACTIVE_CHARACTER_ID_KEY);
 
-            // Clear settings
+            // Clear settings (keep bonusActionEnabled on so bonus action step stays in the flow)
             prefs.classKey = '';
             prefs.canHealingWord = false;
             prefs.canOffhandAttack = false;
-            prefs.bonusActionEnabled = false;
             savePrefs();
 
             // Update UI
@@ -2994,17 +3030,47 @@
         // SPELL NORMALIZATION AND FIXES
         // ============================================================================
 
+        /** Spell level lookup for profiles without rawFields/level metadata (e.g. legacy import). */
+        const SPELL_LEVEL_LOOKUP = {
+            1: ['bane', 'bless', 'command', 'create or destroy water', 'cure wounds', 'detect evil and good', 'detect magic', 'detect poison and disease', 'guiding bolt', 'healing word', 'inflict wounds', 'protection from evil and good', 'purify food and drink', 'sanctuary', 'shield of faith'],
+            2: ['aid', 'augury', 'blindness/deafness', 'calm emotions', 'continual flame', 'enhance ability', 'find traps', 'gentle repose', 'hold person', 'lesser restoration', 'locate object', 'prayer of healing', 'protection from poison', 'silence', 'spiritual weapon', 'warding bond', 'zone of truth'],
+            3: ['animate dead', 'beacon of hope', 'bestow curse', 'clairvoyance', 'create food and water', 'daylight', 'dispel magic', 'glyph of warding', 'magic circle', 'mass healing word', 'meld into stone', 'protection from energy', 'remove curse', 'revivify', 'sending', 'speak with dead', 'spirit guardians', 'tongues', 'water walk'],
+            4: ['banishment', 'control water', 'death ward', 'divination', 'freedom of movement', 'guardian of faith', 'locate creature', 'stone shape'],
+            5: ['commune', 'contagion', 'dispel evil and good', 'flame strike', 'geas', 'greater restoration', 'hallow', 'insect plague', 'legend lore', 'mass cure wounds', 'planar binding', 'raise dead', 'scrying'],
+            6: ['blade barrier', 'create undead', 'find the path', 'forbiddance', 'harm', 'heal', "heroes' feast", 'planar ally', 'true seeing', 'word of recall'],
+            7: ['conjure celestial', 'divine word', 'etherealness', 'fire storm', 'plane shift', 'regenerate', 'resurrection', 'symbol'],
+            8: ['antimagic field', 'control weather', 'earthquake', 'holy aura'],
+            9: ['astral projection', 'gate', 'mass heal', 'true resurrection']
+        };
+
+        function getLookupSpellLevel(spellName) {
+            if (!spellName || typeof spellName !== 'string') return null;
+            const key = spellName.trim().toLowerCase();
+            for (let level = 1; level <= 9; level++) {
+                if (SPELL_LEVEL_LOOKUP[level].includes(key)) return level;
+            }
+            return null;
+        }
+
         function getCantrips(profile) {
             const normalized = CharacterSheetImporter.getNormalizedSpells(profile);
             return normalized.filter(s => s.levelGroup === 'cantrip').map(s => s.name);
         }
 
         /**
-         * Get spells by level from normalized spells
+         * Get spells by level from normalized spells, with fallback to spell level lookup when
+         * normalized data lacks level info (e.g. legacy import where all spells default to level 1).
          */
         function getSpellsByLevel(profile, level) {
             const normalized = CharacterSheetImporter.getNormalizedSpells(profile);
-            return normalized.filter(s => s.levelGroup === level).map(s => s.name);
+            const fromNormalized = normalized.filter(s => s.levelGroup === level).map(s => s.name);
+            if (fromNormalized.length > 0) return fromNormalized;
+            if (level < 1 || level > 9 || !profile?.spells?.length) return [];
+            const lookup = SPELL_LEVEL_LOOKUP[level] || [];
+            return profile.spells.filter(name => {
+                const key = String(name).trim().toLowerCase();
+                return lookup.includes(key);
+            });
         }
 
         /**
@@ -3025,13 +3091,17 @@
 
         /**
          * Get spell level for slot consumption
-         * Returns 0 for cantrips, or the numeric level for leveled spells
+         * Returns 0 for cantrips, or the numeric level for leveled spells.
+         * Uses spell level lookup when normalized data lacks level info (e.g. legacy import).
          */
         function getSpellLevelForSlot(spellName, profile) {
             const normalized = CharacterSheetImporter.getNormalizedSpells(profile);
             const spell = normalized.find(s => s.name === spellName);
-            if (!spell) return 1; // Default fallback
-            return spell.levelGroup === 'cantrip' ? 0 : spell.levelGroup;
+            if (spell && spell.levelGroup === 'cantrip') return 0;
+            if (spell && typeof spell.levelGroup === 'number' && spell.levelGroup >= 2) return spell.levelGroup;
+            const lookupLevel = getLookupSpellLevel(spellName);
+            if (lookupLevel != null) return lookupLevel;
+            return (spell && typeof spell.levelGroup === 'number') ? spell.levelGroup : 1;
         }
 
         const SPELL_FREE_USES_KEY = 'spellFreeUsesState';
