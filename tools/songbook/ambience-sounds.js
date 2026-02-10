@@ -27,6 +27,7 @@
             folders: [],
             profiles: [],
             playlists: [],
+            groups: [],
             embedSlots: { layers: [] }
         };
     }
@@ -39,6 +40,7 @@
             if (!data.version || !Array.isArray(data.profiles)) return defaultState();
             data.folders = Array.isArray(data.folders) ? data.folders : [];
             data.playlists = Array.isArray(data.playlists) ? data.playlists : [];
+            data.groups = Array.isArray(data.groups) ? data.groups : [];
             data.settings = data.settings || defaultState().settings;
             var oldSlots = data.embedSlots;
             if (oldSlots && (oldSlots.layer1 != null || oldSlots.layer2 != null || oldSlots.soundEffect != null)) {
@@ -69,6 +71,7 @@
                 folders: state.folders,
                 profiles: state.profiles,
                 playlists: state.playlists,
+                groups: state.groups,
                 embedSlots: {
                     layers: (state.embedSlots && state.embedSlots.layers || []).map(function (l) {
                         return { id: l.id, type: l.type, profileId: l.profileId, name: l.name, embedUrl: l.embedUrl, loop: l.loop };
@@ -225,6 +228,13 @@
         let result;
         if (filterFolderId === '__starred__') {
             result = list.filter(function (p) { return p.starred === true; });
+        } else if (filterFolderId.indexOf('grp:') === 0) {
+            const groupId = filterFolderId.slice(4);
+            const grp = state.groups.find(function (x) { return x.id === groupId; });
+            if (!grp || !Array.isArray(grp.profileIds)) return [];
+            const byId = {};
+            list.forEach(function (p) { byId[p.id] = p; });
+            return grp.profileIds.map(function (id) { return byId[id]; }).filter(Boolean);
         } else if (filterFolderId.indexOf('pl:') === 0) {
             const playlistId = filterFolderId.slice(3);
             const pl = state.playlists.find(function (x) { return x.id === playlistId; });
@@ -266,6 +276,34 @@
         return result;
     }
 
+    function getViewSegments(profiles) {
+        if (!profiles || profiles.length === 0) return [];
+        if (filterFolderId.indexOf('grp:') === 0) {
+            var groupId = filterFolderId.slice(4);
+            var grp = state.groups.find(function (x) { return x.id === groupId; });
+            if (!grp) return profiles.map(function (p) { return { type: 'card', profile: p }; });
+            return [{ type: 'group', group: grp, profiles: profiles }];
+        }
+        var segments = [];
+        var emittedGroupIds = {};
+        var byId = {};
+        profiles.forEach(function (p) { byId[p.id] = p; });
+        for (var i = 0; i < profiles.length; i++) {
+            var p = profiles[i];
+            var g = getGroupContainingProfileId(p.id);
+            if (!g) {
+                segments.push({ type: 'card', profile: p });
+            } else if (!emittedGroupIds[g.id]) {
+                emittedGroupIds[g.id] = true;
+                var groupProfiles = (g.profileIds || []).map(function (id) { return byId[id]; }).filter(Boolean);
+                if (groupProfiles.length > 0) {
+                    segments.push({ type: 'group', group: g, profiles: groupProfiles });
+                }
+            }
+        }
+        return segments;
+    }
+
     function getNextOrder() {
         if (state.profiles.length === 0) return 0;
         const orders = state.profiles.map(function (p) { return typeof p.order === 'number' ? p.order : 0; });
@@ -274,6 +312,74 @@
 
     function generateId() {
         return 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9);
+    }
+
+    function getGroupContainingProfileId(profileId) {
+        if (!state.groups) return null;
+        for (var i = 0; i < state.groups.length; i++) {
+            var g = state.groups[i];
+            if (Array.isArray(g.profileIds) && g.profileIds.indexOf(profileId) !== -1) return g;
+        }
+        return null;
+    }
+
+    function removeProfileFromAllGroups(profileId) {
+        if (!state.groups) return;
+        state.groups.forEach(function (g) {
+            if (Array.isArray(g.profileIds)) g.profileIds = g.profileIds.filter(function (id) { return id !== profileId; });
+        });
+        state.groups = state.groups.filter(function (g) { return Array.isArray(g.profileIds) && g.profileIds.length > 0; });
+    }
+
+    function addCardToTargetGroup(sourceId, targetId) {
+        if (sourceId === targetId) return;
+        removeProfileFromAllGroups(sourceId);
+        var targetGroup = getGroupContainingProfileId(targetId);
+        if (targetGroup) {
+            if (targetGroup.profileIds.indexOf(sourceId) === -1) targetGroup.profileIds.push(sourceId);
+        } else {
+            var groupNum = state.groups.length + 1;
+            state.groups.push({
+                id: generateId(),
+                name: 'Group ' + groupNum,
+                profileIds: [targetId, sourceId]
+            });
+        }
+        saveState(state);
+        renderFolderFilter();
+        renderCards();
+    }
+
+    function reorderProfileToViewIndex(sourceId, viewInsertIndex) {
+        if (filterFolderId !== '') return;
+        removeProfileFromAllGroups(sourceId);
+        var viewProfiles = getProfilesForView();
+        var idx = viewProfiles.findIndex(function (p) { return p.id === sourceId; });
+        if (idx === -1) return;
+        var arr = viewProfiles.filter(function (p) { return p.id !== sourceId; });
+        var sourceProfile = state.profiles.find(function (p) { return p.id === sourceId; });
+        if (!sourceProfile) return;
+        var insertAt = Math.max(0, Math.min(viewInsertIndex, arr.length));
+        arr.splice(insertAt, 0, sourceProfile);
+        arr.forEach(function (p, i) { p.order = i; });
+        saveState(state);
+        renderFolderFilter();
+        renderCards();
+    }
+
+    function removeGroup(groupId) {
+        state.groups = state.groups.filter(function (g) { return g.id !== groupId; });
+        saveState(state);
+        renderFolderFilter();
+        renderCards();
+    }
+
+    function updateGroupName(grp, newName) {
+        var name = (newName || '').trim();
+        if (name) grp.name = name;
+        saveState(state);
+        renderFolderFilter();
+        renderCards();
     }
 
     function applyGridLayout() {
@@ -312,6 +418,16 @@
             folderGroup.appendChild(opt);
         });
         sel.appendChild(folderGroup);
+        const groupGroup = document.createElement('optgroup');
+        groupGroup.label = '— Groups (drag cards together) —';
+        state.groups.slice().forEach(function (grp) {
+            const opt = document.createElement('option');
+            opt.value = 'grp:' + grp.id;
+            opt.textContent = grp.name || 'Group';
+            if (filterFolderId === 'grp:' + grp.id) opt.selected = true;
+            groupGroup.appendChild(opt);
+        });
+        sel.appendChild(groupGroup);
         const playlistGroup = document.createElement('optgroup');
         playlistGroup.label = '— Playlists —';
         state.playlists.slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); }).forEach(function (pl) {
@@ -322,6 +438,73 @@
             playlistGroup.appendChild(opt);
         });
         sel.appendChild(playlistGroup);
+        renderGroupButtons();
+    }
+
+    function renderGroupButtons() {
+        const container = document.getElementById('ambience-group-buttons');
+        if (!container) return;
+        container.innerHTML = '';
+        const hasGroups = state.groups.length > 0;
+        const hasPlaylists = state.playlists.length > 0;
+        if (!hasGroups && !hasPlaylists) return;
+        const allBtn = document.createElement('button');
+        allBtn.type = 'button';
+        allBtn.className = 'ambience-btn group-btn' + (!filterFolderId ? ' active' : '');
+        allBtn.setAttribute('aria-pressed', !filterFolderId ? 'true' : 'false');
+        allBtn.textContent = 'All';
+        allBtn.addEventListener('click', function () {
+            filterFolderId = '';
+            renderFolderFilter();
+            renderCards();
+        });
+        container.appendChild(allBtn);
+        state.groups.forEach(function (grp) {
+            var wrap = document.createElement('span');
+            wrap.className = 'group-btn-wrap';
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            const isActive = filterFolderId === 'grp:' + grp.id;
+            btn.className = 'ambience-btn group-btn' + (isActive ? ' active' : '');
+            btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            btn.textContent = grp.name || 'Group';
+            btn.setAttribute('title', 'Drag a card onto another to add to this group');
+            btn.addEventListener('click', function () {
+                filterFolderId = 'grp:' + grp.id;
+                renderFolderFilter();
+                renderCards();
+            });
+            wrap.appendChild(btn);
+            var renameBtn = document.createElement('button');
+            renameBtn.type = 'button';
+            renameBtn.className = 'ambience-btn small group-btn-rename';
+            renameBtn.setAttribute('aria-label', 'Rename group');
+            renameBtn.setAttribute('title', 'Rename group');
+            renameBtn.textContent = '\u270E';
+            renameBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var newName = prompt('Group name', grp.name || 'Group');
+                if (newName != null) {
+                    updateGroupName(grp, newName);
+                }
+            });
+            wrap.appendChild(renameBtn);
+            container.appendChild(wrap);
+        });
+        state.playlists.slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); }).forEach(function (pl) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            const isActive = filterFolderId === 'pl:' + pl.id;
+            btn.className = 'ambience-btn group-btn' + (isActive ? ' active' : '');
+            btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            btn.textContent = pl.name || 'Unnamed';
+            btn.addEventListener('click', function () {
+                filterFolderId = 'pl:' + pl.id;
+                renderFolderFilter();
+                renderCards();
+            });
+            container.appendChild(btn);
+        });
     }
 
     function renderFoldersInForm() {
@@ -338,72 +521,96 @@
         });
     }
 
-    function renderCards() {
-        const grid = document.getElementById('ambience-cards-grid');
-        const addNew = document.getElementById('ambience-add-new-card');
-        if (!grid || !addNew) return;
-        const existingCards = grid.querySelectorAll('.card:not(.add-new-card)');
-        existingCards.forEach(function (el) { el.remove(); });
+    function buildCardElement(p, inGroup) {
+        var cardGroup = inGroup ? null : getGroupContainingProfileId(p.id);
+        const li = document.createElement('div');
+        li.className = 'card' + (cardGroup ? ' card-in-group' : '');
+        li.setAttribute('role', 'listitem');
+        li.dataset.profileId = p.id;
 
-        const profiles = getProfilesForView();
-        profiles.forEach(function (p, index) {
-            const li = document.createElement('div');
-            li.className = 'card';
-            li.setAttribute('role', 'listitem');
-            li.dataset.profileId = p.id;
-            li.dataset.orderIndex = String(index);
+        const header = document.createElement('div');
+        header.className = 'card-header';
+        if (cardGroup) {
+            var groupBadge = document.createElement('span');
+            groupBadge.className = 'card-group-badge';
+            groupBadge.textContent = cardGroup.name || 'Group';
+            groupBadge.setAttribute('title', 'In group. Drag another card here to add.');
+            header.appendChild(groupBadge);
+        }
+        if (p.loop) {
+            var loopBadge = document.createElement('span');
+            loopBadge.className = 'card-loop-badge';
+            loopBadge.textContent = '\u27F3';
+            loopBadge.setAttribute('title', 'Loops continuously');
+            loopBadge.setAttribute('aria-hidden', 'true');
+            header.appendChild(loopBadge);
+        }
+        const handle = document.createElement('button');
+        handle.type = 'button';
+        handle.className = 'card-drag-handle';
+        handle.setAttribute('aria-label', 'Drag to reorder or onto another card to group');
+        handle.textContent = '\u22EE\u22EE';
+        handle.draggable = true;
+        header.appendChild(handle);
+        li.appendChild(header);
 
-            const header = document.createElement('div');
-            header.className = 'card-header';
-            if (p.loop) {
-                var loopBadge = document.createElement('span');
-                loopBadge.className = 'card-loop-badge';
-                loopBadge.textContent = '\u27F3';
-                loopBadge.setAttribute('title', 'Loops continuously');
-                loopBadge.setAttribute('aria-hidden', 'true');
-                header.appendChild(loopBadge);
+        const body = document.createElement('div');
+        body.className = 'card-body';
+        const iconWrap = document.createElement('div');
+        iconWrap.className = 'card-icon';
+        if (p.icon && p.icon.startsWith('data:')) {
+            const img = document.createElement('img');
+            img.src = p.icon;
+            img.alt = '';
+            iconWrap.appendChild(img);
+        } else {
+            iconWrap.textContent = p.icon || '🎵';
+        }
+        body.appendChild(iconWrap);
+        const label = document.createElement('span');
+        label.className = 'card-label';
+        label.textContent = p.name || 'Unnamed';
+        body.appendChild(label);
+        const notesWrap = document.createElement('div');
+        notesWrap.className = 'card-dm-notes-wrap';
+        const notesInput = document.createElement('input');
+        notesInput.type = 'text';
+        notesInput.className = 'card-dm-notes';
+        notesInput.placeholder = 'DM note…';
+        notesInput.maxLength = 80;
+        notesInput.value = p.dmNotes || '';
+        notesInput.setAttribute('aria-label', 'DM note');
+        notesInput.addEventListener('click', function (e) { e.stopPropagation(); });
+        notesInput.addEventListener('blur', function () {
+            var val = (notesInput.value || '').trim() || null;
+            if (p.dmNotes !== val) {
+                p.dmNotes = val;
+                saveState(state);
             }
-            const handle = document.createElement('button');
-            handle.type = 'button';
-            handle.className = 'card-drag-handle';
-            handle.setAttribute('aria-label', 'Drag to reorder');
-            handle.textContent = '\u22EE\u22EE';
-            handle.draggable = true;
-            header.appendChild(handle);
-            li.appendChild(header);
+        });
+        notesWrap.appendChild(notesInput);
+        body.appendChild(notesWrap);
+        li.appendChild(body);
 
-            const body = document.createElement('div');
-            body.className = 'card-body';
-            const iconWrap = document.createElement('div');
-            iconWrap.className = 'card-icon';
-            if (p.icon && p.icon.startsWith('data:')) {
-                const img = document.createElement('img');
-                img.src = p.icon;
-                img.alt = '';
-                iconWrap.appendChild(img);
-            } else {
-                iconWrap.textContent = p.icon || '🎵';
-            }
-            body.appendChild(iconWrap);
-            const label = document.createElement('span');
-            label.className = 'card-label';
-            label.textContent = p.name || 'Unnamed';
-            body.appendChild(label);
-            li.appendChild(body);
-
-            const actions = document.createElement('div');
-            actions.className = 'card-actions';
-            const starBtn = document.createElement('button');
-            starBtn.type = 'button';
-            starBtn.className = 'star-btn' + (p.starred ? ' starred' : '');
-            starBtn.setAttribute('aria-label', p.starred ? 'Unstar' : 'Star');
-            starBtn.textContent = p.starred ? '\u2605' : '\u2606';
-            const linkBtn = document.createElement('button');
-            linkBtn.type = 'button';
-            linkBtn.className = 'card-link-btn';
-            linkBtn.setAttribute('aria-label', 'Open in YouTube');
-            linkBtn.setAttribute('title', 'Open in YouTube');
-            linkBtn.textContent = '\uD83D\uDD17';
+        const actions = document.createElement('div');
+        actions.className = 'card-actions';
+        const starBtn = document.createElement('button');
+        starBtn.type = 'button';
+        starBtn.className = 'star-btn' + (p.starred ? ' starred' : '');
+        starBtn.setAttribute('aria-label', p.starred ? 'Unstar' : 'Star');
+        starBtn.textContent = p.starred ? '\u2605' : '\u2606';
+        const linkBtn = document.createElement('button');
+        linkBtn.type = 'button';
+        linkBtn.className = 'card-link-btn';
+        linkBtn.setAttribute('aria-label', 'Open in YouTube');
+        linkBtn.setAttribute('title', 'Open in YouTube');
+        linkBtn.textContent = '\uD83D\uDD17';
+            const groupBtn = document.createElement('button');
+            groupBtn.type = 'button';
+            groupBtn.className = 'card-group-btn';
+            groupBtn.setAttribute('aria-label', 'Add to group');
+            groupBtn.setAttribute('title', 'Add to group');
+            groupBtn.textContent = '\u2630';
             const editBtn = document.createElement('button');
             editBtn.type = 'button';
             editBtn.setAttribute('aria-label', 'Edit');
@@ -414,48 +621,166 @@
             delBtn.textContent = '\uD83D\uDDD1';
             actions.appendChild(starBtn);
             actions.appendChild(linkBtn);
+            actions.appendChild(groupBtn);
+            if (inGroup) {
+                var removeFromGroupBtn = document.createElement('button');
+                removeFromGroupBtn.type = 'button';
+                removeFromGroupBtn.className = 'ambience-btn small card-remove-from-group';
+                removeFromGroupBtn.setAttribute('aria-label', 'Remove from group');
+                removeFromGroupBtn.setAttribute('title', 'Remove from group');
+                removeFromGroupBtn.textContent = '\u2191';
+                removeFromGroupBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    removeProfileFromAllGroups(p.id);
+                    saveState(state);
+                    renderCards();
+                });
+                actions.appendChild(removeFromGroupBtn);
+            }
             actions.appendChild(editBtn);
             actions.appendChild(delBtn);
             li.appendChild(actions);
 
-            handle.addEventListener('click', function (e) { e.stopPropagation(); });
-            starBtn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                p.starred = !p.starred;
+        handle.addEventListener('click', function (e) { e.stopPropagation(); });
+        starBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            p.starred = !p.starred;
+            saveState(state);
+            renderCards();
+        });
+        linkBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (p.url && isValidYouTubeUrl(p.url)) {
+                window.open(appendStartParam(p.url), '_blank');
+            }
+        });
+        groupBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            openPlaylistDropdown(groupBtn, p.id);
+        });
+        editBtn.addEventListener('click', function (e) { e.stopPropagation(); openFormModal(p.id); });
+        delBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (confirm("Delete \"" + (p.name || "") + "\"?")) {
+                state.profiles = state.profiles.filter(function (x) { return x.id !== p.id; });
+                state.playlists.forEach(function (pl) {
+                    if (Array.isArray(pl.profileIds)) pl.profileIds = pl.profileIds.filter(function (id) { return id !== p.id; });
+                });
+                removeProfileFromAllGroups(p.id);
                 saveState(state);
                 renderCards();
-            });
-            linkBtn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                if (p.url && isValidYouTubeUrl(p.url)) {
-                    window.open(appendStartParam(p.url), '_blank');
-                }
-            });
-            editBtn.addEventListener('click', function (e) { e.stopPropagation(); openFormModal(p.id); });
-            delBtn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                if (confirm("Delete \"" + (p.name || "") + "\"?")) {
-                    state.profiles = state.profiles.filter(function (x) { return x.id !== p.id; });
-                    state.playlists.forEach(function (pl) {
-                        if (Array.isArray(pl.profileIds)) pl.profileIds = pl.profileIds.filter(function (id) { return id !== p.id; });
-                    });
-                    saveState(state);
-                    renderCards();
-                }
-            });
+            }
+        });
 
-            li.addEventListener('click', function (e) {
-                if (e.target.closest('.card-drag-handle, .card-actions')) return;
-                playProfile(p);
-            });
+        li.addEventListener('click', function (e) {
+            if (e.target.closest('.card-drag-handle, .card-actions, .card-dm-notes-wrap')) return;
+            playProfile(p);
+        });
 
-            handle.addEventListener('dragstart', onDragStart);
-            li.addEventListener('dragover', onDragOver);
-            li.addEventListener('drop', onDrop);
-            li.addEventListener('dragend', onDragEnd);
-            li.addEventListener('dragleave', onDragLeave);
+        handle.addEventListener('dragstart', onDragStart);
+        li.addEventListener('dragover', onDragOver);
+        li.addEventListener('drop', onDrop);
+        li.addEventListener('dragend', onDragEnd);
+        li.addEventListener('dragleave', onDragLeave);
 
-            grid.insertBefore(li, addNew);
+        return li;
+    }
+
+    function renderCards() {
+        const grid = document.getElementById('ambience-cards-grid');
+        const addNew = document.getElementById('ambience-add-new-card');
+        if (!grid || !addNew) return;
+        grid.querySelectorAll('.card-slot').forEach(function (el) { el.remove(); });
+
+        const profiles = getProfilesForView();
+        const segments = getViewSegments(profiles);
+        const showInsertZones = filterFolderId === '';
+
+        segments.forEach(function (seg, segIndex) {
+            var slot = document.createElement('div');
+            slot.className = 'card-slot';
+
+            if (showInsertZones) {
+                var zone = document.createElement('div');
+                zone.className = 'insert-zone';
+                zone.setAttribute('aria-label', 'Drop to reorder');
+                zone.dataset.insertIndex = String(segIndex);
+                zone.addEventListener('dragover', function (e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    zone.classList.add('drag-over');
+                });
+                zone.addEventListener('dragleave', function () { zone.classList.remove('drag-over'); });
+                zone.addEventListener('drop', function (e) {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    var sourceId = e.dataTransfer.getData('application/x-ambience-profile-id');
+                    if (!sourceId) return;
+                    var idx = parseInt(zone.dataset.insertIndex, 10);
+                    reorderProfileToViewIndex(sourceId, idx);
+                });
+                slot.appendChild(zone);
+            }
+
+            if (seg.type === 'card') {
+                slot.appendChild(buildCardElement(seg.profile, false));
+            } else {
+                var grp = seg.group;
+                var groupEl = document.createElement('div');
+                groupEl.className = 'card-group';
+                groupEl.dataset.groupId = grp.id;
+
+                var headerEl = document.createElement('div');
+                headerEl.className = 'card-group-header';
+                headerEl.dataset.groupId = grp.id;
+                headerEl.dataset.profileId = grp.profileIds && grp.profileIds[0] ? grp.profileIds[0] : '';
+                var nameSpan = document.createElement('span');
+                nameSpan.className = 'card-group-name';
+                nameSpan.textContent = grp.name || 'Group';
+                nameSpan.setAttribute('title', 'Click to rename');
+                nameSpan.addEventListener('click', function () {
+                    var newName = prompt('Group name', grp.name || 'Group');
+                    if (newName != null) {
+                        updateGroupName(grp, newName);
+                    }
+                });
+                headerEl.appendChild(nameSpan);
+                var ungroupBtn = document.createElement('button');
+                ungroupBtn.type = 'button';
+                ungroupBtn.className = 'ambience-btn small card-group-ungroup';
+                ungroupBtn.setAttribute('aria-label', 'Ungroup all');
+                ungroupBtn.setAttribute('title', 'Ungroup all');
+                ungroupBtn.textContent = '\u2A2F';
+                ungroupBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    removeGroup(grp.id);
+                });
+                headerEl.appendChild(ungroupBtn);
+                headerEl.addEventListener('dragover', function (e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    headerEl.classList.add('drag-over');
+                });
+                headerEl.addEventListener('dragleave', function () { headerEl.classList.remove('drag-over'); });
+                headerEl.addEventListener('drop', function (e) {
+                    e.preventDefault();
+                    headerEl.classList.remove('drag-over');
+                    var sourceId = e.dataTransfer.getData('application/x-ambience-profile-id');
+                    if (!sourceId || !headerEl.dataset.profileId) return;
+                    addCardToTargetGroup(sourceId, headerEl.dataset.profileId);
+                });
+                groupEl.appendChild(headerEl);
+
+                var cardsWrap = document.createElement('div');
+                cardsWrap.className = 'card-group-cards';
+                seg.profiles.forEach(function (p) {
+                    cardsWrap.appendChild(buildCardElement(p, true));
+                });
+                groupEl.appendChild(cardsWrap);
+                slot.appendChild(groupEl);
+            }
+
+            grid.insertBefore(slot, addNew);
         });
     }
 
@@ -466,6 +791,8 @@
         e.dataTransfer.setData('text/plain', card.dataset.profileId);
         e.dataTransfer.setData('application/x-ambience-profile-id', card.dataset.profileId);
         card.classList.add('dragging');
+        var grid = document.getElementById('ambience-cards-grid');
+        if (grid) grid.classList.add('drag-active');
     }
 
     function onDragOver(e) {
@@ -488,23 +815,17 @@
         card.classList.remove('drag-over');
         const sourceId = e.dataTransfer.getData('application/x-ambience-profile-id');
         if (!sourceId) return;
-        const sourceIndex = state.profiles.findIndex(function (p) { return p.id === sourceId; });
         const targetId = card.dataset.profileId;
-        const targetIndex = state.profiles.findIndex(function (p) { return p.id === targetId; });
-        if (sourceIndex === -1 || targetIndex === -1 || sourceIndex === targetIndex) return;
-        const arr = state.profiles.slice();
-        const [item] = arr.splice(sourceIndex, 1);
-        const newTargetIndex = arr.findIndex(function (p) { return p.id === targetId; });
-        arr.splice(newTargetIndex, 0, item);
-        arr.forEach(function (p, i) { p.order = i; });
-        state.profiles = arr;
-        saveState(state);
-        renderCards();
+        if (sourceId === targetId) return;
+        addCardToTargetGroup(sourceId, targetId);
     }
 
     function onDragEnd(e) {
         const card = e.target.closest('.card');
         if (card) card.classList.remove('dragging');
+        var grid = document.getElementById('ambience-cards-grid');
+        if (grid) grid.classList.remove('drag-active');
+        document.querySelectorAll('.insert-zone').forEach(function (z) { z.classList.remove('drag-over'); });
     }
 
     function playProfile(profile) {
@@ -580,6 +901,7 @@
         renderFoldersInForm();
         renderEmojiGrid(null);
         const nameInput = document.getElementById('ambience-form-name');
+        const dmNotesInput = document.getElementById('ambience-form-dm-notes');
         const urlInput = document.getElementById('ambience-form-url');
         const folderSelect = document.getElementById('ambience-form-folder');
         const fileInput = document.getElementById('ambience-icon-file');
@@ -591,6 +913,7 @@
             const p = state.profiles.find(function (x) { return x.id === profileId; });
             if (p) {
                 nameInput.value = p.name || '';
+                if (dmNotesInput) dmNotesInput.value = p.dmNotes || '';
                 urlInput.value = p.url || '';
                 folderSelect.value = p.folderId || '';
                 if (loopEl) loopEl.checked = p.loop === true;
@@ -601,6 +924,7 @@
             }
         } else {
             nameInput.value = '';
+            if (dmNotesInput) dmNotesInput.value = '';
             urlInput.value = '';
             folderSelect.value = '';
             if (loopEl) loopEl.checked = false;
@@ -647,9 +971,11 @@
         const nameInput = document.getElementById('ambience-form-name');
         const urlInput = document.getElementById('ambience-form-url');
         const folderSelect = document.getElementById('ambience-form-folder');
+        const dmNotesInput = document.getElementById('ambience-form-dm-notes');
         const name = (nameInput && nameInput.value || '').trim();
         const url = (urlInput && urlInput.value || '').trim();
         const folderId = (folderSelect && folderSelect.value) || '';
+        const dmNotes = (dmNotesInput && dmNotesInput.value || '').trim() || null;
         const errEl = document.getElementById('ambience-form-url-error');
         if (!name) {
             nameInput.focus();
@@ -697,6 +1023,7 @@
                     p.folderId = folderId || null;
                     p.icon = iconValue;
                     p.loop = loop;
+                    p.dmNotes = dmNotes;
                 }
             } else {
                 state.profiles.push({
@@ -707,7 +1034,8 @@
                     url: url,
                     icon: iconValue,
                     starred: false,
-                    loop: loop
+                    loop: loop,
+                    dmNotes: dmNotes
                 });
             }
         saveState(state);
@@ -1195,6 +1523,7 @@
             state.folders = state.folders || [];
             state.profiles = state.profiles || [];
             state.playlists = Array.isArray(state.playlists) ? state.playlists : [];
+            state.groups = Array.isArray(state.groups) ? state.groups : [];
             state.settings = state.settings || defaultState().settings;
         } else {
             const existingIds = {};

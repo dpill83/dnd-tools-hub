@@ -48,6 +48,7 @@
                     <option value="folder">Folder</option>
                 </select>
             </div>
+            <div id="ambience-group-buttons" class="group-buttons-row" aria-label="Groups"></div>
 
             <div class="cards-grid cards-per-row-1 card-size-medium" id="ambience-cards-grid" role="list">
                 <div class="card add-new-card" id="ambience-add-new-card" role="listitem" tabindex="0">
@@ -79,6 +80,10 @@
                     <div class="form-group">
                         <label for="ambience-form-name">Name</label>
                         <input type="text" id="ambience-form-name" required maxlength="100" placeholder="e.g. Tavern" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="ambience-form-dm-notes">DM notes</label>
+                        <input type="text" id="ambience-form-dm-notes" maxlength="80" placeholder="e.g. Scene 3, boss fight" autocomplete="off">
                     </div>
                     <div class="form-group">
                         <label for="ambience-form-url">YouTube URL</label>
