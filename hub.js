@@ -9,6 +9,7 @@
         'tools/adventure-maker/',
         'tools/char-sheet/',
         'tools/combat-turn-helper/',
+        'tools/cosmetic-battle-pass/',
         'tools/cassalanter-inquiry-runner/',
         'tools/cassalanter-inquiry-wizard/',
         'tools/playstyle-quiz/',
