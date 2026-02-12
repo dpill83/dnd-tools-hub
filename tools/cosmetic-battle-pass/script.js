@@ -7,6 +7,7 @@
     const STORAGE_KEY = 'dnd-cosmetic-battle-pass';
     const SOUND_STORAGE_KEY = 'dnd-cosmetic-battle-pass-sound';
     const GALLERY_CAP = 20;
+    const MAX_TIERS_IN_PROMPT = 12;
 
     const PROMPT_TEMPLATES = {
         0: 'Fantasy [class] [gear] with basic [theme] [application] on the handle/edges, simple etched [motif] details starting to show, battle-ready and worn, [artStyle] D&D art style.',
@@ -153,8 +154,11 @@
         const gearById = {};
         (character.gearPool || []).forEach(g => { gearById[g.id] = g.label; });
 
+        const capped = activeSubTiers.length > MAX_TIERS_IN_PROMPT
+            ? activeSubTiers.slice(-MAX_TIERS_IN_PROMPT)
+            : activeSubTiers;
         const parts = [];
-        for (const s of activeSubTiers) {
+        for (const s of capped) {
             const themeName = getThemeForLevelTier(s.level, s.tier);
             const gear = gearById[s.selectedGearId] || 'gear';
             const app = s.application || 'detail';
@@ -182,6 +186,20 @@
 
     function getActiveSubTiers() {
         return state.subTiers.filter(s => s.active).sort((a, b) => a.level - b.level || a.tier - b.tier);
+    }
+
+    function turnOnAllTiers() {
+        state.subTiers.forEach(s => { s.active = true; });
+        saveState();
+        renderAccordions();
+        updateGenerateButton();
+    }
+
+    function turnOffAllTiers() {
+        state.subTiers.forEach(s => { s.active = false; });
+        saveState();
+        renderAccordions();
+        updateGenerateButton();
     }
 
     function hasNewContentSinceLastGenerate() {
@@ -246,6 +264,21 @@
         const pct = range ? Math.min(100, ((xp - startXp) / range) * 100) : 0;
         fillEl.style.width = pct + '%';
 
+        const markersEl = document.getElementById('bp-progress-tier-markers');
+        if (markersEl) {
+            markersEl.innerHTML = '';
+            for (let i = 1; i < thresholds.length; i++) {
+                const t = thresholds[i];
+                const leftPct = range ? ((t.xp - startXp) / range) * 100 : 0;
+                const div = document.createElement('div');
+                div.className = 'bp-progress-tier-marker';
+                div.style.left = leftPct + '%';
+                div.setAttribute('data-tier', 'T' + t.tier);
+                div.setAttribute('title', 'Tier ' + t.tier);
+                markersEl.appendChild(div);
+            }
+        }
+
         const unlocked = getAllUnlockedSubTiers(xp);
         const next = unlocked._nextUnlock;
         if (next) {
@@ -259,6 +292,24 @@
         } else {
             ringEl.style.strokeDashoffset = '0';
             nextEl.textContent = 'Max tier reached!';
+        }
+        renderHeroPortrait();
+    }
+
+    function renderHeroPortrait() {
+        const imgEl = document.getElementById('bp-hero-portrait-img');
+        const placeholderEl = document.getElementById('bp-hero-portrait-placeholder');
+        const url = (state.character && state.character.portraitDataUrl) || '';
+        if (imgEl && placeholderEl) {
+            if (url) {
+                imgEl.src = url;
+                imgEl.classList.add('bp-hero-portrait-visible');
+                placeholderEl.style.display = 'none';
+            } else {
+                imgEl.removeAttribute('src');
+                imgEl.classList.remove('bp-hero-portrait-visible');
+                placeholderEl.style.display = 'block';
+            }
         }
     }
 
@@ -302,14 +353,14 @@
         const currentContainer = document.getElementById('bp-current-level-tiers');
         const currentHeading = document.getElementById('bp-current-level-num');
         const currentHint = document.getElementById('bp-current-level-hint');
-        const otherDetails = document.getElementById('bp-other-levels-details');
+        const otherSection = document.getElementById('bp-other-levels-section');
         const currentTiers = byLevel[currentLevel] || [];
 
         if (currentHeading) currentHeading.textContent = currentLevel;
         if (currentContainer) {
             currentContainer.innerHTML = '';
             if (currentTiers.length === 0) {
-                currentContainer.innerHTML = '<p class="help-text" style="color:var(--text-light);">No tiers unlocked yet. Add at least 2 gear items (Character &amp; Gear tab) and enter XP to unlock tiers for this level.</p>';
+                currentContainer.innerHTML = '<p class="help-text bp-help-light">No tiers unlocked yet. Add at least 2 gear items (Gear tab) and enter XP to unlock tiers for this level.</p>';
             } else {
                 const themeName = getThemeForLevelTier(currentLevel, 0);
                 currentTiers.forEach(s => renderTierCard(s, currentLevel, themeName, currentContainer));
@@ -317,22 +368,17 @@
         }
         if (currentHint) currentHint.textContent = currentTiers.length ? 'Toggle which tiers to include in your generated prompts.' : '';
 
-        // 2) Other levels (past only) – accordions
+        // 2) All other levels – accordions (default open)
         const container = document.getElementById('bp-accordions');
         const filterSearch = (document.getElementById('bp-filter-search') || {}).value || '';
-        const filterLevel = (document.getElementById('bp-filter-level') || {}).value;
-        const filterTheme = (document.getElementById('bp-filter-theme') || {}).value;
         const search = filterSearch.toLowerCase();
 
         const levels = Object.keys(byLevel).map(Number).sort((a, b) => a - b).filter(L => L < currentLevel);
-        if (otherDetails) otherDetails.style.display = levels.length === 0 ? 'none' : 'block';
+        if (otherSection) otherSection.style.display = state.subTiers.length === 0 ? 'none' : 'block';
 
         container.innerHTML = '';
         for (const level of levels) {
             const themeName = getThemeForLevelTier(level, 0);
-            if (filterLevel && String(level) !== filterLevel) continue;
-            if (filterTheme && themeName !== filterTheme) continue;
-
             const cards = byLevel[level];
             const visible = cards.filter(s => {
                 const gearLabel = (state.character.gearPool.find(g => g.id === s.selectedGearId) || {}).label || '';
@@ -342,24 +388,32 @@
             if (visible.length === 0) continue;
 
             const accordion = document.createElement('div');
-            accordion.className = 'bp-accordion';
+            accordion.className = 'bp-accordion open';
             accordion.innerHTML = `
-                <button type="button" class="bp-accordion-header" aria-expanded="false">
+                <button type="button" class="bp-accordion-header" aria-expanded="true">
                     <span>Level ${level} – ${themeName}</span>
                     <span class="bp-accordion-icon">▶</span>
                 </button>
                 <div class="bp-accordion-content"></div>
             `;
             const content = accordion.querySelector('.bp-accordion-content');
+            const headerBtn = accordion.querySelector('.bp-accordion-header');
             const grid = document.createElement('div');
             grid.className = 'bp-tier-cards-grid';
             visible.forEach(s => renderTierCard(s, level, themeName, grid));
             content.appendChild(grid);
-            accordion.querySelector('.bp-accordion-header').addEventListener('click', () => {
+            headerBtn.addEventListener('click', () => {
                 accordion.classList.toggle('open');
             });
             container.appendChild(accordion);
         }
+    }
+
+    function syncTiersAfterGearChange() {
+        ensureUnlocks();
+        renderDashboardHero();
+        renderAccordions();
+        updateGenerateButton();
     }
 
     function getThemeEmoji(name) {
@@ -367,10 +421,73 @@
         return map[name] || '✨';
     }
 
+    function updateXpSectionCopy() {
+        const heading = document.getElementById('bp-xp-heading');
+        const help = document.getElementById('bp-xp-help');
+        const label = document.getElementById('bp-xp-label');
+        if (!heading || !help || !label) return;
+        if (state.currentXp === 0) {
+            heading.textContent = 'Enter current XP';
+            help.textContent = 'Set your starting XP to unlock the other tabs. This cannot be undone.';
+            label.textContent = 'Current XP';
+        } else {
+            heading.textContent = 'Set new XP level';
+            help.textContent = 'Adding more XP updates which tiers are unlocked. You cannot reduce XP. Changes are saved immediately.';
+            label.textContent = 'Current XP';
+        }
+    }
+
+    function isCharacterSatisfied() {
+        return ((state.character && state.character.class) || '').trim() !== '';
+    }
+
+    function isGearSatisfied() {
+        return (state.character.gearPool || []).length >= 2;
+    }
+
+    function isTabLocked(tabId) {
+        if (state.currentXp === 0) {
+            return ['character', 'gear', 'dashboard', 'generate'].includes(tabId);
+        }
+        const charOk = isCharacterSatisfied();
+        const gearOk = isGearSatisfied();
+        if (tabId === 'character') return false;
+        if (tabId === 'gear') return !charOk;
+        if (tabId === 'dashboard' || tabId === 'generate') return !charOk || !gearOk;
+        return false;
+    }
+
+    function updateTabsForXp() {
+        const tabOrder = ['xp', 'character', 'gear', 'dashboard', 'generate', 'settings'];
+        let activeTabId = null;
+        document.querySelectorAll('.bp-tab').forEach(tab => {
+            const tabId = tab.getAttribute('data-tab');
+            const locked = isTabLocked(tabId);
+            if (locked) {
+                tab.classList.add('bp-tab-disabled');
+                tab.setAttribute('aria-disabled', 'true');
+            } else {
+                tab.classList.remove('bp-tab-disabled');
+                tab.removeAttribute('aria-disabled');
+            }
+            if (tab.classList.contains('active')) activeTabId = tabId;
+        });
+        if (activeTabId && isTabLocked(activeTabId)) {
+            const firstUnlocked = tabOrder.find(id => !isTabLocked(id));
+            const tab = document.querySelector('.bp-tab[data-tab="' + firstUnlocked + '"]');
+            const panel = document.getElementById('bp-tab-' + firstUnlocked);
+            if (tab && panel) {
+                document.querySelectorAll('.bp-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.bp-tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                panel.classList.add('active');
+            }
+        }
+    }
+
     function bindXpAndMilestone() {
         const xpInput = document.getElementById('bp-current-xp');
         const errEl = document.getElementById('bp-xp-error');
-        const milestoneBtn = document.getElementById('bp-milestone-btn');
 
         xpInput.value = state.currentXp;
         xpInput.addEventListener('change', () => {
@@ -380,13 +497,25 @@
                 return;
             }
             if (v < state.currentXp) {
-                errEl.textContent = `XP cannot be lower than current (${state.currentXp}).`;
+                errEl.textContent = `XP cannot be lower than current (${state.currentXp.toLocaleString()}).`;
                 errEl.style.display = 'block';
                 xpInput.value = state.currentXp;
                 return;
             }
+            if (v !== state.currentXp) {
+                const newLevel = getLevelFromXp(v + state.passXp);
+                const msg = state.currentXp === 0
+                    ? `You are about to set your current XP to ${v.toLocaleString()}. This will put you in level ${newLevel}. This cannot be undone. Do you confirm?`
+                    : `You are about to add ${(v - state.currentXp).toLocaleString()} XP to your current XP. This will put you in level ${newLevel}. Do you confirm?`;
+                if (!confirm(msg)) {
+                    xpInput.value = state.currentXp;
+                    return;
+                }
+            }
             errEl.style.display = 'none';
             state.currentXp = v;
+            updateXpSectionCopy();
+            updateTabsForXp();
             const before = state.subTiers.length;
             ensureUnlocks();
             renderDashboardHero();
@@ -399,32 +528,33 @@
             saveState();
             updateGenerateButton();
         });
-
-        milestoneBtn.addEventListener('click', () => {
-            const level = getLevelFromXp(state.currentXp + state.passXp);
-            state.currentXp = window.BattlePassData.XP_TABLE[level - 1] || 0;
-            xpInput.value = state.currentXp;
-            errEl.style.display = 'none';
-            ensureUnlocks();
-            renderDashboardHero();
-            renderAccordions();
-            saveState();
-            updateGenerateButton();
-        });
     }
 
     function bindTabs() {
         document.querySelectorAll('.bp-tab').forEach(tab => {
             tab.addEventListener('click', () => {
-                const id = 'bp-tab-' + tab.getAttribute('data-tab');
+                if (tab.classList.contains('bp-tab-disabled')) return;
+                const tabId = tab.getAttribute('data-tab');
+                const id = 'bp-tab-' + tabId;
                 document.querySelectorAll('.bp-tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.bp-tab-content').forEach(c => c.classList.remove('active'));
                 tab.classList.add('active');
                 const panel = document.getElementById(id);
                 if (panel) panel.classList.add('active');
+                if (tabId === 'dashboard') {
+                    ensureUnlocks();
+                    renderDashboardHero();
+                    renderAccordions();
+                    updateGenerateButton();
+                }
+                if (tabId === 'generate') {
+                    runGeneratePrompts();
+                }
             });
         });
     }
+
+    const ART_STYLE_OPTIONS = ['epic high-fantasy', 'dark fantasy', 'classic D&D illustration', 'painterly fantasy', 'cinematic fantasy'];
 
     function bindCharacterForm() {
         const ids = ['bp-char-name', 'bp-char-class', 'bp-art-style', 'bp-motif'];
@@ -433,10 +563,18 @@
             if (!el) return;
             const key = id.replace('bp-char-', '').replace('bp-', '').replace(/-/g, '');
             const stateKey = key === 'name' ? 'name' : key === 'class' ? 'class' : key === 'artstyle' ? 'artStyle' : 'motif';
-            el.value = state.character[stateKey] || (id === 'bp-art-style' ? 'epic high-fantasy' : '');
-            el.addEventListener('input', () => {
+            let initial = state.character[stateKey] || (id === 'bp-art-style' ? 'epic high-fantasy' : '');
+            if (id === 'bp-art-style' && !ART_STYLE_OPTIONS.includes(initial)) {
+                initial = 'epic high-fantasy';
+                state.character.artStyle = initial;
+                saveState();
+            }
+            el.value = initial;
+            const event = el.tagName === 'SELECT' ? 'change' : 'input';
+            el.addEventListener(event, () => {
                 state.character[stateKey] = el.value;
                 saveState();
+                updateTabsForXp();
             });
         });
         const fileEl = document.getElementById('bp-portrait-file');
@@ -445,9 +583,12 @@
                 const f = e.target.files[0];
                 if (!f) return;
                 const r = new FileReader();
-                r.onload = () => {
-                    state.character.portraitDataUrl = r.result;
+                r.onload = async () => {
+                    let dataUrl = r.result;
+                    dataUrl = await compressImageDataUrl(dataUrl, 800);
+                    state.character.portraitDataUrl = dataUrl;
                     saveState();
+                    renderHeroPortrait();
                 };
                 r.readAsDataURL(f);
             });
@@ -466,7 +607,7 @@
                 state.reseedCounter += 1;
                 saveState();
                 reseedBtn.textContent = 'Reseeded! Future unlocks will use new choices.';
-                setTimeout(() => { reseedBtn.textContent = 'Reseed (new gear/effects for future unlocks)'; }, 2000);
+                setTimeout(() => { reseedBtn.textContent = 'Reseed future unlocks (new random gear/effects for next tiers only)'; }, 2000);
             });
         }
     }
@@ -482,20 +623,19 @@
         function renderPool() {
             poolEl.innerHTML = '';
             (state.character.gearPool || []).forEach(g => {
-                const chip = document.createElement('span');
+                const chip = document.createElement('button');
+                chip.type = 'button';
                 chip.className = 'bp-gear-chip';
-                chip.textContent = g.label;
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.textContent = '×';
-                btn.setAttribute('aria-label', 'Remove');
-                btn.addEventListener('click', () => {
+                chip.textContent = g.label + ' ×';
+                chip.setAttribute('aria-label', 'Remove ' + g.label + ' from gear pool');
+                chip.addEventListener('click', () => {
                     state.character.gearPool = state.character.gearPool.filter(x => x.id !== g.id);
                     saveState();
                     renderPool();
-                    renderAccordions();
+                    renderPredefinedList(searchEl.value);
+                    syncTiersAfterGearChange();
+                    updateTabsForXp();
                 });
-                chip.appendChild(btn);
                 poolEl.appendChild(chip);
             });
             const count = (state.character.gearPool || []).length;
@@ -524,6 +664,8 @@
                         saveState();
                         renderPool();
                         renderPredefinedList(searchEl.value);
+                        syncTiersAfterGearChange();
+                        updateTabsForXp();
                     });
                     frag.appendChild(item);
                 });
@@ -543,55 +685,57 @@
             customEl.value = '';
             saveState();
             renderPool();
+            syncTiersAfterGearChange();
+            updateTabsForXp();
         });
         renderPool();
         renderPredefinedList();
     }
 
-    function updateGenerateButton() {
-        const btn = document.getElementById('bp-generate-btn');
-        if (!btn) return;
-        if (hasNewContentSinceLastGenerate()) {
-            btn.classList.add('bp-pulse-available');
-            btn.classList.remove('bp-success');
-        } else {
-            btn.classList.remove('bp-pulse-available');
-        }
-    }
+    function updateGenerateButton() { /* No button; kept for call-site compatibility */ }
 
-    function bindGenerateAndExport() {
-        const btn = document.getElementById('bp-generate-btn');
+    function runGeneratePrompts() {
         const statusEl = document.getElementById('bp-generate-status');
         const standaloneEl = document.getElementById('bp-standalone-prompt');
         const placeholderEl = document.getElementById('bp-placeholder-prompt');
         const compositeEl = document.getElementById('bp-composite-prompt');
-
-        function doGenerate() {
-            const active = getActiveSubTiers();
-            const result = buildCumulativePrompts(state.character, active, THEMES);
-            standaloneEl.value = result.standaloneGearPrompt;
-            placeholderEl.value = result.placeholderCharacterPrompt;
-            compositeEl.value = result.compositePrompt;
-            state.lastGeneratedState = {
-                activeCount: active.length,
-                activeSignature: JSON.stringify(active.map(s => ({ level: s.level, tier: s.tier, active: s.active })))
-            };
-            saveState();
-            btn.classList.remove('bp-pulse-available');
-            btn.classList.add('bp-success');
-            statusEl.textContent = 'Prompts generated. Copy and paste into your image AI.';
-            const wrap = document.getElementById('bp-confetti-wrap');
-            if (wrap) runMiniConfetti(wrap);
+        if (!statusEl || !standaloneEl) return;
+        const active = getActiveSubTiers();
+        if (active.length === 0) {
+            statusEl.textContent = 'Add at least 2 gear items (Gear tab) and set your XP. Tiers will appear on the Tiers tab—toggle some on, then return here.';
+            statusEl.style.color = 'var(--error)';
+            statusEl.style.display = 'block';
+            if (standaloneEl) standaloneEl.value = '';
+            if (placeholderEl) placeholderEl.value = '';
+            if (compositeEl) compositeEl.value = '';
+            return;
         }
+        if ((state.character.gearPool || []).length < 2) {
+            statusEl.textContent = 'Add at least 2 items to your gear pool first (Gear tab).';
+            statusEl.style.color = 'var(--error)';
+            statusEl.style.display = 'block';
+            return;
+        }
+        const result = buildCumulativePrompts(state.character, active, THEMES);
+        standaloneEl.value = result.standaloneGearPrompt;
+        placeholderEl.value = result.placeholderCharacterPrompt;
+        compositeEl.value = result.compositePrompt;
+        state.lastGeneratedState = {
+            activeCount: active.length,
+            activeSignature: JSON.stringify(active.map(s => ({ level: s.level, tier: s.tier, active: s.active })))
+        };
+        saveState();
+        statusEl.textContent = 'Prompts generated. Copy and paste into your image AI.';
+        statusEl.style.color = '';
+        statusEl.style.display = 'block';
+        const wrap = document.getElementById('bp-confetti-wrap');
+        if (wrap) runMiniConfetti(wrap);
+    }
 
-        btn.addEventListener('click', () => {
-            if ((state.character.gearPool || []).length < 2) {
-                statusEl.textContent = 'Add at least 2 items to your gear pool first.';
-                statusEl.style.color = 'var(--error)';
-                return;
-            }
-            doGenerate();
-        });
+    function bindGenerateAndExport() {
+        const standaloneEl = document.getElementById('bp-standalone-prompt');
+        const placeholderEl = document.getElementById('bp-placeholder-prompt');
+        const compositeEl = document.getElementById('bp-composite-prompt');
 
         ['bp-copy-standalone', 'bp-copy-placeholder', 'bp-copy-composite'].forEach((id, i) => {
             const copyBtn = document.getElementById(id);
@@ -712,28 +856,72 @@
     }
 
     function bindFilters() {
-        const levelSelect = document.getElementById('bp-filter-level');
-        const themeSelect = document.getElementById('bp-filter-theme');
-        if (levelSelect) {
-            for (let i = 1; i <= 20; i++) {
-                const opt = document.createElement('option');
-                opt.value = i;
-                opt.textContent = 'Level ' + i;
-                levelSelect.appendChild(opt);
-            }
-            levelSelect.addEventListener('change', renderAccordions);
-        }
-        if (themeSelect) {
-            window.BattlePassData.THEME_NAMES.forEach(n => {
-                const opt = document.createElement('option');
-                opt.value = n;
-                opt.textContent = n;
-                themeSelect.appendChild(opt);
-            });
-            themeSelect.addEventListener('change', renderAccordions);
-        }
         const searchEl = document.getElementById('bp-filter-search');
         if (searchEl) searchEl.addEventListener('input', renderAccordions);
+        const accordionsContainer = document.getElementById('bp-accordions');
+        const turnOnAll = document.getElementById('bp-turn-on-all');
+        const turnOffAll = document.getElementById('bp-turn-off-all');
+        const expandAll = document.getElementById('bp-expand-all');
+        const collapseAll = document.getElementById('bp-collapse-all');
+        if (turnOnAll) turnOnAll.addEventListener('click', turnOnAllTiers);
+        if (turnOffAll) turnOffAll.addEventListener('click', turnOffAllTiers);
+        if (expandAll && accordionsContainer) {
+            expandAll.addEventListener('click', () => {
+                accordionsContainer.querySelectorAll('.bp-accordion').forEach(acc => acc.classList.add('open'));
+            });
+        }
+        if (collapseAll && accordionsContainer) {
+            collapseAll.addEventListener('click', () => {
+                accordionsContainer.querySelectorAll('.bp-accordion').forEach(acc => acc.classList.remove('open'));
+            });
+        }
+    }
+
+    function resetEverything() {
+        if (!confirm('Reset everything? This clears your character, XP, tiers, and gallery. This cannot be undone.')) return;
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(SOUND_STORAGE_KEY);
+        } catch (_) {}
+        location.reload();
+    }
+
+    function bindReset() {
+        const btn = document.getElementById('bp-reset-all');
+        if (btn) btn.addEventListener('click', resetEverything);
+    }
+
+    function bindHeroPortrait() {
+        const fileEl = document.getElementById('bp-hero-portrait-file');
+        const wrap = document.getElementById('bp-hero-portrait-wrap');
+        if (fileEl) {
+            fileEl.addEventListener('change', (e) => {
+                const f = e.target.files[0];
+                if (!f) return;
+                const r = new FileReader();
+                r.onload = async () => {
+                    let dataUrl = r.result;
+                    dataUrl = await compressImageDataUrl(dataUrl, 800);
+                    state.character.portraitDataUrl = dataUrl;
+                    saveState();
+                    renderHeroPortrait();
+                };
+                r.readAsDataURL(f);
+                fileEl.value = '';
+            });
+        }
+        function triggerUpload() {
+            if (fileEl) fileEl.click();
+        }
+        if (wrap) {
+            wrap.addEventListener('click', triggerUpload);
+            wrap.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    triggerUpload();
+                }
+            });
+        }
     }
 
     function init() {
@@ -741,6 +929,7 @@
         state.character.gearPool = state.character.gearPool || [];
         ensureUnlocks();
         renderDashboardHero();
+        bindHeroPortrait();
         bindXpAndMilestone();
         bindTabs();
         bindCharacterForm();
@@ -748,9 +937,12 @@
         bindFilters();
         renderAccordions();
         bindGenerateAndExport();
+        bindReset();
         bindGalleryAdd();
         renderGallery();
         updateGenerateButton();
+        updateXpSectionCopy();
+        updateTabsForXp();
     }
 
     init();

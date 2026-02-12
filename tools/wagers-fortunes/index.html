@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wagers & Fortunes – D&D Tools Hub</title>
+    <link rel="stylesheet" href="../../global.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="wagers-fortunes.css">
+</head>
+<body>
+    <div class="container wf-app">
+        <header class="wf-header">
+            <div>
+                <h1>Wagers & Fortunes</h1>
+                <p class="wf-intro">Waterdeep-style storefront mystery boxes. DM defines outcomes—fair and repeatable.</p>
+            </div>
+            <div class="wf-header-actions">
+                <a href="../../index.html" class="theme-toggle" aria-label="Hub">&#127968;</a>
+                <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">&#127769;</button>
+            </div>
+        </header>
+
+        <div class="tab-navigation">
+            <button type="button" class="tab-btn wf-tab active" data-tab="builder">DM Builder</button>
+            <button type="button" class="tab-btn wf-tab" data-tab="run">Run Game</button>
+            <button type="button" class="tab-btn wf-tab" data-tab="log">Log</button>
+        </div>
+
+        <!-- DM Builder -->
+        <div id="wf-tab-builder" class="tab-content wf-tab-content">
+            <div id="wf-builder-list">
+                <div class="wf-form-section">
+                    <button type="button" id="wf-new-game" class="btn-primary">New game</button>
+                </div>
+                <div id="wf-games-list" class="wf-games-list"></div>
+            </div>
+            <div id="wf-builder-edit" class="wf-builder-edit hidden">
+                <h2 id="wf-game-form-title">Edit Game</h2>
+                <p id="wf-form-errors" class="wf-form-errors hidden" role="alert"></p>
+                <form id="wf-game-form" class="wf-game-form">
+                    <input type="hidden" id="wf-game-id">
+                    <div class="wf-form-group">
+                        <label for="wf-game-name">Game name</label>
+                        <input type="text" id="wf-game-name" required placeholder="e.g. Wagers & Fortunes: Waterdeep">
+                    </div>
+                    <div class="wf-form-group">
+                        <label for="wf-game-location">Location tag</label>
+                        <input type="text" id="wf-game-location" placeholder="Waterdeep">
+                    </div>
+                    <div class="wf-form-group">
+                        <label for="wf-game-description">Description</label>
+                        <textarea id="wf-game-description" rows="2" placeholder="Short description for the encounter"></textarea>
+                    </div>
+                    <div class="wf-form-group">
+                        <label for="wf-game-number-of-boxes">Number of boxes per tier</label>
+                        <input type="number" id="wf-game-number-of-boxes" min="1" value="3">
+                    </div>
+                    <div class="wf-form-group">
+                        <label><input type="checkbox" id="wf-game-shuffle"> Shuffle box order each run</label>
+                    </div>
+                    <fieldset class="wf-fieldset">
+                        <legend>Limiter (optional)</legend>
+                        <label><input type="checkbox" id="wf-limiter-enabled"> Enable limiter</label>
+                        <div class="wf-limiter-options">
+                            <label>Type
+                                <select id="wf-limiter-type">
+                                    <option value="per-day">Once per day per character</option>
+                                    <option value="per-session">Once per session per character</option>
+                                    <option value="cooldown-minutes">Cooldown (minutes)</option>
+                                </select>
+                            </label>
+                            <label>Cooldown minutes <input type="number" id="wf-limiter-value" min="1" placeholder="e.g. 60"></label>
+                        </div>
+                    </fieldset>
+                    <fieldset class="wf-fieldset">
+                        <legend>Skill check hint (optional)</legend>
+                        <label><input type="checkbox" id="wf-hint-enabled"> Enable hint check</label>
+                        <div class="wf-hint-options">
+                            <label>Skill <input type="text" id="wf-hint-skill" placeholder="Insight"></label>
+                            <label>DC <input type="number" id="wf-hint-dc" min="1" placeholder="12"></label>
+                            <label>Hint text (vague) <input type="text" id="wf-hint-style" placeholder="One box might be worth your while…"></label>
+                        </div>
+                    </fieldset>
+                    <div class="wf-form-section">
+                        <h3>Tiers and boxes</h3>
+                        <button type="button" id="wf-quick-start" class="btn-secondary">Quick start template (one tier, 3 boxes)</button>
+                        <button type="button" id="wf-add-tier" class="btn-secondary">Add tier</button>
+                        <div id="wf-tiers-container"></div>
+                        <p class="help-text">Add a tier via Quick start, then edit. Each tier needs exactly the number of boxes above.</p>
+                    </div>
+                    <div class="wf-form-actions">
+                        <button type="button" id="wf-save-game" class="btn-primary">Save game</button>
+                        <button type="button" id="wf-cancel-game" class="btn-secondary">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Run Game -->
+        <div id="wf-tab-run" class="tab-content wf-tab-content hidden">
+            <div class="wf-run-setup">
+                <div class="wf-form-group">
+                    <label for="wf-run-game">Game</label>
+                    <select id="wf-run-game"></select>
+                </div>
+                <div class="wf-form-group">
+                    <label for="wf-run-tier">Tier (wager)</label>
+                    <select id="wf-run-tier"></select>
+                </div>
+                <div class="wf-form-group">
+                    <label for="wf-run-player">Character / player name (optional)</label>
+                    <input type="text" id="wf-run-player" placeholder="For limiter tracking">
+                </div>
+                <div class="wf-form-group">
+                    <label><input type="checkbox" id="wf-dm-override"> DM override (allow despite limiter)</label>
+                </div>
+                <button type="button" id="wf-run-start" class="btn-primary">Start</button>
+            </div>
+            <div id="wf-run-play-wrap" class="wf-run-play hidden">
+                <div class="wf-form-group">
+                    <button type="button" id="wf-hint-btn" class="btn-secondary">Make a check (hint)</button>
+                </div>
+                <div id="wf-run-hint" class="wf-hint-panel hidden">
+                    <p class="wf-hint-text"></p>
+                </div>
+                <div id="wf-run-boxes" class="wf-run-boxes"></div>
+                <div id="wf-run-reveal" class="wf-reveal-panel hidden">
+                    <h3>Reveal</h3>
+                    <p class="wf-reveal-text"></p>
+                    <p class="wf-reveal-contents"></p>
+                </div>
+                <button type="button" id="wf-run-again" class="btn-primary hidden">Run again</button>
+            </div>
+        </div>
+
+        <!-- Log -->
+        <div id="wf-tab-log" class="tab-content wf-tab-content hidden">
+            <div class="wf-log-filters">
+                <label>Game <select id="wf-log-game"></select></label>
+                <label>Tier <select id="wf-log-tier"></select></label>
+                <label>Name <input type="text" id="wf-log-name" placeholder="Filter by player/character"></label>
+            </div>
+            <div class="wf-log-export">
+                <button type="button" id="wf-export-json" class="btn-secondary">Export JSON</button>
+                <button type="button" id="wf-export-csv" class="btn-secondary">Export CSV</button>
+            </div>
+            <div class="wf-log-table-wrap">
+                <table id="wf-log-table" class="wf-log-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Game</th>
+                            <th>Tier</th>
+                            <th>Player</th>
+                            <th>Wager</th>
+                            <th>Box</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="wf-logic.js"></script>
+    <script src="seed-data.js"></script>
+    <script src="script.js"></script>
+    <script src="../../theme.js"></script>
+</body>
+</html>

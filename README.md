@@ -122,6 +122,25 @@ Tools live in `tools/<name>/` with `index.html` as the entry point.
 
 ---
 
+### Wagers & Fortunes
+
+**Page:** [tools/wagers-fortunes/](tools/wagers-fortunes/)
+
+- **Purpose:** Configurable Waterdeep-style storefront mystery-box encounter. The DM defines outcomes for each box so play is fair and repeatable.
+- **CSS:** global.css, styles.css, [wagers-fortunes.css](tools/wagers-fortunes/wagers-fortunes.css)
+- **Scripts:** theme.js, [wf-logic.js](tools/wagers-fortunes/wf-logic.js), [seed-data.js](tools/wagers-fortunes/seed-data.js), [script.js](tools/wagers-fortunes/script.js)
+- **Features:**
+  - **DM Builder:** Create/edit/delete games; define tiers (wager) and boxes (outcome type, reveal text, contents, estimated value, DM notes). Quick-start template (one tier, three boxes: break-even / win / loss). Optional limiter (per day, per session, or cooldown) and optional skill-check hint (e.g. Insight DC 12 for a vague hint).
+  - **Run Game:** Select game and tier, optional character name; Start then choose a box to reveal the outcome. Outcomes are fixed unless “shuffle boxes each run” is on. Session log records each play; limiter can block with a clear message (DM override available).
+  - **Log:** Table of plays with filters by game, tier, and name; export to JSON or CSV.
+- **How to add a game:** DM Builder → New game → set name, location, description, number of boxes → Add tier or Quick start template → for each tier set wager and define each box (label, type, reveal text, contents, estimated value, notes) → Save game.
+- **How to define tiers:** Each game has one or more tiers. Each tier has a wager (gp) and exactly N boxes (N = game’s “number of boxes”). Define each box’s outcome type (break-even / win / loss / custom), player-facing reveal text, full contents, and optional DM notes.
+- **How to run at the table:** Run Game → select game and tier → optionally enter character/player name → Start → (optional) Make a check for a hint → player picks a box → reveal outcome; “Run again” respects the limiter unless DM override is used.
+
+- **Testing:** Open [tools/wagers-fortunes/test-runner.html](tools/wagers-fortunes/test-runner.html) to run logic tests (validation, limiter, shuffle, log shape). Manual smoke test: open Run Game → select “Wagers & Fortunes: Waterdeep” and a tier → Start → pick a box → confirm reveal and a new entry in the Log tab.
+
+---
+
 ### Playstyle Quiz
 
 **Page:** [tools/playstyle-quiz/](tools/playstyle-quiz/)
@@ -174,4 +193,5 @@ HTML/CSS/JS only; localStorage where needed; PDF.js via CDN for PDF tools; no bu
 | [tools/playstyle-quiz/](tools/playstyle-quiz/) | global.css, playstyle-quiz.css | theme.js, playstyle-quiz.js | 15-question quiz, results, Copy/Share |
 | [tools/legacy-project-builder/](tools/legacy-project-builder/) | global.css, styles.css | PDF.js, character-sheet-importer.js, theme.js, legacy-project-builder.js | PDF import, wizard steps, JSON import/export |
 | [tools/songbook/](tools/songbook/) | global.css, ambience-sounds.css | theme.js, ambience-sounds.js, presets | YouTube music links, folders, export/import |
+| [tools/wagers-fortunes/](tools/wagers-fortunes/) | global.css, styles.css, wagers-fortunes.css | theme.js, wf-logic.js, seed-data.js, script.js | DM Builder, Run Game, Log, limiter, hint check, export JSON/CSV |
 | [tools/qbasic-editor/](tools/qbasic-editor/) | global.css, qbasic-editor.css | theme.js | Plain-text editor, autosave |

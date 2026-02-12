@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wagers & Fortunes – Tests</title>
+    <link rel="stylesheet" href="../../global.css">
+</head>
+<body>
+    <div class="container" style="padding: 2rem;">
+        <h1>Wagers & Fortunes – Logic tests</h1>
+        <p id="test-summary">Running…</p>
+        <pre id="test-output" style="background: var(--input-bg); padding: 1rem; border-radius: 6px; overflow: auto;"></pre>
+    </div>
+    <script src="wf-logic.js"></script>
+    <script>
+        (function () {
+            'use strict';
+            var L = window.WagersFortunesLogic;
+            if (!L) {
+                document.getElementById('test-summary').textContent = 'Failed: WagersFortunesLogic not found.';
+                return;
+            }
+            var out = [];
+            var failed = 0;
+            function assert(condition, message) {
+                if (!condition) {
+                    failed++;
+                    out.push('FAIL: ' + message);
+                } else {
+                    out.push('OK: ' + message);
+                }
+            }
+            function log(msg) { out.push(msg); }
+
+            // Validation: empty name
+            var r = L.validateGame({ name: '', numberOfBoxes: 3, tiers: [] });
+            assert(!r.valid && r.errors.length > 0, 'validateGame rejects empty name');
+
+            // Validation: invalid numberOfBoxes
+            r = L.validateGame({ name: 'Test', numberOfBoxes: 0, tiers: [] });
+            assert(!r.valid, 'validateGame rejects numberOfBoxes < 1');
+
+            // Validation: tier with wrong box count
+            r = L.validateGame({
+                name: 'G',
+                numberOfBoxes: 3,
+                tiers: [{ id: 't1', gameId: 'g1', wagerGp: 10, boxes: [{ id: 'b1' }, { id: 'b2' }] }]
+            });
+            assert(!r.valid && r.errors.some(function (e) { return e.indexOf('exactly') !== -1; }), 'validateGame rejects tier with wrong box count');
+
+            // Validation: tier wager <= 0
+            r = L.validateGame({
+                name: 'G',
+                numberOfBoxes: 2,
+                tiers: [{ id: 't1', gameId: 'g1', wagerGp: 0, boxes: [{ id: 'b1', estimatedValueGp: 0 }, { id: 'b2', estimatedValueGp: 0 }] }]
+            });
+            assert(!r.valid, 'validateGame rejects wager <= 0');
+
+            // Validation: valid game
+            r = L.validateGame({
+                name: 'Good',
+                numberOfBoxes: 2,
+                tiers: [{ id: 't1', gameId: 'g1', wagerGp: 10, boxes: [{ id: 'b1', estimatedValueGp: 10 }, { id: 'b2', estimatedValueGp: 15 }] }]
+            });
+            assert(r.valid && r.errors.length === 0, 'validateGame accepts valid game');
+
+            // Limiter: no limiter
+            var check = L.checkLimiter(null, 'Alice', {}, null);
+            assert(check.allowed === true, 'checkLimiter allows when no limiter');
+
+            // Limiter: per-day, no previous play
+            check = L.checkLimiter({ type: L.LIMITER_PER_DAY }, 'Bob', {}, null);
+            assert(check.allowed === true, 'checkLimiter allows when no previous play');
+
+            // Limiter: per-day, played today
+            var now = Date.now();
+            check = L.checkLimiter({ type: L.LIMITER_PER_DAY }, 'Bob', { Bob: { timestamp: now, sessionId: 's1' } }, 's1', now);
+            assert(check.allowed === false, 'checkLimiter blocks per-day when already played today');
+
+            // Limiter: cooldown not elapsed
+            check = L.checkLimiter({ type: L.LIMITER_COOLDOWN, value: 60 }, 'C', { C: { timestamp: now - 30 * 60 * 1000 } }, null, now);
+            assert(check.allowed === false, 'checkLimiter blocks when cooldown not elapsed');
+
+            // Shuffle: preserves set
+            var boxes = [{ id: 'a' }, { id: 'b' }, { id: 'c' }];
+            var shuffled = L.shuffleBoxOrder(boxes);
+            assert(shuffled.length === 3, 'shuffleBoxOrder preserves length');
+            assert(shuffled[0].id !== undefined && shuffled[1].id !== undefined && shuffled[2].id !== undefined, 'shuffleBoxOrder preserves box ids');
+
+            // buildLogEntry shape
+            var entry = L.buildLogEntry('g1', 't1', 'Alice', 10, 'b1', 'win: Nice!', 'sess1');
+            assert(entry.timestamp > 0 && entry.gameId === 'g1' && entry.tierId === 't1' && entry.playerName === 'Alice' && entry.wagerGp === 10 && entry.chosenBoxId === 'b1' && entry.resultSummary === 'win: Nice!', 'buildLogEntry produces correct shape');
+
+            // genId
+            var id1 = L.genId();
+            var id2 = L.genId();
+            assert(typeof id1 === 'string' && id1.length > 0 && id1 !== id2, 'genId produces non-empty unique ids');
+
+            document.getElementById('test-output').textContent = out.join('\n');
+            document.getElementById('test-summary').textContent = failed === 0 ? 'All tests passed.' : failed + ' test(s) failed.';
+        })();
+    </script>
+</body>
+</html>

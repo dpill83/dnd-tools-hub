@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cosmetic Battle Pass – D&D 5e</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../global.css">
     <link rel="stylesheet" href="../../styles.css">
     <link rel="stylesheet" href="battle-pass.css">
@@ -13,7 +16,7 @@
         <header class="bp-header">
             <div>
                 <h1>Cosmetic Battle Pass</h1>
-                <p class="intro" style="margin-top:0.25rem;color:var(--text-light);font-size:0.95rem;">Level up your gear look with XP. Zero power creep—pure cosmetic flair.</p>
+                <p class="intro">Level up your gear look with XP. Zero power creep—pure cosmetic flair.</p>
             </div>
             <div class="bp-header-actions">
                 <a href="../../index.html" class="theme-toggle" aria-label="Hub">&#127968;</a>
@@ -21,56 +24,79 @@
             </div>
         </header>
 
-        <!-- Dashboard hero: level badge + next unlock ring -->
-        <section id="bp-dashboard-hero" class="bp-dashboard-hero" data-level="1">
-            <div class="bp-level-badge" id="bp-hero-level">1</div>
-            <div class="bp-theme-name" id="bp-hero-theme">Cotton</div>
-            <div class="bp-progress-bar-wrap">
-                <div class="bp-progress-bar-fill" id="bp-progress-fill" style="width: 0%;"></div>
-            </div>
-            <div class="bp-next-unlock">
-                <div class="bp-ring-wrap">
-                    <svg class="bp-ring-svg" viewBox="0 0 36 36">
-                        <circle class="bp-ring-bg" cx="18" cy="18" r="16" stroke-width="3"/>
-                        <circle class="bp-ring-fill" id="bp-ring-fill" cx="18" cy="18" r="16" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="100"/>
-                    </svg>
+        <!-- Full-width epic fantasy hero + character portrait -->
+        <div class="bp-dashboard-row">
+            <section id="bp-dashboard-hero" class="bp-dashboard-hero bp-hero-fantasy" data-level="1">
+                <div class="bp-hero-bg" aria-hidden="true"></div>
+                <div class="bp-hero-content">
+                    <div class="bp-hero-top">
+                        <div class="bp-level-badge" id="bp-hero-level">1</div>
+                        <div class="bp-theme-name" id="bp-hero-theme">Cotton</div>
+                    </div>
+                    <div class="bp-progress-bar-wrap">
+                        <div class="bp-progress-bar-fill" id="bp-progress-fill"></div>
+                        <div class="bp-progress-bar-shine"></div>
+                        <div id="bp-progress-tier-markers" class="bp-progress-tier-markers" aria-hidden="true"></div>
+                    </div>
+                    <div class="bp-next-unlock">
+                        <div class="bp-ring-wrap">
+                            <svg class="bp-ring-svg" viewBox="0 0 36 36">
+                                <circle class="bp-ring-bg" cx="18" cy="18" r="16" stroke-width="3"/>
+                                <circle class="bp-ring-fill" id="bp-ring-fill" cx="18" cy="18" r="16" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="100"/>
+                            </svg>
+                        </div>
+                        <span class="bp-next-unlock-icon" aria-hidden="true">&#10026;</span>
+                        <span id="bp-next-unlock-text">Next unlock in 75 XP (Tier 1)</span>
+                    </div>
                 </div>
-                <span id="bp-next-unlock-text">Next unlock in 75 XP (Tier 1)</span>
+            </section>
+            <div class="bp-dashboard-portrait">
+                <div id="bp-hero-portrait-wrap" class="bp-hero-portrait-wrap" role="button" tabindex="0" aria-label="Character image – click to update">
+                    <img id="bp-hero-portrait-img" class="bp-hero-portrait-img" alt="Character portrait">
+                    <span id="bp-hero-portrait-placeholder" class="bp-hero-portrait-placeholder">Character image</span>
+                </div>
+                <input type="file" id="bp-hero-portrait-file" accept="image/*" aria-label="Update character image" class="bp-hero-portrait-input">
             </div>
-        </section>
-
-        <div class="bp-xp-row">
-            <label for="bp-current-xp">Current XP</label>
-            <input type="number" id="bp-current-xp" min="0" value="0" placeholder="0">
-            <button type="button" id="bp-milestone-btn" class="btn-secondary">Set to level start (milestone)</button>
-            <span id="bp-xp-error" class="bp-xp-error" style="display:none;"></span>
         </div>
 
         <div class="bp-tabs">
-            <button type="button" class="bp-tab active" data-tab="dashboard">Dashboard & Tiers</button>
-            <button type="button" class="bp-tab" data-tab="character">Character & Gear</button>
+            <button type="button" class="bp-tab active" data-tab="xp">XP Level</button>
+            <button type="button" class="bp-tab" data-tab="character">Character</button>
+            <button type="button" class="bp-tab" data-tab="gear">Gear</button>
+            <button type="button" class="bp-tab" data-tab="dashboard">Tiers</button>
             <button type="button" class="bp-tab" data-tab="generate">Generate & Gallery</button>
+            <button type="button" class="bp-tab" data-tab="settings">Settings</button>
         </div>
 
-        <div id="bp-tab-dashboard" class="bp-tab-content active">
+        <div id="bp-tab-xp" class="bp-tab-content active">
+            <section class="bp-form-section">
+                <h2 id="bp-xp-heading">Enter current XP</h2>
+                <p id="bp-xp-help" class="help-text">Set your starting XP to unlock the other tabs. This cannot be undone.</p>
+                <div class="bp-xp-row">
+                    <label for="bp-current-xp" id="bp-xp-label">Current XP</label>
+                    <input type="number" id="bp-current-xp" min="0" value="0" placeholder="0">
+                </div>
+                <span id="bp-xp-error" class="bp-xp-error"></span>
+            </section>
+        </div>
+
+        <div id="bp-tab-dashboard" class="bp-tab-content">
             <section class="bp-form-section" id="bp-current-level-section">
                 <h2 id="bp-current-level-heading">Your look – Level <span id="bp-current-level-num">1</span></h2>
-                <p class="help-text" id="bp-current-level-hint" style="font-size:0.9rem;color:var(--text-light);margin-bottom:0.75rem;">Toggle which tiers to include in your generated prompts.</p>
+                <p class="help-text" id="bp-current-level-hint">Toggle which tiers to include in your generated prompts.</p>
                 <div id="bp-current-level-tiers" class="bp-tier-cards-grid"></div>
             </section>
-            <details class="bp-form-section" id="bp-other-levels-details">
-                <summary>Other unlocked levels</summary>
+            <section class="bp-form-section" id="bp-other-levels-section">
+                <h2>All unlocked levels</h2>
                 <div class="bp-filter-bar">
-                    <input type="text" id="bp-filter-search" placeholder="Filter by level, theme, gear…">
-                    <select id="bp-filter-level" aria-label="Filter by level">
-                        <option value="">All levels</option>
-                    </select>
-                    <select id="bp-filter-theme" aria-label="Filter by theme">
-                        <option value="">All themes</option>
-                    </select>
+                    <input type="text" id="bp-filter-search" placeholder="Filter by level, theme, gear…" aria-label="Filter tiers">
+                    <button type="button" id="bp-turn-on-all" class="btn-secondary">Turn all on</button>
+                    <button type="button" id="bp-turn-off-all" class="btn-secondary">Turn all off</button>
+                    <button type="button" id="bp-expand-all" class="btn-secondary">Expand all</button>
+                    <button type="button" id="bp-collapse-all" class="btn-secondary">Collapse all</button>
                 </div>
                 <div id="bp-accordions"></div>
-            </details>
+            </section>
         </div>
 
         <div id="bp-tab-character" class="bp-tab-content">
@@ -86,26 +112,34 @@
                 </div>
                 <div class="bp-form-group">
                     <label for="bp-art-style">Art style</label>
-                    <input type="text" id="bp-art-style" value="epic high-fantasy" placeholder="epic high-fantasy">
+                    <select id="bp-art-style" aria-label="Art style">
+                        <option value="epic high-fantasy">Epic high-fantasy</option>
+                        <option value="dark fantasy">Dark fantasy</option>
+                        <option value="classic D&D illustration">Classic D&D illustration</option>
+                        <option value="painterly fantasy">Painterly fantasy</option>
+                        <option value="cinematic fantasy">Cinematic fantasy</option>
+                    </select>
                 </div>
                 <div class="bp-form-group">
-                    <label for="bp-motif">Personal motif</label>
+                    <label for="bp-motif">Personal motif (optional)</label>
                     <input type="text" id="bp-motif" placeholder="e.g. sunburst holy symbol">
                 </div>
                 <div class="bp-form-group">
                     <label>Portrait (optional)</label>
                     <input type="file" id="bp-portrait-file" accept="image/*" aria-label="Upload character portrait">
-                    <p class="help-text" style="font-size:0.85rem;color:var(--text-light);margin-top:0.25rem;">For composite “equip gear” prompts. If none, we’ll give you a placeholder character prompt first.</p>
-                </div>
-                <div class="bp-form-group">
-                    <label><input type="checkbox" id="bp-sound-toggle"> Play sound on unlock</label>
-                </div>
-                <div class="bp-form-group">
-                    <button type="button" id="bp-reseed-btn" class="btn-secondary">Reseed (new gear/effects for future unlocks)</button>
+                    <p class="help-text">Used for the composite prompt: with a portrait, the app tells the AI to equip this character; without one, use the placeholder character prompt in Generate &amp; Gallery first to create a base character, then equip.</p>
                 </div>
             </section>
+        </div>
+
+        <div id="bp-tab-gear" class="bp-tab-content">
             <section class="bp-form-section">
                 <h2>Gear pool (min 2)</h2>
+                <div class="bp-form-group">
+                    <label>Your gear pool</label>
+                    <p class="help-text">Click a gear below to add it here; click a chip to remove it.</p>
+                    <div class="bp-gear-pool-chips" id="bp-gear-pool"></div>
+                </div>
                 <div class="bp-form-group">
                     <label>Add from list</label>
                     <div class="bp-gear-search">
@@ -115,42 +149,52 @@
                 </div>
                 <div class="bp-form-group">
                     <label>Custom item</label>
-                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                    <div class="bp-gear-custom-row">
                         <input type="text" id="bp-gear-custom" placeholder="Item name">
                         <button type="button" id="bp-gear-add-custom" class="btn-secondary">Add</button>
                     </div>
                 </div>
+                <p id="bp-gear-error" class="bp-error-msg"></p>
+            </section>
+        </div>
+
+        <div id="bp-tab-settings" class="bp-tab-content">
+            <section class="bp-form-section">
+                <h2>Settings</h2>
                 <div class="bp-form-group">
-                    <label>Your gear pool</label>
-                    <div class="bp-gear-pool-chips" id="bp-gear-pool"></div>
+                    <label><input type="checkbox" id="bp-sound-toggle"> Play sound on unlock</label>
                 </div>
-                <p id="bp-gear-error" class="bp-error-msg" style="display:none;"></p>
+                <div class="bp-form-group bp-optional-controls">
+                    <button type="button" id="bp-reseed-btn" class="bp-reseed-btn">Reseed future unlocks (new random gear/effects for next tiers only)</button>
+                    <p class="help-text">Only affects tiers you haven’t unlocked yet.</p>
+                </div>
+                <div class="bp-form-group">
+                    <button type="button" id="bp-reset-all" class="bp-reset-btn">Reset everything</button>
+                </div>
             </section>
         </div>
 
         <div id="bp-tab-generate" class="bp-tab-content">
-            <section class="bp-form-section">
-                <button type="button" id="bp-generate-btn" class="bp-generate-btn">Generate prompts</button>
-                <p id="bp-generate-status" style="margin-top:0.5rem;font-size:0.9rem;color:var(--text-light);"></p>
-            </section>
+            <p id="bp-generate-status" class="bp-generate-status"></p>
             <div class="bp-form-group">
                 <label>Standalone gear prompt</label>
                 <textarea id="bp-standalone-prompt" rows="6" readonly placeholder="Generate to see prompt."></textarea>
-                <button type="button" id="bp-copy-standalone" class="btn-secondary" style="margin-top:0.5rem;">Copy</button>
+                <button type="button" id="bp-copy-standalone" class="btn-secondary">Copy</button>
             </div>
             <div class="bp-form-group">
-                <label>Placeholder character prompt (use when no portrait)</label>
-                <textarea id="bp-placeholder-prompt" rows="2" readonly></textarea>
-                <button type="button" id="bp-copy-placeholder" class="btn-secondary" style="margin-top:0.5rem;">Copy</button>
+                <label for="bp-placeholder-prompt">Placeholder character prompt (use when no portrait)</label>
+                <textarea id="bp-placeholder-prompt" rows="2" readonly placeholder="Generate to see prompt." aria-label="Placeholder character prompt for use when no portrait"></textarea>
+                <button type="button" id="bp-copy-placeholder" class="btn-secondary">Copy</button>
             </div>
             <div class="bp-form-group">
                 <label>Composite prompt (equip gear on portrait)</label>
+                <p class="help-text">With portrait: equip on your image. Without: use the placeholder character prompt above first, then equip.</p>
                 <textarea id="bp-composite-prompt" rows="6" readonly placeholder="Generate to see prompt."></textarea>
-                <button type="button" id="bp-copy-composite" class="btn-secondary" style="margin-top:0.5rem;">Copy</button>
+                <button type="button" id="bp-copy-composite" class="btn-secondary">Copy</button>
             </div>
             <section class="bp-form-section">
                 <h2>Gallery (download preferred; max 20)</h2>
-                <p class="help-text" style="font-size:0.85rem;margin-bottom:0.5rem;">Add images you generate elsewhere. Stored locally; download to keep.</p>
+                <p class="help-text">Add images you generate elsewhere. Stored locally; download to keep.</p>
                 <input type="file" id="bp-gallery-add" accept="image/*" aria-label="Add image to gallery" class="bp-gallery-add-input">
                 <div class="bp-gallery-grid" id="bp-gallery"></div>
             </section>
