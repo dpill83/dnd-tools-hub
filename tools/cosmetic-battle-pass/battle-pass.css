@@ -111,7 +111,7 @@
 }
 .bp-dashboard-left {
     flex: 1 1 0;
-    min-width: 0;
+    min-width: 280px;
     display: flex;
     flex-direction: column;
     gap: var(--bp-spacing-sm);
@@ -133,8 +133,9 @@
 }
 .bp-character-card .bp-char-card-name { font-weight: 700; }
 .bp-dashboard-hero {
-    flex: 1 1 0;
+    flex: 1 1 auto;
     min-width: 0;
+    min-height: 160px;
     position: relative;
     overflow: hidden;
     border-radius: 20px;
@@ -615,17 +616,23 @@
 }
 .bp-gear-chip:hover { background: var(--card-bg); border-color: var(--text-light); }
 
-/* Tabs */
+/* Tabs – horizontal scroll only, no vertical wrap */
 .bp-tabs {
     display: flex;
     overflow-x: auto;
+    overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     gap: 12px;
     border-bottom: 2px solid var(--border);
     margin-bottom: 1rem;
     flex-wrap: nowrap;
+    flex-shrink: 0;
 }
-.bp-tabs .bp-tab { flex-shrink: 0; white-space: nowrap; }
+.bp-tabs .bp-tab {
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: visible;
+}
 .bp-tab {
     padding: 0.75rem 1.25rem;
     background: transparent;
@@ -678,12 +685,20 @@
     min-height: 180px;
 }
 .bp-gen-result-status { margin-bottom: 0.5rem; font-size: 0.9rem; }
-#bp-gen-result-image-wrap { margin-bottom: 0.75rem; min-height: 120px; }
-#bp-gen-result-image-wrap img {
-    display: block;
+#bp-gen-result-image-wrap {
+    margin-bottom: 0.75rem;
+    min-height: 120px;
+    overflow: visible;
+}
+#bp-gen-result-image-wrap img,
+#bp-gen-result-image-wrap .bp-gen-result-img {
+    display: block !important;
     max-width: 100%;
+    width: auto;
     height: auto;
     max-height: min(400px, 60vh);
+    min-height: 120px;
+    object-fit: contain;
     border-radius: 6px;
     vertical-align: top;
 }
@@ -695,6 +710,14 @@
 /* Tooltip for tier card narrative */
 .bp-tier-card[title] { cursor: help; }
 .bp-error-msg { color: var(--error); font-size: 0.9rem; margin-top: 0.25rem; }
+
+/* Desktop: ensure hero (Battle Pass card) is visible and has space */
+@media (min-width: 901px) {
+    .bp-dashboard-hero {
+        min-height: 180px;
+        display: block;
+    }
+}
 
 /* 900px: single column dashboard, compact portrait */
 @media (max-width: 900px) {
@@ -722,8 +745,7 @@
     .bp-tier-cards-grid { grid-template-columns: 1fr; }
     .bp-header { flex-direction: column; align-items: flex-start; }
     .bp-tabs { position: sticky; top: env(safe-area-inset-top, 0); z-index: 10; background: var(--surface); padding-top: 4px; }
-    .bp-tab { padding: 0.5rem 0.75rem; font-size: 0.9rem; }
-    .bp-tab[data-tab="generate"] { white-space: normal; max-width: 100px; }
+    .bp-tab { padding: 0.5rem 0.75rem; font-size: 0.875rem; }
     .bp-form-group input,
     .bp-form-group select,
     .bp-form-group textarea,

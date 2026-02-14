@@ -826,10 +826,12 @@
                 resultWrap.classList.add('bp-gen-result-visible');
             }
             if (resultStatus) { resultStatus.style.color = ''; resultStatus.textContent = loading ? 'Generating image…' : ''; }
-            if (resultImageWrap) resultImageWrap.innerHTML = '';
-            if (resultActions) {
-                resultActions.classList.add('bp-gen-result-hidden');
-                resultActions.classList.remove('bp-gen-result-visible');
+            if (loading) {
+                if (resultImageWrap) resultImageWrap.innerHTML = '';
+                if (resultActions) {
+                    resultActions.classList.add('bp-gen-result-hidden');
+                    resultActions.classList.remove('bp-gen-result-visible');
+                }
             }
         }
 
@@ -839,6 +841,7 @@
             resultImageWrap.innerHTML = '';
             const img = document.createElement('img');
             img.alt = 'Generated image';
+            img.className = 'bp-gen-result-img';
             const src = resolveImageUrl(data.imageUrl);
             img.onload = () => {
                 if (resultStatus) resultStatus.textContent = 'Done. Add to gallery or set as portrait.';
@@ -858,8 +861,8 @@
                     resultActions.classList.remove('bp-gen-result-visible');
                 }
             };
-            img.src = src;
             resultImageWrap.appendChild(img);
+            img.src = src;
         }
 
         function showResult(result) {
