@@ -82,7 +82,7 @@
                     state.passXp = Math.max(0, parseInt(parsed.passXp, 10) || 0);
                     state.reseedCounter = parseInt(parsed.reseedCounter, 10) || 0;
                     state.subTiers = Array.isArray(parsed.subTiers) ? parsed.subTiers : [];
-                    state.gallery = Array.isArray(parsed.gallery) ? parsed.gallery.slice(0, GALLERY_CAP) : [];
+                    state.gallery = Array.isArray(parsed.gallery) ? parsed.gallery.slice(0, GALLERY_CAP).map((e, i) => ({ ...e, id: e.id || 'g' + Date.now() + '-' + i + '-' + Math.random().toString(36).slice(2, 8) })) : [];
                 }
             }
             const soundRaw = localStorage.getItem(SOUND_STORAGE_KEY);
@@ -303,6 +303,27 @@
             nextEl.textContent = 'Max tier reached!';
         }
         renderHeroPortrait();
+        renderAtAGlance();
+    }
+
+    function renderAtAGlance() {
+        const el = document.getElementById('bp-at-a-glance');
+        if (!el) return;
+        const xp = state.currentXp + state.passXp;
+        const level = getLevelFromXp(xp);
+        const themeName = getThemeForLevelTier(level, 0);
+        const unlocked = getAllUnlockedSubTiers(xp);
+        const next = unlocked._nextUnlock;
+        const nextText = next ? `${next.need} XP to L${next.level}T${next.tier}` : 'Max tier';
+        el.innerHTML = '<span>XP: ' + xp.toLocaleString() + '</span><span>Level: ' + level + '</span><span>Tier: ' + themeName + '</span><span>Next: ' + nextText + '</span><span>' + (state.character.name || state.character.class || '—') + '</span>';
+    }
+
+    function renderCharacterCard() {
+        const nameEl = document.getElementById('bp-char-card-name');
+        const classEl = document.getElementById('bp-char-card-class');
+        if (nameEl) nameEl.textContent = (state.character.name || '').trim() || '—';
+        if (classEl) classEl.textContent = (state.character.class || '').trim() || '—';
+        renderHeroPortrait();
     }
 
     function renderHeroPortrait() {
@@ -317,11 +338,11 @@
             if (src) {
                 imgEl.src = src;
                 imgEl.classList.add('bp-hero-portrait-visible');
-                placeholderEl.style.display = 'none';
+                placeholderEl.classList.add('is-hidden');
             } else {
                 imgEl.removeAttribute('src');
                 imgEl.classList.remove('bp-hero-portrait-visible');
-                placeholderEl.style.display = 'block';
+                placeholderEl.classList.remove('is-hidden');
             }
         }
     }
@@ -387,7 +408,7 @@
         const search = filterSearch.toLowerCase();
 
         const levels = Object.keys(byLevel).map(Number).sort((a, b) => a - b).filter(L => L < currentLevel);
-        if (otherSection) otherSection.style.display = state.subTiers.length === 0 ? 'none' : 'block';
+        if (otherSection) otherSection.classList.toggle('is-hidden', state.subTiers.length === 0);
 
         container.innerHTML = '';
         for (const level of levels) {
@@ -511,7 +532,7 @@
             }
             if (v < state.currentXp) {
                 errEl.textContent = `XP cannot be lower than current (${state.currentXp.toLocaleString()}).`;
-                errEl.style.display = 'block';
+                errEl.classList.remove('is-hidden');
                 xpInput.value = state.currentXp;
                 return;
             }
@@ -525,7 +546,7 @@
                     return;
                 }
             }
-            errEl.style.display = 'none';
+            errEl.classList.add('is-hidden');
             state.currentXp = v;
             updateXpSectionCopy();
             updateTabsForXp();
@@ -544,26 +565,26 @@
     }
 
     function bindTabs() {
-        document.querySelectorAll('.bp-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                if (tab.classList.contains('bp-tab-disabled')) return;
-                const tabId = tab.getAttribute('data-tab');
-                const id = 'bp-tab-' + tabId;
-                document.querySelectorAll('.bp-tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.bp-tab-content').forEach(c => c.classList.remove('active'));
-                tab.classList.add('active');
-                const panel = document.getElementById(id);
-                if (panel) panel.classList.add('active');
-                if (tabId === 'dashboard') {
-                    ensureUnlocks();
-                    renderDashboardHero();
-                    renderAccordions();
-                    updateGenerateButton();
-                }
-                if (tabId === 'generate') {
-                    runGeneratePrompts();
-                }
-            });
+        const app = document.querySelector('.battle-pass-app');
+        if (!app) return;
+        app.addEventListener('click', (e) => {
+            const tab = e.target.closest('.bp-tab');
+            if (!tab || tab.classList.contains('bp-tab-disabled')) return;
+            const tabId = tab.getAttribute('data-tab');
+            const id = 'bp-tab-' + tabId;
+            document.querySelectorAll('.bp-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.bp-tab-content').forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            const panel = document.getElementById(id);
+            if (panel) panel.classList.add('active');
+            tab.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+            if (tabId === 'dashboard') {
+                ensureUnlocks();
+                renderDashboardHero();
+                renderAccordions();
+                updateGenerateButton();
+            }
+            if (tabId === 'generate') runGeneratePrompts();
         });
     }
 
@@ -587,25 +608,14 @@
             el.addEventListener(event, () => {
                 state.character[stateKey] = el.value;
                 saveState();
+                renderCharacterCard();
                 updateTabsForXp();
             });
         });
-        const fileEl = document.getElementById('bp-portrait-file');
-        if (fileEl) {
-            fileEl.addEventListener('change', (e) => {
-                const f = e.target.files[0];
-                if (!f) return;
-                const r = new FileReader();
-                r.onload = async () => {
-                    let dataUrl = r.result;
-                    dataUrl = await compressImageDataUrl(dataUrl, 800);
-                    state.character.portraitDataUrl = dataUrl;
-                    state.character.portraitUrl = '';
-                    saveState();
-                    renderHeroPortrait();
-                };
-                r.readAsDataURL(f);
-            });
+        const portraitTrigger = document.getElementById('bp-portrait-trigger');
+        const canonicalPortraitInput = document.getElementById('bp-hero-portrait-file');
+        if (portraitTrigger && canonicalPortraitInput) {
+            portraitTrigger.addEventListener('click', () => canonicalPortraitInput.click());
         }
         const soundEl = document.getElementById('bp-sound-toggle');
         if (soundEl) {
@@ -655,9 +665,9 @@
             const count = (state.character.gearPool || []).length;
             if (count < 2) {
                 errEl.textContent = 'Add at least 2 items to your gear pool.';
-                errEl.style.display = 'block';
+                errEl.classList.remove('is-hidden');
             } else {
-                errEl.style.display = 'none';
+                errEl.classList.add('is-hidden');
             }
         }
 
@@ -718,7 +728,7 @@
         if (active.length === 0) {
             statusEl.textContent = 'Add at least 2 gear items (Gear tab) and set your XP. Tiers will appear on the Tiers tab—toggle some on, then return here.';
             statusEl.style.color = 'var(--error)';
-            statusEl.style.display = 'block';
+            statusEl.classList.remove('is-hidden');
             if (standaloneEl) standaloneEl.value = '';
             if (placeholderEl) placeholderEl.value = '';
             if (compositeEl) compositeEl.value = '';
@@ -727,7 +737,7 @@
         if ((state.character.gearPool || []).length < 2) {
             statusEl.textContent = 'Add at least 2 items to your gear pool first (Gear tab).';
             statusEl.style.color = 'var(--error)';
-            statusEl.style.display = 'block';
+            statusEl.classList.remove('is-hidden');
             return;
         }
         const result = buildCumulativePrompts(state.character, active, THEMES);
@@ -741,7 +751,7 @@
         saveState();
         statusEl.textContent = 'Prompts generated. Copy and paste into your image AI.';
         statusEl.style.color = '';
-        statusEl.style.display = 'block';
+        statusEl.classList.remove('is-hidden');
         const wrap = document.getElementById('bp-confetti-wrap');
         if (wrap) runMiniConfetti(wrap);
     }
@@ -757,7 +767,11 @@
             if (copyBtn && source) {
                 copyBtn.addEventListener('click', () => {
                     source.select();
-                    document.execCommand('copy');
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(source.value).catch(() => document.execCommand('copy'));
+                    } else {
+                        document.execCommand('copy');
+                    }
                     copyBtn.textContent = 'Copied!';
                     setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
                 });
@@ -811,36 +825,52 @@
                 resultWrap.classList.remove('bp-gen-result-hidden');
                 resultWrap.classList.add('bp-gen-result-visible');
             }
-            if (resultStatus) resultStatus.style.color = '';
+            if (resultStatus) { resultStatus.style.color = ''; resultStatus.textContent = loading ? 'Generating image…' : ''; }
             if (resultImageWrap) resultImageWrap.innerHTML = '';
             if (resultActions) {
                 resultActions.classList.add('bp-gen-result-hidden');
                 resultActions.classList.remove('bp-gen-result-visible');
             }
-            if (resultStatus) resultStatus.textContent = loading ? 'Generating image…' : '';
+        }
+
+        function renderGenResult(data) {
+            lastGenResult = data;
+            if (!resultImageWrap || !data || !data.imageUrl) return;
+            resultImageWrap.innerHTML = '';
+            const img = document.createElement('img');
+            img.alt = 'Generated image';
+            const src = resolveImageUrl(data.imageUrl);
+            img.onload = () => {
+                if (resultStatus) resultStatus.textContent = 'Done. Add to gallery or set as portrait.';
+                if (resultActions) {
+                    resultActions.classList.remove('bp-gen-result-hidden');
+                    resultActions.classList.add('bp-gen-result-visible');
+                }
+                if (resultWrap) resultWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            };
+            img.onerror = () => {
+                if (resultStatus) {
+                    resultStatus.textContent = 'Image failed to load. src: ' + (src ? src.slice(0, 80) + '…' : 'empty');
+                    resultStatus.style.color = 'var(--error)';
+                }
+                if (resultActions) {
+                    resultActions.classList.add('bp-gen-result-hidden');
+                    resultActions.classList.remove('bp-gen-result-visible');
+                }
+            };
+            img.src = src;
+            resultImageWrap.appendChild(img);
         }
 
         function showResult(result) {
             lastGenResult = result;
-            if (resultStatus) resultStatus.textContent = 'Generated. Add to gallery or set as portrait.';
-            if (resultImageWrap) {
-                resultImageWrap.innerHTML = '';
-                const img = document.createElement('img');
-                img.alt = 'Generated image';
-                img.src = resolveImageUrl(result.imageUrl);
-                resultImageWrap.appendChild(img);
-            }
+            if (resultStatus) resultStatus.textContent = 'Generated. Loading image…';
+            if (resultStatus) resultStatus.style.color = '';
             if (resultWrap) {
                 resultWrap.classList.remove('bp-gen-result-hidden');
                 resultWrap.classList.add('bp-gen-result-visible');
-                resultWrap.style.display = 'block';
             }
-            if (resultActions) {
-                resultActions.classList.remove('bp-gen-result-hidden');
-                resultActions.classList.add('bp-gen-result-visible');
-                resultActions.style.display = 'flex';
-            }
-            if (resultWrap) resultWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            if (resultImageWrap && result.imageUrl) renderGenResult(result);
         }
 
         function showError(msg) {
@@ -895,6 +925,7 @@
                 if (!lastGenResult) return;
                 if (state.gallery.length >= GALLERY_CAP) state.gallery.shift();
                 state.gallery.push({
+                    id: galleryEntryId(),
                     imageUrl: lastGenResult.imageUrl,
                     promptUsed: lastGenResult.promptUsed,
                     model: lastGenResult.model,
@@ -944,13 +975,20 @@
         });
     }
 
+    function galleryEntryId() {
+        return 'g' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+    }
+
     function renderGallery() {
         const container = document.getElementById('bp-gallery');
         if (!container) return;
         container.innerHTML = '';
-        (state.gallery || []).forEach((entry, i) => {
+        (state.gallery || []).forEach((entry) => {
+            const id = entry.id || galleryEntryId();
+            if (!entry.id) entry.id = id;
             const item = document.createElement('div');
             item.className = 'bp-gallery-item';
+            item.setAttribute('data-gallery-id', id);
             const rawSrc = entry.dataUrl || entry.imageUrl;
             const src = rawSrc ? resolveImageUrl(rawSrc) : '';
             const img = src ? document.createElement('img') : null;
@@ -961,30 +999,25 @@
             const actions = document.createElement('div');
             actions.className = 'bp-gallery-item-actions';
             const dl = document.createElement('button');
+            dl.type = 'button';
+            dl.className = 'btn-secondary';
             dl.textContent = 'Download';
-            dl.addEventListener('click', () => {
-                if (entry.dataUrl) {
-                    const a = document.createElement('a');
-                    a.href = entry.dataUrl;
-                    a.download = (entry.caption || 'battle-pass-image') + '.png';
-                    a.click();
-                } else if (entry.imageUrl) {
-                    const a = document.createElement('a');
-                    a.href = resolveImageUrl(entry.imageUrl);
-                    a.download = (entry.promptUsed?.slice(0, 20) || 'generated') + '.png';
-                    a.target = '_blank';
-                    a.rel = 'noopener';
-                    a.click();
-                }
-            });
+            dl.setAttribute('data-action', 'download');
+            dl.setAttribute('data-gallery-id', id);
+            const setPortrait = document.createElement('button');
+            setPortrait.type = 'button';
+            setPortrait.className = 'btn-secondary';
+            setPortrait.textContent = 'Set portrait';
+            setPortrait.setAttribute('data-action', 'set-portrait');
+            setPortrait.setAttribute('data-gallery-id', id);
             const del = document.createElement('button');
+            del.type = 'button';
+            del.className = 'btn-secondary';
             del.textContent = 'Delete';
-            del.addEventListener('click', () => {
-                state.gallery.splice(i, 1);
-                saveState();
-                renderGallery();
-            });
+            del.setAttribute('data-action', 'delete');
+            del.setAttribute('data-gallery-id', id);
             actions.appendChild(dl);
+            actions.appendChild(setPortrait);
             actions.appendChild(del);
             item.appendChild(img || document.createElement('div'));
             item.appendChild(actions);
@@ -992,8 +1025,45 @@
         });
     }
 
+    function handleGalleryAction(action, entryId) {
+        const entry = (state.gallery || []).find(e => e.id === entryId);
+        if (!entry) return;
+        if (action === 'download') {
+            const rawSrc = entry.dataUrl || entry.imageUrl;
+            const href = rawSrc ? resolveImageUrl(rawSrc) : '';
+            if (entry.dataUrl) {
+                const a = document.createElement('a');
+                a.href = entry.dataUrl;
+                a.download = (entry.caption || 'battle-pass-image') + '.png';
+                a.click();
+            } else if (entry.imageUrl) {
+                const a = document.createElement('a');
+                a.href = resolveImageUrl(entry.imageUrl);
+                a.download = (entry.promptUsed?.slice(0, 20) || 'generated') + '.png';
+                a.target = '_blank';
+                a.rel = 'noopener';
+                a.click();
+            }
+        } else if (action === 'set-portrait') {
+            if (entry.dataUrl) {
+                state.character.portraitDataUrl = entry.dataUrl;
+                state.character.portraitUrl = '';
+            } else if (entry.imageUrl) {
+                state.character.portraitUrl = entry.imageUrl;
+                state.character.portraitDataUrl = '';
+            }
+            saveState();
+            renderCharacterCard();
+        } else if (action === 'delete') {
+            state.gallery = state.gallery.filter(e => e.id !== entryId);
+            saveState();
+            renderGallery();
+        }
+    }
+
     function bindGalleryAdd() {
         const addEl = document.getElementById('bp-gallery-add');
+        const galleryEl = document.getElementById('bp-gallery');
         if (!addEl) return;
         addEl.addEventListener('change', (e) => {
             const f = e.target.files[0];
@@ -1003,13 +1073,20 @@
                 let dataUrl = r.result;
                 dataUrl = await compressImageDataUrl(dataUrl, 800);
                 if (state.gallery.length >= GALLERY_CAP) state.gallery.shift();
-                state.gallery.push({ dataUrl, caption: 'Image ' + (state.gallery.length + 1) });
+                state.gallery.push({ id: galleryEntryId(), dataUrl, caption: 'Image ' + (state.gallery.length + 1) });
                 saveState();
                 renderGallery();
             };
             r.readAsDataURL(f);
             addEl.value = '';
         });
+        if (galleryEl) {
+            galleryEl.addEventListener('click', (e) => {
+                const btn = e.target.closest('button[data-action][data-gallery-id]');
+                if (!btn) return;
+                handleGalleryAction(btn.getAttribute('data-action'), btn.getAttribute('data-gallery-id'));
+            });
+        }
     }
 
     function bindFilters() {
@@ -1087,6 +1164,7 @@
         state.character.gearPool = state.character.gearPool || [];
         ensureUnlocks();
         renderDashboardHero();
+        renderCharacterCard();
         bindHeroPortrait();
         bindXpAndMilestone();
         bindTabs();

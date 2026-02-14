@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Cosmetic Battle Pass – D&D 5e</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,38 +24,47 @@
             </div>
         </header>
 
-        <!-- Full-width epic fantasy hero + character portrait -->
+        <!-- Dashboard: Battle Pass card + At-a-glance strip | Character card -->
         <div class="bp-dashboard-row">
-            <section id="bp-dashboard-hero" class="bp-dashboard-hero bp-hero-fantasy" data-level="1">
-                <div class="bp-hero-bg" aria-hidden="true"></div>
-                <div class="bp-hero-content">
-                    <div class="bp-hero-top">
-                        <div class="bp-level-badge" id="bp-hero-level">1</div>
-                        <div class="bp-theme-name" id="bp-hero-theme">Cotton</div>
-                    </div>
-                    <div class="bp-progress-bar-wrap">
-                        <div class="bp-progress-bar-fill" id="bp-progress-fill"></div>
-                        <div class="bp-progress-bar-shine"></div>
-                        <div id="bp-progress-tier-markers" class="bp-progress-tier-markers" aria-hidden="true"></div>
-                    </div>
-                    <div class="bp-next-unlock">
-                        <div class="bp-ring-wrap">
-                            <svg class="bp-ring-svg" viewBox="0 0 36 36">
-                                <circle class="bp-ring-bg" cx="18" cy="18" r="16" stroke-width="3"/>
-                                <circle class="bp-ring-fill" id="bp-ring-fill" cx="18" cy="18" r="16" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="100"/>
-                            </svg>
+            <div class="bp-dashboard-left">
+                <section id="bp-dashboard-hero" class="bp-dashboard-hero bp-hero-fantasy" data-level="1">
+                    <div class="bp-hero-bg" aria-hidden="true"></div>
+                    <div class="bp-hero-content">
+                        <div class="bp-hero-top">
+                            <div class="bp-level-badge" id="bp-hero-level">1</div>
+                            <div class="bp-theme-name" id="bp-hero-theme">Cotton</div>
                         </div>
-                        <span class="bp-next-unlock-icon" aria-hidden="true">&#10026;</span>
-                        <span id="bp-next-unlock-text">Next unlock in 75 XP (Tier 1)</span>
+                        <div class="bp-progress-bar-wrap">
+                            <div class="bp-progress-bar-fill" id="bp-progress-fill"></div>
+                            <div class="bp-progress-bar-shine"></div>
+                            <div id="bp-progress-tier-markers" class="bp-progress-tier-markers" aria-hidden="true"></div>
+                        </div>
+                        <div class="bp-next-unlock">
+                            <div class="bp-ring-wrap">
+                                <svg class="bp-ring-svg" viewBox="0 0 36 36">
+                                    <circle class="bp-ring-bg" cx="18" cy="18" r="16" stroke-width="3"/>
+                                    <circle class="bp-ring-fill" id="bp-ring-fill" cx="18" cy="18" r="16" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="100"/>
+                                </svg>
+                            </div>
+                            <span class="bp-next-unlock-icon" aria-hidden="true">&#10026;</span>
+                            <span id="bp-next-unlock-text">Next unlock in 75 XP (Tier 1)</span>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+                <div id="bp-at-a-glance" class="bp-at-a-glance" role="status" aria-live="polite"></div>
+            </div>
             <div class="bp-dashboard-portrait">
-                <div id="bp-hero-portrait-wrap" class="bp-hero-portrait-wrap" role="button" tabindex="0" aria-label="Character image – click to update">
-                    <img id="bp-hero-portrait-img" class="bp-hero-portrait-img" alt="Character portrait">
-                    <span id="bp-hero-portrait-placeholder" class="bp-hero-portrait-placeholder">Character image</span>
+                <div class="bp-character-card card">
+                    <div class="bp-character-card-header">
+                        <span id="bp-char-card-name" class="bp-char-card-name">—</span>
+                        <span id="bp-char-card-class" class="bp-char-card-class hint">—</span>
+                    </div>
+                    <div id="bp-hero-portrait-wrap" class="bp-hero-portrait-wrap" role="button" tabindex="0" aria-label="Set portrait – click to upload">
+                        <img id="bp-hero-portrait-img" class="bp-hero-portrait-img" alt="Character portrait">
+                        <span id="bp-hero-portrait-placeholder" class="bp-hero-portrait-placeholder">Set portrait</span>
+                    </div>
+                    <input type="file" id="bp-hero-portrait-file" accept="image/*" aria-label="Set character portrait" class="bp-hero-portrait-input">
                 </div>
-                <input type="file" id="bp-hero-portrait-file" accept="image/*" aria-label="Update character image" class="bp-hero-portrait-input">
             </div>
         </div>
 
@@ -76,7 +85,7 @@
                     <label for="bp-current-xp" id="bp-xp-label">Current XP</label>
                     <input type="number" id="bp-current-xp" min="0" value="0" placeholder="0">
                 </div>
-                <span id="bp-xp-error" class="bp-xp-error"></span>
+                <span id="bp-xp-error" class="bp-xp-error is-hidden"></span>
             </section>
         </div>
 
@@ -126,7 +135,7 @@
                 </div>
                 <div class="bp-form-group">
                     <label>Portrait (optional)</label>
-                    <input type="file" id="bp-portrait-file" accept="image/*" aria-label="Upload character portrait">
+                    <button type="button" id="bp-portrait-trigger" class="btn-secondary" aria-label="Upload character portrait">Set portrait</button>
                     <p class="help-text">Used for the composite prompt: with a portrait, the app tells the AI to equip this character; without one, use the placeholder character prompt in Generate &amp; Gallery first to create a base character, then equip.</p>
                 </div>
             </section>
@@ -154,7 +163,7 @@
                         <button type="button" id="bp-gear-add-custom" class="btn-secondary">Add</button>
                     </div>
                 </div>
-                <p id="bp-gear-error" class="bp-error-msg"></p>
+                <p id="bp-gear-error" class="bp-error-msg is-hidden"></p>
             </section>
         </div>
 
@@ -170,6 +179,10 @@
                 </div>
                 <div class="bp-form-group">
                     <button type="button" id="bp-reset-all" class="bp-reset-btn">Reset everything</button>
+                </div>
+                <div class="bp-form-group card bp-actions-card">
+                    <h3 class="card-header">Actions</h3>
+                    <button type="button" id="bp-export-json" class="btn-secondary">Export character build (JSON)</button>
                 </div>
             </section>
         </div>
@@ -211,31 +224,31 @@
                     <button type="button" id="bp-gen-set-portrait" class="btn-secondary">Set as character portrait</button>
                 </div>
             </div>
-            <div class="bp-form-group">
-                <label>Standalone gear prompt</label>
-                <textarea id="bp-standalone-prompt" rows="6" readonly placeholder="Generate to see prompt."></textarea>
-                <button type="button" id="bp-copy-standalone" class="btn-secondary">Copy</button>
-            </div>
-            <div class="bp-form-group">
-                <label for="bp-placeholder-prompt">Placeholder character prompt (use when no portrait)</label>
-                <textarea id="bp-placeholder-prompt" rows="2" readonly placeholder="Generate to see prompt." aria-label="Placeholder character prompt for use when no portrait"></textarea>
-                <button type="button" id="bp-copy-placeholder" class="btn-secondary">Copy</button>
-            </div>
-            <div class="bp-form-group">
-                <label>Composite prompt (equip gear on portrait)</label>
-                <p class="help-text">With portrait: equip on your image. Without: use the placeholder character prompt above first, then equip.</p>
-                <textarea id="bp-composite-prompt" rows="6" readonly placeholder="Generate to see prompt."></textarea>
-                <button type="button" id="bp-copy-composite" class="btn-secondary">Copy</button>
-            </div>
+            <details class="bp-advanced-prompts">
+                <summary>Advanced prompts</summary>
+                <div class="bp-form-group">
+                    <label>Standalone gear prompt</label>
+                    <textarea id="bp-standalone-prompt" rows="6" readonly placeholder="Generate to see prompt."></textarea>
+                    <button type="button" id="bp-copy-standalone" class="btn-secondary">Copy</button>
+                </div>
+                <div class="bp-form-group">
+                    <label for="bp-placeholder-prompt">Placeholder character prompt (use when no portrait)</label>
+                    <textarea id="bp-placeholder-prompt" rows="2" readonly placeholder="Generate to see prompt." aria-label="Placeholder character prompt for use when no portrait"></textarea>
+                    <button type="button" id="bp-copy-placeholder" class="btn-secondary">Copy</button>
+                </div>
+                <div class="bp-form-group">
+                    <label>Composite prompt (equip gear on portrait)</label>
+                    <p class="help-text">With portrait: equip on your image. Without: use the placeholder character prompt above first, then equip.</p>
+                    <textarea id="bp-composite-prompt" rows="6" readonly placeholder="Generate to see prompt."></textarea>
+                    <button type="button" id="bp-copy-composite" class="btn-secondary">Copy</button>
+                </div>
+            </details>
             <section class="bp-form-section">
                 <h2>Gallery (download preferred; max 20)</h2>
                 <p class="help-text">Add images from file upload or from Generate with OpenAI (stored as URL + metadata). Stored locally; download to keep.</p>
                 <input type="file" id="bp-gallery-add" accept="image/*" aria-label="Add image to gallery" class="bp-gallery-add-input">
                 <div class="bp-gallery-grid" id="bp-gallery"></div>
             </section>
-            <div class="bp-form-section">
-                <button type="button" id="bp-export-json" class="btn-secondary">Export character build (JSON)</button>
-            </div>
         </div>
 
         <div id="bp-confetti-wrap" class="bp-confetti-wrap" aria-hidden="true"></div>
