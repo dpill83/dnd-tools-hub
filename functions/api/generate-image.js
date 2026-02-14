@@ -49,13 +49,13 @@ export async function onRequestPost(context) {
     const size = ['1024x1024', '1024x1536', '1536x1024'].includes(body.size) ? body.size : DEFAULT_SIZE;
     const quality = ['low', 'medium', 'high'].includes(body.quality) ? body.quality : DEFAULT_QUALITY;
 
+    // GPT image models always return base64; do not send response_format (unsupported for GPT image models, causes 400).
     const openaiBody = {
         model,
         prompt,
         n: 1,
         size,
         quality,
-        response_format: 'b64_json',
     };
 
     let openaiRes;
