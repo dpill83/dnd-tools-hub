@@ -43,6 +43,13 @@
         return length <= 0 ? 0 : (seed % length + length) % length;
     }
 
+    function resolveImageUrl(url) {
+        if (!url) return '';
+        if (url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://')) return url;
+        if (url.startsWith('/')) return window.location.origin + url;
+        return url;
+    }
+
     // --- State ---
     let state = {
         schemaVersion: SCHEMA_VERSION,
@@ -52,6 +59,7 @@
             artStyle: 'epic high-fantasy',
             motif: '',
             portraitDataUrl: '',
+            portraitUrl: '',
             gearPool: []
         },
         currentXp: 0,
@@ -177,7 +185,8 @@
 
         const standaloneGearPrompt = parts.length ? parts.join(' ') : 'No active tiers—toggle some on.';
         const placeholderCharacterPrompt = `Fantasy ${cls} adventurer in starting gear, ${artStyle} D&D art style.`;
-        const compositePrompt = character.portraitDataUrl
+        const hasPortrait = (character.portraitDataUrl && character.portraitDataUrl.startsWith('data:')) || character.portraitUrl;
+        const compositePrompt = hasPortrait
             ? `Take this exact character portrait and equip the character with this precisely upgraded gear: ${standaloneGearPrompt}. Keep original pose, face, clothing, lighting, and ${artStyle}. Preserve existing ${motif}.`
             : `Use this character prompt first to create a base portrait: "${placeholderCharacterPrompt}". Then equip that character with: ${standaloneGearPrompt}. Preserve pose, face, and ${artStyle}.`;
 
@@ -299,10 +308,14 @@
     function renderHeroPortrait() {
         const imgEl = document.getElementById('bp-hero-portrait-img');
         const placeholderEl = document.getElementById('bp-hero-portrait-placeholder');
-        const url = (state.character && state.character.portraitDataUrl) || '';
+        const c = state.character || {};
+        const url = (c.portraitDataUrl && c.portraitDataUrl.startsWith('data:'))
+            ? c.portraitDataUrl
+            : (c.portraitUrl || c.portraitDataUrl || '');
+        const src = url ? resolveImageUrl(url) : '';
         if (imgEl && placeholderEl) {
-            if (url) {
-                imgEl.src = url;
+            if (src) {
+                imgEl.src = src;
                 imgEl.classList.add('bp-hero-portrait-visible');
                 placeholderEl.style.display = 'none';
             } else {
@@ -587,6 +600,7 @@
                     let dataUrl = r.result;
                     dataUrl = await compressImageDataUrl(dataUrl, 800);
                     state.character.portraitDataUrl = dataUrl;
+                    state.character.portraitUrl = '';
                     saveState();
                     renderHeroPortrait();
                 };
@@ -812,9 +826,13 @@
             if (resultImageWrap) {
                 resultImageWrap.innerHTML = '';
                 const img = document.createElement('img');
-                img.src = result.imageUrl;
+                img.src = resolveImageUrl(result.imageUrl);
                 img.alt = 'Generated image';
                 resultImageWrap.appendChild(img);
+            }
+            if (resultWrap) {
+                resultWrap.classList.remove('bp-gen-result-hidden');
+                resultWrap.classList.add('bp-gen-result-visible');
             }
             if (resultActions) {
                 resultActions.classList.remove('bp-gen-result-hidden');
@@ -888,7 +906,8 @@
         if (setPortraitBtn) {
             setPortraitBtn.addEventListener('click', () => {
                 if (!lastGenResult) return;
-                state.character.portraitDataUrl = lastGenResult.imageUrl;
+                state.character.portraitUrl = lastGenResult.imageUrl;
+                state.character.portraitDataUrl = '';
                 saveState();
                 renderHeroPortrait();
             });
@@ -929,7 +948,8 @@
         (state.gallery || []).forEach((entry, i) => {
             const item = document.createElement('div');
             item.className = 'bp-gallery-item';
-            const src = entry.dataUrl || entry.imageUrl;
+            const rawSrc = entry.dataUrl || entry.imageUrl;
+            const src = rawSrc ? resolveImageUrl(rawSrc) : '';
             const img = src ? document.createElement('img') : null;
             if (img) {
                 img.src = src;
@@ -947,7 +967,7 @@
                     a.click();
                 } else if (entry.imageUrl) {
                     const a = document.createElement('a');
-                    a.href = entry.imageUrl;
+                    a.href = resolveImageUrl(entry.imageUrl);
                     a.download = (entry.promptUsed?.slice(0, 20) || 'generated') + '.png';
                     a.target = '_blank';
                     a.rel = 'noopener';
@@ -1037,6 +1057,7 @@
                     let dataUrl = r.result;
                     dataUrl = await compressImageDataUrl(dataUrl, 800);
                     state.character.portraitDataUrl = dataUrl;
+                    state.character.portraitUrl = '';
                     saveState();
                     renderHeroPortrait();
                 };
