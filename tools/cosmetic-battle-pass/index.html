@@ -176,6 +176,41 @@
 
         <div id="bp-tab-generate" class="bp-tab-content">
             <p id="bp-generate-status" class="bp-generate-status"></p>
+            <div class="bp-form-section bp-generate-api-row">
+                <h2>Generate with OpenAI</h2>
+                <p class="help-text">Quality and model affect cost. Default: medium, gpt-image-1-mini. Use gpt-image-1.5 for best quality (final renders).</p>
+                <div class="bp-generate-controls">
+                    <label class="bp-generate-control">
+                        <span>Quality</span>
+                        <select id="bp-gen-quality" aria-label="Image quality">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </label>
+                    <label class="bp-generate-control">
+                        <span>Model</span>
+                        <select id="bp-gen-model" aria-label="Image model">
+                            <option value="gpt-image-1-mini">gpt-image-1-mini</option>
+                            <option value="gpt-image-1.5">gpt-image-1.5 (final renders)</option>
+                            <option value="gpt-image-1">gpt-image-1</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="bp-generate-buttons">
+                    <button type="button" id="bp-gen-standalone" class="btn-secondary">Generate from standalone prompt</button>
+                    <button type="button" id="bp-gen-placeholder" class="btn-secondary">Generate from placeholder prompt</button>
+                    <button type="button" id="bp-gen-composite" class="btn-secondary">Generate from composite prompt</button>
+                </div>
+                <div id="bp-gen-result-wrap" class="bp-gen-result-wrap bp-gen-result-hidden">
+                    <p id="bp-gen-result-status" class="bp-gen-result-status"></p>
+                    <div id="bp-gen-result-image-wrap" class="bp-gen-result-image-wrap"></div>
+                    <div id="bp-gen-result-actions" class="bp-gen-result-actions bp-gen-result-hidden">
+                        <button type="button" id="bp-gen-add-gallery" class="btn-secondary">Add to gallery</button>
+                        <button type="button" id="bp-gen-set-portrait" class="btn-secondary">Set as character portrait</button>
+                    </div>
+                </div>
+            </div>
             <div class="bp-form-group">
                 <label>Standalone gear prompt</label>
                 <textarea id="bp-standalone-prompt" rows="6" readonly placeholder="Generate to see prompt."></textarea>
@@ -194,7 +229,7 @@
             </div>
             <section class="bp-form-section">
                 <h2>Gallery (download preferred; max 20)</h2>
-                <p class="help-text">Add images you generate elsewhere. Stored locally; download to keep.</p>
+                <p class="help-text">Add images from file upload or from Generate with OpenAI (stored as URL + metadata). Stored locally; download to keep.</p>
                 <input type="file" id="bp-gallery-add" accept="image/*" aria-label="Add image to gallery" class="bp-gallery-add-input">
                 <div class="bp-gallery-grid" id="bp-gallery"></div>
             </section>

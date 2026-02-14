@@ -770,6 +770,131 @@
         }
     }
 
+    let lastGenResult = null;
+
+    function bindGenerateImageApi() {
+        const qualityEl = document.getElementById('bp-gen-quality');
+        const modelEl = document.getElementById('bp-gen-model');
+        const standaloneBtn = document.getElementById('bp-gen-standalone');
+        const placeholderBtn = document.getElementById('bp-gen-placeholder');
+        const compositeBtn = document.getElementById('bp-gen-composite');
+        const resultWrap = document.getElementById('bp-gen-result-wrap');
+        const resultStatus = document.getElementById('bp-gen-result-status');
+        const resultImageWrap = document.getElementById('bp-gen-result-image-wrap');
+        const resultActions = document.getElementById('bp-gen-result-actions');
+        const addGalleryBtn = document.getElementById('bp-gen-add-gallery');
+        const setPortraitBtn = document.getElementById('bp-gen-set-portrait');
+
+        function getPromptFromButton(btnId) {
+            const id = btnId === 'bp-gen-standalone' ? 'bp-standalone-prompt' : btnId === 'bp-gen-placeholder' ? 'bp-placeholder-prompt' : 'bp-composite-prompt';
+            const el = document.getElementById(id);
+            return el ? el.value.trim() : '';
+        }
+
+        function setLoading(loading) {
+            [standaloneBtn, placeholderBtn, compositeBtn].forEach(b => { if (b) b.disabled = loading; });
+            if (resultWrap) {
+                resultWrap.classList.remove('bp-gen-result-hidden');
+                resultWrap.classList.add('bp-gen-result-visible');
+            }
+            if (resultStatus) resultStatus.style.color = '';
+            if (resultImageWrap) resultImageWrap.innerHTML = '';
+            if (resultActions) {
+                resultActions.classList.add('bp-gen-result-hidden');
+                resultActions.classList.remove('bp-gen-result-visible');
+            }
+            if (resultStatus) resultStatus.textContent = loading ? 'Generating image…' : '';
+        }
+
+        function showResult(result) {
+            lastGenResult = result;
+            if (resultStatus) resultStatus.textContent = 'Generated. Add to gallery or set as portrait.';
+            if (resultImageWrap) {
+                resultImageWrap.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = result.imageUrl;
+                img.alt = 'Generated image';
+                resultImageWrap.appendChild(img);
+            }
+            if (resultActions) {
+                resultActions.classList.remove('bp-gen-result-hidden');
+                resultActions.classList.add('bp-gen-result-visible');
+            }
+        }
+
+        function showError(msg) {
+            lastGenResult = null;
+            if (resultStatus) {
+                resultStatus.textContent = msg;
+                resultStatus.style.color = 'var(--error)';
+            }
+            if (resultImageWrap) resultImageWrap.innerHTML = '';
+            if (resultActions) {
+                resultActions.classList.add('bp-gen-result-hidden');
+                resultActions.classList.remove('bp-gen-result-visible');
+            }
+        }
+
+        async function runGenerate(prompt) {
+            if (!prompt) {
+                showError('Generate prompts first (toggle tiers and ensure prompts are filled).');
+                return;
+            }
+            setLoading(true);
+            try {
+                const res = await fetch('/api/generate-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt,
+                        model: modelEl ? modelEl.value : 'gpt-image-1-mini',
+                        size: '1024x1536',
+                        quality: qualityEl ? qualityEl.value : 'medium'
+                    })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    showError(data.error || res.statusText || 'Request failed');
+                    return;
+                }
+                showResult(data);
+            } catch (e) {
+                showError('Network error: ' + (e.message || 'failed'));
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        if (standaloneBtn) standaloneBtn.addEventListener('click', () => runGenerate(getPromptFromButton('bp-gen-standalone')));
+        if (placeholderBtn) placeholderBtn.addEventListener('click', () => runGenerate(getPromptFromButton('bp-gen-placeholder')));
+        if (compositeBtn) compositeBtn.addEventListener('click', () => runGenerate(getPromptFromButton('bp-gen-composite')));
+
+        if (addGalleryBtn) {
+            addGalleryBtn.addEventListener('click', () => {
+                if (!lastGenResult) return;
+                if (state.gallery.length >= GALLERY_CAP) state.gallery.shift();
+                state.gallery.push({
+                    imageUrl: lastGenResult.imageUrl,
+                    promptUsed: lastGenResult.promptUsed,
+                    model: lastGenResult.model,
+                    size: lastGenResult.size,
+                    quality: lastGenResult.quality,
+                    createdAt: lastGenResult.createdAt
+                });
+                saveState();
+                renderGallery();
+            });
+        }
+        if (setPortraitBtn) {
+            setPortraitBtn.addEventListener('click', () => {
+                if (!lastGenResult) return;
+                state.character.portraitDataUrl = lastGenResult.imageUrl;
+                saveState();
+                renderHeroPortrait();
+            });
+        }
+    }
+
     function compressImageDataUrl(dataUrl, maxSize) {
         maxSize = maxSize || 800;
         return new Promise((resolve) => {
@@ -804,21 +929,30 @@
         (state.gallery || []).forEach((entry, i) => {
             const item = document.createElement('div');
             item.className = 'bp-gallery-item';
-            const img = entry.dataUrl ? document.createElement('img') : null;
+            const src = entry.dataUrl || entry.imageUrl;
+            const img = src ? document.createElement('img') : null;
             if (img) {
-                img.src = entry.dataUrl;
-                img.alt = entry.caption || 'Gallery image';
+                img.src = src;
+                img.alt = entry.caption || entry.promptUsed?.slice(0, 40) || 'Gallery image';
             }
             const actions = document.createElement('div');
             actions.className = 'bp-gallery-item-actions';
             const dl = document.createElement('button');
             dl.textContent = 'Download';
             dl.addEventListener('click', () => {
-                if (!entry.dataUrl) return;
-                const a = document.createElement('a');
-                a.href = entry.dataUrl;
-                a.download = (entry.caption || 'battle-pass-image') + '.png';
-                a.click();
+                if (entry.dataUrl) {
+                    const a = document.createElement('a');
+                    a.href = entry.dataUrl;
+                    a.download = (entry.caption || 'battle-pass-image') + '.png';
+                    a.click();
+                } else if (entry.imageUrl) {
+                    const a = document.createElement('a');
+                    a.href = entry.imageUrl;
+                    a.download = (entry.promptUsed?.slice(0, 20) || 'generated') + '.png';
+                    a.target = '_blank';
+                    a.rel = 'noopener';
+                    a.click();
+                }
             });
             const del = document.createElement('button');
             del.textContent = 'Delete';
@@ -937,6 +1071,7 @@
         bindFilters();
         renderAccordions();
         bindGenerateAndExport();
+        bindGenerateImageApi();
         bindReset();
         bindGalleryAdd();
         renderGallery();

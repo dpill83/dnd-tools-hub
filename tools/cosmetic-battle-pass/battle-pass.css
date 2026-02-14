@@ -575,6 +575,21 @@
 .bp-gallery-item-actions { padding: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .bp-gallery-item-actions button { padding: 0.25rem 0.5rem; font-size: 0.85rem; cursor: pointer; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); }
 
+/* Generate with OpenAI */
+.bp-generate-api-row { margin-bottom: 1.5rem; }
+.bp-generate-controls { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem; }
+.bp-generate-control { display: flex; align-items: center; gap: 0.5rem; }
+.bp-generate-control span { font-weight: 600; }
+.bp-generate-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+.bp-gen-result-wrap { margin-top: 1rem; padding: 1rem; border: 2px solid var(--border); border-radius: 8px; background: var(--surface); }
+.bp-gen-result-status { margin-bottom: 0.5rem; font-size: 0.9rem; }
+.bp-gen-result-image-wrap { margin-bottom: 0.75rem; }
+.bp-gen-result-image-wrap img { max-width: 100%; max-height: 400px; display: block; border-radius: 6px; }
+.bp-gen-result-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.bp-gen-result-hidden { display: none !important; }
+.bp-gen-result-wrap.bp-gen-result-visible { display: block; }
+.bp-gen-result-actions.bp-gen-result-visible { display: flex; }
+
 /* Tooltip for tier card narrative */
 .bp-tier-card[title] { cursor: help; }
 .bp-error-msg { color: var(--error); font-size: 0.9rem; margin-top: 0.25rem; }

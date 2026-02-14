@@ -1,0 +1,207 @@
+/* Spell to JSON – tool layout and list styles */
+
+.spell-to-json-app .stj-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.stj-header h1 {
+    margin: 0 0 0.25rem 0;
+    color: var(--primary-color);
+}
+
+.stj-intro {
+    margin: 0;
+    color: var(--text-light);
+    font-size: 0.95rem;
+}
+
+.stj-header-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.stj-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stj-filter-group {
+    margin-bottom: 0;
+}
+
+.stj-filter-group label,
+.stj-search-wrap label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.stj-search-wrap input {
+    min-width: 12rem;
+}
+
+.stj-main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+@media (max-width: 768px) {
+    .stj-main {
+        grid-template-columns: 1fr;
+    }
+}
+
+.stj-spell-list-section h2,
+.stj-selected-section h2 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+}
+
+.stj-count {
+    font-weight: normal;
+    color: var(--text-light);
+}
+
+.stj-status {
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.stj-status-error {
+    color: var(--error);
+}
+
+.stj-spell-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.stj-spell-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.stj-spell-row:hover {
+    background-color: var(--card-bg);
+}
+
+.stj-spell-cb {
+    flex-shrink: 0;
+}
+
+.stj-spell-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.stj-spell-meta {
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.stj-selected-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    max-height: 30vh;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+}
+
+.stj-empty {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.stj-selected-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.35rem 0.5rem;
+    background-color: var(--card-bg);
+    border-radius: 4px;
+}
+
+.stj-remove {
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-light);
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.stj-remove:hover {
+    color: var(--error);
+    background-color: var(--background);
+}
+
+.stj-export-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.stj-prompt-suggestion {
+    margin-bottom: 0;
+}
+
+.stj-prompt-suggestion label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.stj-prompt-suggestion textarea {
+    width: 100%;
+    min-height: 4rem;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--input-bg);
+    color: var(--text);
+}
+
+.stj-toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.75rem 1.25rem;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 8px var(--shadow);
+    z-index: 1000;
+}
+
+.stj-toast.hidden {
+    display: none;
+}

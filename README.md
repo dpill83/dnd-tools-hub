@@ -177,6 +177,14 @@ Tools live in `tools/<name>/` with `index.html` as the entry point.
 
 HTML/CSS/JS only; localStorage where needed; PDF.js via CDN for PDF tools; no build step.
 
+### Image generation (Cosmetic Battle Pass)
+
+The **Generate with OpenAI** feature in [tools/cosmetic-battle-pass/](tools/cosmetic-battle-pass/) uses a Cloudflare Pages Function and R2. To enable it:
+
+- **Environment variables:** In your Pages project (Cloudflare Dashboard → Workers & Pages → your project → Settings → Environment variables), add `OPENAI_API_KEY` (Encrypted).
+- **R2:** Create an R2 bucket and add a binding named `BATTLE_PASS_IMAGES` in the same Settings → Bindings. The Function uploads generated images to R2 and returns URLs; the gallery stores URL + metadata.
+- **Local dev:** Put `OPENAI_API_KEY=sk-...` in a `.dev.vars` file in the project root (ignored by git). Run `npx wrangler pages dev .` and pass the R2 binding (e.g. `--r2=BATTLE_PASS_IMAGES=<bucket_name>`) if you use image generation locally.
+
 ---
 
 ## Summary table
