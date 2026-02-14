@@ -826,18 +826,21 @@
             if (resultImageWrap) {
                 resultImageWrap.innerHTML = '';
                 const img = document.createElement('img');
-                img.src = resolveImageUrl(result.imageUrl);
                 img.alt = 'Generated image';
+                img.src = resolveImageUrl(result.imageUrl);
                 resultImageWrap.appendChild(img);
             }
             if (resultWrap) {
                 resultWrap.classList.remove('bp-gen-result-hidden');
                 resultWrap.classList.add('bp-gen-result-visible');
+                resultWrap.style.display = 'block';
             }
             if (resultActions) {
                 resultActions.classList.remove('bp-gen-result-hidden');
                 resultActions.classList.add('bp-gen-result-visible');
+                resultActions.style.display = 'flex';
             }
+            if (resultWrap) resultWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         function showError(msg) {
