@@ -72,7 +72,7 @@
             <button type="button" class="bp-tab active" data-tab="xp">XP Level</button>
             <button type="button" class="bp-tab" data-tab="character">Character</button>
             <button type="button" class="bp-tab" data-tab="gear">Gear</button>
-            <button type="button" class="bp-tab" data-tab="dashboard">Tiers</button>
+            <button type="button" class="bp-tab" data-tab="dashboard">Loadout</button>
             <button type="button" class="bp-tab" data-tab="generate">Generate & Gallery</button>
             <button type="button" class="bp-tab" data-tab="settings">Settings</button>
         </div>
@@ -90,22 +90,19 @@
         </div>
 
         <div id="bp-tab-dashboard" class="bp-tab-content">
-            <section class="bp-form-section" id="bp-current-level-section">
-                <h2 id="bp-current-level-heading">Your look – Level <span id="bp-current-level-num">1</span></h2>
-                <p class="help-text" id="bp-current-level-hint">Toggle which tiers to include in your generated prompts.</p>
-                <div id="bp-current-level-tiers" class="bp-tier-cards-grid"></div>
+            <section class="bp-form-section bp-loadout-section">
+                <h2>Your look (4 slots)</h2>
+                <p class="help-text">Choose gear, material, and tier for each slot. Generate look uses these 4 selections.</p>
+                <button type="button" id="bp-loadout-reset" class="btn-secondary">Reset to defaults</button>
+                <div id="bp-loadout-grid" class="bp-loadout-grid"></div>
             </section>
-            <section class="bp-form-section" id="bp-other-levels-section">
-                <h2>All unlocked levels</h2>
+            <details class="bp-loadout-catalog-details">
+                <summary>Browse cosmetics catalog</summary>
                 <div class="bp-filter-bar">
-                    <input type="text" id="bp-filter-search" placeholder="Filter by level, theme, gear…" aria-label="Filter tiers">
-                    <button type="button" id="bp-turn-on-all" class="btn-secondary">Turn all on</button>
-                    <button type="button" id="bp-turn-off-all" class="btn-secondary">Turn all off</button>
-                    <button type="button" id="bp-expand-all" class="btn-secondary">Expand all</button>
-                    <button type="button" id="bp-collapse-all" class="btn-secondary">Collapse all</button>
+                    <input type="text" id="bp-filter-search" placeholder="Filter by level, theme, gear…" aria-label="Filter catalog">
                 </div>
-                <div id="bp-accordions"></div>
-            </section>
+                <div id="bp-accordions" class="bp-catalog-readonly"></div>
+            </details>
         </div>
 
         <div id="bp-tab-character" class="bp-tab-content">

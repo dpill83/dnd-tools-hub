@@ -9,6 +9,17 @@
     const GALLERY_CAP = 20;
     const MAX_TIERS_IN_PROMPT = 12;
 
+    const GEAR_TYPES = ['Breastplate', 'Shield', 'Mace', 'Boots', 'Pants', 'Cloak', 'Belt', 'Gloves', 'Helm', 'Accent', 'None'];
+    const LOADOUT_MATERIALS = ['Cotton', 'Wool', 'Lace', 'Leather'];
+    const LOADOUT_TIERS = ['T0', 'T1', 'T2', 'T3'];
+
+    const LOADOUT_DEFAULTS = [
+        { gearType: 'Breastplate', material: 'Leather', tier: 'T0' },
+        { gearType: 'Shield', material: 'Leather', tier: 'T0' },
+        { gearType: 'Mace', material: 'Leather', tier: 'T0' },
+        { gearType: 'Accent', material: 'Leather', tier: 'T0' }
+    ];
+
     const PROMPT_TEMPLATES = {
         0: 'Fantasy [class] [gear] with basic [theme] [application] on the handle/edges, simple etched [motif] details starting to show, battle-ready and worn, [artStyle] D&D art style.',
         1: 'Fantasy [gear] for a [class], with added [theme] [application] over prior design, central [motif] emerging strongly, consistent with other equipped items.',
@@ -92,7 +103,8 @@
         subTiers: [],
         gallery: [],
         lastGeneratedState: null,
-        soundEnabled: false
+        soundEnabled: false,
+        look: { slots: [] }
     };
 
     function loadState() {
@@ -107,11 +119,19 @@
                     state.reseedCounter = parseInt(parsed.reseedCounter, 10) || 0;
                     state.subTiers = Array.isArray(parsed.subTiers) ? parsed.subTiers : [];
                     state.gallery = Array.isArray(parsed.gallery) ? parsed.gallery.slice(0, GALLERY_CAP).map((e, i) => ({ ...e, id: e.id || 'g' + Date.now() + '-' + i + '-' + Math.random().toString(36).slice(2, 8) })) : [];
+                    if (parsed.look && Array.isArray(parsed.look.slots) && parsed.look.slots.length === 4) {
+                        state.look = { slots: parsed.look.slots };
+                    } else {
+                        state.look = { slots: LOADOUT_DEFAULTS.map(s => ({ ...s })) };
+                    }
                 }
             }
             const soundRaw = localStorage.getItem(SOUND_STORAGE_KEY);
             state.soundEnabled = soundRaw === 'true';
         } catch (_) {}
+        if (!state.look || !Array.isArray(state.look.slots) || state.look.slots.length !== 4) {
+            state.look = { slots: LOADOUT_DEFAULTS.map(s => ({ ...s })) };
+        }
     }
 
     function saveState() {
@@ -123,7 +143,8 @@
                 passXp: state.passXp,
                 reseedCounter: state.reseedCounter,
                 subTiers: state.subTiers,
-                gallery: state.gallery
+                gallery: state.gallery,
+                look: state.look
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
         } catch (_) {}
@@ -221,15 +242,16 @@
         return state.subTiers.filter(s => s.active).sort((a, b) => a.level - b.level || a.tier - b.tier);
     }
 
-    function getSelectedLookItems() {
-        const active = getActiveSubTiers();
-        const gearById = {};
-        (state.character.gearPool || []).forEach(g => { gearById[g.id] = g.label; });
-        return active.map(s => {
-            const themeName = getThemeForLevelTier(s.level, s.tier);
-            const gear = gearById[s.selectedGearId] || 'gear';
-            return { id: `L${s.level}T${s.tier}`, label: `${themeName} T${s.tier} ${gear}` };
-        });
+    function getLoadoutSummary() {
+        const slots = state.look?.slots || [];
+        return slots.map(s => {
+            const gt = (s.gearType || 'Accent').trim() || 'Accent';
+            if (gt === 'None') return null;
+            const mat = (s.material || 'Leather').trim() || 'Leather';
+            const t = (s.tier || 'T0').trim() || 'T0';
+            const label = gt === 'Accent' ? `${gt}: ${mat} ${t} (generic trim)` : `${gt}: ${mat} ${t}`;
+            return label;
+        }).filter(Boolean);
     }
 
     function turnOnAllTiers() {
@@ -370,10 +392,10 @@
         }
     }
 
-    function renderTierCard(s, level, themeName, container) {
+    function renderTierCardReadOnly(s, level, themeName, container) {
         const gearLabel = (state.character.gearPool.find(g => g.id === s.selectedGearId) || {}).label || '—';
         const card = document.createElement('div');
-        card.className = 'bp-tier-card' + (s.active ? ' active' : '');
+        card.className = 'bp-tier-card';
         card.setAttribute('data-level', level);
         card.setAttribute('title', s.narrative);
         card.innerHTML = `
@@ -381,59 +403,86 @@
             <div class="bp-tier-theme-name">${themeName} T${s.tier}</div>
             <div class="bp-tier-gear">${gearLabel}</div>
             <div class="bp-tier-narrative">${(s.narrative || '').slice(0, 60)}…</div>
-            <div class="bp-tier-toggle-wrap">
-                <input type="checkbox" id="tier-${s.level}-${s.tier}" ${s.active ? 'checked' : ''} aria-label="Include in look">
-                <label for="tier-${s.level}-${s.tier}">Include in look</label>
-            </div>
         `;
-        const cb = card.querySelector('input[type="checkbox"]');
-        cb.addEventListener('change', () => {
-            s.active = cb.checked;
-            card.classList.toggle('active', s.active);
-            saveState();
-            updateGenerateButton();
-        });
         container.appendChild(card);
+    }
+
+    function getUsedGearTypes(excludeSlotIndex) {
+        const slots = state.look?.slots || [];
+        const used = new Set();
+        slots.forEach((s, i) => {
+            if (i === excludeSlotIndex) return;
+            const gt = (s.gearType || '').trim();
+            if (gt && gt !== 'Accent' && gt !== 'None') used.add(gt);
+        });
+        return used;
+    }
+
+    function renderLoadout() {
+        const grid = document.getElementById('bp-loadout-grid');
+        if (!grid) return;
+        const slots = state.look?.slots || [];
+        grid.innerHTML = '';
+        for (let i = 0; i < 4; i++) {
+            const slot = slots[i] || { gearType: 'Accent', material: 'Leather', tier: 'T0' };
+            const used = getUsedGearTypes(i);
+            const card = document.createElement('div');
+            card.className = 'bp-loadout-slot card';
+            card.setAttribute('data-slot-index', i);
+            const summary = slot.gearType === 'None'
+                ? 'Selected: None'
+                : `Selected: ${slot.material || 'Leather'} ${slot.tier || 'T0'} ${slot.gearType || 'Accent'}`;
+            const gearOptions = GEAR_TYPES.map(g => {
+                const disabled = used.has(g) && g !== 'Accent' && g !== 'None' ? ' disabled' : '';
+                const sel = (slot.gearType || '') === g ? ' selected' : '';
+                return `<option value="${g}"${sel}${disabled}>${g}</option>`;
+            }).join('');
+            const matOptions = LOADOUT_MATERIALS.map(m => {
+                const sel = (slot.material || 'Leather') === m ? ' selected' : '';
+                return `<option value="${m}"${sel}>${m}</option>`;
+            }).join('');
+            const tierOptions = LOADOUT_TIERS.map(t => {
+                const sel = (slot.tier || 'T0') === t ? ' selected' : '';
+                return `<option value="${t}"${sel}>${t}</option>`;
+            }).join('');
+            card.innerHTML = `
+                <div class="bp-loadout-slot-header">Slot ${i + 1}</div>
+                <div class="bp-form-group">
+                    <label for="bp-loadout-gear-${i}">Gear type</label>
+                    <select id="bp-loadout-gear-${i}" data-slot="${i}" data-field="gearType">${gearOptions}</select>
+                </div>
+                <div class="bp-form-group">
+                    <label for="bp-loadout-mat-${i}">Material</label>
+                    <select id="bp-loadout-mat-${i}" data-slot="${i}" data-field="material">${matOptions}</select>
+                </div>
+                <div class="bp-form-group">
+                    <label for="bp-loadout-tier-${i}">Tier</label>
+                    <select id="bp-loadout-tier-${i}" data-slot="${i}" data-field="tier">${tierOptions}</select>
+                </div>
+                <p class="bp-loadout-summary">${summary}</p>
+            `;
+            grid.appendChild(card);
+        }
     }
 
     function renderAccordions() {
         const xp = state.currentXp + state.passXp;
         const currentLevel = getLevelFromXp(xp);
-
         const byLevel = {};
         state.subTiers.forEach(s => {
             if (!byLevel[s.level]) byLevel[s.level] = [];
             byLevel[s.level].push(s);
         });
-
-        // 1) Current level only – visible tier cards with toggles (no accordion)
-        const currentContainer = document.getElementById('bp-current-level-tiers');
-        const currentHeading = document.getElementById('bp-current-level-num');
-        const currentHint = document.getElementById('bp-current-level-hint');
-        const otherSection = document.getElementById('bp-other-levels-section');
-        const currentTiers = byLevel[currentLevel] || [];
-
-        if (currentHeading) currentHeading.textContent = currentLevel;
-        if (currentContainer) {
-            currentContainer.innerHTML = '';
-            if (currentTiers.length === 0) {
-                currentContainer.innerHTML = '<p class="help-text bp-help-light">No tiers unlocked yet. Add at least 2 gear items (Gear tab) and enter XP to unlock tiers for this level.</p>';
-            } else {
-                const themeName = getThemeForLevelTier(currentLevel, 0);
-                currentTiers.forEach(s => renderTierCard(s, currentLevel, themeName, currentContainer));
-            }
-        }
-        if (currentHint) currentHint.textContent = currentTiers.length ? 'Toggle which tiers to include in your generated prompts.' : '';
-
-        // 2) All other levels – accordions (default open)
         const container = document.getElementById('bp-accordions');
+        if (!container) return;
         const filterSearch = (document.getElementById('bp-filter-search') || {}).value || '';
         const search = filterSearch.toLowerCase();
-
-        const levels = Object.keys(byLevel).map(Number).sort((a, b) => a - b).filter(L => L < currentLevel);
-        if (otherSection) otherSection.classList.toggle('is-hidden', state.subTiers.length === 0);
-
+        const levels = Object.keys(byLevel).map(Number).sort((a, b) => a - b);
         container.innerHTML = '';
+        if (state.subTiers.length === 0) {
+            container.innerHTML = '<p class="help-text bp-help-light">Add at least 2 gear items (Gear tab) and enter XP to unlock tiers.</p>';
+            return;
+        }
         for (const level of levels) {
             const themeName = getThemeForLevelTier(level, 0);
             const cards = byLevel[level];
@@ -443,7 +492,6 @@
                 return !search || text.includes(search);
             });
             if (visible.length === 0) continue;
-
             const accordion = document.createElement('div');
             accordion.className = 'bp-accordion open';
             accordion.innerHTML = `
@@ -457,11 +505,9 @@
             const headerBtn = accordion.querySelector('.bp-accordion-header');
             const grid = document.createElement('div');
             grid.className = 'bp-tier-cards-grid';
-            visible.forEach(s => renderTierCard(s, level, themeName, grid));
+            visible.forEach(s => renderTierCardReadOnly(s, level, themeName, grid));
             content.appendChild(grid);
-            headerBtn.addEventListener('click', () => {
-                accordion.classList.toggle('open');
-            });
+            headerBtn.addEventListener('click', () => accordion.classList.toggle('open'));
             container.appendChild(accordion);
         }
     }
@@ -600,6 +646,7 @@
             if (tabId === 'dashboard') {
                 ensureUnlocks();
                 renderDashboardHero();
+                renderLoadout();
                 renderAccordions();
                 updateGenerateButton();
             }
@@ -762,6 +809,7 @@
                     currentXp: state.currentXp,
                     passXp: state.passXp,
                     subTiers: state.subTiers,
+                    look: state.look,
                     exportedAt: new Date().toISOString()
                 }, null, 2)], { type: 'application/json' });
                 const a = document.createElement('a');
@@ -776,11 +824,20 @@
     let lastGenResult = null;
 
     function buildLookPrompt() {
-        const active = getActiveSubTiers();
-        if (active.length === 0) return null;
-        if ((state.character.gearPool || []).length < 2) return null;
-        const result = buildCumulativePrompts(state.character, active, THEMES);
-        return result.compositePrompt;
+        const summary = getLoadoutSummary();
+        if (!summary || summary.length === 0) return null;
+        const cls = state.character.class || 'adventurer';
+        const artStyle = state.character.artStyle || 'epic high-fantasy';
+        const motif = state.character.motif || 'personal motif';
+        const loadoutList = summary.join('; ');
+        if (!loadoutList) return null;
+        const placeholderCharacterPrompt = `Fantasy ${cls} adventurer in starting gear, ${artStyle} D&D art style.`;
+        const hasPortrait = !!getPortraitSrc();
+        const gearPrompt = `Equip the character with: ${loadoutList}.`;
+        const compositePrompt = hasPortrait
+            ? `Take this exact character portrait and ${gearPrompt.toLowerCase()} Keep original pose, face, clothing, lighting, and ${artStyle}. Preserve existing ${motif}.`
+            : `Use this character prompt first to create a base portrait: "${placeholderCharacterPrompt}". Then ${gearPrompt.toLowerCase()} Preserve pose, face, and ${artStyle}.`;
+        return compositePrompt;
     }
 
     function renderGeneratePreview() {
@@ -790,21 +847,17 @@
         const composedEl = document.getElementById('bp-composed-prompt');
         const qualityEl = document.getElementById('bp-gen-quality');
         const modelSelectEl = document.getElementById('bp-gen-model');
-        const items = getSelectedLookItems();
         const prompt = buildLookPrompt();
 
         if (portraitEl) {
             portraitEl.textContent = getPortraitSrc() ? 'Portrait base: Current portrait' : 'Portrait base: No portrait yet, generating from scratch';
         }
         if (cosmeticsEl) {
-            const maxShow = 5;
-            const labels = items.map(i => i.label);
+            const labels = getLoadoutSummary();
             if (labels.length === 0) {
-                cosmeticsEl.textContent = 'Equipped cosmetics: No cosmetics selected';
-            } else if (labels.length <= maxShow) {
-                cosmeticsEl.textContent = 'Equipped cosmetics: ' + labels.join(', ');
+                cosmeticsEl.textContent = 'Equipped cosmetics: All slots set to None';
             } else {
-                cosmeticsEl.textContent = 'Equipped cosmetics: ' + labels.slice(0, maxShow).join(', ') + ' +' + (labels.length - maxShow) + ' more';
+                cosmeticsEl.textContent = 'Equipped cosmetics: ' + labels.join('; ');
             }
         }
         if (modelEl && modelSelectEl && qualityEl) {
@@ -911,7 +964,7 @@
             btn.addEventListener('click', async () => {
                 const prompt = buildLookPrompt();
                 if (!prompt) {
-                    showError('Add at least 2 gear items (Gear tab), set XP, and toggle at least one tier in the Tiers tab.');
+                    showError('Set at least one loadout slot to a gear type other than None.');
                     return;
                 }
                 setLoading(true);
@@ -1120,26 +1173,39 @@
         }
     }
 
+    function bindLoadout() {
+        const grid = document.getElementById('bp-loadout-grid');
+        const resetBtn = document.getElementById('bp-loadout-reset');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                state.look = { slots: LOADOUT_DEFAULTS.map(s => ({ ...s })) };
+                saveState();
+                renderLoadout();
+                renderGeneratePreview();
+            });
+        }
+        if (grid) {
+            grid.addEventListener('change', (e) => {
+                const sel = e.target.closest('select[data-slot][data-field]');
+                if (!sel) return;
+                const idx = parseInt(sel.getAttribute('data-slot'), 10);
+                const field = sel.getAttribute('data-field');
+                if (isNaN(idx) || idx < 0 || idx > 3) return;
+                if (!state.look) state.look = { slots: LOADOUT_DEFAULTS.map(s => ({ ...s })) };
+                while (state.look.slots.length <= idx) {
+                    state.look.slots.push({ gearType: 'Accent', material: 'Leather', tier: 'T0' });
+                }
+                state.look.slots[idx] = { ...state.look.slots[idx], [field]: sel.value };
+                saveState();
+                renderLoadout();
+                renderGeneratePreview();
+            });
+        }
+    }
+
     function bindFilters() {
         const searchEl = document.getElementById('bp-filter-search');
         if (searchEl) searchEl.addEventListener('input', renderAccordions);
-        const accordionsContainer = document.getElementById('bp-accordions');
-        const turnOnAll = document.getElementById('bp-turn-on-all');
-        const turnOffAll = document.getElementById('bp-turn-off-all');
-        const expandAll = document.getElementById('bp-expand-all');
-        const collapseAll = document.getElementById('bp-collapse-all');
-        if (turnOnAll) turnOnAll.addEventListener('click', turnOnAllTiers);
-        if (turnOffAll) turnOffAll.addEventListener('click', turnOffAllTiers);
-        if (expandAll && accordionsContainer) {
-            expandAll.addEventListener('click', () => {
-                accordionsContainer.querySelectorAll('.bp-accordion').forEach(acc => acc.classList.add('open'));
-            });
-        }
-        if (collapseAll && accordionsContainer) {
-            collapseAll.addEventListener('click', () => {
-                accordionsContainer.querySelectorAll('.bp-accordion').forEach(acc => acc.classList.remove('open'));
-            });
-        }
     }
 
     function resetEverything() {
@@ -1202,7 +1268,9 @@
         bindTabs();
         bindCharacterForm();
         bindGearPool();
+        bindLoadout();
         bindFilters();
+        renderLoadout();
         renderAccordions();
         bindGenerateAndExport();
         bindGenerateLook();
