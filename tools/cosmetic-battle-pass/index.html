@@ -136,7 +136,7 @@
                 <div class="bp-form-group">
                     <label>Portrait (optional)</label>
                     <button type="button" id="bp-portrait-trigger" class="btn-secondary" aria-label="Upload character portrait">Set portrait</button>
-                    <p class="help-text">Used for the composite prompt: with a portrait, the app tells the AI to equip this character; without one, use the placeholder character prompt in Generate &amp; Gallery first to create a base character, then equip.</p>
+                    <p class="help-text">With a portrait, the app tells the AI to equip this character. Without one, it generates from scratch then equips.</p>
                 </div>
             </section>
         </div>
@@ -188,7 +188,6 @@
         </div>
 
         <div id="bp-tab-generate" class="bp-tab-content">
-            <p id="bp-generate-status" class="bp-generate-status"></p>
             <div class="bp-form-section bp-generate-api-row">
                 <h2>Generate with OpenAI</h2>
                 <p class="help-text">Quality and model affect cost. Default: medium, gpt-image-1-mini. Use gpt-image-1.5 for best quality (final renders).</p>
@@ -210,47 +209,34 @@
                         </select>
                     </label>
                 </div>
-                <div class="bp-generate-buttons">
-                    <button type="button" id="bp-gen-standalone" class="btn-secondary">Generate from standalone prompt</button>
-                    <button type="button" id="bp-gen-placeholder" class="btn-secondary">Generate from placeholder prompt</button>
-                    <button type="button" id="bp-gen-composite" class="btn-secondary">Generate from composite prompt</button>
+                <button type="button" id="bp-gen-generate-look" class="bp-generate-btn">Generate look</button>
+                <div id="bp-gen-preview" class="bp-gen-preview">
+                    <p class="bp-gen-preview-portrait" id="bp-gen-preview-portrait">—</p>
+                    <p class="bp-gen-preview-cosmetics" id="bp-gen-preview-cosmetics">—</p>
+                    <p class="bp-gen-preview-model" id="bp-gen-preview-model">—</p>
                 </div>
             </div>
             <div id="bp-gen-result-wrap" class="bp-gen-result-wrap bp-gen-result-hidden" aria-live="polite">
                 <p id="bp-gen-result-status" class="bp-gen-result-status"></p>
                 <div id="bp-gen-result-image-wrap" class="bp-gen-result-image-wrap"></div>
                 <div id="bp-gen-result-actions" class="bp-gen-result-actions bp-gen-result-hidden">
-                    <button type="button" id="bp-gen-set-portrait" class="btn-secondary">Set as character portrait</button>
+                    <button type="button" id="bp-gen-set-portrait" class="btn-secondary">Set as portrait</button>
                 </div>
             </div>
             <details class="bp-advanced-prompts">
-                <summary>Advanced prompts</summary>
+                <summary>Advanced prompts (debug)</summary>
                 <div class="bp-form-group">
-                    <label>Standalone gear prompt</label>
-                    <textarea id="bp-standalone-prompt" rows="6" readonly placeholder="Generate to see prompt."></textarea>
-                    <button type="button" id="bp-copy-standalone" class="btn-secondary">Copy</button>
-                </div>
-                <div class="bp-form-group">
-                    <label for="bp-placeholder-prompt">Placeholder character prompt (use when no portrait)</label>
-                    <textarea id="bp-placeholder-prompt" rows="2" readonly placeholder="Generate to see prompt." aria-label="Placeholder character prompt for use when no portrait"></textarea>
-                    <button type="button" id="bp-copy-placeholder" class="btn-secondary">Copy</button>
-                </div>
-                <div class="bp-form-group">
-                    <label>Composite prompt (equip gear on portrait)</label>
-                    <p class="help-text">With portrait: equip on your image. Without: use the placeholder character prompt above first, then equip.</p>
-                    <textarea id="bp-composite-prompt" rows="6" readonly placeholder="Generate to see prompt."></textarea>
-                    <button type="button" id="bp-copy-composite" class="btn-secondary">Copy</button>
+                    <label>Composed prompt</label>
+                    <textarea id="bp-composed-prompt" rows="8" readonly placeholder="Select tiers and generate to see prompt."></textarea>
+                    <button type="button" id="bp-copy-prompt" class="btn-secondary">Copy</button>
                 </div>
             </details>
             <section class="bp-form-section">
                 <h2>Gallery (download preferred; max 20)</h2>
-                <p class="help-text">Add images from file upload or from Generate with OpenAI (stored as URL + metadata). Stored locally; download to keep.</p>
-                <input type="file" id="bp-gallery-add" accept="image/*" aria-label="Add image to gallery" class="bp-gallery-add-input">
+                <p class="help-text">Images are saved automatically when you generate. Stored locally; download to keep.</p>
                 <div class="bp-gallery-grid" id="bp-gallery"></div>
             </section>
         </div>
-
-        <div id="bp-confetti-wrap" class="bp-confetti-wrap" aria-hidden="true"></div>
 
         <div id="bp-lightbox" class="bp-lightbox" role="dialog" aria-modal="true" aria-label="Enlarged image" aria-hidden="true">
             <button type="button" class="bp-lightbox-close" aria-label="Close">×</button>

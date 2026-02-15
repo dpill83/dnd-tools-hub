@@ -50,23 +50,28 @@
         return url;
     }
 
-    function getPortraitAsBase64() {
+    function getPortraitSrc() {
         const c = state.character || {};
-        if (c.portraitDataUrl && c.portraitDataUrl.startsWith('data:')) return Promise.resolve(c.portraitDataUrl);
-        if (c.portraitUrl) {
-            const url = resolveImageUrl(c.portraitUrl);
-            if (!url) return Promise.resolve(null);
-            return fetch(url)
-                .then(r => r.ok ? r.blob() : Promise.reject(new Error('Fetch failed')))
-                .then(blob => new Promise((resolve, reject) => {
-                    const r = new FileReader();
-                    r.onload = () => resolve(r.result);
-                    r.onerror = () => reject(new Error('Read failed'));
-                    r.readAsDataURL(blob);
-                }))
-                .catch(() => null);
-        }
-        return Promise.resolve(null);
+        if (c.portraitDataUrl && c.portraitDataUrl.startsWith('data:')) return c.portraitDataUrl;
+        if (c.portraitUrl) return c.portraitUrl;
+        return '';
+    }
+
+    function getPortraitAsBase64() {
+        const src = getPortraitSrc();
+        if (!src) return Promise.resolve(null);
+        if (src.startsWith('data:')) return Promise.resolve(src);
+        const url = resolveImageUrl(src);
+        if (!url) return Promise.resolve(null);
+        return fetch(url)
+            .then(r => r.ok ? r.blob() : Promise.reject(new Error('Fetch failed')))
+            .then(blob => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('Read failed'));
+                reader.readAsDataURL(blob);
+            }))
+            .catch(() => null);
     }
 
     // --- State ---
@@ -204,7 +209,7 @@
 
         const standaloneGearPrompt = parts.length ? parts.join(' ') : 'No active tiers—toggle some on.';
         const placeholderCharacterPrompt = `Fantasy ${cls} adventurer in starting gear, ${artStyle} D&D art style.`;
-        const hasPortrait = (character.portraitDataUrl && character.portraitDataUrl.startsWith('data:')) || character.portraitUrl;
+        const hasPortrait = !!getPortraitSrc();
         const compositePrompt = hasPortrait
             ? `Take this exact character portrait and equip the character with this precisely upgraded gear: ${standaloneGearPrompt}. Keep original pose, face, clothing, lighting, and ${artStyle}. Preserve existing ${motif}.`
             : `Use this character prompt first to create a base portrait: "${placeholderCharacterPrompt}". Then equip that character with: ${standaloneGearPrompt}. Preserve pose, face, and ${artStyle}.`;
@@ -214,6 +219,17 @@
 
     function getActiveSubTiers() {
         return state.subTiers.filter(s => s.active).sort((a, b) => a.level - b.level || a.tier - b.tier);
+    }
+
+    function getSelectedLookItems() {
+        const active = getActiveSubTiers();
+        const gearById = {};
+        (state.character.gearPool || []).forEach(g => { gearById[g.id] = g.label; });
+        return active.map(s => {
+            const themeName = getThemeForLevelTier(s.level, s.tier);
+            const gear = gearById[s.selectedGearId] || 'gear';
+            return { id: `L${s.level}T${s.tier}`, label: `${themeName} T${s.tier} ${gear}` };
+        });
     }
 
     function turnOnAllTiers() {
@@ -255,19 +271,6 @@
             osc.start(ctx.currentTime);
             osc.stop(ctx.currentTime + 0.2);
         } catch (_) {}
-    }
-
-    // --- Confetti (mini burst) ---
-    function runMiniConfetti(container) {
-        const colors = ['#ffd700', '#51cf66', '#ff6b6b', '#5eb8e0'];
-        for (let i = 0; i < 25; i++) {
-            const p = document.createElement('div');
-            p.style.cssText = `position:absolute;left:50%;top:50%;width:6px;height:6px;background:${colors[i % colors.length]};border-radius:2px;pointer-events:none;`;
-            p.style.transform = `translate(-50%,-50%) rotate(${i * 15}deg) translateY(-${20 + Math.random() * 30}px)`;
-            p.style.animation = 'bp-confetti-fade 0.8s ease-out forwards';
-            container.appendChild(p);
-            setTimeout(() => p.remove(), 800);
-        }
     }
 
     // --- UI ---
@@ -343,6 +346,7 @@
         if (nameEl) nameEl.textContent = (state.character.name || '').trim() || '—';
         if (classEl) classEl.textContent = (state.character.class || '').trim() || '—';
         renderHeroPortrait();
+        renderGeneratePreview();
     }
 
     function renderHeroPortrait() {
@@ -573,11 +577,7 @@
             ensureUnlocks();
             renderDashboardHero();
             renderAccordions();
-            if (state.subTiers.length > before) {
-                playUnlockSound();
-                const wrap = document.getElementById('bp-confetti-wrap');
-                if (wrap) runMiniConfetti(wrap);
-            }
+            if (state.subTiers.length > before) playUnlockSound();
             saveState();
             updateGenerateButton();
         });
@@ -603,7 +603,7 @@
                 renderAccordions();
                 updateGenerateButton();
             }
-            if (tabId === 'generate') runGeneratePrompts();
+            if (tabId === 'generate') renderGeneratePreview();
         });
     }
 
@@ -735,67 +735,23 @@
         renderPredefinedList();
     }
 
-    function updateGenerateButton() { /* No button; kept for call-site compatibility */ }
-
-    function runGeneratePrompts() {
-        const statusEl = document.getElementById('bp-generate-status');
-        const standaloneEl = document.getElementById('bp-standalone-prompt');
-        const placeholderEl = document.getElementById('bp-placeholder-prompt');
-        const compositeEl = document.getElementById('bp-composite-prompt');
-        if (!statusEl || !standaloneEl) return;
-        const active = getActiveSubTiers();
-        if (active.length === 0) {
-            statusEl.textContent = 'Add at least 2 gear items (Gear tab) and set your XP. Tiers will appear on the Tiers tab—toggle some on, then return here.';
-            statusEl.style.color = 'var(--error)';
-            statusEl.classList.remove('is-hidden');
-            if (standaloneEl) standaloneEl.value = '';
-            if (placeholderEl) placeholderEl.value = '';
-            if (compositeEl) compositeEl.value = '';
-            return;
-        }
-        if ((state.character.gearPool || []).length < 2) {
-            statusEl.textContent = 'Add at least 2 items to your gear pool first (Gear tab).';
-            statusEl.style.color = 'var(--error)';
-            statusEl.classList.remove('is-hidden');
-            return;
-        }
-        const result = buildCumulativePrompts(state.character, active, THEMES);
-        standaloneEl.value = result.standaloneGearPrompt;
-        placeholderEl.value = result.placeholderCharacterPrompt;
-        compositeEl.value = result.compositePrompt;
-        state.lastGeneratedState = {
-            activeCount: active.length,
-            activeSignature: JSON.stringify(active.map(s => ({ level: s.level, tier: s.tier, active: s.active })))
-        };
-        saveState();
-        statusEl.textContent = 'Prompts generated. Copy and paste into your image AI.';
-        statusEl.style.color = '';
-        statusEl.classList.remove('is-hidden');
-        const wrap = document.getElementById('bp-confetti-wrap');
-        if (wrap) runMiniConfetti(wrap);
-    }
+    function updateGenerateButton() { renderGeneratePreview(); }
 
     function bindGenerateAndExport() {
-        const standaloneEl = document.getElementById('bp-standalone-prompt');
-        const placeholderEl = document.getElementById('bp-placeholder-prompt');
-        const compositeEl = document.getElementById('bp-composite-prompt');
-
-        ['bp-copy-standalone', 'bp-copy-placeholder', 'bp-copy-composite'].forEach((id, i) => {
-            const copyBtn = document.getElementById(id);
-            const source = [standaloneEl, placeholderEl, compositeEl][i];
-            if (copyBtn && source) {
-                copyBtn.addEventListener('click', () => {
-                    source.select();
-                    if (navigator.clipboard && navigator.clipboard.writeText) {
-                        navigator.clipboard.writeText(source.value).catch(() => document.execCommand('copy'));
-                    } else {
-                        document.execCommand('copy');
-                    }
-                    copyBtn.textContent = 'Copied!';
-                    setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
-                });
-            }
-        });
+        const composedEl = document.getElementById('bp-composed-prompt');
+        const copyBtn = document.getElementById('bp-copy-prompt');
+        if (copyBtn && composedEl) {
+            copyBtn.addEventListener('click', () => {
+                composedEl.select();
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(composedEl.value).catch(() => document.execCommand('copy'));
+                } else {
+                    document.execCommand('copy');
+                }
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+            });
+        }
 
         const exportBtn = document.getElementById('bp-export-json');
         if (exportBtn) {
@@ -819,26 +775,56 @@
 
     let lastGenResult = null;
 
-    function bindGenerateImageApi() {
+    function buildLookPrompt() {
+        const active = getActiveSubTiers();
+        if (active.length === 0) return null;
+        if ((state.character.gearPool || []).length < 2) return null;
+        const result = buildCumulativePrompts(state.character, active, THEMES);
+        return result.compositePrompt;
+    }
+
+    function renderGeneratePreview() {
+        const portraitEl = document.getElementById('bp-gen-preview-portrait');
+        const cosmeticsEl = document.getElementById('bp-gen-preview-cosmetics');
+        const modelEl = document.getElementById('bp-gen-preview-model');
+        const composedEl = document.getElementById('bp-composed-prompt');
         const qualityEl = document.getElementById('bp-gen-quality');
-        const modelEl = document.getElementById('bp-gen-model');
-        const standaloneBtn = document.getElementById('bp-gen-standalone');
-        const placeholderBtn = document.getElementById('bp-gen-placeholder');
-        const compositeBtn = document.getElementById('bp-gen-composite');
+        const modelSelectEl = document.getElementById('bp-gen-model');
+        const items = getSelectedLookItems();
+        const prompt = buildLookPrompt();
+
+        if (portraitEl) {
+            portraitEl.textContent = getPortraitSrc() ? 'Portrait base: Current portrait' : 'Portrait base: No portrait yet, generating from scratch';
+        }
+        if (cosmeticsEl) {
+            const maxShow = 5;
+            const labels = items.map(i => i.label);
+            if (labels.length === 0) {
+                cosmeticsEl.textContent = 'Equipped cosmetics: No cosmetics selected';
+            } else if (labels.length <= maxShow) {
+                cosmeticsEl.textContent = 'Equipped cosmetics: ' + labels.join(', ');
+            } else {
+                cosmeticsEl.textContent = 'Equipped cosmetics: ' + labels.slice(0, maxShow).join(', ') + ' +' + (labels.length - maxShow) + ' more';
+            }
+        }
+        if (modelEl && modelSelectEl && qualityEl) {
+            modelEl.textContent = 'Model: ' + (modelSelectEl.value || 'gpt-image-1-mini') + ' · Quality: ' + (qualityEl.value || 'medium');
+        }
+        if (composedEl) composedEl.value = prompt || '';
+    }
+
+    function bindGenerateLook() {
+        const btn = document.getElementById('bp-gen-generate-look');
+        const qualityEl = document.getElementById('bp-gen-quality');
+        const modelSelectEl = document.getElementById('bp-gen-model');
         const resultWrap = document.getElementById('bp-gen-result-wrap');
         const resultStatus = document.getElementById('bp-gen-result-status');
         const resultImageWrap = document.getElementById('bp-gen-result-image-wrap');
         const resultActions = document.getElementById('bp-gen-result-actions');
         const setPortraitBtn = document.getElementById('bp-gen-set-portrait');
 
-        function getPromptFromButton(btnId) {
-            const id = btnId === 'bp-gen-standalone' ? 'bp-standalone-prompt' : btnId === 'bp-gen-placeholder' ? 'bp-placeholder-prompt' : 'bp-composite-prompt';
-            const el = document.getElementById(id);
-            return el ? el.value.trim() : '';
-        }
-
         function setLoading(loading) {
-            [standaloneBtn, placeholderBtn, compositeBtn].forEach(b => { if (b) b.disabled = loading; });
+            if (btn) btn.disabled = loading;
             if (resultWrap) {
                 resultWrap.classList.remove('bp-gen-result-hidden');
                 resultWrap.classList.add('bp-gen-result-visible');
@@ -921,45 +907,41 @@
             }
         }
 
-        async function runGenerate(prompt, image) {
-            if (!prompt) {
-                showError('Generate prompts first (toggle tiers and ensure prompts are filled).');
-                return;
-            }
-            setLoading(true);
-            try {
-                const body = {
-                    prompt,
-                    model: modelEl ? modelEl.value : 'gpt-image-1-mini',
-                    size: '1024x1536',
-                    quality: qualityEl ? qualityEl.value : 'medium'
-                };
-                if (image) body.image = image;
-                const res = await fetch('/api/generate-image', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                });
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok) {
-                    showError(data.error || res.statusText || 'Request failed');
+        if (btn) {
+            btn.addEventListener('click', async () => {
+                const prompt = buildLookPrompt();
+                if (!prompt) {
+                    showError('Add at least 2 gear items (Gear tab), set XP, and toggle at least one tier in the Tiers tab.');
                     return;
                 }
-                showResult(data);
-            } catch (e) {
-                showError('Network error: ' + (e.message || 'failed'));
-            } finally {
-                setLoading(false);
-            }
+                setLoading(true);
+                try {
+                    const image = await getPortraitAsBase64();
+                    const body = {
+                        prompt,
+                        model: modelSelectEl ? modelSelectEl.value : 'gpt-image-1-mini',
+                        size: '1024x1536',
+                        quality: qualityEl ? qualityEl.value : 'medium'
+                    };
+                    if (image) body.image = image;
+                    const res = await fetch('/api/generate-image', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) {
+                        showError(data.error || res.statusText || 'Request failed');
+                        return;
+                    }
+                    showResult(data);
+                } catch (e) {
+                    showError('Network error: ' + (e.message || 'failed'));
+                } finally {
+                    setLoading(false);
+                }
+            });
         }
-
-        if (standaloneBtn) standaloneBtn.addEventListener('click', () => runGenerate(getPromptFromButton('bp-gen-standalone')));
-        if (placeholderBtn) placeholderBtn.addEventListener('click', () => runGenerate(getPromptFromButton('bp-gen-placeholder')));
-        if (compositeBtn) compositeBtn.addEventListener('click', async () => {
-            const prompt = getPromptFromButton('bp-gen-composite');
-            const image = await getPortraitAsBase64();
-            runGenerate(prompt, image || undefined);
-        });
 
         if (setPortraitBtn) {
             setPortraitBtn.addEventListener('click', () => {
@@ -968,8 +950,11 @@
                 state.character.portraitDataUrl = '';
                 saveState();
                 renderHeroPortrait();
+                renderGeneratePreview();
             });
         }
+        if (qualityEl) qualityEl.addEventListener('change', renderGeneratePreview);
+        if (modelSelectEl) modelSelectEl.addEventListener('change', renderGeneratePreview);
     }
 
     function compressImageDataUrl(dataUrl, maxSize) {
@@ -1079,6 +1064,7 @@
             saveState();
             renderCharacterCard();
         } else if (action === 'delete') {
+            if (!confirm('Delete this image from the gallery?')) return;
             state.gallery = state.gallery.filter(e => e.id !== entryId);
             saveState();
             renderGallery();
@@ -1118,24 +1104,7 @@
     }
 
     function bindGalleryAdd() {
-        const addEl = document.getElementById('bp-gallery-add');
         const galleryEl = document.getElementById('bp-gallery');
-        if (!addEl) return;
-        addEl.addEventListener('change', (e) => {
-            const f = e.target.files[0];
-            if (!f) return;
-            const r = new FileReader();
-            r.onload = async () => {
-                let dataUrl = r.result;
-                dataUrl = await compressImageDataUrl(dataUrl, 800);
-                if (state.gallery.length >= GALLERY_CAP) state.gallery.shift();
-                state.gallery.push({ id: galleryEntryId(), dataUrl, caption: 'Image ' + (state.gallery.length + 1) });
-                saveState();
-                renderGallery();
-            };
-            r.readAsDataURL(f);
-            addEl.value = '';
-        });
         if (galleryEl) {
             galleryEl.addEventListener('click', (e) => {
                 const btn = e.target.closest('button[data-action][data-gallery-id]');
@@ -1202,6 +1171,7 @@
                     state.character.portraitUrl = '';
                     saveState();
                     renderHeroPortrait();
+                    renderGeneratePreview();
                 };
                 r.readAsDataURL(f);
                 fileEl.value = '';
@@ -1235,7 +1205,7 @@
         bindFilters();
         renderAccordions();
         bindGenerateAndExport();
-        bindGenerateImageApi();
+        bindGenerateLook();
         bindReset();
         bindLightbox();
         bindGalleryAdd();
