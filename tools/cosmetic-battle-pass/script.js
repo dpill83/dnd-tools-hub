@@ -418,6 +418,67 @@
         return used;
     }
 
+    function getGearIconSvg(gearType) {
+        const icons = {
+            Breastplate: '<path d="M12 2 L6 6 L6 10 L12 14 L18 10 L18 6 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>',
+            Shield: '<path d="M12 2 L20 6 L20 14 L12 22 L4 14 L4 6 Z" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+            Mace: '<path d="M12 2 L12 14 M10 10 L14 10 M12 14 L10 18 M12 14 L14 18" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+            Boots: '<path d="M6 14 L10 14 L10 20 L6 20 Z M14 14 L18 14 L18 20 L14 20 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>',
+            Pants: '<path d="M8 4 L8 16 L6 20 L10 20 L10 16 M16 4 L16 16 L14 20 L18 20 L18 16" fill="none" stroke="currentColor" stroke-width="1"/>',
+            Cloak: '<path d="M12 2 L20 8 L20 18 L12 22 L4 18 L4 8 Z" fill="none" stroke="currentColor" stroke-width="1"/>',
+            Belt: '<path d="M4 10 L20 10 M4 12 L20 12" stroke="currentColor" stroke-width="1.5"/>',
+            Gloves: '<path d="M6 8 L10 12 L10 18 L6 18 Z M14 8 L18 12 L18 18 L14 18 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>',
+            Helm: '<path d="M12 2 L18 6 L18 12 L12 16 L6 12 L6 6 Z" fill="none" stroke="currentColor" stroke-width="1"/>',
+            Accent: '<circle cx="12" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+            None: '<path d="M4 4 L20 20 M20 4 L4 20" stroke="currentColor" stroke-width="1.5"/>'
+        };
+        const path = icons[gearType] || icons.Accent;
+        return `<svg class="bp-gear-icon" viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
+    }
+
+    function renderLoadoutSlot(slot, index) {
+        const used = getUsedGearTypes(index);
+        const gt = slot.gearType || 'Accent';
+        const mat = slot.material || 'Leather';
+        const tier = slot.tier || 'T0';
+        const gearOptions = GEAR_TYPES.map(g => {
+            const disabled = used.has(g) && g !== 'Accent' && g !== 'None' ? ' disabled' : '';
+            const sel = gt === g ? ' selected' : '';
+            return `<option value="${g}"${sel}${disabled}>${g}</option>`;
+        }).join('');
+        const matChips = LOADOUT_MATERIALS.map(m => {
+            const active = mat === m ? ' bp-mat-chip-active' : '';
+            return `<button type="button" class="bp-mat-chip bp-mat-${m.toLowerCase()}${active}" data-action="set-material" data-slot="${index}" data-value="${m}" aria-pressed="${mat === m}">${m}</button>`;
+        }).join('');
+        const tierSteps = LOADOUT_TIERS.map(t => {
+            const active = tier === t ? ' bp-tier-step-active' : '';
+            return `<button type="button" class="bp-tier-step bp-tier-${t.toLowerCase()}${active}" data-action="set-tier" data-slot="${index}" data-value="${t}" aria-pressed="${tier === t}">${t.replace('T', '')}</button>`;
+        }).join('');
+        return `
+            <div class="bp-loadout-slot bp-gear-card card" data-slot-index="${index}">
+                <div class="bp-gear-card-header">
+                    <span class="bp-gear-icon-wrap">${getGearIconSvg(gt)}</span>
+                    <div class="bp-gear-header-middle">
+                        <span class="bp-slot-label">Slot ${index + 1}</span>
+                        <select class="bp-gear-select" data-action="set-gear" data-slot="${index}" data-field="gearType" aria-label="Gear type">${gearOptions}</select>
+                    </div>
+                    <div class="bp-gear-header-chips">
+                        <span class="bp-summary-chip bp-mat-chip bp-mat-${mat.toLowerCase()}">${mat}</span>
+                        <span class="bp-summary-chip bp-tier-chip bp-tier-${tier.toLowerCase()}">${tier}</span>
+                    </div>
+                </div>
+                <div class="bp-gear-card-body">
+                    <div class="bp-mat-chip-group" role="group" aria-label="Material">
+                        ${matChips}
+                    </div>
+                    <div class="bp-tier-step-group" role="group" aria-label="Tier">
+                        ${tierSteps}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     function renderLoadout() {
         const grid = document.getElementById('bp-loadout-grid');
         if (!grid) return;
@@ -425,43 +486,7 @@
         grid.innerHTML = '';
         for (let i = 0; i < 4; i++) {
             const slot = slots[i] || { gearType: 'Accent', material: 'Leather', tier: 'T0' };
-            const used = getUsedGearTypes(i);
-            const card = document.createElement('div');
-            card.className = 'bp-loadout-slot card';
-            card.setAttribute('data-slot-index', i);
-            const summary = slot.gearType === 'None'
-                ? 'Selected: None'
-                : `Selected: ${slot.material || 'Leather'} ${slot.tier || 'T0'} ${slot.gearType || 'Accent'}`;
-            const gearOptions = GEAR_TYPES.map(g => {
-                const disabled = used.has(g) && g !== 'Accent' && g !== 'None' ? ' disabled' : '';
-                const sel = (slot.gearType || '') === g ? ' selected' : '';
-                return `<option value="${g}"${sel}${disabled}>${g}</option>`;
-            }).join('');
-            const matOptions = LOADOUT_MATERIALS.map(m => {
-                const sel = (slot.material || 'Leather') === m ? ' selected' : '';
-                return `<option value="${m}"${sel}>${m}</option>`;
-            }).join('');
-            const tierOptions = LOADOUT_TIERS.map(t => {
-                const sel = (slot.tier || 'T0') === t ? ' selected' : '';
-                return `<option value="${t}"${sel}>${t}</option>`;
-            }).join('');
-            card.innerHTML = `
-                <div class="bp-loadout-slot-header">Slot ${i + 1}</div>
-                <div class="bp-form-group">
-                    <label for="bp-loadout-gear-${i}">Gear type</label>
-                    <select id="bp-loadout-gear-${i}" data-slot="${i}" data-field="gearType">${gearOptions}</select>
-                </div>
-                <div class="bp-form-group">
-                    <label for="bp-loadout-mat-${i}">Material</label>
-                    <select id="bp-loadout-mat-${i}" data-slot="${i}" data-field="material">${matOptions}</select>
-                </div>
-                <div class="bp-form-group">
-                    <label for="bp-loadout-tier-${i}">Tier</label>
-                    <select id="bp-loadout-tier-${i}" data-slot="${i}" data-field="tier">${tierOptions}</select>
-                </div>
-                <p class="bp-loadout-summary">${summary}</p>
-            `;
-            grid.appendChild(card);
+            grid.insertAdjacentHTML('beforeend', renderLoadoutSlot(slot, i));
         }
     }
 
@@ -1185,20 +1210,31 @@
             });
         }
         if (grid) {
-            grid.addEventListener('change', (e) => {
-                const sel = e.target.closest('select[data-slot][data-field]');
-                if (!sel) return;
-                const idx = parseInt(sel.getAttribute('data-slot'), 10);
-                const field = sel.getAttribute('data-field');
+            function updateSlot(idx, field, value) {
                 if (isNaN(idx) || idx < 0 || idx > 3) return;
                 if (!state.look) state.look = { slots: LOADOUT_DEFAULTS.map(s => ({ ...s })) };
                 while (state.look.slots.length <= idx) {
                     state.look.slots.push({ gearType: 'Accent', material: 'Leather', tier: 'T0' });
                 }
-                state.look.slots[idx] = { ...state.look.slots[idx], [field]: sel.value };
+                state.look.slots[idx] = { ...state.look.slots[idx], [field]: value };
                 saveState();
                 renderLoadout();
                 renderGeneratePreview();
+            }
+            grid.addEventListener('change', (e) => {
+                const sel = e.target.closest('select[data-action="set-gear"]');
+                if (!sel) return;
+                const idx = parseInt(sel.getAttribute('data-slot'), 10);
+                updateSlot(idx, 'gearType', sel.value);
+            });
+            grid.addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-action="set-material"], [data-action="set-tier"]');
+                if (!btn) return;
+                const action = btn.getAttribute('data-action');
+                const idx = parseInt(btn.getAttribute('data-slot'), 10);
+                const value = btn.getAttribute('data-value');
+                if (action === 'set-material') updateSlot(idx, 'material', value);
+                else if (action === 'set-tier') updateSlot(idx, 'tier', value);
             });
         }
     }
