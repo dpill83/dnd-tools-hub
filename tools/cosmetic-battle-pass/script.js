@@ -13,12 +13,22 @@
     const LOADOUT_MATERIALS = ['Cotton', 'Wool', 'Lace', 'Leather'];
     const LOADOUT_TIERS = ['T0', 'T1', 'T2', 'T3'];
 
-    const LOADOUT_DEFAULTS = [
-        { gearType: 'Breastplate', material: 'Leather', tier: 'T0' },
-        { gearType: 'Shield', material: 'Leather', tier: 'T0' },
-        { gearType: 'Mace', material: 'Leather', tier: 'T0' },
-        { gearType: 'Accent', material: 'Leather', tier: 'T0' }
-    ];
+    function getCurrentTierMaterial() {
+        const xp = state.currentXp + state.passXp;
+        const level = getLevelFromXp(xp);
+        const theme = getThemeForLevelTier(level, 0);
+        return LOADOUT_MATERIALS.includes(theme) ? theme : 'Leather';
+    }
+
+    function getLoadoutDefaults() {
+        const mat = getCurrentTierMaterial();
+        return [
+            { gearType: 'Breastplate', material: mat, tier: 'T0' },
+            { gearType: 'Shield', material: mat, tier: 'T0' },
+            { gearType: 'Mace', material: mat, tier: 'T0' },
+            { gearType: 'Accent', material: mat, tier: 'T0' }
+        ];
+    }
 
     const PROMPT_TEMPLATES = {
         0: 'Fantasy [class] [gear] with basic [theme] [application] on the handle/edges, simple etched [motif] details starting to show, battle-ready and worn, [artStyle] D&D art style.',
@@ -104,7 +114,8 @@
         gallery: [],
         lastGeneratedState: null,
         soundEnabled: false,
-        look: { slots: [] }
+        look: { slots: [] },
+        catalog: { customGear: [] }
     };
 
     function loadState() {
@@ -122,7 +133,10 @@
                     if (parsed.look && Array.isArray(parsed.look.slots) && parsed.look.slots.length === 4) {
                         state.look = { slots: parsed.look.slots };
                     } else {
-                        state.look = { slots: LOADOUT_DEFAULTS.map(s => ({ ...s })) };
+                        state.look = { slots: getLoadoutDefaults().map(s => ({ ...s })) };
+                    }
+                    if (parsed.catalog && Array.isArray(parsed.catalog.customGear)) {
+                        state.catalog = { customGear: parsed.catalog.customGear };
                     }
                 }
             }
@@ -130,7 +144,10 @@
             state.soundEnabled = soundRaw === 'true';
         } catch (_) {}
         if (!state.look || !Array.isArray(state.look.slots) || state.look.slots.length !== 4) {
-            state.look = { slots: LOADOUT_DEFAULTS.map(s => ({ ...s })) };
+            state.look = { slots: getLoadoutDefaults().map(s => ({ ...s })) };
+        }
+        if (!state.catalog || !Array.isArray(state.catalog.customGear)) {
+            state.catalog = { customGear: [] };
         }
     }
 
@@ -144,7 +161,8 @@
                 reseedCounter: state.reseedCounter,
                 subTiers: state.subTiers,
                 gallery: state.gallery,
-                look: state.look
+                look: state.look,
+                catalog: state.catalog
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
         } catch (_) {}
@@ -157,13 +175,10 @@
         const unlocked = getAllUnlockedSubTiers(xp);
         const nextMeta = unlocked._nextUnlock;
         const list = unlocked.filter(x => !x._nextUnlock);
-        const pool = state.character.gearPool || [];
+        const userPool = state.character.gearPool || [];
+        const pool = userPool.length >= 2 ? userPool : GEAR_TYPES.filter(g => g !== 'None').slice(0, 6).map((label, i) => ({ id: 'default-' + i, label, custom: false }));
         const name = (state.character.name || '').trim() || 'Character';
         const reseed = String(state.reseedCounter);
-        if (pool.length < 2) {
-            saveState();
-            return { nextMeta: unlocked._nextUnlock, list: [], newlyAdded: 0 };
-        }
 
         for (const u of list) {
             if (state.subTiers.some(s => s.level === u.level && s.tier === u.tier)) continue;
@@ -407,6 +422,11 @@
         container.appendChild(card);
     }
 
+    function getGearTypesForLoadout() {
+        const custom = (state.catalog?.customGear || []).map(g => g.name || g.label).filter(Boolean);
+        return [...GEAR_TYPES, ...custom.filter(n => !GEAR_TYPES.includes(n))];
+    }
+
     function getUsedGearTypes(excludeSlotIndex) {
         const slots = state.look?.slots || [];
         const used = new Set();
@@ -441,7 +461,8 @@
         const gt = slot.gearType || 'Accent';
         const mat = slot.material || 'Leather';
         const tier = slot.tier || 'T0';
-        const gearOptions = GEAR_TYPES.map(g => {
+        const gearTypes = getGearTypesForLoadout();
+        const gearOptions = gearTypes.map(g => {
             const disabled = used.has(g) && g !== 'Accent' && g !== 'None' ? ' disabled' : '';
             const sel = gt === g ? ' selected' : '';
             return `<option value="${g}"${sel}${disabled}>${g}</option>`;
@@ -570,23 +591,23 @@
     }
 
     function isGearSatisfied() {
-        return (state.character.gearPool || []).length >= 2;
+        return true;
     }
 
     function isTabLocked(tabId) {
         if (state.currentXp === 0) {
-            return ['character', 'gear', 'dashboard', 'generate'].includes(tabId);
+            return ['character', 'catalog', 'dashboard', 'generate'].includes(tabId);
         }
         const charOk = isCharacterSatisfied();
         const gearOk = isGearSatisfied();
         if (tabId === 'character') return false;
-        if (tabId === 'gear') return !charOk;
+        if (tabId === 'catalog') return !charOk;
         if (tabId === 'dashboard' || tabId === 'generate') return !charOk || !gearOk;
         return false;
     }
 
     function updateTabsForXp() {
-        const tabOrder = ['xp', 'character', 'gear', 'dashboard', 'generate', 'settings'];
+        const tabOrder = ['xp', 'character', 'catalog', 'dashboard', 'generate', 'settings'];
         let activeTabId = null;
         document.querySelectorAll('.bp-tab').forEach(tab => {
             const tabId = tab.getAttribute('data-tab');
@@ -647,7 +668,6 @@
             const before = state.subTiers.length;
             ensureUnlocks();
             renderDashboardHero();
-            renderAccordions();
             if (state.subTiers.length > before) playUnlockSound();
             saveState();
             updateGenerateButton();
@@ -672,9 +692,9 @@
                 ensureUnlocks();
                 renderDashboardHero();
                 renderLoadout();
-                renderAccordions();
                 updateGenerateButton();
             }
+            if (tabId === 'catalog') renderCatalog();
             if (tabId === 'generate') renderGeneratePreview();
         });
     }
@@ -727,84 +747,61 @@
         }
     }
 
-    function bindGearPool() {
-        const listEl = document.getElementById('bp-gear-list');
-        const searchEl = document.getElementById('bp-gear-search');
-        const customEl = document.getElementById('bp-gear-custom');
-        const addBtn = document.getElementById('bp-gear-add-custom');
-        const poolEl = document.getElementById('bp-gear-pool');
-        const errEl = document.getElementById('bp-gear-error');
+    function renderCatalog() {
+        const grid = document.getElementById('bp-catalog-gear-grid');
+        const customList = document.getElementById('bp-custom-gear-list');
+        if (!grid) return;
+        const gearTypes = getGearTypesForLoadout();
+        grid.innerHTML = gearTypes.filter(g => g !== 'None').map(g => {
+            const svg = getGearIconSvg(g);
+            return `<div class="bp-catalog-gear-item" aria-label="${g}"><span class="bp-catalog-gear-icon">${svg}</span><span class="bp-catalog-gear-name">${g}</span></div>`;
+        }).join('');
+        if (customList) {
+            const custom = state.catalog?.customGear || [];
+            customList.innerHTML = custom.map((g, i) => {
+                const name = g.name || g.label || '';
+                const emoji = g.emoji || '';
+                return `<span class="bp-custom-gear-chip"><span class="bp-custom-gear-emoji">${emoji}</span>${name} <button type="button" class="bp-custom-gear-remove" data-index="${i}" aria-label="Remove ${name}">×</button></span>`;
+            }).join('');
+        }
+    }
 
-        function renderPool() {
-            poolEl.innerHTML = '';
-            (state.character.gearPool || []).forEach(g => {
-                const chip = document.createElement('button');
-                chip.type = 'button';
-                chip.className = 'bp-gear-chip';
-                chip.textContent = g.label + ' ×';
-                chip.setAttribute('aria-label', 'Remove ' + g.label + ' from gear pool');
-                chip.addEventListener('click', () => {
-                    state.character.gearPool = state.character.gearPool.filter(x => x.id !== g.id);
-                    saveState();
-                    renderPool();
-                    renderPredefinedList(searchEl.value);
-                    syncTiersAfterGearChange();
-                    updateTabsForXp();
-                });
-                poolEl.appendChild(chip);
+    function bindCatalog() {
+        const grid = document.getElementById('bp-catalog-gear-grid');
+        const nameEl = document.getElementById('bp-custom-gear-name');
+        const emojiEl = document.getElementById('bp-custom-gear-emoji');
+        const addBtn = document.getElementById('bp-catalog-add-custom');
+        const customList = document.getElementById('bp-custom-gear-list');
+        if (addBtn && nameEl) {
+            addBtn.addEventListener('click', () => {
+                const name = (nameEl.value || '').trim();
+                if (!name) return;
+                if (GEAR_TYPES.includes(name)) return;
+                state.catalog = state.catalog || { customGear: [] };
+                state.catalog.customGear = state.catalog.customGear || [];
+                if (state.catalog.customGear.some(g => (g.name || g.label) === name)) return;
+                state.catalog.customGear.push({ name, emoji: (emojiEl?.value || '').trim().slice(0, 2) });
+                nameEl.value = '';
+                if (emojiEl) emojiEl.value = '';
+                saveState();
+                renderCatalog();
+                renderLoadout();
+                renderGeneratePreview();
             });
-            const count = (state.character.gearPool || []).length;
-            if (count < 2) {
-                errEl.textContent = 'Add at least 2 items to your gear pool.';
-                errEl.classList.remove('is-hidden');
-            } else {
-                errEl.classList.add('is-hidden');
-            }
         }
-
-        function renderPredefinedList(filter) {
-            const q = (filter || '').toLowerCase();
-            const poolIds = (state.character.gearPool || []).map(g => g.label);
-            const frag = document.createDocumentFragment();
-            PREDEFINED_GEAR
-                .filter(label => !poolIds.includes(label) && (!q || label.toLowerCase().includes(q)))
-                .forEach(label => {
-                    const item = document.createElement('div');
-                    item.className = 'bp-gear-list-item';
-                    item.textContent = label;
-                    item.addEventListener('click', () => {
-                        const id = 'gear-' + label.replace(/\s/g, '-') + '-' + Date.now();
-                        state.character.gearPool = state.character.gearPool || [];
-                        state.character.gearPool.push({ id, label, custom: false });
-                        saveState();
-                        renderPool();
-                        renderPredefinedList(searchEl.value);
-                        syncTiersAfterGearChange();
-                        updateTabsForXp();
-                    });
-                    frag.appendChild(item);
-                });
-            listEl.innerHTML = '';
-            listEl.appendChild(frag);
+        if (customList) {
+            customList.addEventListener('click', (e) => {
+                const btn = e.target.closest('.bp-custom-gear-remove');
+                if (!btn) return;
+                const idx = parseInt(btn.getAttribute('data-index'), 10);
+                if (isNaN(idx)) return;
+                state.catalog.customGear = (state.catalog?.customGear || []).filter((_, i) => i !== idx);
+                saveState();
+                renderCatalog();
+                renderLoadout();
+                renderGeneratePreview();
+            });
         }
-
-        if (searchEl) {
-            searchEl.addEventListener('input', () => renderPredefinedList(searchEl.value));
-        }
-        addBtn.addEventListener('click', () => {
-            const label = (customEl.value || '').trim();
-            if (!label) return;
-            const id = 'gear-custom-' + Date.now();
-            state.character.gearPool = state.character.gearPool || [];
-            state.character.gearPool.push({ id, label, custom: true });
-            customEl.value = '';
-            saveState();
-            renderPool();
-            syncTiersAfterGearChange();
-            updateTabsForXp();
-        });
-        renderPool();
-        renderPredefinedList();
     }
 
     function updateGenerateButton() { renderGeneratePreview(); }
@@ -835,6 +832,7 @@
                     passXp: state.passXp,
                     subTiers: state.subTiers,
                     look: state.look,
+                    catalog: state.catalog,
                     exportedAt: new Date().toISOString()
                 }, null, 2)], { type: 'application/json' });
                 const a = document.createElement('a');
@@ -865,9 +863,24 @@
         return compositePrompt;
     }
 
+    function renderCurrentBuild() {
+        const container = document.getElementById('bp-build-chips');
+        if (!container) return;
+        const slots = state.look?.slots || [];
+        const labels = slots.map(s => {
+            const gt = (s.gearType || 'Accent').trim() || 'Accent';
+            if (gt === 'None') return null;
+            const mat = (s.material || 'Leather').trim() || 'Leather';
+            const t = (s.tier || 'T0').trim() || 'T0';
+            return `${mat} ${t} ${gt}`;
+        }).filter(Boolean);
+        container.innerHTML = labels.length === 0
+            ? '<span class="bp-build-chip bp-build-empty">All slots None</span>'
+            : labels.map(l => `<span class="bp-build-chip">${l}</span>`).join('');
+    }
+
     function renderGeneratePreview() {
         const portraitEl = document.getElementById('bp-gen-preview-portrait');
-        const cosmeticsEl = document.getElementById('bp-gen-preview-cosmetics');
         const modelEl = document.getElementById('bp-gen-preview-model');
         const composedEl = document.getElementById('bp-composed-prompt');
         const qualityEl = document.getElementById('bp-gen-quality');
@@ -877,18 +890,13 @@
         if (portraitEl) {
             portraitEl.textContent = getPortraitSrc() ? 'Portrait base: Current portrait' : 'Portrait base: No portrait yet, generating from scratch';
         }
-        if (cosmeticsEl) {
-            const labels = getLoadoutSummary();
-            if (labels.length === 0) {
-                cosmeticsEl.textContent = 'Equipped cosmetics: All slots set to None';
-            } else {
-                cosmeticsEl.textContent = 'Equipped cosmetics: ' + labels.join('; ');
-            }
-        }
+<｜tool▁call▁end｜><｜tool▁call▁begin｜>
+Read
         if (modelEl && modelSelectEl && qualityEl) {
             modelEl.textContent = 'Model: ' + (modelSelectEl.value || 'gpt-image-1-mini') + ' · Quality: ' + (qualityEl.value || 'medium');
         }
         if (composedEl) composedEl.value = prompt || '';
+        renderCurrentBuild();
     }
 
     function bindGenerateLook() {
@@ -1203,7 +1211,7 @@
         const resetBtn = document.getElementById('bp-loadout-reset');
         if (resetBtn) {
             resetBtn.addEventListener('click', () => {
-                state.look = { slots: LOADOUT_DEFAULTS.map(s => ({ ...s })) };
+                state.look = { slots: getLoadoutDefaults().map(s => ({ ...s })) };
                 saveState();
                 renderLoadout();
                 renderGeneratePreview();
@@ -1212,7 +1220,7 @@
         if (grid) {
             function updateSlot(idx, field, value) {
                 if (isNaN(idx) || idx < 0 || idx > 3) return;
-                if (!state.look) state.look = { slots: LOADOUT_DEFAULTS.map(s => ({ ...s })) };
+                if (!state.look) state.look = { slots: getLoadoutDefaults().map(s => ({ ...s })) };
                 while (state.look.slots.length <= idx) {
                     state.look.slots.push({ gearType: 'Accent', material: 'Leather', tier: 'T0' });
                 }
@@ -1237,11 +1245,6 @@
                 else if (action === 'set-tier') updateSlot(idx, 'tier', value);
             });
         }
-    }
-
-    function bindFilters() {
-        const searchEl = document.getElementById('bp-filter-search');
-        if (searchEl) searchEl.addEventListener('input', renderAccordions);
     }
 
     function resetEverything() {
@@ -1303,11 +1306,10 @@
         bindXpAndMilestone();
         bindTabs();
         bindCharacterForm();
-        bindGearPool();
+        bindCatalog();
         bindLoadout();
-        bindFilters();
+        renderCatalog();
         renderLoadout();
-        renderAccordions();
         bindGenerateAndExport();
         bindGenerateLook();
         bindReset();

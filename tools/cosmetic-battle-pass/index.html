@@ -71,7 +71,7 @@
         <div class="bp-tabs">
             <button type="button" class="bp-tab active" data-tab="xp">XP Level</button>
             <button type="button" class="bp-tab" data-tab="character">Character</button>
-            <button type="button" class="bp-tab" data-tab="gear">Gear</button>
+            <button type="button" class="bp-tab" data-tab="catalog">Catalog</button>
             <button type="button" class="bp-tab" data-tab="dashboard">Loadout</button>
             <button type="button" class="bp-tab" data-tab="generate">Generate & Gallery</button>
             <button type="button" class="bp-tab" data-tab="settings">Settings</button>
@@ -96,13 +96,6 @@
                 <button type="button" id="bp-loadout-reset" class="btn-secondary">Reset to defaults</button>
                 <div id="bp-loadout-grid" class="bp-loadout-grid"></div>
             </section>
-            <details class="bp-loadout-catalog-details">
-                <summary>Browse cosmetics catalog</summary>
-                <div class="bp-filter-bar">
-                    <input type="text" id="bp-filter-search" placeholder="Filter by level, theme, gear…" aria-label="Filter catalog">
-                </div>
-                <div id="bp-accordions" class="bp-catalog-readonly"></div>
-            </details>
         </div>
 
         <div id="bp-tab-character" class="bp-tab-content">
@@ -138,29 +131,20 @@
             </section>
         </div>
 
-        <div id="bp-tab-gear" class="bp-tab-content">
+        <div id="bp-tab-catalog" class="bp-tab-content">
             <section class="bp-form-section">
-                <h2>Gear pool (min 2)</h2>
-                <div class="bp-form-group">
-                    <label>Your gear pool</label>
-                    <p class="help-text">Click a gear below to add it here; click a chip to remove it.</p>
-                    <div class="bp-gear-pool-chips" id="bp-gear-pool"></div>
-                </div>
-                <div class="bp-form-group">
-                    <label>Add from list</label>
-                    <div class="bp-gear-search">
-                        <input type="text" id="bp-gear-search" placeholder="Search equipment…">
-                    </div>
-                    <div class="bp-gear-list" id="bp-gear-list"></div>
-                </div>
-                <div class="bp-form-group">
-                    <label>Custom item</label>
+                <h2>Gear catalog</h2>
+                <p class="help-text">Browse available gear types. Add custom types to use in Loadout. Catalog does not affect selection—use Loadout to choose gear.</p>
+                <div id="bp-catalog-gear-grid" class="bp-catalog-gear-grid"></div>
+                <div class="bp-form-group bp-catalog-add">
+                    <label for="bp-custom-gear-name">Add custom gear type</label>
                     <div class="bp-gear-custom-row">
-                        <input type="text" id="bp-gear-custom" placeholder="Item name">
-                        <button type="button" id="bp-gear-add-custom" class="btn-secondary">Add</button>
+                        <input type="text" id="bp-custom-gear-name" placeholder="Item name (e.g. Cape)" aria-label="Custom gear name">
+                        <input type="text" id="bp-custom-gear-emoji" placeholder="Emoji (optional)" maxlength="2" aria-label="Optional emoji" class="bp-emoji-input">
+                        <button type="button" id="bp-catalog-add-custom" class="btn-secondary">Add</button>
                     </div>
+                    <div id="bp-custom-gear-list" class="bp-custom-gear-chips"></div>
                 </div>
-                <p id="bp-gear-error" class="bp-error-msg is-hidden"></p>
             </section>
         </div>
 
@@ -206,10 +190,13 @@
                         </select>
                     </label>
                 </div>
+                <div id="bp-current-build" class="bp-current-build" aria-label="Current build summary">
+                    <span class="bp-build-label">Current build:</span>
+                    <div id="bp-build-chips" class="bp-build-chips"></div>
+                </div>
                 <button type="button" id="bp-gen-generate-look" class="bp-generate-btn">Generate look</button>
                 <div id="bp-gen-preview" class="bp-gen-preview">
                     <p class="bp-gen-preview-portrait" id="bp-gen-preview-portrait">—</p>
-                    <p class="bp-gen-preview-cosmetics" id="bp-gen-preview-cosmetics">—</p>
                     <p class="bp-gen-preview-model" id="bp-gen-preview-model">—</p>
                 </div>
             </div>
@@ -221,7 +208,7 @@
                 </div>
             </div>
             <details class="bp-advanced-prompts">
-                <summary>Advanced prompts (debug)</summary>
+                <summary>Advanced</summary>
                 <div class="bp-form-group">
                     <label>Composed prompt</label>
                     <textarea id="bp-composed-prompt" rows="8" readonly placeholder="Select tiers and generate to see prompt."></textarea>
