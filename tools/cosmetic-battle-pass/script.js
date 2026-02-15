@@ -890,8 +890,6 @@
         if (portraitEl) {
             portraitEl.textContent = getPortraitSrc() ? 'Portrait base: Current portrait' : 'Portrait base: No portrait yet, generating from scratch';
         }
-<｜tool▁call▁end｜><｜tool▁call▁begin｜>
-Read
         if (modelEl && modelSelectEl && qualityEl) {
             modelEl.textContent = 'Model: ' + (modelSelectEl.value || 'gpt-image-1-mini') + ' · Quality: ' + (qualityEl.value || 'medium');
         }
