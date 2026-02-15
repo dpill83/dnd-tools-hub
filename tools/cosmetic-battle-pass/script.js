@@ -50,6 +50,25 @@
         return url;
     }
 
+    function getPortraitAsBase64() {
+        const c = state.character || {};
+        if (c.portraitDataUrl && c.portraitDataUrl.startsWith('data:')) return Promise.resolve(c.portraitDataUrl);
+        if (c.portraitUrl) {
+            const url = resolveImageUrl(c.portraitUrl);
+            if (!url) return Promise.resolve(null);
+            return fetch(url)
+                .then(r => r.ok ? r.blob() : Promise.reject(new Error('Fetch failed')))
+                .then(blob => new Promise((resolve, reject) => {
+                    const r = new FileReader();
+                    r.onload = () => resolve(r.result);
+                    r.onerror = () => reject(new Error('Read failed'));
+                    r.readAsDataURL(blob);
+                }))
+                .catch(() => null);
+        }
+        return Promise.resolve(null);
+    }
+
     // --- State ---
     let state = {
         schemaVersion: SCHEMA_VERSION,
@@ -889,22 +908,24 @@
             }
         }
 
-        async function runGenerate(prompt) {
+        async function runGenerate(prompt, image) {
             if (!prompt) {
                 showError('Generate prompts first (toggle tiers and ensure prompts are filled).');
                 return;
             }
             setLoading(true);
             try {
+                const body = {
+                    prompt,
+                    model: modelEl ? modelEl.value : 'gpt-image-1-mini',
+                    size: '1024x1536',
+                    quality: qualityEl ? qualityEl.value : 'medium'
+                };
+                if (image) body.image = image;
                 const res = await fetch('/api/generate-image', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        prompt,
-                        model: modelEl ? modelEl.value : 'gpt-image-1-mini',
-                        size: '1024x1536',
-                        quality: qualityEl ? qualityEl.value : 'medium'
-                    })
+                    body: JSON.stringify(body)
                 });
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) {
@@ -921,7 +942,11 @@
 
         if (standaloneBtn) standaloneBtn.addEventListener('click', () => runGenerate(getPromptFromButton('bp-gen-standalone')));
         if (placeholderBtn) placeholderBtn.addEventListener('click', () => runGenerate(getPromptFromButton('bp-gen-placeholder')));
-        if (compositeBtn) compositeBtn.addEventListener('click', () => runGenerate(getPromptFromButton('bp-gen-composite')));
+        if (compositeBtn) compositeBtn.addEventListener('click', async () => {
+            const prompt = getPromptFromButton('bp-gen-composite');
+            const image = await getPortraitAsBase64();
+            runGenerate(prompt, image || undefined);
+        });
 
         if (addGalleryBtn) {
             addGalleryBtn.addEventListener('click', () => {

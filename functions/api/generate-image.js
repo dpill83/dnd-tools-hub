@@ -1,10 +1,12 @@
 /**
  * POST /api/generate-image
- * Body: { prompt, model?, size?, quality? }
- * Calls OpenAI Images API (gpt-image-1-mini etc.), uploads image to R2, returns { imageUrl, promptUsed, model, size, quality, createdAt }.
+ * Body: { prompt, model?, size?, quality?, image? }
+ * When image (base64 data URL) is provided: uses Images Edits API to edit the portrait.
+ * Otherwise: uses Images Generations API for text-to-image.
  * Requires: OPENAI_API_KEY, BATTLE_PASS_IMAGES (R2 bucket binding).
  */
-const OPENAI_URL = 'https://api.openai.com/v1/images/generations';
+const GENERATIONS_URL = 'https://api.openai.com/v1/images/generations';
+const EDITS_URL = 'https://api.openai.com/v1/images/edits';
 const ALLOWED_MODELS = ['gpt-image-1-mini', 'gpt-image-1.5', 'gpt-image-1'];
 const DEFAULT_MODEL = 'gpt-image-1-mini';
 const DEFAULT_SIZE = '1024x1536';
@@ -49,18 +51,15 @@ export async function onRequestPost(context) {
     const size = ['1024x1024', '1024x1536', '1536x1024'].includes(body.size) ? body.size : DEFAULT_SIZE;
     const quality = ['low', 'medium', 'high'].includes(body.quality) ? body.quality : DEFAULT_QUALITY;
 
-    // GPT image models always return base64; do not send response_format (unsupported for GPT image models, causes 400).
-    const openaiBody = {
-        model,
-        prompt,
-        n: 1,
-        size,
-        quality,
-    };
+    const image = typeof body.image === 'string' && body.image.startsWith('data:image/') ? body.image : null;
+    const apiUrl = image ? EDITS_URL : GENERATIONS_URL;
+    const openaiBody = image
+        ? { images: [{ image_url: image }], prompt, model, size, quality, n: 1 }
+        : { model, prompt, n: 1, size, quality };
 
     let openaiRes;
     try {
-        openaiRes = await fetch(OPENAI_URL, {
+        openaiRes = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
