@@ -829,7 +829,6 @@
         const resultStatus = document.getElementById('bp-gen-result-status');
         const resultImageWrap = document.getElementById('bp-gen-result-image-wrap');
         const resultActions = document.getElementById('bp-gen-result-actions');
-        const addGalleryBtn = document.getElementById('bp-gen-add-gallery');
         const setPortraitBtn = document.getElementById('bp-gen-set-portrait');
 
         function getPromptFromButton(btnId) {
@@ -863,7 +862,7 @@
             img.className = 'bp-gen-result-img';
             const src = resolveImageUrl(data.imageUrl);
             img.onload = () => {
-                if (resultStatus) resultStatus.textContent = 'Done. Add to gallery or set as portrait.';
+                if (resultStatus) resultStatus.textContent = 'Done. Saved to gallery. Set as portrait below.';
                 if (resultActions) {
                     resultActions.classList.remove('bp-gen-result-hidden');
                     resultActions.classList.add('bp-gen-result-visible');
@@ -893,6 +892,20 @@
                 resultWrap.classList.add('bp-gen-result-visible');
             }
             if (resultImageWrap && result.imageUrl) renderGenResult(result);
+            if (result?.imageUrl) {
+                if (state.gallery.length >= GALLERY_CAP) state.gallery.shift();
+                state.gallery.push({
+                    id: galleryEntryId(),
+                    imageUrl: result.imageUrl,
+                    promptUsed: result.promptUsed,
+                    model: result.model,
+                    size: result.size,
+                    quality: result.quality,
+                    createdAt: result.createdAt
+                });
+                saveState();
+                renderGallery();
+            }
         }
 
         function showError(msg) {
@@ -948,23 +961,6 @@
             runGenerate(prompt, image || undefined);
         });
 
-        if (addGalleryBtn) {
-            addGalleryBtn.addEventListener('click', () => {
-                if (!lastGenResult) return;
-                if (state.gallery.length >= GALLERY_CAP) state.gallery.shift();
-                state.gallery.push({
-                    id: galleryEntryId(),
-                    imageUrl: lastGenResult.imageUrl,
-                    promptUsed: lastGenResult.promptUsed,
-                    model: lastGenResult.model,
-                    size: lastGenResult.size,
-                    quality: lastGenResult.quality,
-                    createdAt: lastGenResult.createdAt
-                });
-                saveState();
-                renderGallery();
-            });
-        }
         if (setPortraitBtn) {
             setPortraitBtn.addEventListener('click', () => {
                 if (!lastGenResult) return;
@@ -1089,6 +1085,38 @@
         }
     }
 
+    function openLightbox(src) {
+        const lightbox = document.getElementById('bp-lightbox');
+        const imgEl = lightbox?.querySelector('.bp-lightbox-img');
+        if (!lightbox || !imgEl) return;
+        imgEl.src = src;
+        lightbox.classList.add('bp-lightbox-open');
+        lightbox.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeLightbox() {
+        const lightbox = document.getElementById('bp-lightbox');
+        const imgEl = lightbox?.querySelector('.bp-lightbox-img');
+        if (!lightbox || !imgEl) return;
+        lightbox.classList.remove('bp-lightbox-open');
+        lightbox.setAttribute('aria-hidden', 'true');
+        imgEl.removeAttribute('src');
+    }
+
+    function bindLightbox() {
+        const lightbox = document.getElementById('bp-lightbox');
+        if (!lightbox) return;
+        const closeBtn = lightbox.querySelector('.bp-lightbox-close');
+        const backdrop = lightbox.querySelector('.bp-lightbox-backdrop');
+        if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+        if (backdrop) backdrop.addEventListener('click', closeLightbox);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && lightbox.classList.contains('bp-lightbox-open')) {
+                closeLightbox();
+            }
+        });
+    }
+
     function bindGalleryAdd() {
         const addEl = document.getElementById('bp-gallery-add');
         const galleryEl = document.getElementById('bp-gallery');
@@ -1111,8 +1139,14 @@
         if (galleryEl) {
             galleryEl.addEventListener('click', (e) => {
                 const btn = e.target.closest('button[data-action][data-gallery-id]');
-                if (!btn) return;
-                handleGalleryAction(btn.getAttribute('data-action'), btn.getAttribute('data-gallery-id'));
+                if (btn) {
+                    handleGalleryAction(btn.getAttribute('data-action'), btn.getAttribute('data-gallery-id'));
+                    return;
+                }
+                const img = e.target.closest('.bp-gallery-item img');
+                if (img && img.src) {
+                    openLightbox(img.src);
+                }
             });
         }
     }
@@ -1203,6 +1237,7 @@
         bindGenerateAndExport();
         bindGenerateImageApi();
         bindReset();
+        bindLightbox();
         bindGalleryAdd();
         renderGallery();
         updateGenerateButton();

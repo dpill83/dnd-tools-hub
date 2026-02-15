@@ -220,7 +220,6 @@
                 <p id="bp-gen-result-status" class="bp-gen-result-status"></p>
                 <div id="bp-gen-result-image-wrap" class="bp-gen-result-image-wrap"></div>
                 <div id="bp-gen-result-actions" class="bp-gen-result-actions bp-gen-result-hidden">
-                    <button type="button" id="bp-gen-add-gallery" class="btn-secondary">Add to gallery</button>
                     <button type="button" id="bp-gen-set-portrait" class="btn-secondary">Set as character portrait</button>
                 </div>
             </div>
@@ -252,6 +251,12 @@
         </div>
 
         <div id="bp-confetti-wrap" class="bp-confetti-wrap" aria-hidden="true"></div>
+
+        <div id="bp-lightbox" class="bp-lightbox" role="dialog" aria-modal="true" aria-label="Enlarged image" aria-hidden="true">
+            <button type="button" class="bp-lightbox-close" aria-label="Close">×</button>
+            <div class="bp-lightbox-backdrop"></div>
+            <img class="bp-lightbox-img" src="" alt="Enlarged image">
+        </div>
     </div>
 
     <script src="../../theme.js"></script>
