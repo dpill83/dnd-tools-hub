@@ -208,7 +208,7 @@
         } catch (_) {}
     }
 
-    const { getLevelFromXp, getAllUnlockedSubTiers, getSubTierThresholds, getThemeForLevelTier, THEMES } = window.BattlePassData;
+    const { getLevelFromXp, getAllUnlockedSubTiers, getSubTierThresholds, getThemeForLevelTier, THEME_NAMES, THEMES } = window.BattlePassData;
 
     function getMaxUnlockedTierIndex() {
         const xp = state.currentXp + state.passXp;
@@ -220,6 +220,20 @@
             if (t.tier <= 3 && xp >= t.xp) max = Math.max(max, t.tier);
         }
         return max;
+    }
+
+    /** Max tier (0–3) allowed for a given material. Earlier materials (e.g. Lace when current is Leather) get all 4 tiers. */
+    function getMaxUnlockedTierIndexForMaterial(material) {
+        const mat = (material || '').trim() || 'Leather';
+        const xp = state.currentXp + state.passXp;
+        const level = getLevelFromXp(xp);
+        const currentTheme = getThemeForLevelTier(level, 0);
+        const currentThemeIndex = THEME_NAMES.indexOf(currentTheme);
+        const materialIndex = THEME_NAMES.indexOf(mat);
+        if (materialIndex < 0) return 3;
+        if (materialIndex < currentThemeIndex) return 3;
+        if (materialIndex === currentThemeIndex) return getMaxUnlockedTierIndex();
+        return 0;
     }
 
     function ensureUnlocks() {
@@ -525,7 +539,7 @@
             const active = mat === m ? ' bp-mat-chip-active' : '';
             return `<button type="button" class="bp-mat-chip bp-mat-${m.toLowerCase()}${active}" data-action="set-material" data-slot="${index}" data-value="${m}" aria-pressed="${mat === m}">${m}</button>`;
         }).join('');
-        const maxUnlockedTier = getMaxUnlockedTierIndex();
+        const maxUnlockedTier = getMaxUnlockedTierIndexForMaterial(mat);
         const tierSteps = LOADOUT_TIERS.map(t => {
             const tierIdx = tierToIndex(t);
             const locked = tierIdx > maxUnlockedTier;
@@ -1323,6 +1337,11 @@
                     state.look.slots.push({ gearType: 'Accent', material: 'Leather', tier: 'T0' });
                 }
                 state.look.slots[idx] = { ...state.look.slots[idx], [field]: value };
+                if (field === 'material') {
+                    const maxTier = getMaxUnlockedTierIndexForMaterial(value);
+                    const currentTierIdx = tierToIndex(state.look.slots[idx].tier);
+                    if (currentTierIdx > maxTier) state.look.slots[idx].tier = LOADOUT_TIERS[maxTier];
+                }
                 saveState();
                 renderLoadout();
                 renderGeneratePreview();
@@ -1341,7 +1360,9 @@
                 const value = btn.getAttribute('data-value');
                 if (action === 'set-material') updateSlot(idx, 'material', value);
                 else if (action === 'set-tier') {
-                    if (tierToIndex(value) <= getMaxUnlockedTierIndex()) updateSlot(idx, 'tier', value);
+                    const slot = state.look?.slots?.[idx];
+                    const slotMat = (slot?.material || 'Leather').trim() || 'Leather';
+                    if (tierToIndex(value) <= getMaxUnlockedTierIndexForMaterial(slotMat)) updateSlot(idx, 'tier', value);
                 }
             });
         }
