@@ -13,6 +13,46 @@
     const LOADOUT_MATERIALS = ['Cotton', 'Wool', 'Lace', 'Leather'];
     const LOADOUT_TIERS = ['T0', 'T1', 'T2', 'T3'];
 
+    const TIER_NAMES = { 0: 'Subtle', 1: 'Noticeable', 2: 'Ornate', 3: 'Signature' };
+    const TIER_DESCRIPTIONS = {
+        0: 'minimal trim, starter detail',
+        1: 'clearer upgrade, more visible trim/texture',
+        2: 'layered embellishment, emblem work',
+        3: 'fully realized matched set, most elaborate'
+    };
+
+    function tierToIndex(tier) {
+        if (tier == null || tier === '') return 0;
+        const s = String(tier).toUpperCase();
+        if (s === 'T0') return 0;
+        if (s === 'T1') return 1;
+        if (s === 'T2') return 2;
+        if (s === 'T3') return 3;
+        const n = parseInt(s.replace(/^T/, ''), 10);
+        return isNaN(n) || n < 0 ? 0 : Math.min(3, n);
+    }
+
+    function getTierName(tier) {
+        return TIER_NAMES[tierToIndex(tier)] || TIER_NAMES[0];
+    }
+
+    function getTierDescription(tier) {
+        return TIER_DESCRIPTIONS[tierToIndex(tier)] || TIER_DESCRIPTIONS[0];
+    }
+
+    const GEAR_DESCRIPTORS = {
+        Gloves: 'worn and practical, subtle stitching, slightly scuffed edges',
+        Pants: 'tailored fit, reinforced knees, travel-worn creases',
+        Cloak: 'layered trim and embroidery, weathered hem, drape matches the current pose',
+        Belt: 'simple buckle, small utility pouches, worn patina',
+        Boots: 'sturdy soles, laced or buckled, light wear',
+        Breastplate: 'fitted, visible trim and fastenings, battle-ready',
+        Shield: 'faced with material, reinforced rim, worn grip',
+        Helm: 'fitted to the head, visible trim, practical design',
+        Mace: 'weighted head, grip wrap, balanced',
+        Accent: 'subtle trim or emblem, matches the set'
+    };
+
     function getCurrentTierMaterial() {
         const xp = state.currentXp + state.passXp;
         const level = getLevelFromXp(xp);
@@ -263,8 +303,8 @@
             const gt = (s.gearType || 'Accent').trim() || 'Accent';
             if (gt === 'None') return null;
             const mat = (s.material || 'Leather').trim() || 'Leather';
-            const t = (s.tier || 'T0').trim() || 'T0';
-            const label = gt === 'Accent' ? `${gt}: ${mat} ${t} (generic trim)` : `${gt}: ${mat} ${t}`;
+            const tierName = getTierName(s.tier);
+            const label = gt === 'Accent' ? `${gt}: ${mat}, ${tierName} (generic trim)` : `${gt}: ${mat}, ${tierName}`;
             return label;
         }).filter(Boolean);
     }
@@ -461,6 +501,8 @@
         const gt = slot.gearType || 'Accent';
         const mat = slot.material || 'Leather';
         const tier = slot.tier || 'T0';
+        const tierName = getTierName(tier);
+        const tierDesc = getTierDescription(tier);
         const gearTypes = getGearTypesForLoadout();
         const gearOptions = gearTypes.map(g => {
             const disabled = used.has(g) && g !== 'Accent' && g !== 'None' ? ' disabled' : '';
@@ -473,31 +515,55 @@
         }).join('');
         const tierSteps = LOADOUT_TIERS.map(t => {
             const active = tier === t ? ' bp-tier-step-active' : '';
-            return `<button type="button" class="bp-tier-step bp-tier-${t.toLowerCase()}${active}" data-action="set-tier" data-slot="${index}" data-value="${t}" aria-pressed="${tier === t}">${t.replace('T', '')}</button>`;
+            return `<button type="button" class="bp-tier-step bp-tier-${t.toLowerCase()}${active}" data-action="set-tier" data-slot="${index}" data-value="${t}" aria-pressed="${tier === t}">${getTierName(t)}</button>`;
         }).join('');
+        const tooltipId = 'bp-tier-tooltip-' + index;
+        const mobileDetailsId = 'bp-tier-meaning-mobile-' + index;
         return `
             <div class="bp-loadout-slot bp-gear-card card" data-slot-index="${index}">
                 <div class="bp-gear-card-header">
                     <span class="bp-gear-icon-wrap">${getGearIconSvg(gt)}</span>
                     <div class="bp-gear-header-middle">
                         <span class="bp-slot-label">Slot ${index + 1}</span>
+                        <span class="bp-slot-tier-label">Tier: ${tierName}</span>
                         <select class="bp-gear-select" data-action="set-gear" data-slot="${index}" data-field="gearType" aria-label="Gear type">${gearOptions}</select>
                     </div>
                     <div class="bp-gear-header-chips">
                         <span class="bp-summary-chip bp-mat-chip bp-mat-${mat.toLowerCase()}">${mat}</span>
-                        <span class="bp-summary-chip bp-tier-chip bp-tier-${tier.toLowerCase()}">${tier}</span>
+                        <span class="bp-summary-chip bp-tier-chip bp-tier-${tier.toLowerCase()}">${tierName}</span>
                     </div>
                 </div>
                 <div class="bp-gear-card-body">
                     <div class="bp-mat-chip-group" role="group" aria-label="Material">
                         ${matChips}
                     </div>
-                    <div class="bp-tier-step-group" role="group" aria-label="Tier">
-                        ${tierSteps}
+                    <div class="bp-tier-control-wrap" role="group" aria-label="Tier" aria-describedby="${tooltipId}" id="bp-tier-control-${index}">
+                        <div class="bp-tier-step-group" role="group" aria-label="Tier">
+                            ${tierSteps}
+                        </div>
+                        <div id="${tooltipId}" class="bp-tier-tooltip bp-tier-tooltip-desktop" role="tooltip" hidden>${tierDesc}</div>
+                        <details class="bp-tier-meaning-mobile bp-tier-meaning-mobile-panel" id="${mobileDetailsId}">
+                            <summary>Tier meaning</summary>
+                            <p class="bp-tier-meaning-text">${tierDesc}</p>
+                        </details>
                     </div>
                 </div>
             </div>
         `;
+    }
+
+    function bindTierTooltips(container) {
+        if (!container) return;
+        container.querySelectorAll('.bp-tier-control-wrap').forEach(wrap => {
+            const tooltip = wrap.querySelector('.bp-tier-tooltip-desktop');
+            if (!tooltip) return;
+            wrap.addEventListener('mouseenter', () => { tooltip.hidden = false; });
+            wrap.addEventListener('mouseleave', () => { tooltip.hidden = true; });
+            wrap.addEventListener('focusin', () => { tooltip.hidden = false; });
+            wrap.addEventListener('focusout', (e) => {
+                if (!wrap.contains(e.relatedTarget)) tooltip.hidden = true;
+            });
+        });
     }
 
     function renderLoadout() {
@@ -509,6 +575,7 @@
             const slot = slots[i] || { gearType: 'Accent', material: 'Leather', tier: 'T0' };
             grid.insertAdjacentHTML('beforeend', renderLoadoutSlot(slot, i));
         }
+        bindTierTooltips(grid);
     }
 
     function renderAccordions() {
@@ -847,20 +914,30 @@
     let lastGenResult = null;
 
     function buildLookPrompt() {
-        const summary = getLoadoutSummary();
-        if (!summary || summary.length === 0) return null;
+        const slots = state.look?.slots || [];
+        const items = slots.map(s => {
+            const gt = (s.gearType || 'Accent').trim() || 'Accent';
+            if (gt === 'None') return null;
+            const mat = (s.material || 'Leather').trim().toLowerCase() || 'leather';
+            const tierName = getTierName(s.tier);
+            const desc = GEAR_DESCRIPTORS[gt] || 'practical, fits the current pose';
+            return { gearType: gt, material: mat, tierName, desc };
+        }).filter(Boolean);
+        if (items.length === 0) return null;
         const cls = state.character.class || 'adventurer';
         const artStyle = state.character.artStyle || 'epic high-fantasy';
         const motif = state.character.motif || 'personal motif';
-        const loadoutList = summary.join('; ');
-        if (!loadoutList) return null;
-        const placeholderCharacterPrompt = `Fantasy ${cls} adventurer in starting gear, ${artStyle} D&D art style.`;
         const hasPortrait = !!getPortraitSrc();
-        const gearPrompt = `Equip the character with: ${loadoutList}.`;
-        const compositePrompt = hasPortrait
-            ? `Take this exact character portrait and ${gearPrompt.toLowerCase()} Keep original pose, face, clothing, lighting, and ${artStyle}. Preserve existing ${motif}.`
-            : `Use this character prompt first to create a base portrait: "${placeholderCharacterPrompt}". Then ${gearPrompt.toLowerCase()} Preserve pose, face, and ${artStyle}.`;
-        return compositePrompt;
+        const intro = 'Using the provided portrait as the only reference, modify the character by updating ONLY these gear pieces and nothing else. Keep the same person, face, pose, camera angle, lighting, and overall art style. Do not change the background. Preserve the existing personal motif/emblem and keep it visible.';
+        const tierLadder = 'Tier meanings: Subtle = minimal trim, Noticeable = clear accents, Ornate = layered embellishment, Signature = full matched set, most detail.';
+        const bulletLines = items.map(it => `* ${it.gearType}: ${it.material}, Tier: ${it.tierName}, ${it.desc}.`).join('\n');
+        const closing = 'Everything else remains exactly the same.';
+        let body = intro + '\n\n' + tierLadder + '\n\nUpdate these items:\n\n' + bulletLines + '\n\n' + closing;
+        if (!hasPortrait) {
+            const placeholderCharacterPrompt = `Fantasy ${cls} adventurer in starting gear, ${artStyle} D&D art style.`;
+            body = `Use this character prompt first to create a base portrait: "${placeholderCharacterPrompt}". Then apply the following.\n\n` + body;
+        }
+        return body;
     }
 
     function renderCurrentBuild() {
@@ -871,8 +948,8 @@
             const gt = (s.gearType || 'Accent').trim() || 'Accent';
             if (gt === 'None') return null;
             const mat = (s.material || 'Leather').trim() || 'Leather';
-            const t = (s.tier || 'T0').trim() || 'T0';
-            return `${mat} ${t} ${gt}`;
+            const tierName = getTierName(s.tier);
+            return `${mat} · ${tierName} ${gt}`;
         }).filter(Boolean);
         container.innerHTML = labels.length === 0
             ? '<span class="bp-build-chip bp-build-empty">All slots None</span>'
@@ -1016,10 +1093,13 @@
                     });
                     const data = await res.json().catch(() => ({}));
                     if (!res.ok) {
-                        const msg = data.error || res.statusText || 'Request failed';
-                        const detail = data.details ? ` (${data.details})` : '';
+                        const code = data.details || '';
+                        const isBilling = code === 'billing_hard_limit_reached' || (data.error && /billing|limit|quota/i.test(data.error));
+                        const msg = isBilling
+                            ? 'OpenAI billing limit reached. Add a payment method or increase your limit at platform.openai.com/account/billing.'
+                            : (data.error || res.statusText || 'Request failed') + (code && !isBilling ? ' (' + code + ')' : '');
                         console.error('generate-image failed', res.status, { error: data.error, details: data.details, full: data });
-                        showError(msg + detail);
+                        showError(msg);
                         return;
                     }
                     showResult(data);

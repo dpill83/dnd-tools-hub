@@ -603,6 +603,49 @@
 .bp-tier-chip.bp-tier-t2 { background: rgba(160, 140, 180, 0.25); border: 1px solid rgba(160, 140, 180, 0.7); color: var(--text); }
 .bp-tier-chip.bp-tier-t3 { background: rgba(160, 140, 180, 0.3); border: 1px solid rgba(160, 140, 180, 0.9); color: var(--text); }
 
+/* Tier legend and meanings (Loadout) */
+.bp-tier-legend { margin: 0.75rem 0 0.25rem; font-size: 0.95rem; color: var(--text-light); }
+.bp-tier-meanings-details { margin-bottom: 1rem; }
+.bp-tier-meanings-details summary { cursor: pointer; font-weight: 600; }
+.bp-tier-meanings-list { margin: 0.5rem 0 0 1.25rem; padding: 0; }
+
+/* Slot header tier label */
+.bp-slot-tier-label { display: block; font-size: 0.85rem; color: var(--text-light); margin-top: 0.15rem; }
+
+/* Tier control: tooltip (desktop) and collapsible panel (mobile) */
+.bp-tier-control-wrap { position: relative; margin-top: 0.5rem; }
+.bp-tier-tooltip-desktop {
+    position: absolute;
+    left: 0;
+    bottom: 100%;
+    margin-bottom: 0.35rem;
+    padding: 0.5rem 0.75rem;
+    max-width: 280px;
+    font-size: 0.85rem;
+    line-height: 1.35;
+    background: var(--card-bg, var(--surface));
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--tier-card-shadow);
+    color: var(--text);
+    z-index: 5;
+    pointer-events: none;
+}
+.bp-tier-tooltip-desktop[hidden] { display: none !important; }
+
+/* Desktop: show hover tooltip; hide mobile panel */
+@media (hover: hover) {
+    .bp-tier-meaning-mobile-panel { display: none !important; }
+}
+
+/* Mobile/touch: hide desktop tooltip; show collapsible tier meaning */
+@media (hover: none) {
+    .bp-tier-tooltip-desktop { display: none !important; }
+    .bp-tier-meaning-mobile-panel { display: block; margin-top: 0.5rem; }
+    .bp-tier-meaning-mobile-panel summary { font-size: 0.9rem; }
+    .bp-tier-meaning-text { margin: 0.35rem 0 0; font-size: 0.85rem; color: var(--text-light); }
+}
+
 @media (max-width: 600px) {
     .bp-loadout-grid { grid-template-columns: 1fr; }
     .bp-gear-card-header { flex-wrap: wrap; }
