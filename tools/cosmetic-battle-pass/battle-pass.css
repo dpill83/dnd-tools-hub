@@ -1063,11 +1063,11 @@
     .bp-dashboard-portrait { width: 100%; }
     .bp-character-card { max-width: 280px; margin: 0 auto; }
     .bp-hero-portrait-wrap {
-        max-height: 200px;
+        max-height: 320px;
         width: 100%;
-        height: 200px;
+        height: 320px;
     }
-    .bp-hero-portrait-img { object-fit: cover; }
+    .bp-hero-portrait-img { object-fit: contain; }
 }
 
 /* 600px: compact padding, full-width controls, result image constrained */
