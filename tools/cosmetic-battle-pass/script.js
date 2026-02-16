@@ -1015,7 +1015,8 @@
                     });
                     const data = await res.json().catch(() => ({}));
                     if (!res.ok) {
-                        showError(data.error || res.statusText || 'Request failed');
+                        const msg = data.error || res.statusText || 'Request failed';
+                        showError(data.details ? `${msg} (${data.details})` : msg);
                         return;
                     }
                     showResult(data);
