@@ -79,8 +79,13 @@ export async function onRequestPost(context) {
             openaiData.message ||
             openaiRes.statusText ||
             'Request failed';
+        const details = err?.code || err?.type || (err && typeof err === 'object' ? err.param : undefined);
         const status = openaiRes.status >= 500 ? 502 : 400;
-        return jsonResponse({ error: msg, details: err?.code || err?.type }, status);
+        return jsonResponse({
+            error: msg,
+            details: details,
+            openaiStatus: openaiRes.status,
+        }, status);
     }
 
     const imageData = openaiData.data?.[0]?.b64_json;

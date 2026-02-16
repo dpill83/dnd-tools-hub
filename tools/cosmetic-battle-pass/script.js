@@ -1000,7 +1000,8 @@
                 }
                 setLoading(true);
                 try {
-                    const image = await getPortraitAsBase64();
+                    let image = await getPortraitAsBase64();
+                    if (image) image = await compressImageDataUrl(image, 1024);
                     const body = {
                         prompt,
                         model: modelSelectEl ? modelSelectEl.value : 'gpt-image-1-mini',
@@ -1016,7 +1017,9 @@
                     const data = await res.json().catch(() => ({}));
                     if (!res.ok) {
                         const msg = data.error || res.statusText || 'Request failed';
-                        showError(data.details ? `${msg} (${data.details})` : msg);
+                        const detail = data.details ? ` (${data.details})` : '';
+                        console.error('generate-image failed', res.status, { error: data.error, details: data.details, full: data });
+                        showError(msg + detail);
                         return;
                     }
                     showResult(data);
