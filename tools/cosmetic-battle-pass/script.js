@@ -40,6 +40,34 @@
         return TIER_DESCRIPTIONS[tierToIndex(tier)] || TIER_DESCRIPTIONS[0];
     }
 
+    function getEffectiveTier(slot, index) {
+        if (state.look?.slotTierOverride?.[index]) return slot.tier || 'T0';
+        return state.look?.globalTier ?? 'T0';
+    }
+
+    function getMaterialIconSvg(material) {
+        const icons = {
+            Cotton: '<rect x="4" y="4" width="16" height="16" fill="none" stroke="currentColor"/>',
+            Wool: '<path d="M4 8 Q12 4, 20 8 Q12 12, 4 8 M4 16 Q12 12, 20 16 Q12 20, 4 16" stroke="currentColor" fill="none"/>',
+            Lace: '<circle cx="12" cy="12" r="8" fill="none" stroke="currentColor"/><path d="M12 4 Q16 8, 12 12 Q8 16, 12 20" stroke="currentColor" fill="none"/>',
+            Leather: '<rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor"/><path d="M8 8 L10 10 M14 14 L16 16" stroke="currentColor"/>'
+        };
+        const path = icons[material] || icons.Leather;
+        return `<svg class="bp-mat-icon" viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
+    }
+
+    function getTierIconSvg(tierIndex) {
+        const shield = 'M12 2 L20 6 L20 14 L12 22 L4 14 L4 6 Z';
+        const icons = {
+            0: `<path d="${shield}" fill="none" stroke="currentColor" stroke-width="1.5"/>`,
+            1: `<path d="${shield}" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 8 L12 16 M9 11 L15 11" stroke="currentColor" stroke-width="1"/>`,
+            2: `<path d="${shield}" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 8 L12 16 M9 11 L15 11 M8 6 L16 6 M8 18 L16 18" stroke="currentColor" stroke-width="1"/>`,
+            3: `<path d="${shield}" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 8 L12 16 M9 11 L15 11 M8 6 L16 6 M8 18 L16 18 M6 10 L6 14 M18 10 L18 14" stroke="currentColor" stroke-width="1"/><circle cx="12" cy="12" r="2" fill="none" stroke="currentColor"/>`
+        };
+        const path = icons[Math.min(3, Math.max(0, tierIndex))] || icons[0];
+        return `<svg class="bp-tier-icon" viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
+    }
+
     const GEAR_DESCRIPTORS = {
         Gloves: 'worn and practical, subtle stitching, slightly scuffed edges',
         Pants: 'tailored fit, reinforced knees, travel-worn creases',
@@ -171,9 +199,13 @@
                     state.subTiers = Array.isArray(parsed.subTiers) ? parsed.subTiers : [];
                     state.gallery = Array.isArray(parsed.gallery) ? parsed.gallery.slice(0, GALLERY_CAP).map((e, i) => ({ ...e, id: e.id || 'g' + Date.now() + '-' + i + '-' + Math.random().toString(36).slice(2, 8) })) : [];
                     if (parsed.look && Array.isArray(parsed.look.slots) && parsed.look.slots.length === 4) {
-                        state.look = { slots: parsed.look.slots };
+                        state.look = {
+                            slots: parsed.look.slots,
+                            globalTier: parsed.look.globalTier || 'T0',
+                            slotTierOverride: Array.isArray(parsed.look.slotTierOverride) ? parsed.look.slotTierOverride : [false, false, false, false]
+                        };
                     } else {
-                        state.look = { slots: getLoadoutDefaults().map(s => ({ ...s })) };
+                        state.look = { slots: getLoadoutDefaults().map(s => ({ ...s })), globalTier: 'T0', slotTierOverride: [false, false, false, false] };
                     }
                     if (parsed.catalog && Array.isArray(parsed.catalog.customGear)) {
                         state.catalog = { customGear: parsed.catalog.customGear };
@@ -184,7 +216,11 @@
             state.soundEnabled = soundRaw === 'true';
         } catch (_) {}
         if (!state.look || !Array.isArray(state.look.slots) || state.look.slots.length !== 4) {
-            state.look = { slots: getLoadoutDefaults().map(s => ({ ...s })) };
+            state.look = { slots: getLoadoutDefaults().map(s => ({ ...s })), globalTier: 'T0', slotTierOverride: [false, false, false, false] };
+        }
+        if (!state.look.globalTier) state.look.globalTier = 'T0';
+        if (!Array.isArray(state.look.slotTierOverride) || state.look.slotTierOverride.length !== 4) {
+            state.look.slotTierOverride = [false, false, false, false];
         }
         if (!state.catalog || !Array.isArray(state.catalog.customGear)) {
             state.catalog = { customGear: [] };
@@ -325,11 +361,11 @@
 
     function getLoadoutSummary() {
         const slots = state.look?.slots || [];
-        return slots.map(s => {
+        return slots.map((s, i) => {
             const gt = (s.gearType || 'Accent').trim() || 'Accent';
             if (gt === 'None') return null;
             const mat = (s.material || 'Leather').trim() || 'Leather';
-            const tierName = getTierName(s.tier);
+            const tierName = getTierName(getEffectiveTier(s, i));
             const label = gt === 'Accent' ? `${gt}: ${mat}, ${tierName} (generic trim)` : `${gt}: ${mat}, ${tierName}`;
             return label;
         }).filter(Boolean);
@@ -522,35 +558,55 @@
         return `<svg class="bp-gear-icon" viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
     }
 
+    function renderGlobalTierBlock() {
+        const globalTier = state.look?.globalTier ?? 'T0';
+        const maxUnlocked = getMaxUnlockedTierIndex();
+        return LOADOUT_TIERS.map(t => {
+            const tierIdx = tierToIndex(t);
+            const locked = tierIdx > maxUnlocked;
+            const active = globalTier === t ? ' bp-segmented-option-active' : '';
+            const disabled = locked ? ' disabled' : '';
+            const title = locked ? 'Unlock with more XP' : getTierName(t);
+            return `<button type="button" class="bp-segmented-option bp-tier-${t.toLowerCase()}${active}${locked ? ' bp-tier-step-locked' : ''}" data-action="set-global-tier" data-value="${t}" aria-pressed="${globalTier === t}"${disabled} title="${title}">${getTierIconSvg(tierIdx)}</button>`;
+        }).join('');
+    }
+
     function renderLoadoutSlot(slot, index) {
         const used = getUsedGearTypes(index);
         const gt = slot.gearType || 'Accent';
         const mat = slot.material || 'Leather';
         const tier = slot.tier || 'T0';
-        const tierName = getTierName(tier);
-        const tierDesc = getTierDescription(tier);
+        const effectiveTier = getEffectiveTier(slot, index);
+        const tierName = getTierName(effectiveTier);
+        const isOverridden = !!state.look?.slotTierOverride?.[index];
         const gearTypes = getGearTypesForLoadout();
         const gearOptions = gearTypes.map(g => {
             const disabled = used.has(g) && g !== 'Accent' && g !== 'None' ? ' disabled' : '';
             const sel = gt === g ? ' selected' : '';
             return `<option value="${g}"${sel}${disabled}>${g}</option>`;
         }).join('');
-        const matChips = LOADOUT_MATERIALS.map(m => {
-            const active = mat === m ? ' bp-mat-chip-active' : '';
-            return `<button type="button" class="bp-mat-chip bp-mat-${m.toLowerCase()}${active}" data-action="set-material" data-slot="${index}" data-value="${m}" aria-pressed="${mat === m}">${m}</button>`;
+        const matSegmented = LOADOUT_MATERIALS.map(m => {
+            const active = mat === m ? ' bp-segmented-option-active' : '';
+            return `<button type="button" class="bp-segmented-option bp-mat-${m.toLowerCase()}${active}" data-action="set-material" data-slot="${index}" data-value="${m}" aria-pressed="${mat === m}" title="${m}">${getMaterialIconSvg(m)}</button>`;
         }).join('');
         const maxUnlockedTier = getMaxUnlockedTierIndexForMaterial(mat);
-        const tierSteps = LOADOUT_TIERS.map(t => {
+        const tierSegmented = LOADOUT_TIERS.map(t => {
             const tierIdx = tierToIndex(t);
             const locked = tierIdx > maxUnlockedTier;
-            const active = tier === t ? ' bp-tier-step-active' : '';
+            const active = tier === t ? ' bp-segmented-option-active' : '';
             const disabled = locked ? ' disabled' : '';
-            return `<button type="button" class="bp-tier-step bp-tier-${t.toLowerCase()}${active}${locked ? ' bp-tier-step-locked' : ''}" data-action="set-tier" data-slot="${index}" data-value="${t}" aria-pressed="${tier === t}"${disabled}${locked ? ' title="Unlock with more XP"' : ''}>${getTierName(t)}</button>`;
+            const titleAttr = locked ? 'Unlock with more XP' : getTierName(t);
+            return `<button type="button" class="bp-segmented-option bp-tier-${t.toLowerCase()}${active}${locked ? ' bp-tier-step-locked' : ''}" data-action="set-tier" data-slot="${index}" data-value="${t}" aria-pressed="${tier === t}"${disabled} title="${titleAttr}">${getTierIconSvg(tierIdx)}</button>`;
         }).join('');
-        const tooltipId = 'bp-tier-tooltip-' + index;
-        const mobileDetailsId = 'bp-tier-meaning-mobile-' + index;
+        const slotOverrideClass = isOverridden ? ' bp-loadout-slot-overridden' : '';
+        const tierControlHtml = isOverridden
+            ? `<div class="bp-tier-control-wrap" role="group" aria-label="Tier" id="bp-tier-control-${index}">
+                <div class="bp-segmented bp-tier-segmented">${tierSegmented}</div>
+                <button type="button" class="bp-reset-to-global" data-action="reset-tier-to-global" data-slot="${index}" title="Reset to global tier" aria-label="Reset to global tier">&#8635;</button>
+              </div>`
+            : '';
         return `
-            <div class="bp-loadout-slot bp-gear-card card" data-slot-index="${index}">
+            <div class="bp-loadout-slot bp-gear-card card${slotOverrideClass}" data-slot-index="${index}">
                 <div class="bp-gear-card-header">
                     <span class="bp-gear-icon-wrap">${getGearIconSvg(gt)}</span>
                     <div class="bp-gear-header-middle">
@@ -560,44 +616,26 @@
                     </div>
                     <div class="bp-gear-header-chips">
                         <span class="bp-summary-chip bp-mat-chip bp-mat-${mat.toLowerCase()}">${mat}</span>
-                        <span class="bp-summary-chip bp-tier-chip bp-tier-${tier.toLowerCase()}">${tierName}</span>
+                        <span class="bp-summary-chip bp-tier-chip bp-tier-${effectiveTier.toLowerCase()}">${tierName}</span>
                     </div>
                 </div>
                 <div class="bp-gear-card-body">
-                    <div class="bp-mat-chip-group" role="group" aria-label="Material">
-                        ${matChips}
+                    <div class="bp-slot-control-row">
+                        <div class="bp-segmented bp-mat-segmented" role="group" aria-label="Material">${matSegmented}</div>
+                        ${!isOverridden ? `<button type="button" class="bp-customize-tier" data-action="customize-tier" data-slot="${index}" title="Customize tier for this slot" aria-label="Customize tier for this slot">&#9998;</button>` : ''}
                     </div>
-                    <div class="bp-tier-control-wrap" role="group" aria-label="Tier" aria-describedby="${tooltipId}" id="bp-tier-control-${index}">
-                        <div class="bp-tier-step-group" role="group" aria-label="Tier">
-                            ${tierSteps}
-                        </div>
-                        <div id="${tooltipId}" class="bp-tier-tooltip bp-tier-tooltip-desktop" role="tooltip" hidden>${tierDesc}</div>
-                        <details class="bp-tier-meaning-mobile bp-tier-meaning-mobile-panel" id="${mobileDetailsId}">
-                            <summary>Tier meaning</summary>
-                            <p class="bp-tier-meaning-text">${tierDesc}</p>
-                        </details>
-                    </div>
+                    ${tierControlHtml}
                 </div>
             </div>
         `;
     }
 
-    function bindTierTooltips(container) {
-        if (!container) return;
-        container.querySelectorAll('.bp-tier-control-wrap').forEach(wrap => {
-            const tooltip = wrap.querySelector('.bp-tier-tooltip-desktop');
-            if (!tooltip) return;
-            wrap.addEventListener('mouseenter', () => { tooltip.hidden = false; });
-            wrap.addEventListener('mouseleave', () => { tooltip.hidden = true; });
-            wrap.addEventListener('focusin', () => { tooltip.hidden = false; });
-            wrap.addEventListener('focusout', (e) => {
-                if (!wrap.contains(e.relatedTarget)) tooltip.hidden = true;
-            });
-        });
-    }
-
     function renderLoadout() {
+        const globalWrap = document.getElementById('bp-global-tier-wrap');
         const grid = document.getElementById('bp-loadout-grid');
+        if (globalWrap) {
+            globalWrap.innerHTML = '<label class="bp-global-tier-label">Intensity tier</label><div class="bp-segmented bp-global-tier-segmented" role="group" aria-label="Intensity tier">' + renderGlobalTierBlock() + '</div>';
+        }
         if (!grid) return;
         const slots = state.look?.slots || [];
         grid.innerHTML = '';
@@ -605,7 +643,6 @@
             const slot = slots[i] || { gearType: 'Accent', material: 'Leather', tier: 'T0' };
             grid.insertAdjacentHTML('beforeend', renderLoadoutSlot(slot, i));
         }
-        bindTierTooltips(grid);
     }
 
     function renderAccordions() {
@@ -960,11 +997,11 @@
 
     function buildLookPrompt() {
         const slots = state.look?.slots || [];
-        const items = slots.map(s => {
+        const items = slots.map((s, i) => {
             const gt = (s.gearType || 'Accent').trim() || 'Accent';
             if (gt === 'None') return null;
             const mat = (s.material || 'Leather').trim().toLowerCase() || 'leather';
-            const tierName = getTierName(s.tier);
+            const tierName = getTierName(getEffectiveTier(s, i));
             const desc = GEAR_DESCRIPTORS[gt] || 'practical, fits the current pose';
             return { gearType: gt, material: mat, tierName, desc };
         }).filter(Boolean);
@@ -989,11 +1026,11 @@
         const container = document.getElementById('bp-build-chips');
         if (!container) return;
         const slots = state.look?.slots || [];
-        const labels = slots.map(s => {
+        const labels = slots.map((s, i) => {
             const gt = (s.gearType || 'Accent').trim() || 'Accent';
             if (gt === 'None') return null;
             const mat = (s.material || 'Leather').trim() || 'Leather';
-            const tierName = getTierName(s.tier);
+            const tierName = getTierName(getEffectiveTier(s, i));
             return `${mat} · ${tierName} ${gt}`;
         }).filter(Boolean);
         container.innerHTML = labels.length === 0
@@ -1334,11 +1371,17 @@
     }
 
     function bindLoadout() {
+        const section = document.querySelector('.bp-loadout-section');
         const grid = document.getElementById('bp-loadout-grid');
         const resetBtn = document.getElementById('bp-loadout-reset');
         if (resetBtn) {
             resetBtn.addEventListener('click', () => {
-                state.look = { slots: getLoadoutDefaults().map(s => ({ ...s })) };
+                const defaults = getLoadoutDefaults().map(s => ({ ...s }));
+                state.look = {
+                    slots: defaults,
+                    globalTier: 'T0',
+                    slotTierOverride: [false, false, false, false]
+                };
                 saveState();
                 renderLoadout();
                 renderGeneratePreview();
@@ -1347,7 +1390,7 @@
         if (grid) {
             function updateSlot(idx, field, value) {
                 if (isNaN(idx) || idx < 0 || idx > 3) return;
-                if (!state.look) state.look = { slots: getLoadoutDefaults().map(s => ({ ...s })) };
+                if (!state.look) state.look = { slots: getLoadoutDefaults().map(s => ({ ...s })), globalTier: 'T0', slotTierOverride: [false, false, false, false] };
                 while (state.look.slots.length <= idx) {
                     state.look.slots.push({ gearType: 'Accent', material: 'Leather', tier: 'T0' });
                 }
@@ -1368,17 +1411,60 @@
                 updateSlot(idx, 'gearType', sel.value);
             });
             grid.addEventListener('click', (e) => {
-                const btn = e.target.closest('[data-action="set-material"], [data-action="set-tier"]');
-                if (!btn || btn.disabled) return;
-                const action = btn.getAttribute('data-action');
-                const idx = parseInt(btn.getAttribute('data-slot'), 10);
-                const value = btn.getAttribute('data-value');
-                if (action === 'set-material') updateSlot(idx, 'material', value);
-                else if (action === 'set-tier') {
-                    const slot = state.look?.slots?.[idx];
-                    const slotMat = (slot?.material || 'Leather').trim() || 'Leather';
-                    if (tierToIndex(value) <= getMaxUnlockedTierIndexForMaterial(slotMat)) updateSlot(idx, 'tier', value);
+                const customizeBtn = e.target.closest('[data-action="customize-tier"]');
+                if (customizeBtn) {
+                    const idx = parseInt(customizeBtn.getAttribute('data-slot'), 10);
+                    if (!isNaN(idx) && idx >= 0 && idx <= 3) {
+                        const globalTier = state.look?.globalTier ?? 'T0';
+                        if (!state.look.slotTierOverride) state.look.slotTierOverride = [false, false, false, false];
+                        state.look.slotTierOverride = state.look.slotTierOverride.slice();
+                        state.look.slotTierOverride[idx] = true;
+                        if (!state.look.slots[idx]) state.look.slots[idx] = { gearType: 'Accent', material: 'Leather', tier: 'T0' };
+                        state.look.slots[idx] = { ...state.look.slots[idx], tier: globalTier };
+                        saveState();
+                        renderLoadout();
+                        renderGeneratePreview();
+                    }
+                    return;
                 }
+                const resetBtn2 = e.target.closest('[data-action="reset-tier-to-global"]');
+                if (resetBtn2) {
+                    const idx = parseInt(resetBtn2.getAttribute('data-slot'), 10);
+                    if (!isNaN(idx) && idx >= 0 && idx <= 3 && state.look?.slotTierOverride) {
+                        state.look.slotTierOverride = state.look.slotTierOverride.slice();
+                        state.look.slotTierOverride[idx] = false;
+                        saveState();
+                        renderLoadout();
+                        renderGeneratePreview();
+                    }
+                    return;
+                }
+                const btn = e.target.closest('[data-action="set-material"], [data-action="set-tier"]');
+                if (btn && !btn.disabled) {
+                    const action = btn.getAttribute('data-action');
+                    const idx = parseInt(btn.getAttribute('data-slot'), 10);
+                    const value = btn.getAttribute('data-value');
+                    if (action === 'set-material') updateSlot(idx, 'material', value);
+                    else if (action === 'set-tier') {
+                        const slot = state.look?.slots?.[idx];
+                        const slotMat = (slot?.material || 'Leather').trim() || 'Leather';
+                        if (tierToIndex(value) <= getMaxUnlockedTierIndexForMaterial(slotMat)) updateSlot(idx, 'tier', value);
+                    }
+                    return;
+                }
+            });
+        }
+        if (section) {
+            section.addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-action="set-global-tier"]');
+                if (!btn || btn.disabled) return;
+                const value = btn.getAttribute('data-value');
+                if (!value) return;
+                state.look = state.look || { slots: getLoadoutDefaults().map(s => ({ ...s })), globalTier: 'T0', slotTierOverride: [false, false, false, false] };
+                state.look.globalTier = value;
+                saveState();
+                renderLoadout();
+                renderGeneratePreview();
             });
         }
     }
