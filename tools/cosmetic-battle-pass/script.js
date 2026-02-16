@@ -771,28 +771,43 @@
         });
     }
 
+    function switchToTab(tabId) {
+        const tab = document.querySelector('.bp-tab[data-tab="' + tabId + '"]');
+        const panel = document.getElementById('bp-tab-' + tabId);
+        if (!tab || !panel) return;
+        document.querySelectorAll('.bp-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.bp-tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        panel.classList.add('active');
+        tab.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+        if (tabId === 'dashboard') {
+            ensureUnlocks();
+            renderDashboardHero();
+            renderLoadout();
+            updateGenerateButton();
+        }
+        if (tabId === 'catalog') renderCatalog();
+        if (tabId === 'generate') renderGeneratePreview();
+    }
+
     function bindTabs() {
         const app = document.querySelector('.battle-pass-app');
         if (!app) return;
         app.addEventListener('click', (e) => {
             const tab = e.target.closest('.bp-tab');
             if (!tab || tab.classList.contains('bp-tab-disabled')) return;
-            const tabId = tab.getAttribute('data-tab');
-            const id = 'bp-tab-' + tabId;
-            document.querySelectorAll('.bp-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.bp-tab-content').forEach(c => c.classList.remove('active'));
-            tab.classList.add('active');
-            const panel = document.getElementById(id);
-            if (panel) panel.classList.add('active');
-            tab.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
-            if (tabId === 'dashboard') {
-                ensureUnlocks();
-                renderDashboardHero();
-                renderLoadout();
-                updateGenerateButton();
-            }
-            if (tabId === 'catalog') renderCatalog();
-            if (tabId === 'generate') renderGeneratePreview();
+            switchToTab(tab.getAttribute('data-tab'));
+        });
+    }
+
+    function bindTabNavButtons() {
+        const app = document.querySelector('.battle-pass-app');
+        if (!app) return;
+        app.addEventListener('click', (e) => {
+            const btn = e.target.closest('.bp-tab-nav-prev, .bp-tab-nav-next');
+            if (!btn) return;
+            const target = btn.getAttribute('data-tab-nav');
+            if (target) switchToTab(target);
         });
     }
 
@@ -1190,7 +1205,7 @@
         const container = document.getElementById('bp-gallery');
         if (!container) return;
         container.innerHTML = '';
-        (state.gallery || []).forEach((entry) => {
+        [...(state.gallery || [])].reverse().forEach((entry) => {
             const id = entry.id || galleryEntryId();
             if (!entry.id) entry.id = id;
             const item = document.createElement('div');
@@ -1426,6 +1441,7 @@
         bindHeroPortrait();
         bindXpAndMilestone();
         bindTabs();
+        bindTabNavButtons();
         bindCharacterForm();
         bindCatalog();
         bindLoadout();

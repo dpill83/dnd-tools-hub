@@ -85,6 +85,9 @@
                     <input type="number" id="bp-current-xp" min="0" value="0" placeholder="0">
                 </div>
                 <span id="bp-xp-error" class="bp-xp-error is-hidden"></span>
+                <div class="bp-tab-nav">
+                    <button type="button" class="btn-secondary bp-tab-nav-next" data-tab-nav="character">Next</button>
+                </div>
             </section>
         </div>
 
@@ -104,6 +107,10 @@
                     </ul>
                 </details>
                 <div id="bp-loadout-grid" class="bp-loadout-grid"></div>
+                <div class="bp-tab-nav">
+                    <button type="button" class="btn-secondary bp-tab-nav-prev" data-tab-nav="catalog">Prev</button>
+                    <button type="button" class="btn-secondary bp-tab-nav-next" data-tab-nav="generate">Next</button>
+                </div>
             </section>
         </div>
 
@@ -137,6 +144,10 @@
                     <button type="button" id="bp-portrait-trigger" class="btn-secondary" aria-label="Upload character portrait">Set portrait</button>
                     <p class="help-text">With a portrait, the app tells the AI to equip this character. Without one, it generates from scratch then equips.</p>
                 </div>
+                <div class="bp-tab-nav">
+                    <button type="button" class="btn-secondary bp-tab-nav-prev" data-tab-nav="xp">Prev</button>
+                    <button type="button" class="btn-secondary bp-tab-nav-next" data-tab-nav="catalog">Next</button>
+                </div>
             </section>
         </div>
 
@@ -153,6 +164,10 @@
                         <button type="button" id="bp-catalog-add-custom" class="btn-secondary">Add</button>
                     </div>
                     <div id="bp-custom-gear-list" class="bp-custom-gear-chips"></div>
+                </div>
+                <div class="bp-tab-nav">
+                    <button type="button" class="btn-secondary bp-tab-nav-prev" data-tab-nav="character">Prev</button>
+                    <button type="button" class="btn-secondary bp-tab-nav-next" data-tab-nav="dashboard">Next</button>
                 </div>
             </section>
         </div>
@@ -229,6 +244,9 @@
                 <p class="help-text">Images are saved automatically when you generate. Stored locally; download to keep.</p>
                 <div class="bp-gallery-grid" id="bp-gallery"></div>
             </section>
+            <div class="bp-tab-nav">
+                <button type="button" class="btn-secondary bp-tab-nav-prev" data-tab-nav="dashboard">Prev</button>
+            </div>
         </div>
 
         <div id="bp-lightbox" class="bp-lightbox" role="dialog" aria-modal="true" aria-label="Enlarged image" aria-hidden="true">

@@ -804,6 +804,7 @@
 
 /* Forms */
 .bp-form-section { margin-bottom: 1.5rem; }
+.bp-tab-nav { display: flex; gap: 0.75rem; margin-top: 1.25rem; flex-wrap: wrap; }
 .bp-form-section h2 { font-size: 1.2rem; margin-bottom: 0.75rem; color: var(--primary-color); }
 .bp-form-group { margin-bottom: 0.75rem; }
 .bp-form-group label { display: block; font-weight: 600; margin-bottom: 0.25rem; }
