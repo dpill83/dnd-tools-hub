@@ -597,6 +597,8 @@
 .bp-tier-step-active.bp-tier-t1 { border-color: var(--primary-color); box-shadow: 0 0 4px rgba(138, 122, 158, 0.4); }
 .bp-tier-step-active.bp-tier-t2 { border-color: var(--primary-color); box-shadow: 0 0 8px rgba(138, 122, 158, 0.5); }
 .bp-tier-step-active.bp-tier-t3 { border-color: var(--primary-color); box-shadow: 0 0 14px rgba(138, 122, 158, 0.6); }
+.bp-tier-step.bp-tier-step-locked,
+.bp-tier-step:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .bp-tier-chip.bp-tier-t0 { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
 .bp-tier-chip.bp-tier-t1 { background: rgba(160, 140, 180, 0.2); border: 1px solid rgba(160, 140, 180, 0.5); color: var(--text); }

@@ -208,7 +208,19 @@
         } catch (_) {}
     }
 
-    const { getLevelFromXp, getAllUnlockedSubTiers, getThemeForLevelTier, THEMES } = window.BattlePassData;
+    const { getLevelFromXp, getAllUnlockedSubTiers, getSubTierThresholds, getThemeForLevelTier, THEMES } = window.BattlePassData;
+
+    function getMaxUnlockedTierIndex() {
+        const xp = state.currentXp + state.passXp;
+        const level = getLevelFromXp(xp);
+        const thresholds = getSubTierThresholds(level);
+        if (!thresholds.length) return 0;
+        let max = 0;
+        for (const t of thresholds) {
+            if (t.tier <= 3 && xp >= t.xp) max = Math.max(max, t.tier);
+        }
+        return max;
+    }
 
     function ensureUnlocks() {
         const xp = state.currentXp + state.passXp;
@@ -513,9 +525,13 @@
             const active = mat === m ? ' bp-mat-chip-active' : '';
             return `<button type="button" class="bp-mat-chip bp-mat-${m.toLowerCase()}${active}" data-action="set-material" data-slot="${index}" data-value="${m}" aria-pressed="${mat === m}">${m}</button>`;
         }).join('');
+        const maxUnlockedTier = getMaxUnlockedTierIndex();
         const tierSteps = LOADOUT_TIERS.map(t => {
+            const tierIdx = tierToIndex(t);
+            const locked = tierIdx > maxUnlockedTier;
             const active = tier === t ? ' bp-tier-step-active' : '';
-            return `<button type="button" class="bp-tier-step bp-tier-${t.toLowerCase()}${active}" data-action="set-tier" data-slot="${index}" data-value="${t}" aria-pressed="${tier === t}">${getTierName(t)}</button>`;
+            const disabled = locked ? ' disabled' : '';
+            return `<button type="button" class="bp-tier-step bp-tier-${t.toLowerCase()}${active}${locked ? ' bp-tier-step-locked' : ''}" data-action="set-tier" data-slot="${index}" data-value="${t}" aria-pressed="${tier === t}"${disabled}${locked ? ' title="Unlock with more XP"' : ''}>${getTierName(t)}</button>`;
         }).join('');
         const tooltipId = 'bp-tier-tooltip-' + index;
         const mobileDetailsId = 'bp-tier-meaning-mobile-' + index;
@@ -1319,12 +1335,14 @@
             });
             grid.addEventListener('click', (e) => {
                 const btn = e.target.closest('[data-action="set-material"], [data-action="set-tier"]');
-                if (!btn) return;
+                if (!btn || btn.disabled) return;
                 const action = btn.getAttribute('data-action');
                 const idx = parseInt(btn.getAttribute('data-slot'), 10);
                 const value = btn.getAttribute('data-value');
                 if (action === 'set-material') updateSlot(idx, 'material', value);
-                else if (action === 'set-tier') updateSlot(idx, 'tier', value);
+                else if (action === 'set-tier') {
+                    if (tierToIndex(value) <= getMaxUnlockedTierIndex()) updateSlot(idx, 'tier', value);
+                }
             });
         }
     }
