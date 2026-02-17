@@ -11,6 +11,7 @@
         'tools/combat-turn-helper/',
         'tools/cosmetic-battle-pass/',
         'tools/wagers-fortunes/',
+        'tools/interactive-map/',
         'tools/cassalanter-inquiry-runner/',
         'tools/cassalanter-inquiry-wizard/',
         'tools/playstyle-quiz/',

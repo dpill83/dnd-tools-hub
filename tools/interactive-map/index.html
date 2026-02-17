@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Interactive Map – D&D Tools Hub</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link rel="stylesheet" href="../../global.css">
+    <link rel="stylesheet" href="interactive-map.css">
+</head>
+<body class="interactive-map-app">
+    <header class="wm-header">
+        <a href="../../index.html" class="theme-toggle" aria-label="Hub">&#127968;</a>
+        <div class="wm-header-center">
+            <label class="wm-map-label">
+                <span class="wm-label-text">Map</span>
+                <select id="wm-map-select" class="wm-map-select" aria-label="Select map">
+                    <option value="">— No map —</option>
+                </select>
+            </label>
+            <label class="wm-search-label">
+                <span class="wm-search-icon" aria-hidden="true">&#128269;</span>
+                <input type="search" id="wm-search" class="wm-search" placeholder="Search by name or type" aria-label="Search markers">
+            </label>
+        </div>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode"><span class="theme-icon">&#127769;</span></button>
+    </header>
+
+    <div class="wm-main">
+        <aside class="wm-sidebar-left">
+            <h2 class="wm-panel-title">Location details</h2>
+            <div id="wm-detail-content" class="wm-detail-content">
+                <p class="wm-detail-placeholder">Upload a map to get started.</p>
+            </div>
+        </aside>
+
+        <div class="wm-map-wrap">
+            <div id="wm-upload-zone" class="wm-upload-zone" aria-label="Upload a map">
+                <input type="file" id="wm-file-input" accept="image/png,image/jpeg,image/jpg,image/webp" aria-label="Choose map image" class="wm-file-input">
+                <p class="wm-upload-text">Upload a map</p>
+                <p class="wm-upload-hint">Drag and drop an image here, or click to choose a file.</p>
+            </div>
+            <div id="wm-map-container" class="wm-map-container" aria-hidden="true"></div>
+            <div class="wm-map-overlays">
+                <details class="wm-legend wm-legend-overlay">
+                    <summary class="wm-legend-summary">Legend</summary>
+                    <ul id="wm-legend-list" class="wm-legend-list" aria-label="Marker types"></ul>
+                </details>
+                <button type="button" id="wm-add-marker" class="wm-fab wm-fab-hidden" aria-label="Add marker" title="Add marker (right-click on map to set location first)">+</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="wm-add-marker-modal" class="wm-modal" role="dialog" aria-modal="true" aria-labelledby="wm-modal-title" aria-hidden="true">
+        <div class="wm-modal-backdrop"></div>
+        <div class="wm-modal-content">
+            <h2 id="wm-modal-title" class="wm-modal-title">Add marker here</h2>
+            <form id="wm-add-marker-form" class="wm-modal-form">
+                <div class="wm-form-group">
+                    <label for="wm-marker-name">Name</label>
+                    <input type="text" id="wm-marker-name" required placeholder="Location name">
+                </div>
+                <div class="wm-form-group">
+                    <label for="wm-marker-comment">Comment / description</label>
+                    <textarea id="wm-marker-comment" rows="3" placeholder="Optional notes"></textarea>
+                </div>
+                <div class="wm-form-group">
+                    <label for="wm-marker-type">Type</label>
+                    <select id="wm-marker-type" aria-label="Marker type"></select>
+                </div>
+                <div class="wm-modal-actions">
+                    <button type="button" id="wm-modal-cancel" class="wm-btn wm-btn-secondary">Cancel</button>
+                    <button type="submit" class="wm-btn wm-btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="../../theme.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

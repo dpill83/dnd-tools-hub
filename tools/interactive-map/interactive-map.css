@@ -1,0 +1,446 @@
+/* Interactive Map – full-viewport layout, upload zone, legend, modal. Depends on global.css. */
+
+body.interactive-map-app {
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.wm-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.wm-header-center {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.wm-map-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.wm-label-text {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    white-space: nowrap;
+}
+
+.wm-map-select {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--text);
+    min-width: 140px;
+    cursor: pointer;
+}
+
+.wm-map-select:hover,
+.wm-map-select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.wm-search-label {
+    flex: 1;
+    min-width: 160px;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    position: relative;
+}
+
+.wm-search-icon {
+    position: absolute;
+    left: 0.5rem;
+    color: var(--text-light);
+    pointer-events: none;
+}
+
+.wm-search {
+    width: 100%;
+    padding: 0.35rem 0.5rem 0.35rem 1.75rem;
+    font-size: 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--text);
+}
+
+.wm-search:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.wm-main {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+
+.wm-sidebar-left {
+    width: 280px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.wm-panel-title {
+    font-size: 1rem;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.wm-detail-content {
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+.wm-detail-placeholder {
+    color: var(--text-light);
+    font-style: italic;
+}
+
+.wm-detail-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.wm-detail-type {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+}
+
+.wm-detail-description {
+    white-space: pre-wrap;
+}
+
+.wm-map-wrap {
+    flex: 1;
+    position: relative;
+    min-width: 0;
+    background: var(--background);
+}
+
+.wm-upload-zone {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    margin: 0.5rem;
+    background: var(--card-bg);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.wm-upload-zone:hover,
+.wm-upload-zone.wm-drag-over {
+    border-color: var(--primary-color);
+    background: var(--surface);
+}
+
+.wm-file-input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.wm-upload-text {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.wm-upload-hint {
+    font-size: 0.875rem;
+    color: var(--text-light);
+}
+
+.wm-upload-zone.hidden {
+    display: none;
+}
+
+.wm-map-container {
+    position: absolute;
+    inset: 0;
+    background: var(--background);
+}
+
+/* Leaflet adds .leaflet-container to the map div; keep background in sync with theme */
+.interactive-map-app .wm-map-container.leaflet-container {
+    background: var(--background);
+}
+
+.wm-map-container[aria-hidden="true"] {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* Legend and + button overlay on top of map */
+.wm-map-overlays {
+    position: absolute;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: flex-end;
+    gap: 0.5rem;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.wm-map-overlays > * {
+    pointer-events: auto;
+}
+
+.wm-legend-overlay {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    box-shadow: 0 2px 12px var(--shadow);
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.wm-legend-overlay[open] .wm-legend-list {
+    margin-top: 0.5rem;
+}
+
+.wm-map-overlays .wm-fab {
+    position: relative;
+    bottom: auto;
+    right: auto;
+    flex-shrink: 0;
+}
+
+.wm-legend-summary {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    list-style: none;
+}
+
+.wm-legend-summary::-webkit-details-marker {
+    display: none;
+}
+
+.wm-legend-summary::before {
+    content: "▼ ";
+    font-size: 0.7rem;
+}
+
+.wm-legend[open] .wm-legend-summary::before {
+    content: "▲ ";
+}
+
+.wm-legend-list {
+    list-style: none;
+    margin-top: 0.5rem;
+}
+
+.wm-legend-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text);
+    margin-bottom: 0.35rem;
+}
+
+.wm-legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.wm-fab {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: none;
+    background: var(--primary-color);
+    color: white;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 2px 8px var(--shadow);
+    transition: background 0.2s ease, transform 0.2s ease;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wm-fab:hover {
+    background: var(--primary-light);
+    transform: scale(1.05);
+}
+
+.wm-fab:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+.wm-fab.wm-fab-hidden {
+    display: none;
+}
+
+/* Modal */
+.wm-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.wm-modal[aria-hidden="true"] {
+    display: none;
+}
+
+.wm-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.wm-modal-content {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 4px 20px var(--shadow);
+}
+
+.wm-modal-title {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.wm-modal-form .wm-form-group {
+    margin-bottom: 1rem;
+}
+
+.wm-modal-form label {
+    display: block;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+    color: var(--text);
+}
+
+.wm-modal-form input,
+.wm-modal-form textarea,
+.wm-modal-form select {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--text);
+}
+
+.wm-modal-form input:focus,
+.wm-modal-form textarea:focus,
+.wm-modal-form select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.wm-modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1.25rem;
+}
+
+.wm-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+}
+
+.wm-btn-secondary {
+    background: var(--input-bg);
+    color: var(--text);
+}
+
+.wm-btn-secondary:hover {
+    background: var(--card-bg);
+    border-color: var(--primary-color);
+}
+
+.wm-btn-primary {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.wm-btn-primary:hover {
+    background: var(--primary-light);
+    border-color: var(--primary-light);
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .wm-main {
+        flex-direction: column;
+    }
+
+    .wm-sidebar-left {
+        width: 100%;
+        max-height: 180px;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .wm-map-overlays {
+        bottom: 1rem;
+        right: 1rem;
+        flex-direction: column-reverse;
+        align-items: flex-end;
+    }
+
+    .wm-legend-overlay {
+        max-height: 50vh;
+    }
+}
