@@ -13,7 +13,7 @@ import {
     markersKey,
     uploadMapImage,
     generateId,
-} from './_lib/r2-maps.js';
+} from './lib/r2-maps.js';
 
 function jsonResponse(data, status = 200) {
     return new Response(JSON.stringify(data), {
