@@ -86,6 +86,17 @@ body.interactive-map-app {
     outline: none;
 }
 
+.wm-admin-link {
+    font-size: 0.875rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.wm-admin-link:hover {
+    text-decoration: underline;
+}
+
 .wm-main {
     flex: 1;
     display: flex;
