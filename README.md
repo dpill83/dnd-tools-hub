@@ -185,6 +185,8 @@ The **Generate with OpenAI** feature in [tools/cosmetic-battle-pass/](tools/cosm
 - **R2:** Create an R2 bucket and add a binding named `BATTLE_PASS_IMAGES` in the same Settings → Bindings. The Function uploads generated images to R2 and returns URLs; the gallery stores URL + metadata.
 - **Local dev:** Put `OPENAI_API_KEY=sk-...` in a `.dev.vars` file in the project root (ignored by git). Run `npx wrangler pages dev .` and pass the R2 binding (e.g. `--r2=BATTLE_PASS_IMAGES=<bucket_name>`) if you use image generation locally.
 
+The **Interactive Map** ([tools/interactive-map/](tools/interactive-map/)) uses the same R2 bucket (prefix `maps/`) for map images and marker data so all visitors see the same maps; no extra bindings are required.
+
 ---
 
 ## Summary table

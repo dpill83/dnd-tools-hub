@@ -1,13 +1,10 @@
-// Interactive Map – upload-first, multi-map, markers, search. Leaflet + IndexedDB + localStorage.
+// Interactive Map – shared maps and markers via API. Leaflet + /api/maps.
 
 (function () {
     'use strict';
 
-    const IDB_NAME = 'interactive-map-db';
-    const IDB_VERSION = 1;
-    const MAP_STORE = 'maps';
     const LAST_MAP_KEY = 'interactive-map-last-map';
-    const USER_MARKERS_PREFIX = 'interactive-map-user-markers-';
+    const API_BASE = '';
 
     const TYPE_COLORS = {
         'city': '#2563eb',
@@ -36,7 +33,6 @@
         { key: 'miscellaneous', label: 'Miscellaneous' }
     ];
 
-    let idb = null;
     let map = null;
     let imageOverlay = null;
     let markerLayer = null;
@@ -61,59 +57,40 @@
     const markerType = $('wm-marker-type');
     const modalCancel = $('wm-modal-cancel');
 
-    function openDB() {
-        return new Promise((resolve, reject) => {
-            const req = indexedDB.open(IDB_NAME, IDB_VERSION);
-            req.onerror = () => reject(req.error);
-            req.onsuccess = () => { idb = req.result; resolve(idb); };
-            req.onupgradeneeded = (e) => {
-                const db = e.target.result;
-                if (!db.objectStoreNames.contains(MAP_STORE)) {
-                    const store = db.createObjectStore(MAP_STORE, { keyPath: 'id' });
-                    store.createIndex('name', 'name', { unique: false });
-                }
-            };
+    function apiUrl(path) {
+        return (API_BASE + path).replace(/\/+/g, '/');
+    }
+
+    function getMapList() {
+        return fetch(apiUrl('/api/maps')).then((r) => {
+            if (!r.ok) throw new Error('Failed to load maps');
+            return r.json();
         });
     }
 
-    function saveMap(record) {
-        return new Promise((resolve, reject) => {
-            const tx = idb.transaction(MAP_STORE, 'readwrite');
-            tx.objectStore(MAP_STORE).put(record);
-            tx.oncomplete = () => resolve();
-            tx.onerror = () => reject(tx.error);
+    function getMapMeta(id) {
+        return fetch(apiUrl('/api/maps/' + encodeURIComponent(id))).then((r) => {
+            if (!r.ok) throw new Error('Map not found');
+            return r.json();
         });
     }
 
-    function getAllMaps() {
-        return new Promise((resolve, reject) => {
-            const tx = idb.transaction(MAP_STORE, 'readonly');
-            const req = tx.objectStore(MAP_STORE).getAll();
-            req.onsuccess = () => resolve(req.result || []);
-            req.onerror = () => reject(req.error);
+    function getMarkers(id) {
+        return fetch(apiUrl('/api/maps/' + encodeURIComponent(id) + '/markers')).then((r) => {
+            if (!r.ok) return [];
+            return r.json();
         });
     }
 
-    function getMap(id) {
-        return new Promise((resolve, reject) => {
-            const tx = idb.transaction(MAP_STORE, 'readonly');
-            const req = tx.objectStore(MAP_STORE).get(id);
-            req.onsuccess = () => resolve(req.result);
-            req.onerror = () => reject(req.error);
+    function putMarkers(id, markers) {
+        return fetch(apiUrl('/api/maps/' + encodeURIComponent(id) + '/markers'), {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ markers }),
+        }).then((r) => {
+            if (!r.ok) throw new Error('Failed to save markers');
+            return r.json();
         });
-    }
-
-    function deleteMap(id) {
-        return new Promise((resolve, reject) => {
-            const tx = idb.transaction(MAP_STORE, 'readwrite');
-            tx.objectStore(MAP_STORE).delete(id);
-            tx.oncomplete = () => resolve();
-            tx.onerror = () => reject(tx.error);
-        });
-    }
-
-    function generateId() {
-        return 'map-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9);
     }
 
     function getImageDimensions(file) {
@@ -143,23 +120,39 @@
 
     function handleFile(file) {
         if (!file || !file.type.startsWith('image/')) return;
-        getImageDimensions(file).then(({ width, height }) => {
-            return fileToDataUrl(file).then((dataUrl) => ({ dataUrl, width, height, name: file.name }));
-        }).then(({ dataUrl, width, height, name }) => {
-            const id = generateId();
-            const displayName = name.replace(/\.[^.]+$/, '') || 'Untitled map';
-            const record = { id, name: displayName, imageData: dataUrl, bounds: { height, width } };
-            return saveMap(record).then(() => ({ record, id }));
-        }).then(({ record, id }) => {
-            refreshMapSelect().then(() => {
-                selectMapById(id);
-                showMapView(record);
+        getImageDimensions(file)
+            .then(({ width, height }) =>
+                fileToDataUrl(file).then((dataUrl) => ({ dataUrl, width, height, name: file.name }))
+            )
+            .then(({ dataUrl, width, height, name }) => {
+                const displayName = name.replace(/\.[^.]+$/, '') || 'Untitled map';
+                return fetch(apiUrl('/api/maps'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: displayName,
+                        imageData: dataUrl,
+                        bounds: { width, height },
+                    }),
+                }).then((res) => {
+                    if (!res.ok) return res.json().then((d) => Promise.reject(new Error(d.error || 'Upload failed')));
+                    return res.json();
+                }).then((record) => ({ record, id: record.id }));
+            })
+            .then(({ record, id }) => {
+                return refreshMapSelect().then(() => {
+                    selectMapById(id);
+                    showMapView(record);
+                });
+            })
+            .catch((err) => {
+                console.error('Upload failed', err);
+                alert(err.message || 'Upload failed.');
             });
-        }).catch((err) => console.error('Upload failed', err));
     }
 
     function refreshMapSelect() {
-        return getAllMaps().then((maps) => {
+        return getMapList().then((maps) => {
             const current = mapSelect.value;
             mapSelect.innerHTML = '<option value="">— No map —</option>';
             maps.forEach((m) => {
@@ -169,6 +162,11 @@
                 mapSelect.appendChild(opt);
             });
             if (current && maps.some((m) => m.id === current)) mapSelect.value = current;
+            return maps;
+        }).catch((err) => {
+            console.error('Failed to load map list', err);
+            mapSelect.innerHTML = '<option value="">— No map —</option>';
+            return [];
         });
     }
 
@@ -196,7 +194,7 @@
         }
 
         if (imageOverlay) map.removeLayer(imageOverlay);
-        imageOverlay = L.imageOverlay(record.imageData, mapBounds).addTo(map);
+        imageOverlay = L.imageOverlay(record.imageUrl, mapBounds).addTo(map);
         map.fitBounds(mapBounds);
 
         currentMapId = record.id;
@@ -223,8 +221,11 @@
             showUploadView();
             return;
         }
-        getMap(id).then((record) => {
+        getMapMeta(id).then((record) => {
             if (record) showMapView(record);
+        }).catch((err) => {
+            console.error('Failed to load map', err);
+            updateDetailPlaceholder('Could not load map. It may have been removed.');
         });
     }
 
@@ -233,19 +234,6 @@
         map.removeLayer(markerLayer);
         markerLayer = null;
         allMarkerLayers = [];
-    }
-
-    function getUserMarkers(mapId) {
-        try {
-            const raw = localStorage.getItem(USER_MARKERS_PREFIX + mapId);
-            return raw ? JSON.parse(raw) : [];
-        } catch (_) {
-            return [];
-        }
-    }
-
-    function setUserMarkers(mapId, list) {
-        localStorage.setItem(USER_MARKERS_PREFIX + mapId, JSON.stringify(list));
     }
 
     function getColorForType(type) {
@@ -282,16 +270,19 @@
     function loadAndRenderMarkers() {
         clearMarkers();
         if (!map || !currentMapId) return;
-        const list = getUserMarkers(currentMapId);
-        markerLayer = L.layerGroup();
-        allMarkerLayers = [];
-        list.forEach((m) => {
-            const layer = createMarkerLayer(m);
-            markerLayer.addLayer(layer);
-            allMarkerLayers.push({ layer, data: m });
+        getMarkers(currentMapId).then((list) => {
+            markerLayer = L.layerGroup();
+            allMarkerLayers = [];
+            (list || []).forEach((m) => {
+                const layer = createMarkerLayer(m);
+                markerLayer.addLayer(layer);
+                allMarkerLayers.push({ layer, data: m });
+            });
+            markerLayer.addTo(map);
+            applySearchFilter();
+        }).catch((err) => {
+            console.error('Failed to load markers', err);
         });
-        markerLayer.addTo(map);
-        applySearchFilter();
     }
 
     function applySearchFilter() {
@@ -368,7 +359,6 @@
         const name = markerName.value.trim() || 'Unnamed';
         const comment = markerComment.value.trim();
         const type = markerType.value || 'miscellaneous';
-        const list = getUserMarkers(currentMapId);
         const newMarker = {
             lat: pendingAddLatLng.lat,
             lng: pendingAddLatLng.lng,
@@ -376,10 +366,14 @@
             comment,
             type
         };
-        list.push(newMarker);
-        setUserMarkers(currentMapId, list);
-        loadAndRenderMarkers();
-        closeAddMarkerModal();
+        const list = allMarkerLayers.map(({ data }) => data).concat([newMarker]);
+        putMarkers(currentMapId, list).then(() => {
+            loadAndRenderMarkers();
+            closeAddMarkerModal();
+        }).catch((err) => {
+            console.error('Failed to save marker', err);
+            alert('Failed to save marker.');
+        });
     }
 
     function populateLegend() {
@@ -443,15 +437,16 @@
     populateLegend();
     populateTypeSelect();
 
-    openDB().then(() => refreshMapSelect()).then(() => {
+    refreshMapSelect().then((maps) => {
+        const params = new URLSearchParams(window.location.search);
+        const mapIdFromUrl = params.get('map');
         const lastId = localStorage.getItem(LAST_MAP_KEY);
-        if (lastId) {
-            getMap(lastId).then((record) => {
-                if (record) {
-                    mapSelect.value = lastId;
-                    showMapView(record);
-                }
-            });
+        const idToSelect = mapIdFromUrl || (lastId && maps.some((m) => m.id === lastId) ? lastId : null);
+        if (idToSelect) {
+            mapSelect.value = idToSelect;
+            selectMapById(idToSelect);
+        } else {
+            updateDetailPlaceholder('Upload a map to get started, or choose one from the list.');
         }
-    }).catch((err) => console.error('IndexedDB init failed', err));
+    });
 })();
