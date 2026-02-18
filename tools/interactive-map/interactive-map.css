@@ -55,9 +55,13 @@ body.interactive-map-app {
     outline: none;
 }
 
-.wm-search-label {
+.wm-search-wrap {
     flex: 1;
     min-width: 160px;
+    position: relative;
+}
+
+.wm-search-label {
     display: flex;
     align-items: center;
     gap: 0.35rem;
@@ -84,6 +88,51 @@ body.interactive-map-app {
 .wm-search:focus {
     border-color: var(--primary-color);
     outline: none;
+}
+
+.wm-search-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 0.25rem;
+    max-height: 200px;
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px var(--shadow);
+    z-index: 1000;
+}
+
+.wm-search-dropdown.hidden {
+    display: none;
+}
+
+.wm-search-dropdown-item {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    border: none;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    color: var(--text);
+}
+
+.wm-search-dropdown-item:hover,
+.wm-search-dropdown-item:focus {
+    background: var(--input-bg);
+    outline: none;
+}
+
+.wm-search-dropdown-item-name {
+    font-weight: 500;
+}
+
+.wm-search-dropdown-item-type {
+    font-size: 0.75rem;
+    color: var(--text-light);
 }
 
 .wm-admin-link {

@@ -18,10 +18,13 @@
                     <option value="">— No map —</option>
                 </select>
             </label>
-            <label class="wm-search-label">
-                <span class="wm-search-icon" aria-hidden="true">&#128269;</span>
-                <input type="search" id="wm-search" class="wm-search" placeholder="Search by name or type" aria-label="Search markers">
-            </label>
+            <div class="wm-search-wrap">
+                <label class="wm-search-label">
+                    <span class="wm-search-icon" aria-hidden="true">&#128269;</span>
+                    <input type="search" id="wm-search" class="wm-search" placeholder="Search by name or type" aria-label="Search markers" autocomplete="off">
+                </label>
+                <div id="wm-search-dropdown" class="wm-search-dropdown hidden" role="listbox" aria-label="Matching locations"></div>
+            </div>
         </div>
         <a href="../../admin.html" class="wm-admin-link" title="Manage maps and markers">Admin</a>
         <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode"><span class="theme-icon">&#127769;</span></button>

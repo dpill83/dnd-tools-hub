@@ -44,6 +44,7 @@
     const $ = (id) => document.getElementById(id);
     const mapSelect = $('wm-map-select');
     const searchInput = $('wm-search');
+    const searchDropdown = $('wm-search-dropdown');
     const uploadZone = $('wm-upload-zone');
     const fileInput = $('wm-file-input');
     const mapContainer = $('wm-map-container');
@@ -183,7 +184,7 @@
         if (!map) {
             map = L.map('wm-map-container', {
                 crs: L.CRS.Simple,
-                minZoom: -2,
+                minZoom: -5,
                 maxZoom: 4
             });
             map.fitBounds(mapBounds);
@@ -285,14 +286,64 @@
         });
     }
 
+    function matchesQuery(data, q) {
+        if (!q) return true;
+        return (data.name && data.name.toLowerCase().includes(q)) ||
+            (data.type && data.type.toLowerCase().includes(q));
+    }
+
+    function getMatchingMarkers() {
+        const q = (searchInput.value || '').trim().toLowerCase();
+        if (!q) return [];
+        return allMarkerLayers
+            .filter(({ data }) => matchesQuery(data, q))
+            .map(({ data }) => data);
+    }
+
     function applySearchFilter() {
         const q = (searchInput.value || '').trim().toLowerCase();
         allMarkerLayers.forEach(({ layer, data }) => {
-            const match = !q ||
-                (data.name && data.name.toLowerCase().includes(q)) ||
-                (data.type && data.type.toLowerCase().includes(q));
+            const match = matchesQuery(data, q);
             layer.setStyle({ opacity: match ? 1 : 0.25, fillOpacity: match ? 0.9 : 0.2 });
         });
+    }
+
+    function showSearchDropdown() {
+        const matches = getMatchingMarkers();
+        if (matches.length === 0) {
+            searchDropdown.classList.add('hidden');
+            searchDropdown.innerHTML = '';
+            return;
+        }
+        searchDropdown.innerHTML = matches.map((data) => {
+            const name = escapeHtml(data.name || 'Unnamed');
+            const type = escapeHtml(data.type || 'miscellaneous');
+            return '<button type="button" class="wm-search-dropdown-item" role="option" data-lat="' + data.lat + '" data-lng="' + data.lng + '">' +
+                '<span class="wm-search-dropdown-item-name">' + name + '</span>' +
+                '<span class="wm-search-dropdown-item-type"> (' + type + ')</span>' +
+                '</button>';
+        }).join('');
+        searchDropdown.classList.remove('hidden');
+        searchDropdown.querySelectorAll('.wm-search-dropdown-item').forEach((btn) => {
+            btn.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                selectSearchResult(Number(btn.dataset.lat), Number(btn.dataset.lng));
+            });
+        });
+    }
+
+    function selectSearchResult(lat, lng) {
+        const { data } = allMarkerLayers.find(({ data: d }) => d.lat === lat && d.lng === lng) || {};
+        if (data) {
+            updateDetailPanel(data);
+            map.setView(L.latLng(lat, lng), map.getZoom(), { animate: true });
+        }
+        searchDropdown.classList.add('hidden');
+        searchInput.blur();
+    }
+
+    function hideSearchDropdown() {
+        setTimeout(() => searchDropdown.classList.add('hidden'), 150);
     }
 
     function updateDetailPlaceholder(text) {
@@ -419,7 +470,12 @@
 
     mapSelect.addEventListener('change', () => selectMapById(mapSelect.value || null));
 
-    searchInput.addEventListener('input', () => applySearchFilter());
+    searchInput.addEventListener('input', () => {
+        applySearchFilter();
+        showSearchDropdown();
+    });
+    searchInput.addEventListener('focus', () => showSearchDropdown());
+    searchInput.addEventListener('blur', hideSearchDropdown);
 
     addForm.addEventListener('submit', (e) => {
         e.preventDefault();
