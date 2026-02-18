@@ -93,9 +93,10 @@
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ markers }),
-        }).then((r) => {
-            if (!r.ok) throw new Error('Failed to save markers');
-            return r.json();
+        }).then(async (r) => {
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) throw new Error(data.error || 'Failed to save markers');
+            return data;
         });
     }
 

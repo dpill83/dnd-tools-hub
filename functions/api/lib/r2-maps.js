@@ -9,7 +9,7 @@ const MARKERS_PREFIX = 'maps/markers/';
 const IMAGES_PREFIX = 'maps/images/';
 const MARKER_IMAGES_PREFIX = 'maps/marker-images/';
 const MAX_IMAGE_BYTES = 25 * 1024 * 1024; // 25 MB
-const MAX_MARKER_IMAGE_BYTES = 2 * 1024 * 1024; // 2 MB
+const MAX_MARKER_IMAGE_BYTES = 5 * 1024 * 1024; // 5 MB
 
 function getBucket(env) {
     return env.BATTLE_PASS_IMAGES || null;
