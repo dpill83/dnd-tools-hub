@@ -209,6 +209,64 @@ body.interactive-map-app {
     object-fit: cover;
 }
 
+.wm-detail-image-clickable {
+    cursor: pointer;
+}
+
+/* Image lightbox – enlarged view with overlay */
+.wm-image-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.wm-image-lightbox.hidden {
+    display: none;
+}
+
+.wm-image-lightbox-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    cursor: pointer;
+}
+
+.wm-image-lightbox-img {
+    position: relative;
+    z-index: 1;
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.wm-image-lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 2;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    font-size: 1.5rem;
+    line-height: 1;
+    border: none;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+}
+
+.wm-image-lightbox-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
 .wm-image-hint {
     font-size: 0.8rem;
     color: var(--text-light);

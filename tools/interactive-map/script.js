@@ -61,6 +61,10 @@
     const markerImagePreviewImg = $('wm-marker-image-preview-img');
     const markerImageClear = $('wm-marker-image-clear');
     const modalCancel = $('wm-modal-cancel');
+    const imageLightbox = $('wm-image-lightbox');
+    const imageLightboxImg = $('wm-image-lightbox-img');
+    const imageLightboxClose = $('wm-image-lightbox-close');
+    const imageLightboxBackdrop = $('wm-image-lightbox-backdrop');
     let pendingMarkerImageDataUrl = null;
 
     function apiUrl(path) {
@@ -361,13 +365,27 @@
         const type = data.type || 'miscellaneous';
         const desc = (data.comment || data.description || '').trim();
         const imgHtml = data.imageUrl
-            ? '<div class="wm-detail-image-wrap"><img class="wm-detail-image" src="' + escapeHtml(data.imageUrl) + '" alt="' + escapeHtml(name) + '"></div>'
+            ? '<div class="wm-detail-image-wrap"><img class="wm-detail-image wm-detail-image-clickable" src="' + escapeHtml(data.imageUrl) + '" alt="' + escapeHtml(name) + '" title="Click to enlarge"></div>'
             : '';
         detailContent.innerHTML =
             '<p class="wm-detail-name">' + escapeHtml(name) + '</p>' +
             '<p class="wm-detail-type">' + escapeHtml(type) + '</p>' +
             (desc ? '<div class="wm-detail-description">' + escapeHtml(desc) + '</div>' : '') +
             imgHtml;
+    }
+
+    function showImageLightbox(src) {
+        if (!imageLightbox || !imageLightboxImg) return;
+        imageLightboxImg.src = src;
+        imageLightboxImg.alt = '';
+        imageLightbox.classList.remove('hidden');
+        imageLightbox.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeImageLightbox() {
+        if (!imageLightbox) return;
+        imageLightbox.classList.add('hidden');
+        imageLightbox.setAttribute('aria-hidden', 'true');
     }
 
     function onMapRightClick(e) {
@@ -554,6 +572,17 @@
         }
     });
     modal.querySelector('.wm-modal-backdrop').addEventListener('click', closeAddMarkerModal);
+    detailContent.addEventListener('click', (e) => {
+        const img = e.target.closest('.wm-detail-image-clickable');
+        if (img && img.src) showImageLightbox(img.src);
+    });
+    if (imageLightboxBackdrop) imageLightboxBackdrop.addEventListener('click', closeImageLightbox);
+    if (imageLightboxClose) imageLightboxClose.addEventListener('click', closeImageLightbox);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && imageLightbox && !imageLightbox.classList.contains('hidden')) {
+            closeImageLightbox();
+        }
+    });
 
     fab.addEventListener('click', () => {
         if (!currentMapId) return;
