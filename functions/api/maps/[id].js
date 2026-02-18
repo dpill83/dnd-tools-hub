@@ -4,7 +4,7 @@
  * Requires: BATTLE_PASS_IMAGES (R2 bucket binding).
  */
 
-import { getBucket, getJson, metaKey, markersKey, removeFromIndex } from '../../lib/r2-maps.js';
+import { getBucket, getJson, metaKey, markersKey, removeFromIndex } from '../lib/r2-maps.js';
 
 function jsonResponse(data, status = 200) {
     return new Response(JSON.stringify(data), {
