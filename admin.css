@@ -1,0 +1,200 @@
+/* Admin page styles – depends on global.css */
+
+.hidden {
+    display: none;
+}
+
+.admin-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+    min-height: 100vh;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.admin-header h1 {
+    font-size: 1.5rem;
+    color: var(--text);
+}
+
+.admin-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.admin-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.admin-link:hover {
+    text-decoration: underline;
+}
+
+.dark-mode .admin-link {
+    color: var(--primary-color);
+}
+
+.admin-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.admin-section h2 {
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+}
+
+.admin-hint {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+}
+
+.admin-loading {
+    color: var(--text-light);
+    font-style: italic;
+}
+
+.admin-error {
+    color: var(--error);
+}
+
+.maps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.map-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.map-row.selected {
+    border-color: var(--primary-color);
+    background: var(--input-bg);
+}
+
+.map-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.map-name {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.map-id {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    font-family: monospace;
+}
+
+.map-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.admin-btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+}
+
+.admin-btn:hover {
+    background: var(--input-bg);
+}
+
+.admin-btn-select {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.admin-btn-select:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.admin-btn-danger {
+    color: var(--error);
+    border-color: var(--error);
+}
+
+.admin-btn-danger:hover {
+    background: var(--error);
+    color: white;
+}
+
+.markers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.markers-list.hidden {
+    display: none;
+}
+
+.markers-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.markers-header strong {
+    color: var(--text);
+}
+
+#markers-ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.marker-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+.marker-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.marker-name {
+    font-weight: 500;
+}
+
+.marker-meta {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}

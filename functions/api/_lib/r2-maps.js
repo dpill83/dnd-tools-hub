@@ -63,6 +63,17 @@ export async function appendToIndex(bucket, entry) {
     await putJson(bucket, INDEX_KEY, list);
 }
 
+/**
+ * @param {R2Bucket} bucket
+ * @param {string} id
+ */
+export async function removeFromIndex(bucket, id) {
+    const list = await getIndex(bucket);
+    const filtered = list.filter((e) => e.id !== id);
+    if (filtered.length === list.length) return;
+    await putJson(bucket, INDEX_KEY, filtered);
+}
+
 export function metaKey(id) {
     return META_PREFIX + id + '.json';
 }
