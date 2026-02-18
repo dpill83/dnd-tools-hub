@@ -7,7 +7,7 @@ const INDEX_KEY = 'maps/index.json';
 const META_PREFIX = 'maps/meta/';
 const MARKERS_PREFIX = 'maps/markers/';
 const IMAGES_PREFIX = 'maps/images/';
-const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8 MB
+const MAX_IMAGE_BYTES = 25 * 1024 * 1024; // 25 MB
 
 function getBucket(env) {
     return env.BATTLE_PASS_IMAGES || null;
@@ -98,7 +98,7 @@ export function decodeDataUrl(dataUrl) {
     const b64 = match[2].replace(/\s/g, '');
     const binary = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
     if (binary.length > MAX_IMAGE_BYTES) {
-        throw new Error('Image too large (max 8 MB)');
+        throw new Error('Image too large (max 25 MB)');
     }
     const ext = contentType === 'image/jpeg' || contentType === 'image/jpg' ? 'jpg' : 'png';
     return { body: binary, contentType, ext };
