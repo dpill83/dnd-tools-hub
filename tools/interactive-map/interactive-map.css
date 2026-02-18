@@ -194,6 +194,26 @@ body.interactive-map-app {
     white-space: pre-wrap;
 }
 
+.wm-detail-image-wrap {
+    margin-top: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+.wm-detail-image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    max-height: 240px;
+    object-fit: cover;
+}
+
+.wm-marker-image-input {
+    width: 100%;
+    font-size: 0.875rem;
+}
+
 .wm-map-wrap {
     flex: 1;
     position: relative;

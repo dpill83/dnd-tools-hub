@@ -7,7 +7,9 @@ const INDEX_KEY = 'maps/index.json';
 const META_PREFIX = 'maps/meta/';
 const MARKERS_PREFIX = 'maps/markers/';
 const IMAGES_PREFIX = 'maps/images/';
+const MARKER_IMAGES_PREFIX = 'maps/marker-images/';
 const MAX_IMAGE_BYTES = 25 * 1024 * 1024; // 25 MB
+const MAX_MARKER_IMAGE_BYTES = 2 * 1024 * 1024; // 2 MB
 
 function getBucket(env) {
     return env.BATTLE_PASS_IMAGES || null;
@@ -89,16 +91,18 @@ export function imageKey(id, ext = 'png') {
 /**
  * Decode data URL (e.g. data:image/png;base64,...) to Uint8Array.
  * @param {string} dataUrl
- * @returns {{ body: Uint8Array, contentType: string }}
+ * @param {number} [maxBytes=MAX_IMAGE_BYTES]
+ * @returns {{ body: Uint8Array, contentType: string, ext: string }}
  */
-export function decodeDataUrl(dataUrl) {
+export function decodeDataUrl(dataUrl, maxBytes = MAX_IMAGE_BYTES) {
     const match = /^data:([^;]+);base64,(.+)$/.exec(dataUrl);
     if (!match) throw new Error('Invalid data URL');
     const contentType = match[1].trim();
     const b64 = match[2].replace(/\s/g, '');
     const binary = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-    if (binary.length > MAX_IMAGE_BYTES) {
-        throw new Error('Image too large (max 25 MB)');
+    if (binary.length > maxBytes) {
+        const mb = Math.round(maxBytes / (1024 * 1024));
+        throw new Error('Image too large (max ' + mb + ' MB)');
     }
     const ext = contentType === 'image/jpeg' || contentType === 'image/jpg' ? 'jpg' : 'png';
     return { body: binary, contentType, ext };
@@ -114,6 +118,23 @@ export function decodeDataUrl(dataUrl) {
 export async function uploadMapImage(bucket, id, dataUrl) {
     const { body, contentType, ext } = decodeDataUrl(dataUrl);
     const key = imageKey(id, ext);
+    await bucket.put(key, body, {
+        httpMetadata: { contentType },
+    });
+    return key;
+}
+
+/**
+ * Upload marker image from data URL to R2.
+ * @param {R2Bucket} bucket
+ * @param {string} mapId
+ * @param {string} dataUrl
+ * @returns {string} imageKey for storage (e.g. maps/marker-images/mapId/timestamp-random.png)
+ */
+export async function uploadMarkerImage(bucket, mapId, dataUrl) {
+    const { body, contentType, ext } = decodeDataUrl(dataUrl, MAX_MARKER_IMAGE_BYTES);
+    const id = Date.now() + '-' + Math.random().toString(36).slice(2, 9);
+    const key = MARKER_IMAGES_PREFIX + mapId + '/' + id + '.' + ext;
     await bucket.put(key, body, {
         httpMetadata: { contentType },
     });

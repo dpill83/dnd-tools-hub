@@ -56,6 +56,7 @@
     const markerName = $('wm-marker-name');
     const markerComment = $('wm-marker-comment');
     const markerType = $('wm-marker-type');
+    const markerImage = $('wm-marker-image');
     const modalCancel = $('wm-modal-cancel');
 
     function apiUrl(path) {
@@ -184,7 +185,7 @@
         if (!map) {
             map = L.map('wm-map-container', {
                 crs: L.CRS.Simple,
-                minZoom: -5,
+                minZoom: -4,
                 maxZoom: 4
             });
             map.fitBounds(mapBounds);
@@ -354,10 +355,14 @@
         const name = data.name || 'Unnamed';
         const type = data.type || 'miscellaneous';
         const desc = (data.comment || data.description || '').trim();
+        const imgHtml = data.imageUrl
+            ? '<div class="wm-detail-image-wrap"><img class="wm-detail-image" src="' + escapeHtml(data.imageUrl) + '" alt="' + escapeHtml(name) + '"></div>'
+            : '';
         detailContent.innerHTML =
             '<p class="wm-detail-name">' + escapeHtml(name) + '</p>' +
             '<p class="wm-detail-type">' + escapeHtml(type) + '</p>' +
-            (desc ? '<div class="wm-detail-description">' + escapeHtml(desc) + '</div>' : '');
+            (desc ? '<div class="wm-detail-description">' + escapeHtml(desc) + '</div>' : '') +
+            imgHtml;
     }
 
     function onMapRightClick(e) {
@@ -396,6 +401,7 @@
         markerName.value = '';
         markerComment.value = '';
         markerType.value = 'miscellaneous';
+        if (markerImage) markerImage.value = '';
         modal.setAttribute('aria-hidden', 'false');
         markerName.focus();
     }
@@ -410,21 +416,34 @@
         const name = markerName.value.trim() || 'Unnamed';
         const comment = markerComment.value.trim();
         const type = markerType.value || 'miscellaneous';
-        const newMarker = {
+        const file = markerImage && markerImage.files && markerImage.files[0];
+        const baseMarker = {
             lat: pendingAddLatLng.lat,
             lng: pendingAddLatLng.lng,
             name,
             comment,
             type
         };
-        const list = allMarkerLayers.map(({ data }) => data).concat([newMarker]);
-        putMarkers(currentMapId, list).then(() => {
-            loadAndRenderMarkers();
-            closeAddMarkerModal();
-        }).catch((err) => {
-            console.error('Failed to save marker', err);
-            alert('Failed to save marker.');
-        });
+        const list = allMarkerLayers.map(({ data }) => data);
+        const doSave = (newMarker) => {
+            putMarkers(currentMapId, list.concat([newMarker])).then(() => {
+                loadAndRenderMarkers();
+                closeAddMarkerModal();
+            }).catch((err) => {
+                console.error('Failed to save marker', err);
+                alert(err.message || 'Failed to save marker.');
+            });
+        };
+        if (file && file.type.startsWith('image/')) {
+            fileToDataUrl(file).then((dataUrl) => {
+                doSave({ ...baseMarker, imageData: dataUrl });
+            }).catch((err) => {
+                console.error('Failed to read image', err);
+                alert('Failed to read image.');
+            });
+        } else {
+            doSave(baseMarker);
+        }
     }
 
     function populateLegend() {
