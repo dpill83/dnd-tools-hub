@@ -74,7 +74,12 @@
                 </div>
                 <div class="wm-form-group">
                     <label for="wm-marker-image">Location image (optional)</label>
+                    <p class="wm-image-hint">Choose a file or paste (Ctrl+V / Cmd+V)</p>
                     <input type="file" id="wm-marker-image" class="wm-marker-image-input" accept="image/png,image/jpeg,image/jpg,image/webp" aria-label="Add optional location image">
+                    <div id="wm-marker-image-preview" class="wm-marker-image-preview hidden">
+                        <img id="wm-marker-image-preview-img" class="wm-marker-image-preview-img" alt="Preview">
+                        <button type="button" id="wm-marker-image-clear" class="wm-marker-image-clear" aria-label="Remove image">×</button>
+                    </div>
                 </div>
                 <div class="wm-modal-actions">
                     <button type="button" id="wm-modal-cancel" class="wm-btn wm-btn-secondary">Cancel</button>

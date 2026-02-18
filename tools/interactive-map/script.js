@@ -57,7 +57,11 @@
     const markerComment = $('wm-marker-comment');
     const markerType = $('wm-marker-type');
     const markerImage = $('wm-marker-image');
+    const markerImagePreview = $('wm-marker-image-preview');
+    const markerImagePreviewImg = $('wm-marker-image-preview-img');
+    const markerImageClear = $('wm-marker-image-clear');
     const modalCancel = $('wm-modal-cancel');
+    let pendingMarkerImageDataUrl = null;
 
     function apiUrl(path) {
         return (API_BASE + path).replace(/\/+/g, '/');
@@ -402,8 +406,23 @@
         markerComment.value = '';
         markerType.value = 'miscellaneous';
         if (markerImage) markerImage.value = '';
+        pendingMarkerImageDataUrl = null;
+        updateMarkerImagePreview(null);
         modal.setAttribute('aria-hidden', 'false');
         markerName.focus();
+    }
+
+    function updateMarkerImagePreview(dataUrl) {
+        if (!markerImagePreview || !markerImagePreviewImg) return;
+        if (!dataUrl) {
+            pendingMarkerImageDataUrl = null;
+            markerImagePreview.classList.add('hidden');
+            markerImagePreviewImg.removeAttribute('src');
+            return;
+        }
+        pendingMarkerImageDataUrl = dataUrl;
+        markerImagePreviewImg.src = dataUrl;
+        markerImagePreview.classList.remove('hidden');
     }
 
     function closeAddMarkerModal() {
@@ -416,7 +435,6 @@
         const name = markerName.value.trim() || 'Unnamed';
         const comment = markerComment.value.trim();
         const type = markerType.value || 'miscellaneous';
-        const file = markerImage && markerImage.files && markerImage.files[0];
         const baseMarker = {
             lat: pendingAddLatLng.lat,
             lng: pendingAddLatLng.lng,
@@ -434,15 +452,20 @@
                 alert(err.message || 'Failed to save marker.');
             });
         };
-        if (file && file.type.startsWith('image/')) {
-            fileToDataUrl(file).then((dataUrl) => {
-                doSave({ ...baseMarker, imageData: dataUrl });
-            }).catch((err) => {
-                console.error('Failed to read image', err);
-                alert('Failed to read image.');
-            });
+        if (pendingMarkerImageDataUrl) {
+            doSave({ ...baseMarker, imageData: pendingMarkerImageDataUrl });
         } else {
-            doSave(baseMarker);
+            const file = markerImage && markerImage.files && markerImage.files[0];
+            if (file && file.type.startsWith('image/')) {
+                fileToDataUrl(file).then((dataUrl) => {
+                    doSave({ ...baseMarker, imageData: dataUrl });
+                }).catch((err) => {
+                    console.error('Failed to read image', err);
+                    alert('Failed to read image.');
+                });
+            } else {
+                doSave(baseMarker);
+            }
         }
     }
 
@@ -501,6 +524,34 @@
         saveNewMarker();
     });
     modalCancel.addEventListener('click', closeAddMarkerModal);
+    if (markerImage) {
+        markerImage.addEventListener('change', () => {
+            const file = markerImage.files && markerImage.files[0];
+            if (file && file.type.startsWith('image/')) {
+                fileToDataUrl(file).then(updateMarkerImagePreview).catch((err) => console.error('Failed to read image', err));
+            } else {
+                updateMarkerImagePreview(null);
+            }
+        });
+    }
+    if (markerImageClear) {
+        markerImageClear.addEventListener('click', () => {
+            updateMarkerImagePreview(null);
+            if (markerImage) markerImage.value = '';
+        });
+    }
+    modal.addEventListener('paste', (e) => {
+        const item = Array.from(e.clipboardData.items || []).find((i) => i.type.startsWith('image/'));
+        if (item) {
+            e.preventDefault();
+            const blob = item.getAsFile();
+            if (blob) {
+                const r = new FileReader();
+                r.onload = () => updateMarkerImagePreview(r.result);
+                r.readAsDataURL(blob);
+            }
+        }
+    });
     modal.querySelector('.wm-modal-backdrop').addEventListener('click', closeAddMarkerModal);
 
     fab.addEventListener('click', () => {

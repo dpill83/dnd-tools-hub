@@ -209,9 +209,55 @@ body.interactive-map-app {
     object-fit: cover;
 }
 
+.wm-image-hint {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-bottom: 0.35rem;
+}
+
 .wm-marker-image-input {
     width: 100%;
     font-size: 0.875rem;
+}
+
+.wm-marker-image-preview {
+    position: relative;
+    margin-top: 0.5rem;
+    display: inline-block;
+}
+
+.wm-marker-image-preview.hidden {
+    display: none;
+}
+
+.wm-marker-image-preview-img {
+    display: block;
+    max-width: 160px;
+    max-height: 120px;
+    object-fit: contain;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+.wm-marker-image-clear {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    font-size: 1.25rem;
+    line-height: 1;
+    border: none;
+    border-radius: 4px;
+    background: var(--error);
+    color: white;
+    cursor: pointer;
+    opacity: 0.9;
+}
+
+.wm-marker-image-clear:hover {
+    opacity: 1;
 }
 
 .wm-map-wrap {
