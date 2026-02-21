@@ -4,9 +4,7 @@
     'use strict';
 
     const LAST_MAP_KEY = 'interactive-map-last-map';
-    const SCALE_STORAGE_PREFIX = 'interactive-map-scale-';
     const API_BASE = '';
-    const METERS_TO_FEET = 3.28084;
 
     const TYPE_COLORS = {
         'city': '#2563eb',
@@ -71,10 +69,6 @@
     const imageLightboxImg = $('wm-image-lightbox-img');
     const imageLightboxClose = $('wm-image-lightbox-close');
     const imageLightboxBackdrop = $('wm-image-lightbox-backdrop');
-    const scaleWrap = $('wm-scale-wrap');
-    const scalePixels = $('wm-scale-pixels');
-    const scaleMeters = $('wm-scale-meters');
-    const scaleSave = $('wm-scale-save');
     let pendingMarkerImageDataUrl = null;
 
     function apiUrl(path) {
@@ -226,10 +220,6 @@
         localStorage.setItem(LAST_MAP_KEY, record.id);
         loadAndRenderMarkers();
         updateDetailPlaceholder('Click a marker.');
-        if (scaleWrap) {
-            scaleWrap.classList.remove('hidden');
-            loadScaleInputs();
-        }
     }
 
     function showUploadView() {
@@ -242,7 +232,6 @@
         mapContainer.setAttribute('aria-hidden', 'true');
         fab.classList.add('wm-fab-hidden');
         if (rulerBtn) rulerBtn.classList.add('wm-fab-hidden');
-        if (scaleWrap) scaleWrap.classList.add('hidden');
         clearRuler();
         currentMapId = null;
         updateDetailPlaceholder('Upload a map to get started.');
@@ -303,47 +292,6 @@
         return Math.hypot(latLng2.lat - latLng1.lat, latLng2.lng - latLng1.lng);
     }
 
-    function getMapScale(mapId) {
-        if (!mapId) return null;
-        try {
-            const raw = localStorage.getItem(SCALE_STORAGE_PREFIX + mapId);
-            if (!raw) return null;
-            const data = JSON.parse(raw);
-            if (typeof data.pixels !== 'number' || typeof data.meters !== 'number' || data.pixels <= 0 || data.meters <= 0) return null;
-            return { metersPerPixel: data.meters / data.pixels };
-        } catch (_) {
-            return null;
-        }
-    }
-
-    function setMapScale(mapId, pixels, meters) {
-        if (!mapId || pixels <= 0 || meters <= 0) return;
-        try {
-            localStorage.setItem(SCALE_STORAGE_PREFIX + mapId, JSON.stringify({ pixels, meters }));
-        } catch (_) {}
-    }
-
-    function loadScaleInputs() {
-        if (!scalePixels || !scaleMeters || !currentMapId) return;
-        try {
-            const raw = localStorage.getItem(SCALE_STORAGE_PREFIX + currentMapId);
-            const data = raw ? JSON.parse(raw) : {};
-            scalePixels.value = typeof data.pixels === 'number' ? String(data.pixels) : '';
-            scaleMeters.value = typeof data.meters === 'number' ? String(data.meters) : '';
-        } catch (_) {
-            scalePixels.value = '';
-            scaleMeters.value = '';
-        }
-    }
-
-    function formatRulerDistance(distancePx) {
-        const scale = getMapScale(currentMapId);
-        if (!scale) return 'Set scale for m/ft';
-        const meters = distancePx * scale.metersPerPixel;
-        const feet = meters * METERS_TO_FEET;
-        return Math.round(meters) + ' m / ' + Math.round(feet) + ' ft';
-    }
-
     function clearRuler() {
         rulerActive = false;
         rulerPoints = [];
@@ -386,7 +334,7 @@
                 const label = L.marker(L.latLng(midLat, midLng), {
                     icon: L.divIcon({
                         className: 'wm-ruler-label',
-                        html: '<span class="wm-ruler-label-text">' + escapeHtml(formatRulerDistance(seg)) + '</span>',
+                        html: '<span class="wm-ruler-label-text">' + Math.round(seg) + ' px</span>',
                         iconSize: null,
                         iconAnchor: [0, 0]
                     })
@@ -398,7 +346,7 @@
                 const label = L.marker(last, {
                     icon: L.divIcon({
                         className: 'wm-ruler-label',
-                        html: '<span class="wm-ruler-label-text">Total: ' + escapeHtml(formatRulerDistance(total)) + '</span>',
+                        html: '<span class="wm-ruler-label-text">Total: ' + Math.round(total) + ' px</span>',
                         iconSize: null,
                         iconAnchor: [0, 0]
                     })
@@ -740,20 +688,6 @@
 
     if (rulerBtn) {
         rulerBtn.addEventListener('click', () => toggleRuler());
-    }
-
-    if (scaleSave && scalePixels && scaleMeters) {
-        scaleSave.addEventListener('click', () => {
-            if (!currentMapId) return;
-            const pixels = Number(scalePixels.value);
-            const meters = Number(scaleMeters.value);
-            if (!Number.isFinite(pixels) || !Number.isFinite(meters) || pixels <= 0 || meters <= 0) {
-                alert('Enter a positive number of pixels and meters.');
-                return;
-            }
-            setMapScale(currentMapId, pixels, meters);
-            if (rulerActive && rulerLayer) updateRulerLayer();
-        });
     }
 
     fab.addEventListener('click', () => {
