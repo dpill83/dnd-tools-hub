@@ -424,6 +424,62 @@ body.interactive-map-app {
     flex-shrink: 0;
 }
 
+.wm-ruler-btn {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: none;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 2px 8px var(--shadow);
+    border: 1px solid var(--border);
+    transition: background 0.2s ease, transform 0.2s ease;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wm-ruler-btn:hover {
+    background: var(--input-bg);
+    transform: scale(1.05);
+}
+
+.wm-ruler-btn[aria-pressed="true"] {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.wm-ruler-btn[aria-pressed="true"]:hover {
+    background: var(--primary-light);
+    border-color: var(--primary-light);
+}
+
+.wm-ruler-btn.wm-fab-hidden {
+    display: none;
+}
+
+.wm-ruler-label {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    box-shadow: 0 1px 4px var(--shadow);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.wm-ruler-label-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
 .wm-legend-summary {
     font-size: 0.9rem;
     font-weight: 600;

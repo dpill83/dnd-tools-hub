@@ -40,6 +40,9 @@
     let pendingAddLatLng = null;
     let allMarkerLayers = [];
     let longPressTimer = null;
+    let rulerActive = false;
+    let rulerPoints = [];
+    let rulerLayer = null;
 
     const $ = (id) => document.getElementById(id);
     const mapSelect = $('wm-map-select');
@@ -50,6 +53,7 @@
     const mapContainer = $('wm-map-container');
     const detailContent = $('wm-detail-content');
     const legendList = $('wm-legend-list');
+    const rulerBtn = $('wm-ruler-btn');
     const fab = $('wm-add-marker');
     const modal = $('wm-add-marker-modal');
     const addForm = $('wm-add-marker-form');
@@ -185,6 +189,7 @@
         uploadZone.classList.add('hidden');
         mapContainer.setAttribute('aria-hidden', 'false');
         fab.classList.remove('wm-fab-hidden');
+        if (rulerBtn) rulerBtn.classList.remove('wm-fab-hidden');
 
         const bounds = record.bounds;
         const southWest = L.latLng(0, 0);
@@ -200,6 +205,7 @@
             map.fitBounds(mapBounds);
             map.setZoom(map.getZoom() + 1);
             map.on('contextmenu', onMapRightClick);
+            map.on('click', onMapRulerClick);
             map.getContainer().addEventListener('touchstart', onTouchStart, { passive: true });
             map.getContainer().addEventListener('touchend', onTouchEnd, { passive: true });
             map.getContainer().addEventListener('touchmove', onTouchMove, { passive: true });
@@ -225,6 +231,8 @@
         uploadZone.classList.remove('hidden');
         mapContainer.setAttribute('aria-hidden', 'true');
         fab.classList.add('wm-fab-hidden');
+        if (rulerBtn) rulerBtn.classList.add('wm-fab-hidden');
+        clearRuler();
         currentMapId = null;
         updateDetailPlaceholder('Upload a map to get started.');
     }
@@ -278,6 +286,94 @@
         const div = document.createElement('div');
         div.textContent = s;
         return div.innerHTML;
+    }
+
+    function distanceInPixels(latLng1, latLng2) {
+        return Math.hypot(latLng2.lat - latLng1.lat, latLng2.lng - latLng1.lng);
+    }
+
+    function clearRuler() {
+        rulerActive = false;
+        rulerPoints = [];
+        if (rulerLayer && map) {
+            map.removeLayer(rulerLayer);
+            rulerLayer = null;
+        }
+        if (rulerBtn) {
+            rulerBtn.setAttribute('aria-pressed', 'false');
+        }
+    }
+
+    function updateRulerLayer() {
+        if (!map || !rulerLayer) return;
+        rulerLayer.clearLayers();
+        if (rulerPoints.length === 0) return;
+        rulerPoints.forEach((pt) => {
+            rulerLayer.addLayer(L.circleMarker(pt, {
+                radius: 5,
+                fillColor: '#0ea5e9',
+                color: '#0369a1',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.9
+            }));
+        });
+        if (rulerPoints.length >= 2) {
+            rulerLayer.addLayer(L.polyline(rulerPoints, {
+                color: '#0ea5e9',
+                weight: 2,
+                opacity: 0.9
+            }));
+            let total = 0;
+            rulerPoints.forEach((pt, i) => {
+                if (i === 0) return;
+                const seg = distanceInPixels(rulerPoints[i - 1], pt);
+                total += seg;
+                const midLat = (rulerPoints[i - 1].lat + pt.lat) / 2;
+                const midLng = (rulerPoints[i - 1].lng + pt.lng) / 2;
+                const label = L.marker(L.latLng(midLat, midLng), {
+                    icon: L.divIcon({
+                        className: 'wm-ruler-label',
+                        html: '<span class="wm-ruler-label-text">' + Math.round(seg) + ' px</span>',
+                        iconSize: null,
+                        iconAnchor: [0, 0]
+                    })
+                });
+                rulerLayer.addLayer(label);
+            });
+            if (rulerPoints.length > 2) {
+                const last = rulerPoints[rulerPoints.length - 1];
+                const label = L.marker(last, {
+                    icon: L.divIcon({
+                        className: 'wm-ruler-label',
+                        html: '<span class="wm-ruler-label-text">Total: ' + Math.round(total) + ' px</span>',
+                        iconSize: null,
+                        iconAnchor: [0, 0]
+                    })
+                });
+                rulerLayer.addLayer(label);
+            }
+        }
+    }
+
+    function onMapRulerClick(e) {
+        if (!rulerActive || !map || !rulerLayer) return;
+        if (e.originalEvent && e.originalEvent.button !== 0) return;
+        rulerPoints.push(e.latlng);
+        updateRulerLayer();
+    }
+
+    function toggleRuler() {
+        if (!map || !currentMapId) return;
+        rulerActive = !rulerActive;
+        if (!rulerActive) {
+            clearRuler();
+            return;
+        }
+        rulerPoints = [];
+        if (rulerLayer && map.hasLayer(rulerLayer)) map.removeLayer(rulerLayer);
+        rulerLayer = L.layerGroup().addTo(map);
+        if (rulerBtn) rulerBtn.setAttribute('aria-pressed', 'true');
     }
 
     function loadAndRenderMarkers() {
@@ -581,10 +677,18 @@
     if (imageLightboxBackdrop) imageLightboxBackdrop.addEventListener('click', closeImageLightbox);
     if (imageLightboxClose) imageLightboxClose.addEventListener('click', closeImageLightbox);
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && imageLightbox && !imageLightbox.classList.contains('hidden')) {
-            closeImageLightbox();
+        if (e.key === 'Escape') {
+            if (imageLightbox && !imageLightbox.classList.contains('hidden')) {
+                closeImageLightbox();
+            } else if (rulerActive) {
+                clearRuler();
+            }
         }
     });
+
+    if (rulerBtn) {
+        rulerBtn.addEventListener('click', () => toggleRuler());
+    }
 
     fab.addEventListener('click', () => {
         if (!currentMapId) return;
