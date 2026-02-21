@@ -198,6 +198,7 @@
                 maxZoom: 4
             });
             map.fitBounds(mapBounds);
+            map.setZoom(map.getZoom() + 1);
             map.on('contextmenu', onMapRightClick);
             map.getContainer().addEventListener('touchstart', onTouchStart, { passive: true });
             map.getContainer().addEventListener('touchend', onTouchEnd, { passive: true });
@@ -207,6 +208,7 @@
         if (imageOverlay) map.removeLayer(imageOverlay);
         imageOverlay = L.imageOverlay(record.imageUrl, mapBounds).addTo(map);
         map.fitBounds(mapBounds);
+        map.setZoom(map.getZoom() + 1);
 
         currentMapId = record.id;
         localStorage.setItem(LAST_MAP_KEY, record.id);

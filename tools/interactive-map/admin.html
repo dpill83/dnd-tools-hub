@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Map Admin – D&D Tools Hub</title>
+    <link rel="stylesheet" href="../../global.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>Map Admin</h1>
+            <div class="admin-header-actions">
+                <a href="../../index.html" class="admin-link">← Hub</a>
+                <a href="index.html" class="admin-link">Interactive Map</a>
+                <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="admin-main">
+            <section class="admin-section">
+                <h2>Maps</h2>
+                <p class="admin-hint">Delete maps or manage markers. Changes affect all visitors.</p>
+                <div id="maps-list" class="maps-list">
+                    <p class="admin-loading">Loading maps…</p>
+                </div>
+            </section>
+
+            <section class="admin-section" id="markers-section">
+                <h2>Markers</h2>
+                <p id="markers-prompt" class="admin-hint">Select a map above to view and manage its markers.</p>
+                <div id="markers-list" class="markers-list hidden">
+                    <div class="markers-header">
+                        <span>Map: <strong id="selected-map-name"></strong></span>
+                        <button type="button" id="clear-all-markers" class="admin-btn admin-btn-danger">Clear all markers</button>
+                    </div>
+                    <ul id="markers-ul"></ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="admin-edit-marker-modal" class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-edit-marker-title" aria-hidden="true">
+        <div class="admin-modal-backdrop"></div>
+        <div class="admin-modal-content">
+            <h2 id="admin-edit-marker-title" class="admin-modal-title">Edit marker</h2>
+            <form id="admin-edit-marker-form" class="admin-modal-form">
+                <div class="admin-form-group">
+                    <label for="admin-edit-name">Name</label>
+                    <input type="text" id="admin-edit-name" required placeholder="Location name">
+                </div>
+                <div class="admin-form-group">
+                    <label for="admin-edit-description">Description</label>
+                    <textarea id="admin-edit-description" rows="3" placeholder="Optional notes"></textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label for="admin-edit-type">Type</label>
+                    <select id="admin-edit-type" aria-label="Marker type"></select>
+                </div>
+                <div class="admin-form-group">
+                    <label>Location image (optional)</label>
+                    <p class="admin-image-hint">Choose a file to add or replace. Existing image is shown below.</p>
+                    <div id="admin-edit-image-current" class="admin-edit-image-current hidden">
+                        <span class="admin-edit-image-label">Current image:</span>
+                        <img id="admin-edit-image-current-img" class="admin-edit-image-preview-img" alt="Current">
+                        <button type="button" id="admin-edit-image-remove" class="admin-btn admin-btn-danger admin-edit-image-remove">Remove image</button>
+                    </div>
+                    <input type="file" id="admin-edit-image" class="admin-edit-image-input" accept="image/png,image/jpeg,image/jpg,image/webp" aria-label="Add or replace image">
+                    <div id="admin-edit-image-preview" class="admin-edit-image-preview hidden">
+                        <span class="admin-edit-image-label">New image:</span>
+                        <img id="admin-edit-image-preview-img" class="admin-edit-image-preview-img" alt="Preview">
+                        <button type="button" id="admin-edit-image-preview-clear" class="admin-btn admin-btn-secondary">Use current / clear</button>
+                    </div>
+                </div>
+                <div class="admin-modal-actions">
+                    <button type="button" id="admin-edit-cancel" class="admin-btn">Cancel</button>
+                    <button type="submit" class="admin-btn admin-btn-select">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../../theme.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
