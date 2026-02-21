@@ -284,6 +284,22 @@
                 editImageInput.value = '';
             });
         }
+
+        editModal.addEventListener('paste', (e) => {
+            const item = Array.from(e.clipboardData.items || []).find((i) => i.type.startsWith('image/'));
+            if (item) {
+                e.preventDefault();
+                const blob = item.getAsFile();
+                if (blob) {
+                    fileToDataUrl(blob).then((dataUrl) => {
+                        pendingEditImageDataUrl = dataUrl;
+                        editRemoveImage = false;
+                        editImagePreviewImg.src = dataUrl;
+                        editImagePreview.classList.remove('hidden');
+                    }).catch(() => alert('Failed to read pasted image.'));
+                }
+            }
+        });
     }
 
     async function deleteMarker(index) {
