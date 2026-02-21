@@ -338,10 +338,10 @@
 
     function formatRulerDistance(distancePx) {
         const scale = getMapScale(currentMapId);
-        if (!scale) return Math.round(distancePx) + ' px';
+        if (!scale) return 'Set scale for m/ft';
         const meters = distancePx * scale.metersPerPixel;
         const feet = meters * METERS_TO_FEET;
-        return Math.round(meters) + ' m / ' + Math.round(feet) + ' feet';
+        return Math.round(meters) + ' m / ' + Math.round(feet) + ' ft';
     }
 
     function clearRuler() {
