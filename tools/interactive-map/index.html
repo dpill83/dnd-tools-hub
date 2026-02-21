@@ -36,6 +36,20 @@
             <div id="wm-detail-content" class="wm-detail-content">
                 <p class="wm-detail-placeholder">Upload a map to get started.</p>
             </div>
+            <div id="wm-scale-wrap" class="wm-scale-wrap hidden" aria-label="Map scale for ruler">
+                <h3 class="wm-scale-title">Map scale (ruler)</h3>
+                <p class="wm-scale-hint">Reference length on the map so distances show in m / ft.</p>
+                <div class="wm-scale-form">
+                    <label for="wm-scale-pixels" class="wm-scale-label">Length on map</label>
+                    <div class="wm-scale-inputs">
+                        <input type="number" id="wm-scale-pixels" class="wm-scale-input" min="1" step="1" placeholder="px" aria-label="Pixels">
+                        <span class="wm-scale-eq">=</span>
+                        <input type="number" id="wm-scale-meters" class="wm-scale-input" min="0.1" step="0.1" placeholder="m" aria-label="Meters">
+                        <span class="wm-scale-unit">m</span>
+                    </div>
+                    <button type="button" id="wm-scale-save" class="wm-btn wm-btn-primary wm-scale-save">Save</button>
+                </div>
+            </div>
         </aside>
 
         <div class="wm-map-wrap">
