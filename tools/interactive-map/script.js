@@ -33,6 +33,25 @@
         { key: 'miscellaneous', label: 'Miscellaneous' }
     ];
 
+    /** Maps raw marker type to legend key (for filtering). */
+    const TYPE_TO_LEGEND_KEY = {
+        city: 'city',
+        inn: 'inn',
+        tavern: 'inn',
+        festhall: 'inn',
+        temple: 'temple',
+        guildhall: 'guildhall',
+        business: 'business',
+        warehouse: 'warehouse',
+        noble: 'noble',
+        place: 'place',
+        street: 'place',
+        miscellaneous: 'miscellaneous'
+    };
+
+    const legendKeysEnabled = {};
+    LEGEND_ENTRIES.forEach(({ key }) => { legendKeysEnabled[key] = true; });
+
     let map = null;
     let imageOverlay = null;
     let markerLayer = null;
@@ -262,6 +281,11 @@
         return TYPE_COLORS[t] || TYPE_COLORS.miscellaneous;
     }
 
+    function getLegendKeyForType(type) {
+        const t = (type || 'miscellaneous').toLowerCase();
+        return TYPE_TO_LEGEND_KEY[t] || 'miscellaneous';
+    }
+
     function createMarkerLayer(markerData) {
         const color = getColorForType(markerData.type);
         const layer = L.circleMarker(L.latLng(markerData.lat, markerData.lng), {
@@ -388,7 +412,7 @@
                 allMarkerLayers.push({ layer, data: m });
             });
             markerLayer.addTo(map);
-            applySearchFilter();
+            applyFilters();
         }).catch((err) => {
             console.error('Failed to load markers', err);
         });
@@ -408,11 +432,13 @@
             .map(({ data }) => data);
     }
 
-    function applySearchFilter() {
+    function applyFilters() {
         const q = (searchInput.value || '').trim().toLowerCase();
         allMarkerLayers.forEach(({ layer, data }) => {
-            const match = matchesQuery(data, q);
-            layer.setStyle({ opacity: match ? 1 : 0.25, fillOpacity: match ? 0.9 : 0.2 });
+            const searchMatch = matchesQuery(data, q);
+            const typeVisible = legendKeysEnabled[getLegendKeyForType(data.type)] !== false;
+            const show = searchMatch && typeVisible;
+            layer.setStyle({ opacity: show ? 1 : 0.25, fillOpacity: show ? 0.9 : 0.2 });
         });
     }
 
@@ -590,8 +616,20 @@
         legendList.innerHTML = '';
         LEGEND_ENTRIES.forEach(({ key, label }) => {
             const li = document.createElement('li');
+            li.className = 'wm-legend-item';
+            if (legendKeysEnabled[key] === false) li.classList.add('wm-legend-item--off');
             const color = TYPE_COLORS[key] || TYPE_COLORS.miscellaneous;
-            li.innerHTML = '<span class="wm-legend-swatch" style="background:' + color + '"></span><span>' + escapeHtml(label) + '</span>';
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'wm-legend-btn';
+            btn.setAttribute('data-legend-key', key);
+            btn.innerHTML = '<span class="wm-legend-swatch" style="background:' + color + '"></span><span>' + escapeHtml(label) + '</span>';
+            btn.addEventListener('click', () => {
+                legendKeysEnabled[key] = !legendKeysEnabled[key];
+                li.classList.toggle('wm-legend-item--off', legendKeysEnabled[key] === false);
+                applyFilters();
+            });
+            li.appendChild(btn);
             legendList.appendChild(li);
         });
     }
@@ -630,7 +668,7 @@
     mapSelect.addEventListener('change', () => selectMapById(mapSelect.value || null));
 
     searchInput.addEventListener('input', () => {
-        applySearchFilter();
+        applyFilters();
         showSearchDropdown();
     });
     searchInput.addEventListener('focus', () => showSearchDropdown());
