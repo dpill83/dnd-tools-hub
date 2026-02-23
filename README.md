@@ -187,11 +187,6 @@ The **Generate with OpenAI** feature in [tools/cosmetic-battle-pass/](tools/cosm
 
 The **Interactive Map** ([tools/interactive-map/](tools/interactive-map/)) uses the same R2 bucket (prefix `maps/`) for map images and marker data so all visitors see the same maps; no extra bindings are required.
 
-**Local testing:**
-
-- **With remote R2:** Set `BATTLE_PASS_IMAGES` to your R2 bucket name, then run [dev-interactive-map.bat](dev-interactive-map.bat). Opens Wrangler Pages dev; open the printed URL and go to `tools/interactive-map/`.
-- **Offline (mock API):** Run [serve-hub.bat](serve-hub.bat). It serves the full hub and a local mock of the maps API so Interactive Map works; data is stored under `tools/interactive-map/.local-dev-data` (gitignored). [serve-interactive-map-local.bat](serve-interactive-map-local.bat) does the same (calls serve-hub.bat).
-
 ---
 
 ## Summary table
