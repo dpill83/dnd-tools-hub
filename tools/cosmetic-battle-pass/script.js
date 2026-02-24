@@ -146,6 +146,19 @@
         return '';
     }
 
+    function getPortraitDescription() {
+        if (getPortraitSrc()) return 'Reference: the provided portrait image.';
+        const cls = (state.character && state.character.class) ? state.character.class : 'adventurer';
+        const artStyle = (state.character && state.character.artStyle) ? state.character.artStyle : 'epic high-fantasy';
+        return `Fantasy ${cls} adventurer in starting gear, ${artStyle} D&D art style.`;
+    }
+
+    function getFinalPrompt() {
+        const base = buildLookPrompt();
+        if (!base) return null;
+        return getPortraitDescription() + ' Exact same face, pose, lighting, art style. ' + base;
+    }
+
     function getPortraitAsBase64() {
         const src = getPortraitSrc();
         if (!src) return Promise.resolve(null);
@@ -584,10 +597,10 @@
         const loadoutMaterials = getLoadoutMaterials();
         const rawMat = (slot.material || 'Leather').trim() || 'Leather';
         const mat = loadoutMaterials.includes(rawMat) ? rawMat : loadoutMaterials[loadoutMaterials.length - 1] || 'Leather';
-        const tier = slot.tier || 'T0';
+        const isOverridden = !!state.look?.slotTierOverride?.[index];
+        const displayTier = isOverridden ? (slot.tier || 'T0') : (state.look?.globalTier ?? 'T0');
         const effectiveTier = getEffectiveTier(slot, index);
         const tierName = getTierName(effectiveTier);
-        const isOverridden = !!state.look?.slotTierOverride?.[index];
         const gearTypes = getGearTypesForLoadout();
         const gearOptions = gearTypes.map(g => {
             const disabled = used.has(g) && g !== 'Accent' && g !== 'None' ? ' disabled' : '';
@@ -602,18 +615,16 @@
         const tierSegmented = LOADOUT_TIERS.map(t => {
             const tierIdx = tierToIndex(t);
             const locked = tierIdx > maxUnlockedTier;
-            const active = tier === t ? ' bp-segmented-option-active' : '';
+            const active = displayTier === t ? ' bp-segmented-option-active' : '';
             const disabled = locked ? ' disabled' : '';
             const titleAttr = locked ? 'Unlock with more XP' : getTierName(t);
-            return `<button type="button" class="bp-segmented-option bp-tier-${t.toLowerCase()}${active}${locked ? ' bp-tier-step-locked' : ''}" data-action="set-tier" data-slot="${index}" data-value="${t}" aria-pressed="${tier === t}"${disabled} title="${titleAttr}">${getTierIconSvg(tierIdx)}</button>`;
+            return `<button type="button" class="bp-segmented-option bp-tier-${t.toLowerCase()}${active}${locked ? ' bp-tier-step-locked' : ''}" data-action="set-tier" data-slot="${index}" data-value="${t}" aria-pressed="${displayTier === t}"${disabled} title="${titleAttr}">${getTierIconSvg(tierIdx)}</button>`;
         }).join('');
         const slotOverrideClass = isOverridden ? ' bp-loadout-slot-overridden' : '';
-        const tierControlHtml = isOverridden
-            ? `<div class="bp-tier-control-wrap" role="group" aria-label="Tier" id="bp-tier-control-${index}">
+        const tierControlHtml = `<div class="bp-tier-control-wrap" role="group" aria-label="Tier" id="bp-tier-control-${index}">
                 <div class="bp-segmented bp-tier-segmented">${tierSegmented}</div>
-                <button type="button" class="bp-reset-to-global" data-action="reset-tier-to-global" data-slot="${index}" title="Reset to global tier" aria-label="Reset to global tier">&#8635;</button>
-              </div>`
-            : '';
+                ${isOverridden ? `<button type="button" class="bp-reset-to-global" data-action="reset-tier-to-global" data-slot="${index}" title="Reset to global tier" aria-label="Reset to global tier">&#8635;</button>` : ''}
+              </div>`;
         return `
             <div class="bp-loadout-slot bp-gear-card card${slotOverrideClass}" data-slot-index="${index}">
                 <div class="bp-gear-card-header">
@@ -639,11 +650,19 @@
         `;
     }
 
+    function allSlotsFollowGlobal() {
+        const overrides = state.look?.slotTierOverride;
+        if (!overrides || overrides.length !== 4) return true;
+        return overrides.every(function (x) { return !x; });
+    }
+
     function renderLoadout() {
         const globalWrap = document.getElementById('bp-global-tier-wrap');
         const grid = document.getElementById('bp-loadout-grid');
         if (globalWrap) {
-            globalWrap.innerHTML = '<label class="bp-global-tier-label">Intensity tier</label><div class="bp-segmented bp-global-tier-segmented" role="group" aria-label="Intensity tier">' + renderGlobalTierBlock() + '</div>';
+            const applyAllActive = allSlotsFollowGlobal();
+            const applyAllBtn = '<button type="button" class="bp-apply-tier-to-all' + (applyAllActive ? ' bp-apply-tier-to-all-active' : '') + '" data-action="apply-tier-to-all" aria-pressed="' + applyAllActive + '" title="Apply current intensity tier to all 4 slots">Apply to all</button>';
+            globalWrap.innerHTML = '<label class="bp-global-tier-label">Intensity tier</label><div class="bp-segmented bp-global-tier-segmented" role="group" aria-label="Intensity tier">' + renderGlobalTierBlock() + '</div>' + applyAllBtn;
         }
         if (!grid) return;
         const slots = state.look?.slots || [];
@@ -1004,31 +1023,56 @@
 
     let lastGenResult = null;
 
+    /** Build the same cumulative prompt as buildCumulativePrompts but scoped to the 4 loadout slots + their active tiers. */
     function buildLookPrompt() {
-        const slots = state.look?.slots || [];
-        const items = slots.map((s, i) => {
+        const slots = (state.look?.slots || []).slice(0, 4);
+        const activeFromLoadout = [];
+        for (let i = 0; i < slots.length; i++) {
+            const s = slots[i];
             const gt = (s.gearType || 'Accent').trim() || 'Accent';
-            if (gt === 'None') return null;
-            const mat = (s.material || 'Leather').trim().toLowerCase() || 'leather';
-            const tierName = getTierName(getEffectiveTier(s, i));
-            const desc = GEAR_DESCRIPTORS[gt] || 'practical, fits the current pose';
-            return { gearType: gt, material: mat, tierName, desc };
-        }).filter(Boolean);
-        if (items.length === 0) return null;
-        const cls = state.character.class || 'adventurer';
-        const artStyle = state.character.artStyle || 'epic high-fantasy';
-        const motif = state.character.motif || 'personal motif';
-        const hasPortrait = !!getPortraitSrc();
-        const intro = 'Using the provided portrait as the only reference, modify the character by updating ONLY these gear pieces and nothing else. Keep the same person, face, pose, camera angle, lighting, and overall art style. Do not change the background. Preserve the existing personal motif/emblem and keep it visible.';
-        const tierLadder = 'Tier meanings: Subtle = minimal trim, Noticeable = clear accents, Ornate = layered embellishment, Signature = full matched set, most detail.';
-        const bulletLines = items.map(it => `* ${it.gearType}: ${it.material}, Tier: ${it.tierName}, ${it.desc}.`).join('\n');
-        const closing = 'Everything else remains exactly the same.';
-        let body = intro + '\n\n' + tierLadder + '\n\nUpdate these items:\n\n' + bulletLines + '\n\n' + closing;
-        if (!hasPortrait) {
-            const placeholderCharacterPrompt = `Fantasy ${cls} adventurer in starting gear, ${artStyle} D&D art style.`;
-            body = `Use this character prompt first to create a base portrait: "${placeholderCharacterPrompt}". Then apply the following.\n\n` + body;
+            if (gt === 'None') continue;
+            const mat = (s.material || 'Leather').trim() || 'Leather';
+            const matCap = mat.charAt(0).toUpperCase() + mat.slice(1).toLowerCase();
+            const theme = THEMES[matCap] || THEMES['Leather'];
+            const app = (theme && theme.application && theme.application[0]) ? theme.application[0] : 'detail';
+            const effect = (theme && theme.effect && theme.effect[0]) ? theme.effect[0] : 'effect';
+            const maxTierForMat = getMaxUnlockedTierIndexForMaterial(mat);
+            const tierIndex = Math.min(tierToIndex(getEffectiveTier(s, i)), maxTierForMat);
+            const gearLabel = matCap + ' ' + gt.toLowerCase();
+            activeFromLoadout.push({
+                level: i,
+                tier: tierIndex,
+                gearLabel,
+                themeName: matCap,
+                application: app,
+                effect
+            });
         }
-        return body;
+        if (activeFromLoadout.length === 0) return null;
+
+        const cls = (state.character && state.character.class) ? state.character.class : 'adventurer';
+        const artStyle = (state.character && state.character.artStyle) ? state.character.artStyle : 'epic high-fantasy';
+        const motif = (state.character && state.character.motif) ? state.character.motif : 'personal motif';
+        const parts = [];
+        for (const s of activeFromLoadout) {
+            const template = PROMPT_TEMPLATES[s.tier] || PROMPT_TEMPLATES[0];
+            const filled = template
+                .replace(/\[class\]/g, cls)
+                .replace(/\[gear\]/g, s.gearLabel)
+                .replace(/\[theme\]/g, s.themeName)
+                .replace(/\[application\]/g, s.application)
+                .replace(/\[motif\]/g, motif)
+                .replace(/\[artStyle\]/g, artStyle)
+                .replace(/\[effect\]/g, s.effect);
+            parts.push(filled);
+        }
+        const standaloneGearPrompt = parts.join(' ');
+        const hasPortrait = !!getPortraitSrc();
+        const placeholderCharacterPrompt = `Fantasy ${cls} adventurer in starting gear, ${artStyle} D&D art style.`;
+        const compositePrompt = hasPortrait
+            ? `Take this exact character portrait and equip the character with this precisely upgraded gear: ${standaloneGearPrompt}. Keep original pose, face, clothing, lighting, and ${artStyle}. Preserve existing ${motif}.`
+            : `Use this character prompt first to create a base portrait: "${placeholderCharacterPrompt}". Then equip that character with: ${standaloneGearPrompt}. Preserve pose, face, and ${artStyle}.`;
+        return compositePrompt;
     }
 
     function renderCurrentBuild() {
@@ -1053,7 +1097,7 @@
         const composedEl = document.getElementById('bp-composed-prompt');
         const qualityEl = document.getElementById('bp-gen-quality');
         const modelSelectEl = document.getElementById('bp-gen-model');
-        const prompt = buildLookPrompt();
+        const prompt = getFinalPrompt();
 
         if (portraitEl) {
             portraitEl.textContent = getPortraitSrc() ? 'Portrait base: Current portrait' : 'Portrait base: No portrait yet, generating from scratch';
@@ -1172,7 +1216,7 @@
 
         if (btn) {
             btn.addEventListener('click', async () => {
-                const prompt = buildLookPrompt();
+                const prompt = getFinalPrompt();
                 if (!prompt) {
                     showError('Set at least one loadout slot to a gear type other than None.');
                     return;
@@ -1181,11 +1225,14 @@
                 try {
                     let image = await getPortraitAsBase64();
                     if (image) image = await compressImageDataUrl(image, 1024);
+                    const xp = state.currentXp + state.passXp;
+                    const seedStr = ((state.character && state.character.name) || 'Character').trim() + String(xp);
                     const body = {
                         prompt,
                         model: modelSelectEl ? modelSelectEl.value : 'gpt-image-1-mini',
                         size: '1024x1536',
-                        quality: qualityEl ? qualityEl.value : 'medium'
+                        quality: qualityEl ? qualityEl.value : 'medium',
+                        seed: hashSeed(seedStr)
                     };
                     if (image) body.image = image;
                     const res = await fetch('/api/generate-image', {
@@ -1414,6 +1461,11 @@
                 while (state.look.slots.length <= idx) {
                     state.look.slots.push({ gearType: 'Accent', material: 'Leather', tier: 'T0' });
                 }
+                if (field === 'tier') {
+                    if (!state.look.slotTierOverride) state.look.slotTierOverride = [false, false, false, false];
+                    state.look.slotTierOverride = state.look.slotTierOverride.slice();
+                    state.look.slotTierOverride[idx] = true;
+                }
                 state.look.slots[idx] = { ...state.look.slots[idx], [field]: value };
                 if (field === 'material') {
                     const maxTier = getMaxUnlockedTierIndexForMaterial(value);
@@ -1476,6 +1528,15 @@
         }
         if (section) {
             section.addEventListener('click', (e) => {
+                const applyBtn = e.target.closest('[data-action="apply-tier-to-all"]');
+                if (applyBtn) {
+                    state.look = state.look || { slots: getLoadoutDefaults().map(s => ({ ...s })), globalTier: 'T0', slotTierOverride: [false, false, false, false] };
+                    state.look.slotTierOverride = [false, false, false, false];
+                    saveState();
+                    renderLoadout();
+                    renderGeneratePreview();
+                    return;
+                }
                 const btn = e.target.closest('[data-action="set-global-tier"]');
                 if (!btn || btn.disabled) return;
                 const value = btn.getAttribute('data-value');
