@@ -159,6 +159,11 @@
     0%, 100% { box-shadow: 0 0 0 1px rgba(0,0,0,0.2), 0 8px 32px rgba(0,0,0,0.3), 0 0 60px var(--hero-glow); }
     50% { box-shadow: 0 0 0 1px rgba(0,0,0,0.2), 0 8px 32px rgba(0,0,0,0.3), 0 0 80px var(--hero-glow); }
 }
+@keyframes bp-sparkle {
+    0%, 100% { box-shadow: 0 0 60px var(--hero-glow); }
+    50% { box-shadow: 0 0 120px #ffd700; }
+}
+.bp-unlock-sparkle { animation: bp-sparkle 1.2s ease-out; }
 /* Epic fantasy background: purple magical energy, depth */
 .bp-hero-bg {
     position: absolute;
@@ -242,11 +247,9 @@
     font-size: 3.5rem;
     font-weight: 800;
     letter-spacing: 0.08em;
-    line-height: 1;
     background: linear-gradient(180deg, #f4e8c1 0%, #d4af37 40%, #b8972e 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-clip: text;
     filter: drop-shadow(0 0 12px #ffd700) drop-shadow(2px 2px 4px #000);
 }
 /* Light-level hero: dark badge for readability */
@@ -489,9 +492,11 @@
 #bp-global-tier-wrap {
     padding: 0.75rem;
     border: 3px solid transparent;
-    background: linear-gradient(#2a2118, #1e170f) padding-box, linear-gradient(90deg, #c9a66b, #ffd700, #c9a66b) border-box;
+    background: linear-gradient(#2a2118, #1e170f) padding-box,
+                linear-gradient(90deg, #c9a66b, #ffd700, #c9a66b) border-box;
     background-clip: padding-box, border-box;
     background-origin: padding-box, border-box;
+    border-radius: 12px;
 }
 .bp-global-tier-label {
     font-weight: 600;
@@ -617,7 +622,7 @@
     padding: 0;
     overflow: hidden;
     background: linear-gradient(145deg, #2a2118 0%, #1e170f 100%);
-    border: 2px solid;
+    border: 3px solid transparent;
     border-image: linear-gradient(#c9a66b, #8b5a2b) 1;
     border-radius: 12px;
     box-shadow: inset 0 0 20px rgba(139,90,43,0.3), 0 8px 20px rgba(0,0,0,0.6);

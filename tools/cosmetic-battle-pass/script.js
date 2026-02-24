@@ -156,7 +156,10 @@
     function getFinalPrompt() {
         const base = buildLookPrompt();
         if (!base) return null;
-        return getPortraitDescription() + ' Exact same face, pose, lighting, art style. ' + base;
+        const consistency = (state.character && state.character.consistencyPrompt && state.character.consistencyPrompt.trim())
+            ? ' ' + state.character.consistencyPrompt.trim() + '.'
+            : '';
+        return getPortraitDescription() + ' Exact same face, pose, lighting, art style.' + consistency + ' ' + base;
     }
 
     function getPortraitAsBase64() {
@@ -184,6 +187,7 @@
             class: '',
             artStyle: 'epic high-fantasy',
             motif: '',
+            consistencyPrompt: '',
             portraitDataUrl: '',
             portraitUrl: '',
             gearPool: []
@@ -334,7 +338,16 @@
             });
         }
         saveState();
-        return { nextMeta, list, newlyAdded: state.subTiers.length - (list.length - (unlocked._nextUnlock ? 0 : 1)) };
+        const newlyAdded = state.subTiers.length - (list.length - (unlocked._nextUnlock ? 0 : 1));
+        if (newlyAdded > 0) {
+            playUnlockSound();
+            const hero = document.getElementById('bp-dashboard-hero');
+            if (hero) {
+                hero.classList.add('bp-unlock-sparkle');
+                setTimeout(() => hero.classList.remove('bp-unlock-sparkle'), 1200);
+            }
+        }
+        return { nextMeta, list, newlyAdded };
     }
 
     function buildCumulativePrompts(character, activeSubTiers, themesData) {
@@ -900,6 +913,15 @@
                 updateTabsForXp();
             });
         });
+        const consistencyEl = document.getElementById('bp-consistency-prompt');
+        if (consistencyEl) {
+            consistencyEl.value = state.character.consistencyPrompt || '';
+            consistencyEl.addEventListener('input', () => {
+                state.character.consistencyPrompt = consistencyEl.value;
+                saveState();
+                renderGeneratePreview();
+            });
+        }
         const portraitTrigger = document.getElementById('bp-portrait-trigger');
         const canonicalPortraitInput = document.getElementById('bp-hero-portrait-file');
         if (portraitTrigger && canonicalPortraitInput) {
