@@ -1117,6 +1117,17 @@
                     resultActions.classList.remove('bp-gen-result-visible');
                 }
             };
+            function openResultLightbox() { openLightbox(src); }
+            img.addEventListener('click', openResultLightbox);
+            img.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openResultLightbox();
+                }
+            });
+            img.setAttribute('role', 'button');
+            img.setAttribute('tabindex', '0');
+            img.setAttribute('aria-label', 'View full size');
             resultImageWrap.appendChild(img);
             img.src = src;
         }
