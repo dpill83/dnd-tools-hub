@@ -4,6 +4,8 @@
     'use strict';
 
     const LAST_MAP_KEY = 'interactive-map-last-map';
+    const WALKING_SPEED_KEY = 'interactive-map-walking-speed-ft-per-sec';
+    const DEFAULT_WALKING_SPEED = 4;
     const API_BASE = '';
 
     const TYPE_COLORS = {
@@ -321,6 +323,28 @@
         return Math.hypot(latLng2.lat - latLng1.lat, latLng2.lng - latLng1.lng);
     }
 
+    function getWalkingSpeedFtPerSec() {
+        const raw = localStorage.getItem(WALKING_SPEED_KEY);
+        if (raw == null || raw === '') return DEFAULT_WALKING_SPEED;
+        const n = Number(raw);
+        return (Number.isFinite(n) && n > 0) ? n : DEFAULT_WALKING_SPEED;
+    }
+
+    function formatTravelTime(seconds) {
+        if (!Number.isFinite(seconds) || seconds < 0) return '';
+        const sec = Math.floor(seconds);
+        if (sec < 60) return sec + ' sec';
+        if (sec < 3600) return Math.round(sec / 60) + ' min';
+        if (sec < 86400) {
+            const h = Math.floor(sec / 3600);
+            const m = Math.round((sec % 3600) / 60);
+            return m > 0 ? h + ' hr ' + m + ' min' : h + ' hr';
+        }
+        const d = Math.floor(sec / 86400);
+        const h = Math.floor((sec % 86400) / 3600);
+        return h > 0 ? d + ' days ' + h + ' hr' : d + ' days';
+    }
+
     function clearRuler() {
         rulerActive = false;
         rulerPoints = [];
@@ -373,11 +397,18 @@
                 });
                 rulerLayer.addLayer(label);
             });
-            if (rulerPoints.length > 2) {
+            if (rulerPoints.length >= 2) {
                 const last = rulerPoints[rulerPoints.length - 1];
-                const totalLabel = scaleFeetPerPixel != null
+                let totalLabel = scaleFeetPerPixel != null
                     ? 'Total: ' + Math.round(total * scaleFeetPerPixel) + ' ft (' + Math.round(total) + ' px)'
                     : 'Total: ' + Math.round(total) + ' px';
+                if (scaleFeetPerPixel != null) {
+                    const totalFeet = total * scaleFeetPerPixel;
+                    const speed = getWalkingSpeedFtPerSec();
+                    const timeSeconds = totalFeet / speed;
+                    const timeStr = formatTravelTime(timeSeconds);
+                    if (timeStr) totalLabel += ' — ~' + timeStr + ' walk';
+                }
                 const label = L.marker(last, {
                     icon: L.divIcon({
                         className: 'wm-ruler-label',

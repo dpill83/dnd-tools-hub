@@ -2,6 +2,8 @@
     'use strict';
 
     const API_BASE = '';
+    const WALKING_SPEED_KEY = 'interactive-map-walking-speed-ft-per-sec';
+    const DEFAULT_WALKING_SPEED = 4;
 
     const LEGEND_ENTRIES = [
         { key: 'city', label: 'City buildings' },
@@ -92,6 +94,8 @@
     const editMapName = document.getElementById('admin-edit-map-name');
     const editMapWidthFeet = document.getElementById('admin-edit-map-width-feet');
     const editMapCancelBtn = document.getElementById('admin-edit-map-cancel');
+    const walkingSpeedInput = document.getElementById('admin-walking-speed');
+    const walkingSpeedSaveBtn = document.getElementById('admin-walking-speed-save');
 
     let selectedMapId = null;
     let editingMapId = null;
@@ -422,9 +426,39 @@
         }
     });
 
+    function loadWalkingSpeed() {
+        if (!walkingSpeedInput) return;
+        const raw = localStorage.getItem(WALKING_SPEED_KEY);
+        if (raw != null && raw !== '') {
+            const n = Number(raw);
+            if (Number.isFinite(n) && n > 0) {
+                walkingSpeedInput.value = String(n);
+                return;
+            }
+        }
+        walkingSpeedInput.value = String(DEFAULT_WALKING_SPEED);
+    }
+
+    function saveWalkingSpeed() {
+        if (!walkingSpeedInput) return;
+        const raw = walkingSpeedInput.value.trim();
+        const n = raw === '' ? DEFAULT_WALKING_SPEED : Number(raw);
+        if (!Number.isFinite(n) || n <= 0) {
+            alert('Walking speed must be a positive number.');
+            return;
+        }
+        localStorage.setItem(WALKING_SPEED_KEY, String(n));
+    }
+
     async function init() {
         setupEditModal();
         setupEditMapModal();
+        loadWalkingSpeed();
+        if (walkingSpeedSaveBtn) {
+            walkingSpeedSaveBtn.addEventListener('click', () => {
+                saveWalkingSpeed();
+            });
+        }
         try {
             const maps = await getMaps();
             renderMaps(maps);
