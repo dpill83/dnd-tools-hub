@@ -10,7 +10,6 @@
     const MAX_TIERS_IN_PROMPT = 12;
 
     const GEAR_TYPES = ['Breastplate', 'Shield', 'Mace', 'Boots', 'Pants', 'Cloak', 'Belt', 'Gloves', 'Helm', 'Accent', 'None'];
-    const LOADOUT_MATERIALS = ['Cotton', 'Wool', 'Lace', 'Leather'];
     const LOADOUT_TIERS = ['T0', 'T1', 'T2', 'T3'];
 
     const TIER_NAMES = { 0: 'Subtle', 1: 'Noticeable', 2: 'Ornate', 3: 'Signature' };
@@ -50,7 +49,8 @@
             Cotton: '<rect x="4" y="4" width="16" height="16" fill="none" stroke="currentColor"/>',
             Wool: '<path d="M4 8 Q12 4, 20 8 Q12 12, 4 8 M4 16 Q12 12, 20 16 Q12 20, 4 16" stroke="currentColor" fill="none"/>',
             Lace: '<circle cx="12" cy="12" r="8" fill="none" stroke="currentColor"/><path d="M12 4 Q16 8, 12 12 Q8 16, 12 20" stroke="currentColor" fill="none"/>',
-            Leather: '<rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor"/><path d="M8 8 L10 10 M14 14 L16 16" stroke="currentColor"/>'
+            Leather: '<rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor"/><path d="M8 8 L10 10 M14 14 L16 16" stroke="currentColor"/>',
+            Silk: '<path d="M4 12 Q8 6 12 12 Q16 18 20 12 M4 14 Q8 8 12 14 Q16 20 20 14" stroke="currentColor" fill="none" stroke-width="1.5"/>'
         };
         const path = icons[material] || icons.Leather;
         return `<svg class="bp-mat-icon" viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
@@ -85,7 +85,7 @@
         const xp = state.currentXp + state.passXp;
         const level = getLevelFromXp(xp);
         const theme = getThemeForLevelTier(level, 0);
-        return LOADOUT_MATERIALS.includes(theme) ? theme : 'Leather';
+        return theme || 'Leather';
     }
 
     function getLoadoutDefaults() {
@@ -245,6 +245,13 @@
     }
 
     const { getLevelFromXp, getAllUnlockedSubTiers, getSubTierThresholds, getThemeForLevelTier, THEME_NAMES, THEMES } = window.BattlePassData;
+
+    /** Materials available in Loadout for current XP level (themes for levels 1 through level). */
+    function getLoadoutMaterials() {
+        const xp = state.currentXp + state.passXp;
+        const level = Math.min(20, Math.max(1, getLevelFromXp(xp)));
+        return THEME_NAMES.slice(0, level);
+    }
 
     function getMaxUnlockedTierIndex() {
         const xp = state.currentXp + state.passXp;
@@ -574,7 +581,9 @@
     function renderLoadoutSlot(slot, index) {
         const used = getUsedGearTypes(index);
         const gt = slot.gearType || 'Accent';
-        const mat = slot.material || 'Leather';
+        const loadoutMaterials = getLoadoutMaterials();
+        const rawMat = (slot.material || 'Leather').trim() || 'Leather';
+        const mat = loadoutMaterials.includes(rawMat) ? rawMat : loadoutMaterials[loadoutMaterials.length - 1] || 'Leather';
         const tier = slot.tier || 'T0';
         const effectiveTier = getEffectiveTier(slot, index);
         const tierName = getTierName(effectiveTier);
@@ -585,7 +594,7 @@
             const sel = gt === g ? ' selected' : '';
             return `<option value="${g}"${sel}${disabled}>${g}</option>`;
         }).join('');
-        const matSegmented = LOADOUT_MATERIALS.map(m => {
+        const matSegmented = loadoutMaterials.map(m => {
             const active = mat === m ? ' bp-segmented-option-active' : '';
             return `<button type="button" class="bp-segmented-option bp-mat-${m.toLowerCase()}${active}" data-action="set-material" data-slot="${index}" data-value="${m}" aria-pressed="${mat === m}" title="${m}">${getMaterialIconSvg(m)}</button>`;
         }).join('');

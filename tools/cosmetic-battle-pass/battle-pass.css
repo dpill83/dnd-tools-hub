@@ -535,10 +535,18 @@
 .bp-segmented-option.bp-mat-wool { background: linear-gradient(135deg, #e8e2d8 0%, #d4ccc0 100%); color: #3d3d3d; }
 .bp-segmented-option.bp-mat-lace { background: repeating-linear-gradient(90deg, #f5f2ef 0, #f5f2ef 2px, #ebe6e0 2px, #ebe6e0 4px); color: #4a4a4a; }
 .bp-segmented-option.bp-mat-leather { background: linear-gradient(135deg, #5c4a3a 0%, #4a3c2e 100%); color: #e8e0d8; }
+.bp-segmented-option.bp-mat-silk { background: linear-gradient(135deg, #6b5b7b 0%, #4a3a5c 100%); color: #e8e0f0; }
+/* Generic fallback for materials without a specific class (e.g. Wood, Steel, Gold) */
+.bp-segmented-option[class*="bp-mat-"]:not(.bp-mat-cotton):not(.bp-mat-wool):not(.bp-mat-lace):not(.bp-mat-leather):not(.bp-mat-silk) {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--card-bg) 100%);
+    color: var(--text);
+}
 .bp-segmented-option.bp-mat-cotton.bp-segmented-option-active,
 .bp-segmented-option.bp-mat-wool.bp-segmented-option-active,
 .bp-segmented-option.bp-mat-lace.bp-segmented-option-active,
-.bp-segmented-option.bp-mat-leather.bp-segmented-option-active {
+.bp-segmented-option.bp-mat-leather.bp-segmented-option-active,
+.bp-segmented-option.bp-mat-silk.bp-segmented-option-active,
+.bp-segmented-option[class*="bp-mat-"].bp-segmented-option-active {
     border: 2px solid var(--primary-color);
     box-shadow: 0 0 0 2px rgba(var(--primary-rgb, 138, 122, 158), 0.3);
 }
@@ -672,6 +680,15 @@
 .bp-mat-leather {
     background: linear-gradient(135deg, #5c4a3a 0%, #4a3c2e 100%);
     color: #e8e0d8;
+}
+.bp-mat-silk {
+    background: linear-gradient(135deg, #6b5b7b 0%, #4a3a5c 100%);
+    color: #e8e0f0;
+}
+/* Generic fallback for material chips (e.g. Wood, Steel, Gold) */
+.bp-mat-chip[class*="bp-mat-"]:not(.bp-mat-cotton):not(.bp-mat-wool):not(.bp-mat-lace):not(.bp-mat-leather):not(.bp-mat-silk) {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--card-bg) 100%);
+    color: var(--text);
 }
 
 /* Tier step buttons – 4-step visual selector */
