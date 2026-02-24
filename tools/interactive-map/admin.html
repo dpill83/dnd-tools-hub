@@ -43,6 +43,28 @@
         </main>
     </div>
 
+    <div id="admin-edit-map-modal" class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-edit-map-title" aria-hidden="true">
+        <div class="admin-modal-backdrop"></div>
+        <div class="admin-modal-content">
+            <h2 id="admin-edit-map-title" class="admin-modal-title">Edit map</h2>
+            <form id="admin-edit-map-form" class="admin-modal-form">
+                <div class="admin-form-group">
+                    <label for="admin-edit-map-name">Map name</label>
+                    <input type="text" id="admin-edit-map-name" required placeholder="Display name">
+                </div>
+                <div class="admin-form-group">
+                    <label for="admin-edit-map-width-feet">Map width (feet)</label>
+                    <input type="number" id="admin-edit-map-width-feet" min="1" step="1" placeholder="Optional – full map width in feet for ruler">
+                    <p class="admin-hint">How many feet does the full width of this map represent? Leave blank for pixels only.</p>
+                </div>
+                <div class="admin-modal-actions">
+                    <button type="button" id="admin-edit-map-cancel" class="admin-btn">Cancel</button>
+                    <button type="submit" class="admin-btn admin-btn-select">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="admin-edit-marker-modal" class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-edit-marker-title" aria-hidden="true">
         <div class="admin-modal-backdrop"></div>
         <div class="admin-modal-content">

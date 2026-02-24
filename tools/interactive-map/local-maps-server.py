@@ -175,6 +175,8 @@ class LocalMapsHandler(BaseHTTPRequestHandler):
                 "bounds": meta["bounds"],
                 "imageUrl": meta.get("imageUrl") or "/api/image/" + meta.get("imageKey", ""),
             }
+            if isinstance(meta.get("mapWidthFeet"), (int, float)) and meta["mapWidthFeet"] > 0:
+                out["mapWidthFeet"] = meta["mapWidthFeet"]
             return self.send_json(out)
 
         # /api/maps/<id>/markers
@@ -252,6 +254,11 @@ class LocalMapsHandler(BaseHTTPRequestHandler):
             return self.send_error_json(str(e), status)
 
         image_url = "/api/image/" + image_key_stored
+        map_width_feet = body.get("mapWidthFeet")
+        if isinstance(map_width_feet, (int, float)) and map_width_feet > 0:
+            map_width_feet = float(map_width_feet)
+        else:
+            map_width_feet = None
         meta = {
             "id": map_id,
             "name": name,
@@ -259,6 +266,8 @@ class LocalMapsHandler(BaseHTTPRequestHandler):
             "imageKey": image_key_stored,
             "imageUrl": image_url,
         }
+        if map_width_feet is not None:
+            meta["mapWidthFeet"] = map_width_feet
         put_json(meta_key(map_id), meta)
         put_json(markers_key(map_id), [])
         index = get_index()
@@ -266,12 +275,56 @@ class LocalMapsHandler(BaseHTTPRequestHandler):
             index.append({"id": map_id, "name": name})
         put_index(index)
 
-        self.send_json({
-            "id": map_id,
-            "name": name,
+        resp = {"id": map_id, "name": name, "bounds": meta["bounds"], "imageUrl": image_url}
+        if meta.get("mapWidthFeet") is not None:
+            resp["mapWidthFeet"] = meta["mapWidthFeet"]
+        self.send_json(resp, 201)
+
+    def do_PATCH(self):
+        path = unquote(urlparse(self.path).path).replace("\\", "/")
+
+        m = re.match(r"^/api/maps/([^/]+)$", path)
+        if not m:
+            self.send_error(404)
+            return
+        map_id = m.group(1)
+        meta = get_json(meta_key(map_id))
+        if not meta:
+            return self.send_error_json("Map not found", 404)
+
+        body = self.read_body_json()
+        if body is None:
+            return self.send_error_json("Invalid JSON body", 400)
+
+        if "name" in body and isinstance(body["name"], str):
+            trimmed = body["name"].strip()
+            if trimmed:
+                meta["name"] = trimmed
+        if "mapWidthFeet" in body:
+            v = body["mapWidthFeet"]
+            if v is None or v == "":
+                meta.pop("mapWidthFeet", None)
+            elif isinstance(v, (int, float)) and v > 0:
+                meta["mapWidthFeet"] = float(v)
+
+        put_json(meta_key(map_id), meta)
+        if meta.get("name"):
+            index = get_index()
+            for i, e in enumerate(index):
+                if e.get("id") == map_id:
+                    index[i] = {"id": map_id, "name": meta["name"]}
+                    break
+            put_index(index)
+
+        out = {
+            "id": meta["id"],
+            "name": meta["name"],
             "bounds": meta["bounds"],
-            "imageUrl": image_url,
-        }, 201)
+            "imageUrl": meta.get("imageUrl") or "/api/image/" + meta.get("imageKey", ""),
+        }
+        if isinstance(meta.get("mapWidthFeet"), (int, float)) and meta["mapWidthFeet"] > 0:
+            out["mapWidthFeet"] = meta["mapWidthFeet"]
+        self.send_json(out)
 
     def do_PUT(self):
         path = unquote(urlparse(self.path).path).replace("\\", "/")

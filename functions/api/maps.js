@@ -69,6 +69,10 @@ export async function onRequestPost(context) {
         return jsonResponse({ error: msg }, status);
     }
 
+    const mapWidthFeet = typeof body.mapWidthFeet === 'number' && body.mapWidthFeet > 0
+        ? body.mapWidthFeet
+        : undefined;
+
     const imageUrl = '/api/image/' + imageKeyStored;
     const meta = {
         id,
@@ -76,16 +80,14 @@ export async function onRequestPost(context) {
         bounds: { width: bounds.width, height: bounds.height },
         imageKey: imageKeyStored,
         imageUrl,
+        ...(mapWidthFeet != null && { mapWidthFeet }),
     };
 
     await putJson(bucket, metaKey(id), meta);
     await putJson(bucket, markersKey(id), []);
     await appendToIndex(bucket, { id, name });
 
-    return jsonResponse({
-        id,
-        name,
-        bounds: meta.bounds,
-        imageUrl,
-    }, 201);
+    const response = { id, name, bounds: meta.bounds, imageUrl };
+    if (meta.mapWidthFeet != null) response.mapWidthFeet = meta.mapWidthFeet;
+    return jsonResponse(response, 201);
 }

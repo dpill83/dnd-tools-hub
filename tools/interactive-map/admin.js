@@ -53,6 +53,19 @@
         return r.json();
     }
 
+    async function patchMap(id, body) {
+        const r = await fetch(api('/api/maps/' + encodeURIComponent(id)), {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        if (!r.ok) {
+            const data = await r.json().catch(() => ({}));
+            throw new Error(data.error || 'Failed to update map');
+        }
+        return r.json();
+    }
+
     const mapsList = document.getElementById('maps-list');
     const markersSection = document.getElementById('markers-section');
     const markersPrompt = document.getElementById('markers-prompt');
@@ -74,7 +87,14 @@
     const editImagePreviewClear = document.getElementById('admin-edit-image-preview-clear');
     const editCancelBtn = document.getElementById('admin-edit-cancel');
 
+    const editMapModal = document.getElementById('admin-edit-map-modal');
+    const editMapForm = document.getElementById('admin-edit-map-form');
+    const editMapName = document.getElementById('admin-edit-map-name');
+    const editMapWidthFeet = document.getElementById('admin-edit-map-width-feet');
+    const editMapCancelBtn = document.getElementById('admin-edit-map-cancel');
+
     let selectedMapId = null;
+    let editingMapId = null;
     let currentMarkers = [];
     let editingMarkerIndex = null;
     let pendingEditImageDataUrl = null;
@@ -102,6 +122,7 @@
                 '</div>' +
                 '<div class="map-actions">' +
                 '<button type="button" class="admin-btn admin-btn-select map-select-btn">Select</button>' +
+                '<button type="button" class="admin-btn map-edit-btn">Edit</button>' +
                 '<button type="button" class="admin-btn admin-btn-danger map-delete-btn">Delete map</button>' +
                 '</div>' +
                 '</div>'
@@ -111,6 +132,7 @@
         mapsList.querySelectorAll('.map-row').forEach((row) => {
             const id = row.dataset.mapId;
             row.querySelector('.map-select-btn').addEventListener('click', () => selectMap(id));
+            row.querySelector('.map-edit-btn').addEventListener('click', () => openEditMapModal(id));
             row.querySelector('.map-delete-btn').addEventListener('click', () => confirmDeleteMap(id));
         });
     }
@@ -326,6 +348,68 @@
         }
     }
 
+    async function openEditMapModal(id) {
+        editingMapId = id;
+        try {
+            const meta = await getMapMeta(id);
+            editMapName.value = meta.name || '';
+            editMapWidthFeet.value = (meta.mapWidthFeet != null && meta.mapWidthFeet > 0) ? String(meta.mapWidthFeet) : '';
+            editMapModal.setAttribute('aria-hidden', 'false');
+            editMapName.focus();
+        } catch (e) {
+            alert(e.message || 'Failed to load map.');
+            editingMapId = null;
+        }
+    }
+
+    function closeEditMapModal() {
+        editMapModal.setAttribute('aria-hidden', 'true');
+        editingMapId = null;
+    }
+
+    async function saveEditMap() {
+        if (!editingMapId) return;
+        const name = editMapName.value.trim();
+        if (!name) {
+            alert('Map name is required.');
+            return;
+        }
+        const feetVal = editMapWidthFeet.value.trim();
+        const body = { name };
+        if (feetVal === '') {
+            body.mapWidthFeet = null;
+        } else {
+            const n = Number(feetVal);
+            if (!Number.isFinite(n) || n <= 0) {
+                alert('Map width (feet) must be a positive number or blank.');
+                return;
+            }
+            body.mapWidthFeet = n;
+        }
+        try {
+            await patchMap(editingMapId, body);
+            closeEditMapModal();
+            const maps = await getMaps();
+            renderMaps(maps);
+            if (selectedMapId === editingMapId) {
+                selectedMapName.textContent = name;
+            }
+        } catch (e) {
+            alert(e.message || 'Failed to update map.');
+        }
+    }
+
+    function setupEditMapModal() {
+        if (!editMapForm || !editMapModal) return;
+        editMapForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            saveEditMap();
+        });
+        if (editMapCancelBtn) editMapCancelBtn.addEventListener('click', closeEditMapModal);
+        const backdrop = editMapModal.querySelector('.admin-modal-backdrop');
+        if (backdrop) backdrop.addEventListener('click', closeEditMapModal);
+    }
+
     clearAllBtn.addEventListener('click', async () => {
         if (!selectedMapId) return;
         if (!confirm('Remove all markers from this map?')) return;
@@ -340,6 +424,7 @@
 
     async function init() {
         setupEditModal();
+        setupEditMapModal();
         try {
             const maps = await getMaps();
             renderMaps(maps);

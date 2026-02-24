@@ -62,6 +62,7 @@
     let rulerActive = false;
     let rulerPoints = [];
     let rulerLayer = null;
+    let scaleFeetPerPixel = null;
 
     const $ = (id) => document.getElementById(id);
     const mapSelect = $('wm-map-select');
@@ -236,6 +237,9 @@
         map.setZoom(map.getZoom() + 1);
 
         currentMapId = record.id;
+        scaleFeetPerPixel = (typeof record.mapWidthFeet === 'number' && record.mapWidthFeet > 0 && record.bounds && record.bounds.width)
+            ? record.mapWidthFeet / record.bounds.width
+            : null;
         localStorage.setItem(LAST_MAP_KEY, record.id);
         loadAndRenderMarkers();
         updateDetailPlaceholder('Click a marker.');
@@ -253,6 +257,7 @@
         if (rulerBtn) rulerBtn.classList.add('wm-fab-hidden');
         clearRuler();
         currentMapId = null;
+        scaleFeetPerPixel = null;
         updateDetailPlaceholder('Upload a map to get started.');
     }
 
@@ -355,10 +360,13 @@
                 total += seg;
                 const midLat = (rulerPoints[i - 1].lat + pt.lat) / 2;
                 const midLng = (rulerPoints[i - 1].lng + pt.lng) / 2;
+                const segLabel = scaleFeetPerPixel != null
+                    ? Math.round(seg * scaleFeetPerPixel) + ' ft (' + Math.round(seg) + ' px)'
+                    : Math.round(seg) + ' px';
                 const label = L.marker(L.latLng(midLat, midLng), {
                     icon: L.divIcon({
                         className: 'wm-ruler-label',
-                        html: '<span class="wm-ruler-label-text">' + Math.round(seg) + ' px</span>',
+                        html: '<span class="wm-ruler-label-text">' + segLabel + '</span>',
                         iconSize: null,
                         iconAnchor: [0, 0]
                     })
@@ -367,10 +375,13 @@
             });
             if (rulerPoints.length > 2) {
                 const last = rulerPoints[rulerPoints.length - 1];
+                const totalLabel = scaleFeetPerPixel != null
+                    ? 'Total: ' + Math.round(total * scaleFeetPerPixel) + ' ft (' + Math.round(total) + ' px)'
+                    : 'Total: ' + Math.round(total) + ' px';
                 const label = L.marker(last, {
                     icon: L.divIcon({
                         className: 'wm-ruler-label',
-                        html: '<span class="wm-ruler-label-text">Total: ' + Math.round(total) + ' px</span>',
+                        html: '<span class="wm-ruler-label-text">' + totalLabel + '</span>',
                         iconSize: null,
                         iconAnchor: [0, 0]
                     })
