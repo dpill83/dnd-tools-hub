@@ -592,19 +592,6 @@
         return `<svg class="bp-gear-icon" viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
     }
 
-    function renderGlobalTierBlock() {
-        const globalTier = state.look?.globalTier ?? 'T0';
-        const maxUnlocked = getMaxUnlockedTierIndex();
-        return LOADOUT_TIERS.map(t => {
-            const tierIdx = tierToIndex(t);
-            const locked = tierIdx > maxUnlocked;
-            const active = globalTier === t ? ' bp-segmented-option-active' : '';
-            const disabled = locked ? ' disabled' : '';
-            const title = locked ? 'Unlock with more XP' : getTierName(t);
-            return `<button type="button" class="bp-segmented-option bp-tier-${t.toLowerCase()}${active}${locked ? ' bp-tier-step-locked' : ''}" data-action="set-global-tier" data-value="${t}" aria-pressed="${globalTier === t}"${disabled} title="${title}">${getTierIconSvg(tierIdx)}</button>`;
-        }).join('');
-    }
-
     function renderLoadoutSlot(slot, index) {
         const used = getUsedGearTypes(index);
         const gt = slot.gearType || 'Accent';
@@ -666,11 +653,7 @@
     }
 
     function renderLoadout() {
-        const globalWrap = document.getElementById('bp-global-tier-wrap');
         const grid = document.getElementById('bp-loadout-grid');
-        if (globalWrap) {
-            globalWrap.innerHTML = '<label class="bp-global-tier-label">Intensity tier</label><div class="bp-segmented bp-global-tier-segmented" role="group" aria-label="Intensity tier">' + renderGlobalTierBlock() + '</div>';
-        }
         if (!grid) return;
         const slots = state.look?.slots || [];
         grid.innerHTML = '';
@@ -1552,19 +1535,6 @@
                     }
                     return;
                 }
-            });
-        }
-        if (section) {
-            section.addEventListener('click', (e) => {
-                const btn = e.target.closest('[data-action="set-global-tier"]');
-                if (!btn || btn.disabled) return;
-                const value = btn.getAttribute('data-value');
-                if (!value) return;
-                state.look = state.look || { slots: getLoadoutDefaults().map(s => ({ ...s })), globalTier: 'T0', slotTierOverride: [false, false, false, false] };
-                state.look.globalTier = value;
-                saveState();
-                renderLoadout();
-                renderGeneratePreview();
             });
         }
     }
