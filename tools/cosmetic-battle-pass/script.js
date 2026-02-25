@@ -559,7 +559,8 @@
 
     function getGearTypesForLoadout() {
         const custom = (state.catalog?.customGear || []).map(g => g.name || g.label).filter(Boolean);
-        return [...GEAR_TYPES, ...custom.filter(n => !GEAR_TYPES.includes(n))];
+        const builtIn = GEAR_TYPES.filter(g => g !== 'None');
+        return ['None', ...builtIn, ...custom.filter(n => !GEAR_TYPES.includes(n))];
     }
 
     function getUsedGearTypes(excludeSlotIndex) {
@@ -664,19 +665,11 @@
         `;
     }
 
-    function allSlotsFollowGlobal() {
-        const overrides = state.look?.slotTierOverride;
-        if (!overrides || overrides.length !== 4) return true;
-        return overrides.every(function (x) { return !x; });
-    }
-
     function renderLoadout() {
         const globalWrap = document.getElementById('bp-global-tier-wrap');
         const grid = document.getElementById('bp-loadout-grid');
         if (globalWrap) {
-            const applyAllActive = allSlotsFollowGlobal();
-            const applyAllBtn = '<button type="button" class="bp-apply-tier-to-all' + (applyAllActive ? ' bp-apply-tier-to-all-active' : '') + '" data-action="apply-tier-to-all" aria-pressed="' + applyAllActive + '" title="Apply current intensity tier to all 4 slots">Apply to all</button>';
-            globalWrap.innerHTML = '<label class="bp-global-tier-label">Intensity tier</label><div class="bp-segmented bp-global-tier-segmented" role="group" aria-label="Intensity tier">' + renderGlobalTierBlock() + '</div>' + applyAllBtn;
+            globalWrap.innerHTML = '<label class="bp-global-tier-label">Intensity tier</label><div class="bp-segmented bp-global-tier-segmented" role="group" aria-label="Intensity tier">' + renderGlobalTierBlock() + '</div>';
         }
         if (!grid) return;
         const slots = state.look?.slots || [];
@@ -1563,15 +1556,6 @@
         }
         if (section) {
             section.addEventListener('click', (e) => {
-                const applyBtn = e.target.closest('[data-action="apply-tier-to-all"]');
-                if (applyBtn) {
-                    state.look = state.look || { slots: getLoadoutDefaults().map(s => ({ ...s })), globalTier: 'T0', slotTierOverride: [false, false, false, false] };
-                    state.look.slotTierOverride = [false, false, false, false];
-                    saveState();
-                    renderLoadout();
-                    renderGeneratePreview();
-                    return;
-                }
                 const btn = e.target.closest('[data-action="set-global-tier"]');
                 if (!btn || btn.disabled) return;
                 const value = btn.getAttribute('data-value');
