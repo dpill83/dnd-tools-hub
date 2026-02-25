@@ -608,9 +608,9 @@
             const sel = gt === g ? ' selected' : '';
             return `<option value="${g}"${sel}${disabled}>${g}</option>`;
         }).join('');
-        const matSegmented = loadoutMaterials.map(m => {
-            const active = mat === m ? ' bp-segmented-option-active' : '';
-            return `<button type="button" class="bp-segmented-option bp-mat-${m.toLowerCase()}${active}" data-action="set-material" data-slot="${index}" data-value="${m}" aria-pressed="${mat === m}" title="${m}">${getMaterialIconSvg(m)}</button>`;
+        const matDropdownOptions = loadoutMaterials.map(m => {
+            const selected = mat === m ? ' bp-mat-dropdown-option-selected' : '';
+            return `<button type="button" class="bp-mat-dropdown-option bp-mat-${m.toLowerCase()}${selected}" role="option" data-action="set-material" data-slot="${index}" data-value="${m}" aria-selected="${mat === m}">${getMaterialIconSvg(m)}<span>${m}</span></button>`;
         }).join('');
         const maxUnlockedTier = getMaxUnlockedTierIndexForMaterial(mat);
         const tierSegmented = LOADOUT_TIERS.map(t => {
@@ -643,7 +643,18 @@
                 <div class="bp-gear-card-body">
                     <div class="bp-slot-control-row bp-slot-material-row">
                         <span class="bp-slot-control-label">Material</span>
-                        <div class="bp-segmented bp-mat-segmented" role="group" aria-label="Material">${matSegmented}</div>
+                        <div class="bp-mat-dropdown" data-slot="${index}">
+                            <div class="bp-mat-dropdown-wrap">
+                                <button type="button" class="bp-mat-dropdown-trigger bp-mat-${mat.toLowerCase()}" aria-expanded="false" aria-haspopup="listbox" aria-label="Material" title="${mat}">
+                                    <span class="bp-mat-dropdown-trigger-icon">${getMaterialIconSvg(mat)}</span>
+                                    <span class="bp-mat-dropdown-trigger-label">${mat}</span>
+                                    <span class="bp-mat-dropdown-chevron" aria-hidden="true">&#9662;</span>
+                                </button>
+                                <div class="bp-mat-dropdown-panel" role="listbox" aria-hidden="true">
+                                    ${matDropdownOptions}
+                                </div>
+                            </div>
+                        </div>
                         ${!isOverridden ? `<button type="button" class="bp-customize-tier" data-action="customize-tier" data-slot="${index}" title="Customize tier for this slot" aria-label="Customize tier for this slot">&#9998;</button>` : ''}
                     </div>
                     ${tierControlHtml}
@@ -1494,6 +1505,27 @@
                 updateSlot(idx, 'gearType', sel.value);
             });
             grid.addEventListener('click', (e) => {
+                const matTrigger = e.target.closest('.bp-mat-dropdown-trigger');
+                if (matTrigger) {
+                    const dropdown = matTrigger.closest('.bp-mat-dropdown');
+                    if (dropdown) {
+                        const isOpen = dropdown.classList.toggle('bp-mat-dropdown-open');
+                        matTrigger.setAttribute('aria-expanded', isOpen);
+                        const panel = dropdown.querySelector('.bp-mat-dropdown-panel');
+                        if (panel) panel.setAttribute('aria-hidden', !isOpen);
+                        document.querySelectorAll('.bp-mat-dropdown').forEach(d => {
+                            if (d !== dropdown) {
+                                d.classList.remove('bp-mat-dropdown-open');
+                                const t = d.querySelector('.bp-mat-dropdown-trigger');
+                                if (t) t.setAttribute('aria-expanded', 'false');
+                                const p = d.querySelector('.bp-mat-dropdown-panel');
+                                if (p) p.setAttribute('aria-hidden', 'true');
+                            }
+                        });
+                    }
+                    e.stopPropagation();
+                    return;
+                }
                 const customizeBtn = e.target.closest('[data-action="customize-tier"]');
                 if (customizeBtn) {
                     const idx = parseInt(customizeBtn.getAttribute('data-slot'), 10);
@@ -1537,6 +1569,16 @@
                 }
             });
         }
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.bp-mat-dropdown')) return;
+            document.querySelectorAll('.bp-mat-dropdown').forEach(d => {
+                d.classList.remove('bp-mat-dropdown-open');
+                const t = d.querySelector('.bp-mat-dropdown-trigger');
+                if (t) t.setAttribute('aria-expanded', 'false');
+                const p = d.querySelector('.bp-mat-dropdown-panel');
+                if (p) p.setAttribute('aria-hidden', 'true');
+            });
+        });
     }
 
     function resetEverything() {
