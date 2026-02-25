@@ -653,7 +653,8 @@
                     </div>
                 </div>
                 <div class="bp-gear-card-body">
-                    <div class="bp-slot-control-row">
+                    <div class="bp-slot-control-row bp-slot-material-row">
+                        <span class="bp-slot-control-label">Material</span>
                         <div class="bp-segmented bp-mat-segmented" role="group" aria-label="Material">${matSegmented}</div>
                         ${!isOverridden ? `<button type="button" class="bp-customize-tier" data-action="customize-tier" data-slot="${index}" title="Customize tier for this slot" aria-label="Customize tier for this slot">&#9998;</button>` : ''}
                     </div>
@@ -1089,11 +1090,23 @@
             parts.push(filled);
         }
         const standaloneGearPrompt = parts.join(' ');
+        const materialsPerItem = slots
+            .filter(s => (s.gearType || '').trim() && (s.gearType || '').trim() !== 'None')
+            .map(s => {
+                const gt = (s.gearType || 'Accent').trim();
+                const mat = (s.material || 'Leather').trim();
+                const matCap = mat.charAt(0).toUpperCase() + mat.slice(1).toLowerCase();
+                return gt + '=' + matCap;
+            })
+            .join(', ');
+        const gearPromptWithMaterials = materialsPerItem
+            ? 'Materials per item: ' + materialsPerItem + '. ' + standaloneGearPrompt
+            : standaloneGearPrompt;
         const hasPortrait = !!getPortraitSrc();
         const placeholderCharacterPrompt = `Fantasy ${cls} adventurer in starting gear, ${artStyle} D&D art style.`;
         const compositePrompt = hasPortrait
-            ? `Take this exact character portrait and equip the character with this precisely upgraded gear: ${standaloneGearPrompt}. Keep original pose, face, clothing, lighting, and ${artStyle}. Preserve existing ${motif}.`
-            : `Use this character prompt first to create a base portrait: "${placeholderCharacterPrompt}". Then equip that character with: ${standaloneGearPrompt}. Preserve pose, face, and ${artStyle}.`;
+            ? `Take this exact character portrait and equip the character with this precisely upgraded gear: ${gearPromptWithMaterials}. Keep original pose, face, clothing, lighting, and ${artStyle}. Preserve existing ${motif}.`
+            : `Use this character prompt first to create a base portrait: "${placeholderCharacterPrompt}". Then equip that character with: ${gearPromptWithMaterials}. Preserve pose, face, and ${artStyle}.`;
         return compositePrompt;
     }
 
