@@ -18,10 +18,10 @@
         'tools/legacy-project-builder/',
         'tools/songbook/',
         'tools/qbasic-editor/',
-        'https://tetra-cube.github.io/dnd/dnd-reference.html',
-        'https://tetra-cube.github.io/dnd/dnd-char-gen.html',
-        'https://tetra-cube.github.io/dnd/dnd-magic-items.html',
-        'https://tetra-cube.github.io/dnd/dnd-statblock.html'
+        'tools/tetra-dnd/dnd-reference.html',
+        'tools/tetra-dnd/dnd-char-gen.html',
+        'tools/tetra-dnd/dnd-magic-items.html',
+        'tools/tetra-dnd/dnd-statblock.html'
     ];
 
     function getStarred() {
