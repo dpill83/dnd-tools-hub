@@ -39,7 +39,7 @@
 
     function getSort() {
         const v = localStorage.getItem(SORT_STORAGE_KEY);
-        return (v === 'name-asc' || v === 'name-desc' || v === 'emoji') ? v : 'default';
+        return (v === 'name-asc' || v === 'name-desc' || v === 'emoji' || v === 'newest' || v === 'oldest') ? v : 'default';
     }
 
     function setSort(value) {
@@ -79,10 +79,15 @@
         });
 
         unstarredList.sort(function (a, b) {
-            if (sortBy === 'default') {
+            if (sortBy === 'default' || sortBy === 'oldest') {
                 const iA = DEFAULT_ORDER.indexOf(a.getAttribute('data-tool-href') || a.getAttribute('href') || '');
                 const iB = DEFAULT_ORDER.indexOf(b.getAttribute('data-tool-href') || b.getAttribute('href') || '');
                 return (iA < 0 ? 999 : iA) - (iB < 0 ? 999 : iB);
+            }
+            if (sortBy === 'newest') {
+                const iA = DEFAULT_ORDER.indexOf(a.getAttribute('data-tool-href') || a.getAttribute('href') || '');
+                const iB = DEFAULT_ORDER.indexOf(b.getAttribute('data-tool-href') || b.getAttribute('href') || '');
+                return (iB < 0 ? 999 : iB) - (iA < 0 ? 999 : iA);
             }
             if (sortBy === 'name-asc' || sortBy === 'name-desc') {
                 const ta = getCardTitle(a);
