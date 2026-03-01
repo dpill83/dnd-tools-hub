@@ -17,7 +17,11 @@
         'tools/playstyle-quiz/',
         'tools/legacy-project-builder/',
         'tools/songbook/',
-        'tools/qbasic-editor/'
+        'tools/qbasic-editor/',
+        'https://tetra-cube.github.io/dnd/dnd-reference.html',
+        'https://tetra-cube.github.io/dnd/dnd-char-gen.html',
+        'https://tetra-cube.github.io/dnd/dnd-magic-items.html',
+        'https://tetra-cube.github.io/dnd/dnd-statblock.html'
     ];
 
     function getStarred() {

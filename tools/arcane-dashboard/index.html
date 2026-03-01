@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Arcane Dashboard – D&D Tools Hub</title>
+    <link rel="stylesheet" href="../../global.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body class="arcane-dashboard-app dark-mode">
+    <div id="ad-canvas" class="ad-canvas">
+        <div id="ad-background" class="ad-background" aria-hidden="true"></div>
+        <div id="ad-widget-layer" class="ad-widget-layer"></div>
+    </div>
+
+    <header class="ad-toolbar">
+        <a href="../../index.html" class="ad-toolbar-btn" aria-label="Back to Hub">&#127968;</a>
+        <div class="ad-toolbar-center">
+            <label class="ad-campaign-label">
+                <span class="ad-label-text">Campaign</span>
+                <select id="ad-campaign-select" class="ad-campaign-select" aria-label="Select campaign">
+                    <option value="">— No campaign —</option>
+                </select>
+            </label>
+            <button type="button" id="ad-new-campaign" class="ad-toolbar-btn" title="New campaign">+ Campaign</button>
+            <button type="button" id="ad-add-widget" class="ad-toolbar-btn" title="Add widget" aria-haspopup="true" aria-expanded="false">+ Widget</button>
+            <div id="ad-add-widget-menu" class="ad-dropdown hidden" role="menu" aria-label="Add widget"></div>
+            <label class="ad-snap-label">
+                <input type="checkbox" id="ad-snap-toggle" class="ad-snap-toggle" checked aria-label="Snap to grid">
+                <span>Snap to grid</span>
+            </label>
+        </div>
+        <div class="ad-toolbar-right">
+            <button type="button" id="ad-whisper-btn" class="ad-toolbar-btn" title="Whisper mode (W)" aria-pressed="false">&#128274;</button>
+            <button type="button" id="ad-settings-btn" class="ad-toolbar-btn" title="Settings">&#9881;</button>
+            <button type="button" id="ad-help-btn" class="ad-toolbar-btn" title="Shortcuts (?)">?</button>
+            <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode"><span class="theme-icon">&#127769;</span></button>
+        </div>
+    </header>
+
+    <div id="ad-whisper-overlay" class="ad-whisper-overlay hidden" aria-hidden="true">
+        <div class="ad-whisper-content">
+            <div id="ad-whisper-initiative" class="ad-whisper-initiative"></div>
+            <p id="ad-whisper-message" class="ad-whisper-message">DM is checking something.</p>
+        </div>
+    </div>
+
+    <div id="ad-help-modal" class="ad-modal hidden" role="dialog" aria-modal="true" aria-labelledby="ad-help-title" aria-hidden="true">
+        <div class="ad-modal-backdrop"></div>
+        <div class="ad-modal-content">
+            <h2 id="ad-help-title" class="ad-modal-title">Shortcuts</h2>
+            <div id="ad-help-body" class="ad-modal-body"></div>
+            <button type="button" id="ad-help-close" class="ad-modal-close">Close</button>
+        </div>
+    </div>
+
+    <div id="ad-settings-modal" class="ad-modal hidden" role="dialog" aria-modal="true" aria-labelledby="ad-settings-title" aria-hidden="true">
+        <div class="ad-modal-backdrop"></div>
+        <div class="ad-modal-content">
+            <h2 id="ad-settings-title" class="ad-modal-title">Settings</h2>
+            <div class="ad-settings-body">
+                <label class="ad-settings-row">
+                    <span>Background</span>
+                    <input type="file" id="ad-bg-upload" accept="image/png,image/jpeg,image/webp" aria-label="Upload background image">
+                </label>
+                <p class="ad-settings-hint">Max 2 MB. Image will be compressed.</p>
+                <div class="ad-settings-row">
+                    <span>Preset</span>
+                    <button type="button" id="ad-bg-preset-nebula" class="ad-btn">Nebula</button>
+                    <button type="button" id="ad-bg-preset-parchment" class="ad-btn">Parchment</button>
+                </div>
+                <label class="ad-settings-row">
+                    <span>Whisper shortcut</span>
+                    <input type="text" id="ad-remap-whisper" maxlength="1" placeholder="W" aria-label="Remap whisper key" style="width:3em;">
+                </label>
+                <label class="ad-settings-row">
+                    <span>Help shortcut</span>
+                    <input type="text" id="ad-remap-help" maxlength="1" placeholder="?" aria-label="Remap help key" style="width:3em;">
+                </label>
+                <p class="ad-settings-hint">If browser captures a key, set an alternate here.</p>
+                <button type="button" id="ad-export-btn" class="ad-btn">Export campaign JSON</button>
+                <button type="button" id="ad-import-btn" class="ad-btn">Import campaign JSON</button>
+                <input type="file" id="ad-import-file" accept=".json,application/json" class="hidden" aria-label="Choose JSON file to import">
+            </div>
+            <button type="button" id="ad-settings-close" class="ad-modal-close">Close</button>
+        </div>
+    </div>
+
+    <script src="../../theme.js"></script>
+    <script src="state.js"></script>
+    <script src="layout-engine.js"></script>
+    <script src="dashboard.js"></script>
+    <script src="widgets/initiative.js"></script>
+    <script src="widgets/notes-vault.js"></script>
+    <script src="widgets/rule-popup.js"></script>
+    <script src="widgets/random-generator.js"></script>
+</body>
+</html>

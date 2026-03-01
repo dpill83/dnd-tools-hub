@@ -23,6 +23,10 @@ A web-based D&D 5e toolkit for Dungeon Masters and players. The central hub ([in
 - **Scripts:** theme.js
 - **Features:** Card grid linking to all tools; no tool-specific features.
 
+### External tools
+
+The hub also links to these third-party D&D 5e tools, hosted at [tetra-cube.github.io](https://tetra-cube.github.io) ([Tetra-cube/Tetra-cube.github.io](https://github.com/Tetra-cube/Tetra-cube.github.io)): **PC Options Reference**, **Random Character Generator**, **Magic Item Generator**, and **Statblock Generator**. They open in a new tab; starring and sort work the same as for local tools.
+
 ---
 
 ## Tools (per page)
@@ -73,6 +77,24 @@ Tools live in `tools/<name>/` with `index.html` as the entry point.
   - Step-based authoring
   - JSON import/export
   - No PDF; no AI prompt generator in-page (focused on authoring structure)
+
+---
+
+### Arcane Dashboard
+
+**Page:** [tools/arcane-dashboard/](tools/arcane-dashboard/)
+
+- **Purpose:** Virtual DM screen – full-screen, dark-themed control center with modular widgets for running sessions.
+- **CSS:** global.css, [dashboard.css](tools/arcane-dashboard/dashboard.css)
+- **Scripts:** theme.js, state.js, layout-engine.js, dashboard.js, widgets (initiative, notes-vault, rule-popup, random-generator)
+- **Features:**
+  - **Widgets:** Initiative tracker (roll, sort, next turn), Notes vault (tabbed sections, optional encrypted sections with Web Crypto + passphrase and hint), Rule search (keyword search, floating cards), Random generator (custom tables, roll with optional animation).
+  - **Layout:** Drag-and-drop, resize, snap-to-grid or freeform toggle; per-campaign layout persistence; versioned localStorage (v1- prefix).
+  - **Whisper mode:** Overlay hides DM-only content; shows only public initiative (current turn) and pinned widgets. Toggle via shortcut (W) or toolbar.
+  - **Shortcuts:** W = whisper, ? = help; remappable in Settings if browser captures a key.
+  - **Export/import:** Full campaign JSON for backup and recovery.
+  - **Background:** Upload image (max 2 MB, client-side compression) or presets (Nebula, Parchment).
+  - **Plugin API:** `window.ArcaneDashboard.registerWidget(typeId, config)` and layout-manager stub for future widget extensions.
 
 ---
 
@@ -197,6 +219,7 @@ The **Interactive Map** ([tools/interactive-map/](tools/interactive-map/)) uses 
 | [tools/ai-dm-prompt-builder/](tools/ai-dm-prompt-builder/) | global.css, styles.css | theme.js, script.js | AI prompt, Run Prompt, JSON import/export |
 | [tools/adventure-packet-builder/](tools/adventure-packet-builder/) | global.css, styles.css | theme.js, adventure-packet-builder.js | AI prompt, LM Studio packet, JSON import/export |
 | [tools/adventure-maker/](tools/adventure-maker/) | global.css, styles.css + inline | theme.js, adventure-maker.js | Step authoring, JSON import/export |
+| [tools/arcane-dashboard/](tools/arcane-dashboard/) | global.css, dashboard.css | theme.js, state.js, layout-engine.js, dashboard.js, widgets | DM screen: initiative, notes, rules, random, whisper, export/import |
 | [tools/combat-turn-helper/](tools/combat-turn-helper/) | global.css, combat-turn-helper.css | PDF.js, character-sheet-importer.js, theme.js | PDF import, JSON import/export, turn tracking, reaction widget |
 | [tools/cassalanter-inquiry-runner/](tools/cassalanter-inquiry-runner/) | global.css, styles.css + inline | theme.js | Case DC/Heat/Doom, dice, Discord/Avrae export |
 | [tools/cassalanter-inquiry-wizard/](tools/cassalanter-inquiry-wizard/) | global.css, styles.css + inline | PDF.js, character-sheet-importer.js, theme.js | PDF import, wizard steps, Discord/Avrae |
