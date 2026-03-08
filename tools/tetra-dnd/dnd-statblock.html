@@ -62,11 +62,12 @@
             <button onclick="TryMarkdown()">View Markdown</button>
             <input id="file-upload" type="file" onChange="TryLoadFile();" hidden />
             <br><br>
-            <div id="monster-select-form">Monster Presets: <select id="monster-select">
+            <div id="monster-select-form">Monster Presets: <span id="monster-select-loading" class="monster-loading">Loading monsters…</span>
+                <select id="monster-select" disabled aria-busy="true">
                     <option value="">-Select-</option>
                     <option value="default">Restore Default</option>
                 </select> <button type="button" id="monster-select-button" onclick="InputFunctions.GetPreset()">Use
-                    Preset</button></div>
+                    Preset</button> <button type="button" id="monster-refresh-button" onclick="MonsterPresets.refreshList()">Refresh list</button></div>
             <br>
 
             <!-- The Actual Stat Block -->
@@ -197,7 +198,7 @@
                                     <option value="*">Other</option>
                                 </select>
                             </label>
-                            <div><input id="other-type-input" type="text" value="swarm of Tiny beasts"></div>
+                            <div><label for="other-type-input" class="sr-only">Other type</label><input id="other-type-input" type="text" value="swarm of Tiny beasts" title="Other creature type"></div>
                         </td>
                         <td>
                             <label for="tag-input">Tag: <br>

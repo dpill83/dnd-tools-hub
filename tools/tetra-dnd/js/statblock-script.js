@@ -1971,30 +1971,208 @@ var ArrayFunctions = {
     }
 }
 
+// --- Monster presets: Open5e API with localStorage cache and offline fallback ---
+// Tome of Beasts is third-party data (Kobold Press) via Open5e; may be subject to future removal or licensing changes.
+var MonsterPresets = (function () {
+    var CACHE_KEY = "open5e-monster-list-v2";
+    var CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+    var SRD_URL = "https://api.open5e.com/monsters/?format=json&fields=slug,name&limit=1000&document__slug=wotc-srd";
+    var TOB_URL = "https://api.open5e.com/monsters/?format=json&fields=slug,name&limit=1000&document__slug=tob";
+
+    // Minimal offline fallback: most commonly used SRD monsters when API and cache are unavailable.
+    var MONSTER_LIST_FALLBACK = [
+        { slug: "goblin", name: "Goblin" }, { slug: "orc", name: "Orc" }, { slug: "owlbear", name: "Owlbear" },
+        { slug: "adult-red-dragon", name: "Adult Red Dragon" }, { slug: "young-red-dragon", name: "Young Red Dragon" },
+        { slug: "beholder", name: "Beholder" }, { slug: "mind-flayer", name: "Mind Flayer" },
+        { slug: "vampire", name: "Vampire" }, { slug: "werewolf", name: "Werewolf" },
+        { slug: "skeleton", name: "Skeleton" }, { slug: "zombie", name: "Zombie" }, { slug: "ghost", name: "Ghost" },
+        { slug: "wraith", name: "Wraith" }, { slug: "troll", name: "Troll" }, { slug: "ogre", name: "Ogre" },
+        { slug: "hill-giant", name: "Hill Giant" }, { slug: "fire-giant", name: "Fire Giant" },
+        { slug: "hydra", name: "Hydra" }, { slug: "chimera", name: "Chimera" }, { slug: "manticore", name: "Manticore" },
+        { slug: "basilisk", name: "Basilisk" }, { slug: "gelatinous-cube", name: "Gelatinous Cube" },
+        { slug: "rust-monster", name: "Rust Monster" }, { slug: "displacer-beast", name: "Displacer Beast" },
+        { slug: "phase-spider", name: "Phase Spider" }, { slug: "bulette", name: "Bulette" }, { slug: "stirge", name: "Stirge" },
+        { slug: "kobold", name: "Kobold" }, { slug: "gnoll", name: "Gnoll" }, { slug: "hobgoblin", name: "Hobgoblin" },
+        { slug: "bugbear", name: "Bugbear" }, { slug: "lizardfolk", name: "Lizardfolk" },
+        { slug: "bandit", name: "Bandit" }, { slug: "guard", name: "Guard" }, { slug: "knight", name: "Knight" },
+        { slug: "assassin", name: "Assassin" }, { slug: "acolyte", name: "Acolyte" }, { slug: "cultist", name: "Cultist" },
+        { slug: "druid", name: "Druid" }, { slug: "mage", name: "Mage" }, { slug: "priest", name: "Priest" },
+        { slug: "veteran", name: "Veteran" }, { slug: "bandit-captain", name: "Bandit Captain" },
+        { slug: "berserker", name: "Berserker" }, { slug: "scout", name: "Scout" }, { slug: "spy", name: "Spy" },
+        { slug: "thug", name: "Thug" }, { slug: "tribal-warrior", name: "Tribal Warrior" },
+        { slug: "wolf", name: "Wolf" }, { slug: "brown-bear", name: "Brown Bear" }, { slug: "black-bear", name: "Black Bear" },
+        { slug: "boar", name: "Boar" }, { slug: "rat", name: "Rat" }, { slug: "giant-spider", name: "Giant Spider" },
+        { slug: "spider", name: "Spider" }, { slug: "eagle", name: "Eagle" }, { slug: "hawk", name: "Hawk" },
+        { slug: "adult-black-dragon", name: "Adult Black Dragon" }, { slug: "adult-blue-dragon", name: "Adult Blue Dragon" },
+        { slug: "adult-green-dragon", name: "Adult Green Dragon" }, { slug: "adult-white-dragon", name: "Adult White Dragon" },
+        { slug: "young-black-dragon", name: "Young Black Dragon" }, { slug: "young-green-dragon", name: "Young Green Dragon" },
+        { slug: "black-dragon-wyrmling", name: "Black Dragon Wyrmling" }, { slug: "red-dragon-wyrmling", name: "Red Dragon Wyrmling" },
+        { slug: "dragon-turtle", name: "Dragon Turtle" }, { slug: "pseudodragon", name: "Pseudodragon" },
+        { slug: "imp", name: "Imp" }, { slug: "quasit", name: "Quasit" }, { slug: "succubus-incubus", name: "Succubus/Incubus" },
+        { slug: "nightmare", name: "Nightmare" }, { slug: "hell-hound", name: "Hell Hound" },
+        { slug: "goblin-boss", name: "Goblin Boss" }, { slug: "orc-war-chief", name: "Orc War Chief" },
+        { slug: "hobgoblin-captain", name: "Hobgoblin Captain" }, { slug: "gnoll-pack-lord", name: "Gnoll Pack Lord" },
+        { slug: "skeleton-warhorse", name: "Skeleton Warhorse" }, { slug: "zombie-ogre", name: "Zombie Ogre" },
+        { slug: "ghoul", name: "Ghoul" }, { slug: "specter", name: "Specter" }, { slug: "shadow", name: "Shadow" },
+        { slug: "wight", name: "Wight" }, { slug: "mummy", name: "Mummy" }, { slug: "banshee", name: "Banshee" },
+        { slug: "grick", name: "Grick" }, { slug: "carrion-crawler", name: "Carrion Crawler" },
+        { slug: "umber-hulk", name: "Umber Hulk" }, { slug: "purple-worm", name: "Purple Worm" },
+        { slug: "remorhaz", name: "Remorhaz" }, { slug: "frost-giant", name: "Frost Giant" },
+        { slug: "stone-giant", name: "Stone Giant" }, { slug: "storm-giant", name: "Storm Giant" },
+        { slug: "ettin", name: "Ettin" }, { slug: "cyclops", name: "Cyclops" },
+        { slug: "harpy", name: "Harpy" }, { slug: "medusa", name: "Medusa" }, { slug: "gorgon", name: "Gorgon" },
+        { slug: "griffon", name: "Griffon" }, { slug: "hippogriff", name: "Hippogriff" }, { slug: "pegasus", name: "Pegasus" },
+        { slug: "unicorn", name: "Unicorn" }, { slug: "centaur", name: "Centaur" }, { slug: "satyr", name: "Satyr" },
+        { slug: "dryad", name: "Dryad" }, { slug: "treant", name: "Treant" }, { slug: "shambling-mound", name: "Shambling Mound" },
+        { slug: "ankheg", name: "Ankheg" }, { slug: "hook-horror", name: "Hook Horror" },
+        { slug: "minotaur", name: "Minotaur" }, { slug: "minotaur-skeleton", name: "Minotaur Skeleton" },
+        { slug: "gargoyle", name: "Gargoyle" }, { slug: "golem-clay", name: "Clay Golem" }, { slug: "golem-flesh", name: "Flesh Golem" },
+        { slug: "golem-stone", name: "Stone Golem" }, { slug: "golem-iron", name: "Iron Golem" },
+        { slug: "mage", name: "Mage" }, { slug: "archmage", name: "Archmage" }, { slug: "lich", name: "Lich" },
+        { slug: "warlock", name: "Warlock" }, { slug: "cult-fanatic", name: "Cult Fanatic" },
+        { slug: "druid", name: "Druid" }, { slug: "priest", name: "Priest" }, { slug: "cultist", name: "Cultist" },
+        { slug: "commoner", name: "Commoner" }, { slug: "noble", name: "Noble" }, { slug: "bandit", name: "Bandit" },
+        { slug: "scout", name: "Scout" }, { slug: "thug", name: "Thug" }, { slug: "tribal-warrior", name: "Tribal Warrior" },
+        { slug: "wolf", name: "Wolf" }, { slug: "dire-wolf", name: "Dire Wolf" }, { slug: "giant-wolf-spider", name: "Giant Wolf Spider" },
+        { slug: "giant-rat", name: "Giant Rat" }, { slug: "giant-bat", name: "Giant Bat" }, { slug: "giant-frog", name: "Giant Frog" },
+        { slug: "giant-snake-constrictor", name: "Constrictor Snake" }, { slug: "giant-snake-venomous", name: "Poisonous Snake" },
+        { slug: "crocodile", name: "Crocodile" }, { slug: "reef-shark", name: "Reef Shark" }, { slug: "warhorse", name: "Warhorse" },
+        { slug: "elephant", name: "Elephant" }, { slug: "lion", name: "Lion" }, { slug: "tiger", name: "Tiger" },
+        { slug: "brown-bear", name: "Brown Bear" }, { slug: "polar-bear", name: "Polar Bear" }, { slug: "ape", name: "Ape" },
+        { slug: "black-pudding", name: "Black Pudding" }, { slug: "gelatinous-cube", name: "Gelatinous Cube" },
+        { slug: "gray-ooze", name: "Gray Ooze" }, { slug: "ochre-jelly", name: "Ochre Jelly" },
+        { slug: "goblin", name: "Goblin" }, { slug: "kobold", name: "Kobold" }, { slug: "orc", name: "Orc" },
+        { slug: "skeleton", name: "Skeleton" }, { slug: "zombie", name: "Zombie" }, { slug: "ghoul", name: "Ghoul" },
+        { slug: "shadow", name: "Shadow" }, { slug: "wraith", name: "Wraith" }, { slug: "ghost", name: "Ghost" },
+        { slug: "specter", name: "Specter" }, { slug: "will-o-wisp", name: "Will-o'-Wisp" },
+        { slug: "flameskull", name: "Flameskull" }, { slug: "gibbering-mouther", name: "Gibbering Mouther" },
+        { slug: "grick-alpha", name: "Grick Alpha" }, { slug: "nothic", name: "Nothic" },
+        { slug: "doppleganger", name: "Doppelganger" }, { slug: "invisible-stalker", name: "Invisible Stalker" },
+        { slug: "phase-spider", name: "Phase Spider" }, { slug: "drider", name: "Drider" },
+        { slug: "ettin", name: "Ettin" }, { slug: "troll", name: "Troll" }, { slug: "ogre", name: "Ogre" },
+        { slug: "half-ogre", name: "Half-Ogre" }, { slug: "oni", name: "Oni" }
+    ];
+
+    // Fetch one Open5e page. Response has { results, next }. When limit=1000 is exceeded, use fetchAllOpen5ePages to follow "next" until null.
+    function fetchOpen5ePage(url) {
+        return fetch(url).then(function (res) { return res.ok ? res.json() : Promise.reject(new Error(res.statusText)); });
+    }
+
+    // Future-proofing: if a source has more than limit=1000 results, follow response.next and concatenate all pages.
+    function fetchAllOpen5ePages(url) {
+        function collect(url, acc) {
+            acc = acc || [];
+            return fetchOpen5ePage(url).then(function (body) {
+                if (body.results && body.results.length) acc = acc.concat(body.results);
+                if (body.next) return collect(body.next, acc);
+                return acc;
+            });
+        }
+        return collect(url);
+    }
+
+    function getCachedList() {
+        try {
+            var raw = localStorage.getItem(CACHE_KEY);
+            if (!raw) return null;
+            var parsed = JSON.parse(raw);
+            if (!parsed || !Array.isArray(parsed.list)) return null;
+            return { fetchedAt: parsed.fetchedAt || 0, list: parsed.list };
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function setCachedList(list, fetchedAt) {
+        try {
+            fetchedAt = fetchedAt || Date.now();
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ fetchedAt: fetchedAt, list: list }));
+        } catch (e) { /* ignore */ }
+    }
+
+    function isCacheStale(fetchedAt) {
+        return !fetchedAt || (Date.now() - fetchedAt > CACHE_TTL_MS);
+    }
+
+    function fetchMonsterList() {
+        return Promise.all([fetchAllOpen5ePages(SRD_URL), fetchAllOpen5ePages(TOB_URL)]).then(function (pair) {
+            var srdResults = pair[0] || [];
+            var tobResults = pair[1] || [];
+            var list = [];
+            list.push({ slug: "", name: "-5e SRD-", source: "srd" });
+            srdResults.forEach(function (m) { list.push({ slug: m.slug, name: m.name, source: "srd" }); });
+            list.push({ slug: "", name: "-Tome of Beasts (Kobold Press)-", source: "tob" });
+            tobResults.forEach(function (m) { list.push({ slug: m.slug, name: m.name, source: "tob" }); });
+            return list;
+        });
+    }
+
+    function buildOptionsFragment(list) {
+        var frag = document.createDocumentFragment();
+        list.forEach(function (item) {
+            var opt = document.createElement("option");
+            opt.value = item.slug || "";
+            opt.textContent = item.name || "";
+            frag.appendChild(opt);
+        });
+        return frag;
+    }
+
+    function populateSelectFromList(list) {
+        var sel = document.getElementById("monster-select");
+        if (!sel) return;
+        while (sel.options.length > 2) sel.remove(2);
+        sel.appendChild(buildOptionsFragment(list));
+    }
+
+    function setLoading(loading) {
+        var sel = document.getElementById("monster-select");
+        var loadingEl = document.getElementById("monster-select-loading");
+        if (sel) {
+            sel.disabled = loading;
+            sel.setAttribute("aria-busy", loading ? "true" : "false");
+        }
+        if (loadingEl) loadingEl.style.display = loading ? "inline" : "none";
+    }
+
+    function loadMonsterList(forceRefresh) {
+        setLoading(true);
+        var cached = getCachedList();
+        var useCacheFirst = !forceRefresh && cached && cached.list.length && !isCacheStale(cached.fetchedAt);
+        if (useCacheFirst) {
+            populateSelectFromList(cached.list);
+            setLoading(false);
+        }
+        function onFetched(list) {
+            populateSelectFromList(list);
+            setCachedList(list);
+            setLoading(false);
+        }
+        function onError() {
+            if (cached && cached.list.length) {
+                populateSelectFromList(cached.list);
+            } else {
+                populateSelectFromList(MONSTER_LIST_FALLBACK);
+            }
+            setLoading(false);
+        }
+        fetchMonsterList().then(onFetched).catch(onError);
+    }
+
+    function refreshList() {
+        try { localStorage.removeItem(CACHE_KEY); } catch (e) { /* ignore */ }
+        loadMonsterList(true);
+    }
+
+    return {
+        loadMonsterList: loadMonsterList,
+        refreshList: refreshList
+    };
+})();
+
 // Document ready function
 $(function () {
-    // Load the preset monster names
-    $.getJSON("https://api.open5e.com/monsters/?format=json&fields=slug,name&limit=1000&document__slug=wotc-srd", function (srdArr) {
-        let monsterSelect = $("#monster-select");
-        monsterSelect.append("<option value=''></option>");
-        monsterSelect.append("<option value=''>-5e SRD-</option>");
-        $.each(srdArr.results, function (index, value) {
-            monsterSelect.append("<option value='" + value.slug + "'>" + value.name + "</option>");
-        })
-        $.getJSON("https://api.open5e.com/monsters/?format=json&fields=slug,name&limit=1000&document__slug=tob", function (tobArr) {
-            monsterSelect.append("<option value=''></option>");
-            monsterSelect.append("<option value=''>-Tome of Beasts (Kobold Press)-</option>");
-            $.each(tobArr.results, function (index, value) {
-                monsterSelect.append("<option value='" + value.slug + "'>" + value.name + "</option>");
-            })
-        })
-            .fail(function () {
-                $("#monster-select-form").html("Unable to load Tome of Beasts monster presets.")
-            });
-    })
-        .fail(function () {
-            $("#monster-select-form").html("Unable to load monster presets.")
-        });
+    MonsterPresets.loadMonsterList();
 
     // Load the json data
     $.getJSON("js/JSON/statblockdata.json", function (json) {
