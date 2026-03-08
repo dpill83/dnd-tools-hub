@@ -917,25 +917,34 @@ var FormFunctions = {
 
 // Input functions to be called only through HTML
 var InputFunctions = {
-    // Get all variables from a preset
+    // Get all variables from a preset (reads slug from searchable monster input)
     GetPreset: function () {
-        let name = $("#monster-select").val();
-        if (name == "") return;
-        if (name == "default") {
+        var slug = document.getElementById("monster-select-slug") ? document.getElementById("monster-select-slug").value : "";
+        if (slug === "") return;
+        if (slug === "default") {
             GetVariablesFunctions.SetPreset(data.defaultPreset);
             FormFunctions.SetForms();
             UpdateStatblock();
             return;
         }
-        $.getJSON("https://api.open5e.com/monsters/" + name, function (jsonArr) {
+        $.getJSON("https://api.open5e.com/monsters/" + slug, function (jsonArr) {
             GetVariablesFunctions.SetPreset(jsonArr);
             FormFunctions.SetForms();
             UpdateStatblock();
         })
             .fail(function () {
                 console.error("Failed to load preset.");
-                return;
-            })
+            });
+    },
+
+    RestoreDefaultPreset: function () {
+        var slugEl = document.getElementById("monster-select-slug");
+        var inputEl = document.getElementById("monster-select-input");
+        if (slugEl) slugEl.value = "default";
+        if (inputEl) inputEl.value = "";
+        GetVariablesFunctions.SetPreset(data.defaultPreset);
+        FormFunctions.SetForms();
+        UpdateStatblock();
     },
 
     // Adding items to lists
@@ -2053,22 +2062,21 @@ var MonsterPresets = (function () {
         { slug: "half-ogre", name: "Half-Ogre" }, { slug: "oni", name: "Oni" }
     ];
 
-    // Fetch one Open5e page. Response has { results, next }. When limit=1000 is exceeded, use fetchAllOpen5ePages to follow "next" until null.
+    // Fetch one Open5e page. Response has { results, next }. Follow "next" when a source exceeds limit=1000.
     function fetchOpen5ePage(url) {
         return fetch(url).then(function (res) { return res.ok ? res.json() : Promise.reject(new Error(res.statusText)); });
     }
 
-    // Future-proofing: if a source has more than limit=1000 results, follow response.next and concatenate all pages.
-    function fetchAllOpen5ePages(url) {
-        function collect(url, acc) {
-            acc = acc || [];
-            return fetchOpen5ePage(url).then(function (body) {
-                if (body.results && body.results.length) acc = acc.concat(body.results);
-                if (body.next) return collect(body.next, acc);
-                return acc;
-            });
+    // Follow Open5e "next" pagination until no more pages; returns merged results array.
+    async function fetchAllOpen5ePages(url) {
+        var acc = [];
+        var nextUrl = url;
+        while (nextUrl) {
+            var body = await fetchOpen5ePage(nextUrl);
+            if (body.results && body.results.length) acc = acc.concat(body.results);
+            nextUrl = body.next || null;
         }
-        return collect(url);
+        return acc;
     }
 
     function getCachedList() {
@@ -2094,69 +2102,102 @@ var MonsterPresets = (function () {
         return !fetchedAt || (Date.now() - fetchedAt > CACHE_TTL_MS);
     }
 
-    function fetchMonsterList() {
-        return Promise.all([fetchAllOpen5ePages(SRD_URL), fetchAllOpen5ePages(TOB_URL)]).then(function (pair) {
-            var srdResults = pair[0] || [];
-            var tobResults = pair[1] || [];
-            var list = [];
-            list.push({ slug: "", name: "-5e SRD-", source: "srd" });
-            srdResults.forEach(function (m) { list.push({ slug: m.slug, name: m.name, source: "srd" }); });
-            list.push({ slug: "", name: "-Tome of Beasts (Kobold Press)-", source: "tob" });
-            tobResults.forEach(function (m) { list.push({ slug: m.slug, name: m.name, source: "tob" }); });
-            return list;
-        });
+    // Parallel fetch of both sources via Promise.all; merge into single list with section headers.
+    async function fetchMonsterList() {
+        var pair = await Promise.all([fetchAllOpen5ePages(SRD_URL), fetchAllOpen5ePages(TOB_URL)]);
+        var srdResults = pair[0] || [];
+        var tobResults = pair[1] || [];
+        var list = [];
+        list.push({ slug: "", name: "-5e SRD-", source: "srd" });
+        srdResults.forEach(function (m) { list.push({ slug: m.slug, name: m.name, source: "srd" }); });
+        list.push({ slug: "", name: "-Tome of Beasts (Kobold Press)-", source: "tob" });
+        tobResults.forEach(function (m) { list.push({ slug: m.slug, name: m.name, source: "tob" }); });
+        return list;
     }
 
-    function buildOptionsFragment(list) {
-        var frag = document.createDocumentFragment();
+    var nameToSlugMap = {};
+
+    function populateDatalistFromList(list) {
+        var datalist = document.getElementById("monster-datalist");
+        var inputEl = document.getElementById("monster-select-input");
+        if (!datalist || !inputEl) return;
+        nameToSlugMap = {};
+        datalist.innerHTML = "";
         list.forEach(function (item) {
+            if (!item.slug) return;
+            nameToSlugMap[item.name] = item.slug;
             var opt = document.createElement("option");
-            opt.value = item.slug || "";
-            opt.textContent = item.name || "";
-            frag.appendChild(opt);
+            opt.value = item.name;
+            datalist.appendChild(opt);
         });
-        return frag;
     }
 
-    function populateSelectFromList(list) {
-        var sel = document.getElementById("monster-select");
-        if (!sel) return;
-        while (sel.options.length > 2) sel.remove(2);
-        sel.appendChild(buildOptionsFragment(list));
+    function syncSlugFromInput() {
+        var inputEl = document.getElementById("monster-select-input");
+        var slugEl = document.getElementById("monster-select-slug");
+        if (!inputEl || !slugEl) return;
+        var name = (inputEl.value || "").trim();
+        slugEl.value = nameToSlugMap[name] || "";
     }
 
     function setLoading(loading) {
-        var sel = document.getElementById("monster-select");
+        var inputEl = document.getElementById("monster-select-input");
         var loadingEl = document.getElementById("monster-select-loading");
-        if (sel) {
-            sel.disabled = loading;
-            sel.setAttribute("aria-busy", loading ? "true" : "false");
-        }
+        var useBtn = document.getElementById("monster-select-button");
+        var refreshBtn = document.getElementById("monster-refresh-button");
+        var defaultBtn = document.getElementById("monster-restore-default");
+        [inputEl, useBtn, refreshBtn, defaultBtn].forEach(function (el) {
+            if (el) { el.disabled = loading; }
+        });
+        if (inputEl) inputEl.setAttribute("aria-busy", loading ? "true" : "false");
         if (loadingEl) loadingEl.style.display = loading ? "inline" : "none";
+        if (!loading) clearError();
+    }
+
+    function setError(message) {
+        var errEl = document.getElementById("monster-select-error");
+        if (errEl) {
+            errEl.textContent = message || "";
+            errEl.classList.toggle("monster-error-hidden", !message);
+        }
+    }
+
+    function clearError() {
+        setError("");
     }
 
     function loadMonsterList(forceRefresh) {
         setLoading(true);
+        clearError();
         var cached = getCachedList();
         var useCacheFirst = !forceRefresh && cached && cached.list.length && !isCacheStale(cached.fetchedAt);
         if (useCacheFirst) {
-            populateSelectFromList(cached.list);
+            populateDatalistFromList(cached.list);
             setLoading(false);
         }
         function onFetched(list) {
-            populateSelectFromList(list);
+            populateDatalistFromList(list);
             setCachedList(list);
             setLoading(false);
         }
         function onError() {
             if (cached && cached.list.length) {
-                populateSelectFromList(cached.list);
+                populateDatalistFromList(cached.list);
+                setError("Using cached list.");
             } else {
-                populateSelectFromList(MONSTER_LIST_FALLBACK);
+                populateDatalistFromList(MONSTER_LIST_FALLBACK);
+                setError("Offline: showing limited list.");
             }
             setLoading(false);
         }
         fetchMonsterList().then(onFetched).catch(onError);
+    }
+
+    function bindMonsterInput() {
+        var inputEl = document.getElementById("monster-select-input");
+        if (!inputEl) return;
+        inputEl.addEventListener("change", syncSlugFromInput);
+        inputEl.addEventListener("input", syncSlugFromInput);
     }
 
     function refreshList() {
@@ -2166,12 +2207,14 @@ var MonsterPresets = (function () {
 
     return {
         loadMonsterList: loadMonsterList,
-        refreshList: refreshList
+        refreshList: refreshList,
+        bindMonsterInput: bindMonsterInput
     };
 })();
 
 // Document ready function
 $(function () {
+    MonsterPresets.bindMonsterInput();
     MonsterPresets.loadMonsterList();
 
     // Load the json data

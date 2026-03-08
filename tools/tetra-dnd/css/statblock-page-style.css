@@ -35,6 +35,37 @@
     margin-right: 0.5rem;
 }
 
+.monster-spinner {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: monster-spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 0.35rem;
+}
+
+@keyframes monster-spin {
+    to { transform: rotate(360deg); }
+}
+
+.monster-error {
+    margin-right: 0.5rem;
+    color: #c00;
+    font-size: 0.9em;
+}
+
+.monster-error-hidden {
+    display: none;
+}
+
+#monster-select-input {
+    min-width: 14rem;
+    margin-right: 0.5rem;
+}
+
 #understands-but-input {
     width: 8rem;
 }

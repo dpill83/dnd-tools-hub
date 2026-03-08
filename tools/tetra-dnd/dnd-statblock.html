@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>D&amp;D 5e Statblock Generator</title>
     <link rel="shortcut icon" type="image/x-icon" href="dndimages/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
@@ -17,35 +18,10 @@
     <script src="js/dom-to-image.min.js"></script>
     <script src="js/statblock-script.js"></script>
 
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-145234284-1"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-
-        gtag('config', 'UA-145234284-1');
-    </script>
-
 </head>
 
 <body id="stat-block-body" style="min-width: 1000px;">
     <div class="container" style="text-align: center;">
-        <div id="kofiheader" style="text-align: center;">
-            <br>
-            <script src='https://ko-fi.com/widgets/widget_2.js'></script>
-            <script>
-                try {
-                    kofiwidget2.init('Support Me on Ko-fi', '#46b798', 'Q5Q8MRF6');
-                    kofiwidget2.draw();
-                }
-                catch {
-                    console.error("Kofi widget display error")
-                    document.writeln('<a id="kofi-button" href="https://ko-fi.com/Q5Q8MRF6" target="_blank"><b>Support me on Ko-Fi!</b></a>');
-                }
-            </script>
-            <br>
-        </div>
         <div class="content">
             <div style="text-align: center;"><a href="dnd-reference.html">PC Options Reference</a> - <a
                     href="dnd-char-gen.html">Character Generator</a> - <a href="dnd-magic-items.html">Magic Item
@@ -62,12 +38,16 @@
             <button onclick="TryMarkdown()">View Markdown</button>
             <input id="file-upload" type="file" onChange="TryLoadFile();" hidden />
             <br><br>
-            <div id="monster-select-form">Monster Presets: <span id="monster-select-loading" class="monster-loading">Loading monsters…</span>
-                <select id="monster-select" disabled aria-busy="true">
-                    <option value="">-Select-</option>
-                    <option value="default">Restore Default</option>
-                </select> <button type="button" id="monster-select-button" onclick="InputFunctions.GetPreset()">Use
-                    Preset</button> <button type="button" id="monster-refresh-button" onclick="MonsterPresets.refreshList()">Refresh list</button></div>
+            <div id="monster-select-form">Monster Presets:
+                <span id="monster-select-loading" class="monster-loading" aria-live="polite"><span class="monster-spinner" aria-hidden="true"></span> Loading monsters…</span>
+                <span id="monster-select-error" class="monster-error monster-error-hidden" role="alert"></span>
+                <input type="text" id="monster-select-input" list="monster-datalist" placeholder="Search or select monster…" autocomplete="off" disabled aria-busy="true" title="Monster preset search">
+                <input type="hidden" id="monster-select-slug" value="">
+                <datalist id="monster-datalist"></datalist>
+                <button type="button" id="monster-select-button" onclick="InputFunctions.GetPreset()">Use Preset</button>
+                <button type="button" id="monster-refresh-button" onclick="MonsterPresets.refreshList()">Refresh list</button>
+                <button type="button" id="monster-restore-default" onclick="InputFunctions.RestoreDefaultPreset()">Restore default</button>
+            </div>
             <br>
 
             <!-- The Actual Stat Block -->
@@ -414,7 +394,11 @@
                                     <option value="*">Other</option>
                                 </select>
                             </label>
-                            <div><input id="other-damage-input" type="text" value=""></div>
+                            <div>
+                                <label for="other-damage-input">Other:</label>
+                                <input id="other-damage-input" type="text" value=""
+                                    placeholder="Specify damage type" title="Specify damage type when Other is selected">
+                            </div>
                             <div>
                                 <button type="button"
                                     onclick="InputFunctions.AddDamageTypeInput('v')">Vulnerable</button>
@@ -548,7 +532,7 @@
                     <br><br>
                     <b>Legendary Actions Description:</b>
                     <div><label for="legendaries-descsection-input" style="width: 100%"><textarea
-                                id="legendaries-descsection-input" rows="4"></textarea></label></div>
+                                id="legendaries-descsection-input" rows="4" aria-label="Legendary Actions Description"></textarea></label></div>
                     <div><button type="button" onclick="InputFunctions.LegendaryDescriptionDefaultInput()">Reset to
                             Default</button></div>
                 </div>
@@ -556,7 +540,7 @@
                     <br>
                     <b>Mythic Actions Description:</b>
                     <div><label for="mythic-descsection-input" style="width: 100%"><textarea
-                                id="mythic-descsection-input" rows="4"></textarea></label></div>
+                                id="mythic-descsection-input" rows="4" aria-label="Mythic Actions Description"></textarea></label></div>
                     <div><button type="button" onclick="InputFunctions.MythicDescriptionDefaultInput()">Reset to
                             Default</button></div>
                 </div>
@@ -564,10 +548,10 @@
                     <br>
                     <b>Lair Actions Description:</b>
                     <div><label for="lair-descsection-input" style="width: 100%"><textarea id="lair-descsection-input"
-                                rows="4"></textarea></label></div>
+                                rows="4" aria-label="Lair Actions Description"></textarea></label></div>
                     <b>Lair Actions End Note Description:</b>
                     <div><label for="lair-end-descsection-input" style="width: 100%"><textarea
-                                id="lair-end-descsection-input" rows="4"></textarea></label></div>
+                                id="lair-end-descsection-input" rows="4" aria-label="Lair Actions End Note Description"></textarea></label></div>
                     <div><button type="button" onclick="InputFunctions.LairDescriptionDefaultInput()">Reset to
                             Default</button></div>
                 </div>
@@ -575,10 +559,10 @@
                     <br>
                     <b>Regional Effects Description:</b>
                     <div><label for="regional-descsection-input" style="width: 100%"><textarea
-                                id="regional-descsection-input" rows="4"></textarea></label></div>
+                                id="regional-descsection-input" rows="4" aria-label="Regional Effects Description"></textarea></label></div>
                     <b>Regional Effects End Note Description:</b>
                     <div><label for="regional-end-descsection-input" style="width: 100%"><textarea
-                                id="regional-end-descsection-input" rows="4"></textarea></label></div>
+                                id="regional-end-descsection-input" rows="4" aria-label="Regional Effects End Note Description"></textarea></label></div>
                     <div><button type="button" onclick="InputFunctions.RegionalDescriptionDefaultInput()">Reset to
                             Default</button></div>
                 </div>
@@ -586,7 +570,7 @@
                 <b>Abilities:</b>
                 <div><label for="abilities-name-input" style="width: 100%;">Name: <input id="abilities-name-input"
                             type="text" value="" style="margin-right: 40px; width: 30%;"></label></div>
-                <div><textarea id="abilities-desc-input" style="height: 10em;"></textarea></div>
+                <div><textarea id="abilities-desc-input" style="height: 10em;" aria-label="Abilities description"></textarea></div>
                 <div>
                     <button type="button" id="add-ability-button"
                         onclick="InputFunctions.AddAbilityInput('abilities')">Add Ability</button>
