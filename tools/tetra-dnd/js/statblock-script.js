@@ -915,6 +915,59 @@ var FormFunctions = {
     }
 }
 
+// Per-monster API response cache (in-memory + localStorage, 7-day TTL, max 100 entries)
+var monsterPresetCache = (function () {
+    var MEMORY = {};
+    var CACHE_KEY = "open5e-monster-cache-v1";
+    var TTL_MS = 7 * 24 * 60 * 60 * 1000;
+    var MAX_ENTRIES = 100;
+
+    function get(slug) {
+        if (MEMORY[slug]) return MEMORY[slug];
+        try {
+            var raw = localStorage.getItem(CACHE_KEY);
+            if (!raw) return null;
+            var parsed = JSON.parse(raw);
+            if (!parsed || !parsed.entries) return null;
+            var ent = parsed.entries[slug];
+            if (!ent || !ent.data) return null;
+            if (Date.now() - (ent.fetchedAt || 0) > TTL_MS) return null;
+            MEMORY[slug] = ent.data;
+            return ent.data;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function set(slug, data) {
+        MEMORY[slug] = data;
+        try {
+            var raw = localStorage.getItem(CACHE_KEY);
+            var parsed = raw ? JSON.parse(raw) : { entries: {}, order: [] };
+            if (!parsed.entries) parsed.entries = {};
+            if (!parsed.order) parsed.order = [];
+            parsed.entries[slug] = { data: data, fetchedAt: Date.now() };
+            var idx = parsed.order.indexOf(slug);
+            if (idx !== -1) parsed.order.splice(idx, 1);
+            parsed.order.push(slug);
+            while (parsed.order.length > MAX_ENTRIES) {
+                var old = parsed.order.shift();
+                delete parsed.entries[old];
+            }
+            localStorage.setItem(CACHE_KEY, JSON.stringify(parsed));
+        } catch (e) { /* ignore */ }
+    }
+
+    return { get: get, set: set };
+})();
+
+function setPresetLoading(loading) {
+    var btn = document.getElementById("monster-select-button");
+    var el = document.getElementById("monster-preset-loading");
+    if (btn) btn.disabled = loading;
+    if (el) el.style.display = loading ? "inline" : "none";
+}
+
 // Input functions to be called only through HTML
 var InputFunctions = {
     // Get all variables from a preset (reads slug from searchable monster input)
@@ -927,13 +980,24 @@ var InputFunctions = {
             UpdateStatblock();
             return;
         }
+        var cached = monsterPresetCache.get(slug);
+        if (cached) {
+            GetVariablesFunctions.SetPreset(cached);
+            FormFunctions.SetForms();
+            UpdateStatblock();
+            return;
+        }
+        setPresetLoading(true);
         $.getJSON("https://api.open5e.com/monsters/" + slug, function (jsonArr) {
+            monsterPresetCache.set(slug, jsonArr);
             GetVariablesFunctions.SetPreset(jsonArr);
             FormFunctions.SetForms();
             UpdateStatblock();
+            setPresetLoading(false);
         })
             .fail(function () {
                 console.error("Failed to load preset.");
+                setPresetLoading(false);
             });
     },
 

@@ -38,16 +38,18 @@
             <button onclick="TryMarkdown()">View Markdown</button>
             <input id="file-upload" type="file" onChange="TryLoadFile();" hidden />
             <br><br>
-            <div id="monster-select-form">Monster Presets:
+            <div id="monster-select-form">
+                Monster Presets:
                 <span id="monster-select-loading" class="monster-loading" aria-live="polite"><span class="monster-spinner" aria-hidden="true"></span> Loading monsters…</span>
                 <span id="monster-select-error" class="monster-error monster-error-hidden" role="alert"></span>
-                <input type="text" id="monster-select-input" list="monster-datalist" placeholder="Search or select monster…" autocomplete="off" disabled aria-busy="true" title="Monster preset search">
+                <input type="text" id="monster-select-input" list="monster-datalist" placeholder="Search or select monster…" autocomplete="off" disabled aria-busy="true" title="Monster preset search" style="width: 280px; max-width: 45%;">
                 <input type="hidden" id="monster-select-slug" value="">
                 <datalist id="monster-datalist"></datalist>
                 <button type="button" id="monster-select-button" onclick="InputFunctions.GetPreset()">Use Preset</button>
+                <span id="monster-preset-loading" class="monster-loading" style="display: none;" aria-live="polite"><span class="monster-spinner" aria-hidden="true"></span> Loading preset…</span>
                 <button type="button" id="monster-refresh-button" onclick="MonsterPresets.refreshList()">Refresh list</button>
                 <button type="button" id="monster-restore-default" onclick="InputFunctions.RestoreDefaultPreset()">Restore default</button>
-            </div>
+              </div>
             <br>
 
             <!-- The Actual Stat Block -->
