@@ -36,7 +36,7 @@
             <button onclick="TryPrint()">Printable Block</button>
             <button onclick="TryImage()">View Image</button>
             <button onclick="TryMarkdown()">View Markdown</button>
-            <input id="file-upload" type="file" onChange="TryLoadFile();" hidden aria-label="Load statblock file" />
+            <input id="file-upload" type="file" onChange="TryLoadFile();" hidden />
             <br><br>
             <div id="monster-select-form">
                 Monster Presets:
@@ -49,7 +49,6 @@
                 <span id="monster-preset-loading" class="monster-loading" style="display: none;" aria-live="polite"><span class="monster-spinner" aria-hidden="true"></span> Loading preset…</span>
                 <button type="button" id="monster-refresh-button" onclick="MonsterPresets.refreshList()">Refresh list</button>
                 <button type="button" id="monster-restore-default" onclick="InputFunctions.RestoreDefaultPreset()">Restore default</button>
-                <button type="button" id="monster-add-preset" onclick="InputFunctions.AddCurrentAsPreset()" title="Save current statblock as a reusable preset in the dropdown">Add to presets</button>
               </div>
             <br>
 
@@ -185,7 +184,7 @@
                         </td>
                         <td>
                             <label for="tag-input">Tag: <br>
-                                <input id="tag-input" type="text" placeholder="e.g. humanoid" title="Creature tag"></label>
+                                <input id="tag-input" type="text"></label>
                         </td>
                         <td>
                             <label for="alignment-input">Alignment: <br>
@@ -443,17 +442,13 @@
                             <label for="telepathy-input" style="margin-left: .5rem;">Telepathy:<br><input type="number"
                                     id="telepathy-input" min="0" max="995" step="5" value="0"> ft.</label>
                             <div>
-                                <label for="other-language-input" class="sr-only">Other language</label>
-                                <input id="other-language-input" type="text" value="" placeholder="e.g. Custom language" title="Other language name" aria-label="Other language">
+                                <input id="other-language-input" type="text" value="">
                             </div>
                             <div>
                                 <button type="button" onclick="InputFunctions.AddLanguageInput(true)">Speaks</button>
                                 <button type="button"
                                     onclick="InputFunctions.AddLanguageInput(false)">Understands</button> but
-                                <label for="understands-but-input" class="sr-only">Exception (e.g. can't speak)</label>
-                                <input id="understands-but-input" type="text" value="can't speak"
-                                    title="Exception for understands (e.g. can't speak)"
-                                    placeholder="e.g. can't speak">
+                                <input id="understands-but-input" type="text" value="can't speak">
                             </div>
                             <div id="languages-input-section">
                                 <ul id="languages-input-list" class="statblock-list"></ul>
@@ -576,7 +571,7 @@
                 <br>
                 <b>Abilities:</b>
                 <div><label for="abilities-name-input" style="width: 100%;">Name: <input id="abilities-name-input"
-                            type="text" value="" placeholder="e.g. Fey Ancestry" title="Ability name" style="margin-right: 40px; width: 30%;"></label></div>
+                            type="text" value="" style="margin-right: 40px; width: 30%;"></label></div>
                 <div><textarea id="abilities-desc-input" style="height: 10em;" aria-label="Abilities description"></textarea></div>
                 <div>
                     <button type="button" id="add-ability-button"

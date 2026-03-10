@@ -980,6 +980,14 @@ var InputFunctions = {
             UpdateStatblock();
             return;
         }
+        if (typeof MonsterPresets !== "undefined") {
+            var customPreset = MonsterPresets.getCustomPreset(slug);
+            if (customPreset) {
+                Object.assign(mon, customPreset);
+                Populate();
+                return;
+            }
+        }
         var cached = monsterPresetCache.get(slug);
         if (cached) {
             GetVariablesFunctions.SetPreset(cached);
@@ -1009,6 +1017,19 @@ var InputFunctions = {
         GetVariablesFunctions.SetPreset(data.defaultPreset);
         FormFunctions.SetForms();
         UpdateStatblock();
+    },
+
+    AddCurrentAsPreset: function () {
+        GetVariablesFunctions.GetAllVariables();
+        var name = (mon.name || "").trim();
+        if (!name) return;
+        var slug = MonsterPresets.addCustomPreset(JSON.parse(JSON.stringify(mon)));
+        if (slug) {
+            var inputEl = document.getElementById("monster-select-input");
+            var slugEl = document.getElementById("monster-select-slug");
+            if (inputEl) inputEl.value = name + " (custom)";
+            if (slugEl) slugEl.value = slug;
+        }
     },
 
     // Adding items to lists
@@ -2044,13 +2065,40 @@ var ArrayFunctions = {
     }
 }
 
-// --- Monster presets: Open5e API with localStorage cache and offline fallback ---
+// --- Monster presets: Open5e API + local custom catalog (file + localStorage), with offline fallback ---
 // Tome of Beasts is third-party data (Kobold Press) via Open5e; may be subject to future removal or licensing changes.
 var MonsterPresets = (function () {
     var CACHE_KEY = "open5e-monster-list-v2";
     var CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+    var CUSTOM_STORAGE_KEY = "statblock-custom-presets";
     var SRD_URL = "https://api.open5e.com/monsters/?format=json&fields=slug,name&limit=1000&document__slug=wotc-srd";
     var TOB_URL = "https://api.open5e.com/monsters/?format=json&fields=slug,name&limit=1000&document__slug=tob";
+
+    var customMonsterCatalog = {};
+    var customMonsterCatalogLoaded = false;
+    var slugToSourceMap = {};
+
+    function getCustomFromStorage() {
+        try {
+            var raw = localStorage.getItem(CUSTOM_STORAGE_KEY);
+            if (!raw) return {};
+            var parsed = JSON.parse(raw);
+            return parsed && typeof parsed === "object" ? parsed : {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function getCustomMonsters() {
+        return Object.assign({}, customMonsterCatalog, getCustomFromStorage());
+    }
+
+    function getCustomList() {
+        var m = getCustomMonsters();
+        return Object.keys(m).map(function (slug) {
+            return { source: "custom", slug: slug, name: (m[slug].name || slug) + " (custom)" };
+        });
+    }
 
     // Minimal offline fallback: most commonly used SRD monsters when API and cache are unavailable.
     var MONSTER_LIST_FALLBACK = [
@@ -2166,8 +2214,18 @@ var MonsterPresets = (function () {
         return !fetchedAt || (Date.now() - fetchedAt > CACHE_TTL_MS);
     }
 
-    // Parallel fetch of both sources via Promise.all; merge into single list with section headers.
+    // Load custom catalog once, then merge Open5e + custom list with section headers.
     async function fetchMonsterList() {
+        if (!customMonsterCatalogLoaded) {
+            try {
+                var customJson = await $.getJSON("js/JSON/custom-monsters.json");
+                customMonsterCatalog = customJson && typeof customJson === "object" ? customJson : {};
+                customMonsterCatalogLoaded = true;
+            } catch (e) {
+                customMonsterCatalog = {};
+                customMonsterCatalogLoaded = true;
+            }
+        }
         var pair = await Promise.all([fetchAllOpen5ePages(SRD_URL), fetchAllOpen5ePages(TOB_URL)]);
         var srdResults = pair[0] || [];
         var tobResults = pair[1] || [];
@@ -2176,6 +2234,11 @@ var MonsterPresets = (function () {
         srdResults.forEach(function (m) { list.push({ slug: m.slug, name: m.name, source: "srd" }); });
         list.push({ slug: "", name: "-Tome of Beasts (Kobold Press)-", source: "tob" });
         tobResults.forEach(function (m) { list.push({ slug: m.slug, name: m.name, source: "tob" }); });
+        var customList = getCustomList();
+        if (customList.length > 0) {
+            list.push({ slug: "", name: "-Custom-", source: "custom" });
+            customList.forEach(function (item) { list.push(item); });
+        }
         return list;
     }
 
@@ -2186,9 +2249,11 @@ var MonsterPresets = (function () {
         var inputEl = document.getElementById("monster-select-input");
         if (!datalist || !inputEl) return;
         nameToSlugMap = {};
+        slugToSourceMap = {};
         datalist.innerHTML = "";
         list.forEach(function (item) {
             if (!item.slug) return;
+            slugToSourceMap[item.slug] = item.source || "open5e";
             nameToSlugMap[item.name] = item.slug;
             var opt = document.createElement("option");
             opt.value = item.name;
@@ -2269,10 +2334,43 @@ var MonsterPresets = (function () {
         loadMonsterList(true);
     }
 
+    function getPresetSource(slug) {
+        return slugToSourceMap[slug] || "";
+    }
+
+    function getCustomPreset(slug) {
+        var m = getCustomMonsters();
+        return m[slug] || null;
+    }
+
+    function slugFromName(name) {
+        return (name || "").toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") || "custom";
+    }
+
+    function addCustomPreset(monObj) {
+        var slug = slugFromName(monObj.name);
+        if (!slug) return false;
+        var storage = getCustomFromStorage();
+        storage[slug] = monObj;
+        try {
+            localStorage.setItem(CUSTOM_STORAGE_KEY, JSON.stringify(storage));
+            refreshList();
+            return slug;
+        } catch (e) {
+            return false;
+        }
+    }
+
     return {
         loadMonsterList: loadMonsterList,
         refreshList: refreshList,
-        bindMonsterInput: bindMonsterInput
+        bindMonsterInput: bindMonsterInput,
+        getPresetSource: getPresetSource,
+        getCustomPreset: getCustomPreset,
+        getCustomMonsters: getCustomMonsters,
+        getCustomFromStorage: getCustomFromStorage,
+        addCustomPreset: addCustomPreset,
+        CUSTOM_STORAGE_KEY: CUSTOM_STORAGE_KEY
     };
 })();
 
