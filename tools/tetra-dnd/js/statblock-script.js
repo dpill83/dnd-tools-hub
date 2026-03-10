@@ -110,6 +110,18 @@ function TryImage() {
 function UpdateBlockFromVariables(moveSeparationPoint) {
     GetVariablesFunctions.GetAllVariables();
     UpdateStatblock(moveSeparationPoint);
+    updateAddButtonVisibility();
+}
+
+// Smart Add button: only show when user has loaded a .monster file (so they can add it to the list)
+var loadedFromFile = false;
+
+function updateAddButtonVisibility() {
+    var el = document.getElementById("monster-add-to-list");
+    if (!el) return;
+    var name = (mon.name || "").trim();
+    var show = loadedFromFile && name !== "";
+    el.style.display = show ? "" : "none";
 }
 
 // Functions for saving/loading data
@@ -135,8 +147,10 @@ var SavedData = {
             reader = new FileReader();
 
         reader.onload = function (e) {
+            loadedFromFile = true;
             mon = JSON.parse(reader.result);
             Populate();
+            updateAddButtonVisibility();
         };
 
         reader.readAsText(file);
@@ -669,7 +683,8 @@ var FormFunctions = {
         // Challenge Rating
         $("#cr-input").val(mon.cr);
         $("#custom-cr-input").val(mon.customCr);
-        $("#custom-prof-input").val(mon.customProf);
+        // custom-prof-input is type="number"; avoid setting boolean false or non-numeric values
+        $("#custom-prof-input").val(typeof mon.customProf === "number" ? mon.customProf : "");
         this.ChangeCRForm();
 
         // Column Radio Buttons
@@ -777,7 +792,7 @@ var FormFunctions = {
             $("#prof-bonus").hide();
             $("#custom-cr").show();
             $("#custom-cr-input").val(mon.customCr);
-            $("#custom-prof-input").val(mon.customProf);
+            $("#custom-prof-input").val(typeof mon.customProf === "number" ? mon.customProf : "");
         }
         else {
             $("#prof-bonus").show();
@@ -974,10 +989,12 @@ var InputFunctions = {
     GetPreset: function () {
         var slug = document.getElementById("monster-select-slug") ? document.getElementById("monster-select-slug").value : "";
         if (slug === "") return;
+        loadedFromFile = false;
         if (slug === "default") {
             GetVariablesFunctions.SetPreset(data.defaultPreset);
             FormFunctions.SetForms();
             UpdateStatblock();
+            updateAddButtonVisibility();
             return;
         }
         if (typeof MonsterPresets !== "undefined") {
@@ -985,6 +1002,7 @@ var InputFunctions = {
             if (customPreset) {
                 Object.assign(mon, customPreset);
                 Populate();
+                updateAddButtonVisibility();
                 return;
             }
         }
@@ -993,6 +1011,7 @@ var InputFunctions = {
             GetVariablesFunctions.SetPreset(cached);
             FormFunctions.SetForms();
             UpdateStatblock();
+            updateAddButtonVisibility();
             return;
         }
         setPresetLoading(true);
@@ -1002,6 +1021,7 @@ var InputFunctions = {
             FormFunctions.SetForms();
             UpdateStatblock();
             setPresetLoading(false);
+            updateAddButtonVisibility();
         })
             .fail(function () {
                 console.error("Failed to load preset.");
@@ -1010,13 +1030,16 @@ var InputFunctions = {
     },
 
     RestoreDefaultPreset: function () {
+        loadedFromFile = false;
         var slugEl = document.getElementById("monster-select-slug");
-        var inputEl = document.getElementById("monster-select-input");
         if (slugEl) slugEl.value = "default";
-        if (inputEl) inputEl.value = "";
+        if (typeof MonsterPresets !== "undefined" && MonsterPresets.getSelectInstance()) {
+            MonsterPresets.getSelectInstance().setValue("");
+        }
         GetVariablesFunctions.SetPreset(data.defaultPreset);
         FormFunctions.SetForms();
         UpdateStatblock();
+        updateAddButtonVisibility();
     },
 
     AddCurrentAsPreset: function () {
@@ -1025,10 +1048,10 @@ var InputFunctions = {
         if (!name) return;
         var slug = MonsterPresets.addCustomPreset(JSON.parse(JSON.stringify(mon)));
         if (slug) {
-            var inputEl = document.getElementById("monster-select-input");
-            var slugEl = document.getElementById("monster-select-slug");
-            if (inputEl) inputEl.value = name + " (custom)";
-            if (slugEl) slugEl.value = slug;
+            loadedFromFile = false;
+            var displayText = name + (mon.cr != null && mon.cr !== "" ? " (CR " + mon.cr + ")" : "") + " (custom)";
+            MonsterPresets.setSelection(slug, displayText);
+            updateAddButtonVisibility();
         }
     },
 
@@ -2071,8 +2094,8 @@ var MonsterPresets = (function () {
     var CACHE_KEY = "open5e-monster-list-v2";
     var CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
     var CUSTOM_STORAGE_KEY = "statblock-custom-presets";
-    var SRD_URL = "https://api.open5e.com/monsters/?format=json&fields=slug,name&limit=1000&document__slug=wotc-srd";
-    var TOB_URL = "https://api.open5e.com/monsters/?format=json&fields=slug,name&limit=1000&document__slug=tob";
+    var SRD_URL = "https://api.open5e.com/monsters/?format=json&fields=slug,name,challenge_rating&limit=1000&document__slug=wotc-srd";
+    var TOB_URL = "https://api.open5e.com/monsters/?format=json&fields=slug,name,challenge_rating&limit=1000&document__slug=tob";
 
     var customMonsterCatalog = {};
     var customMonsterCatalogLoaded = false;
@@ -2096,7 +2119,12 @@ var MonsterPresets = (function () {
     function getCustomList() {
         var m = getCustomMonsters();
         return Object.keys(m).map(function (slug) {
-            return { source: "custom", slug: slug, name: (m[slug].name || slug) + " (custom)" };
+            var mon = m[slug];
+            var cr = mon.cr != null && mon.cr !== "" ? mon.cr : null;
+            var baseName = (mon.listLabel != null && String(mon.listLabel).trim() !== "")
+                ? String(mon.listLabel).trim()
+                : (mon.name || slug) + " (custom)";
+            return { source: "custom", slug: slug, name: baseName, challenge_rating: cr };
         });
     }
 
@@ -2231,9 +2259,9 @@ var MonsterPresets = (function () {
         var tobResults = pair[1] || [];
         var list = [];
         list.push({ slug: "", name: "-5e SRD-", source: "srd" });
-        srdResults.forEach(function (m) { list.push({ slug: m.slug, name: m.name, source: "srd" }); });
+        srdResults.forEach(function (m) { list.push({ slug: m.slug, name: m.name, source: "srd", challenge_rating: m.challenge_rating }); });
         list.push({ slug: "", name: "-Tome of Beasts (Kobold Press)-", source: "tob" });
-        tobResults.forEach(function (m) { list.push({ slug: m.slug, name: m.name, source: "tob" }); });
+        tobResults.forEach(function (m) { list.push({ slug: m.slug, name: m.name, source: "tob", challenge_rating: m.challenge_rating }); });
         var customList = getCustomList();
         if (customList.length > 0) {
             list.push({ slug: "", name: "-Custom-", source: "custom" });
@@ -2243,42 +2271,70 @@ var MonsterPresets = (function () {
     }
 
     var nameToSlugMap = {};
+    var monsterSelectInstance = null;
+
+    function formatMonsterOptionText(item) {
+        var cr = item.challenge_rating != null && item.challenge_rating !== "" ? item.challenge_rating : null;
+        return item.name + (cr != null ? " (CR " + cr + ")" : "");
+    }
 
     function populateDatalistFromList(list) {
-        var datalist = document.getElementById("monster-datalist");
-        var inputEl = document.getElementById("monster-select-input");
-        if (!datalist || !inputEl) return;
+        var selectEl = document.getElementById("monster-select-input");
+        if (!selectEl) return;
         nameToSlugMap = {};
         slugToSourceMap = {};
-        datalist.innerHTML = "";
+        var options = [];
         list.forEach(function (item) {
             if (!item.slug) return;
             slugToSourceMap[item.slug] = item.source || "open5e";
             nameToSlugMap[item.name] = item.slug;
-            var opt = document.createElement("option");
-            opt.value = item.name;
-            datalist.appendChild(opt);
+            options.push({ value: item.slug, text: formatMonsterOptionText(item) });
         });
-    }
-
-    function syncSlugFromInput() {
-        var inputEl = document.getElementById("monster-select-input");
-        var slugEl = document.getElementById("monster-select-slug");
-        if (!inputEl || !slugEl) return;
-        var name = (inputEl.value || "").trim();
-        slugEl.value = nameToSlugMap[name] || "";
+        if (typeof TomSelect !== "undefined") {
+            if (monsterSelectInstance) {
+                monsterSelectInstance.clearOptions();
+                monsterSelectInstance.addOptions(options);
+            } else {
+                monsterSelectInstance = new TomSelect("#monster-select-input", {
+                    options: options,
+                    valueField: "value",
+                    labelField: "text",
+                    searchField: ["text"],
+                    maxOptions: null,
+                    maxItems: 1,
+                    create: false,
+                    allowEmptyOption: true,
+                    placeholder: "Search monster…",
+                    plugins: { clear_button: { title: "Clear" } },
+                    onChange: function (val) {
+                        var slugEl = document.getElementById("monster-select-slug");
+                        if (slugEl) slugEl.value = val || "";
+                        if (val) InputFunctions.GetPreset();
+                    },
+                    onType: function (value) {
+                        if (this.items.length > 0 && value) {
+                            this.clear();
+                            this.setTextboxValue(value);
+                            var slugEl = document.getElementById("monster-select-slug");
+                            if (slugEl) slugEl.value = "";
+                            this.refreshOptions(true);
+                        }
+                    }
+                });
+            }
+        }
     }
 
     function setLoading(loading) {
-        var inputEl = document.getElementById("monster-select-input");
         var loadingEl = document.getElementById("monster-select-loading");
         var useBtn = document.getElementById("monster-select-button");
         var refreshBtn = document.getElementById("monster-refresh-button");
         var defaultBtn = document.getElementById("monster-restore-default");
-        [inputEl, useBtn, refreshBtn, defaultBtn].forEach(function (el) {
-            if (el) { el.disabled = loading; }
+        var addToListBtn = document.getElementById("monster-add-to-list");
+        if (monsterSelectInstance) monsterSelectInstance[loading ? "disable" : "enable"]();
+        [useBtn, refreshBtn, defaultBtn, addToListBtn].forEach(function (el) {
+            if (el) el.disabled = loading;
         });
-        if (inputEl) inputEl.setAttribute("aria-busy", loading ? "true" : "false");
         if (loadingEl) loadingEl.style.display = loading ? "inline" : "none";
         if (!loading) clearError();
     }
@@ -2323,10 +2379,7 @@ var MonsterPresets = (function () {
     }
 
     function bindMonsterInput() {
-        var inputEl = document.getElementById("monster-select-input");
-        if (!inputEl) return;
-        inputEl.addEventListener("change", syncSlugFromInput);
-        inputEl.addEventListener("input", syncSlugFromInput);
+        // Slug is synced via Tom Select onChange in populateDatalistFromList
     }
 
     function refreshList() {
@@ -2361,6 +2414,110 @@ var MonsterPresets = (function () {
         }
     }
 
+    function getSelectInstance() {
+        return monsterSelectInstance;
+    }
+
+    function setSelection(slug, displayText) {
+        var slugEl = document.getElementById("monster-select-slug");
+        if (slugEl) slugEl.value = slug || "";
+        if (monsterSelectInstance) {
+            if (slug && displayText) {
+                var opt = monsterSelectInstance.options[slug];
+                if (!opt) monsterSelectInstance.addOption({ value: slug, text: displayText });
+            }
+            monsterSelectInstance.setValue(slug || "");
+        }
+    }
+
+    function removeCustomPreset(slug) {
+        var storage = getCustomFromStorage();
+        if (!(slug in storage)) return false;
+        delete storage[slug];
+        try {
+            localStorage.setItem(CUSTOM_STORAGE_KEY, JSON.stringify(storage));
+            refreshList();
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function updateCustomPreset(slug, updates) {
+        var storage = getCustomFromStorage();
+        if (!(slug in storage)) return false;
+        var mon = storage[slug];
+        if (updates.listLabel !== undefined) mon.listLabel = updates.listLabel;
+        storage[slug] = mon;
+        try {
+            localStorage.setItem(CUSTOM_STORAGE_KEY, JSON.stringify(storage));
+            refreshList();
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function openManagePresets() {
+        var storage = getCustomFromStorage();
+        var slugs = Object.keys(storage);
+        var listEl = document.getElementById("manage-presets-list");
+        var emptyEl = document.getElementById("manage-presets-empty");
+        if (!listEl || !emptyEl) return;
+        listEl.innerHTML = "";
+        emptyEl.style.display = slugs.length === 0 ? "block" : "none";
+        slugs.forEach(function (slug) {
+            var mon = storage[slug];
+            var displayName = (mon.listLabel != null && String(mon.listLabel).trim() !== "")
+                ? String(mon.listLabel).trim()
+                : (mon.name || slug) + " (custom)";
+            var row = document.createElement("div");
+            row.className = "mb-3 manage-preset-row";
+            row.setAttribute("data-slug", slug);
+            var label = document.createElement("label");
+            label.className = "form-label small text-muted mb-1";
+            label.textContent = slug;
+            var div = document.createElement("div");
+            div.className = "input-group input-group-sm";
+            var input = document.createElement("input");
+            input.type = "text";
+            input.className = "form-control manage-preset-display-name";
+            input.placeholder = "Display name (empty = name + \"(custom)\")";
+            input.value = displayName;
+            input.setAttribute("aria-label", "Display name for " + slug);
+            var delBtn = document.createElement("button");
+            delBtn.type = "button";
+            delBtn.className = "btn btn-outline-danger";
+            delBtn.textContent = "Delete";
+            delBtn.setAttribute("aria-label", "Remove preset " + slug);
+            delBtn.onclick = function () {
+                if (removeCustomPreset(slug)) row.remove();
+                if (document.querySelectorAll("#manage-presets-list .manage-preset-row").length === 0)
+                    document.getElementById("manage-presets-empty").style.display = "block";
+            };
+            input.onchange = function () {
+                updateCustomPreset(slug, { listLabel: input.value.trim() });
+            };
+            input.onblur = function () {
+                updateCustomPreset(slug, { listLabel: input.value.trim() });
+            };
+            div.appendChild(input);
+            div.appendChild(delBtn);
+            row.appendChild(label);
+            row.appendChild(div);
+            listEl.appendChild(row);
+        });
+        var modalEl = document.getElementById("manage-presets-modal");
+        if (modalEl) {
+            if (typeof bootstrap !== "undefined" && bootstrap.Modal && typeof bootstrap.Modal.getOrCreateInstance === "function") {
+                var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.show();
+            } else if (typeof $ !== "undefined") {
+                $(modalEl).modal("show");
+            }
+        }
+    }
+
     return {
         loadMonsterList: loadMonsterList,
         refreshList: refreshList,
@@ -2370,6 +2527,11 @@ var MonsterPresets = (function () {
         getCustomMonsters: getCustomMonsters,
         getCustomFromStorage: getCustomFromStorage,
         addCustomPreset: addCustomPreset,
+        removeCustomPreset: removeCustomPreset,
+        updateCustomPreset: updateCustomPreset,
+        openManagePresets: openManagePresets,
+        getSelectInstance: getSelectInstance,
+        setSelection: setSelection,
         CUSTOM_STORAGE_KEY: CUSTOM_STORAGE_KEY
     };
 })();
@@ -2408,4 +2570,5 @@ function Populate() {
     FormFunctions.InitForms();
     FormFunctions.SetForms();
     UpdateStatblock();
+    updateAddButtonVisibility();
 }

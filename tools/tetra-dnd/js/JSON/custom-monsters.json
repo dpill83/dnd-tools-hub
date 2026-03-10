@@ -1,6 +1,7 @@
 {
 	"mind-flayer": {
 		"name": "Mind Flayer",
+		"listLabel": "Mind Flayer",
 		"size": "medium",
 		"type": "aberration",
 		"tag": "",

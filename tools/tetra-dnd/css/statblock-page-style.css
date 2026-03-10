@@ -1,3 +1,93 @@
+/* Toolbar: two flex rows, icon-only main actions, preset row below */
+.toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    text-align: center;
+}
+
+.toolbar-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+.toolbar-actions {
+    gap: 0.25rem;
+}
+
+.toolbar-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #a08b6e;
+    border-radius: 0.25rem;
+    background: #e8e0d4;
+    color: #522;
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.toolbar-btn-icon:hover {
+    background: #c9a227;
+    border-color: #a8831e;
+    color: #fff;
+}
+
+.toolbar-btn-icon .bi {
+    font-size: 1.15em;
+}
+
+.toolbar-preset-label {
+    margin: 0 0.25rem 0 0;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.toolbar-btn {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.9rem;
+    border: 1px solid #a08b6e;
+    border-radius: 0.25rem;
+    background: #e8e0d4;
+    color: #522;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.toolbar-btn:hover {
+    background: #c9a227;
+    border-color: #a8831e;
+    color: #fff;
+}
+
+.toolbar-btn-primary {
+    font-weight: 500;
+    background: #c9a227;
+    border-color: #a8831e;
+    color: #fff;
+}
+
+.toolbar-btn-primary:hover {
+    background: #a8831e;
+    border-color: #8a6b18;
+    color: #fff;
+}
+
+.toolbar-btn-secondary {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.5rem;
+}
+
+.preset-group .ts-wrapper {
+    margin-right: 0;
+}
+
 .indent {
     text-indent: 1rem;
 }
@@ -59,6 +149,71 @@
 
 .monster-error-hidden {
     display: none;
+}
+
+/* Monster preset dropdown (Tom Select) */
+.preset-group .ts-wrapper {
+    min-width: 14rem;
+    max-width: 22rem;
+    margin-right: 0.5rem;
+    display: inline-block;
+}
+
+.preset-group .ts-control,
+.preset-group .ts-control input,
+.preset-group .ts-dropdown .option {
+    font-size: 1rem;
+    line-height: 1.4;
+    padding: 0.35rem 0.5rem;
+}
+
+/* Single line: no wrap, clear button stays on right, long text ellipsis */
+.preset-group .ts-wrapper.single .ts-control {
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+/* Selected name: take available space, ellipsis if long, never collide with clear button */
+.preset-group .ts-wrapper.single.has-items .ts-control [data-ts-item] {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    padding-right: 1.75rem; /* room for the × button */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* When closed, hide the search input from taking flex space so the selected name gets room */
+.preset-group .ts-wrapper.single.has-items:not(.dropdown-active) .ts-control > input {
+    flex: 0 0 0;
+    min-width: 0;
+    max-width: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Clear button: always visible when something is selected, fixed on the right, no overlap */
+.preset-group .ts-wrapper.plugin-clear_button.has-items .clear-button {
+    opacity: 1;
+    left: auto;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Reserve space so selected text doesn’t run under the clear button */
+.preset-group .ts-wrapper.single.plugin-clear_button.has-items .ts-control {
+    padding-right: 0.75rem;
+}
+
+/* Tom Select dropdown may render outside preset-group */
+.ts-dropdown .ts-dropdown-content {
+    max-height: min(70vh, 320px);
+}
+
+.preset-group .ts-dropdown .option {
+    white-space: nowrap;
 }
 
 #monster-select-input {
