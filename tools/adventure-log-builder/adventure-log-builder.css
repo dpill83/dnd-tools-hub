@@ -43,6 +43,14 @@
     margin: -0.25rem 0 0.75rem 0;
 }
 
+.alb-table-title {
+    margin-top: 1rem;
+}
+
+.alb-field-full {
+    grid-column: 1 / -1;
+}
+
 .alb-fields {
     display: grid;
     grid-template-columns: 1fr 1fr;

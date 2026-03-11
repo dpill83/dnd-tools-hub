@@ -34,15 +34,26 @@
                 </div>
                 <div class="alb-field">
                     <label for="alb-session-date">Session date</label>
-                    <input type="text" id="alb-session-date" placeholder="YYYY/MM/DD" inputmode="numeric" maxlength="10" autocomplete="off">
-                </div>
-                <div class="alb-field">
-                    <label for="alb-players">Players present</label>
-                    <input type="text" id="alb-players" placeholder="Comma-separated or one per line">
+                    <input type="date" id="alb-session-date">
                 </div>
                 <div class="alb-field">
                     <label for="alb-session-number">Session number</label>
                     <input type="number" id="alb-session-number" min="1" placeholder="e.g. 12">
+                </div>
+            </div>
+            <div class="alb-section-title alb-table-title">Table</div>
+            <div class="alb-fields alb-table-fields">
+                <div class="alb-field alb-field-full">
+                    <label for="alb-dm">DM</label>
+                    <input type="text" id="alb-dm" placeholder="Who ran the session">
+                </div>
+                <div class="alb-field alb-field-full">
+                    <label for="alb-players">Players present</label>
+                    <input type="text" id="alb-players" placeholder="Player names, comma- or newline-separated">
+                </div>
+                <div class="alb-field alb-field-full">
+                    <label for="alb-characters">Characters played</label>
+                    <input type="text" id="alb-characters" placeholder="Who played what, e.g. Alice: Val, Pelan; Bob: Thorn">
                 </div>
             </div>
         </section>

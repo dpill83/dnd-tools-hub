@@ -87,7 +87,9 @@
             partOfCampaign: d.partOfCampaign || '',
             sessionDate: adv ? adv.sessionDate : d.sessionDate,
             sessionNumber: adv ? adv.sessionNumber : d.sessionNumber,
-            recentPlayers: (adv && adv.players && adv.players.length) ? adv.players : (d.recentPlayers || global.recentPlayers || [])
+            dm: adv ? adv.dm : d.dm,
+            recentPlayers: (adv && adv.players && adv.players.length) ? adv.players : (d.recentPlayers || global.recentPlayers || []),
+            characters: adv ? adv.characters : d.characters
         };
     }
 
@@ -95,14 +97,18 @@
         const adventure = (document.getElementById('alb-adventure') && document.getElementById('alb-adventure').value) || '';
         const partOfCampaign = (document.getElementById('alb-part-of-campaign') && document.getElementById('alb-part-of-campaign').value) || '';
         const sessionDate = (document.getElementById('alb-session-date') && document.getElementById('alb-session-date').value) || '';
-        const players = (document.getElementById('alb-players') && document.getElementById('alb-players').value) || '';
         const sessionNumber = (document.getElementById('alb-session-number') && document.getElementById('alb-session-number').value) || '';
+        const dm = (document.getElementById('alb-dm') && document.getElementById('alb-dm').value) || '';
+        const players = (document.getElementById('alb-players') && document.getElementById('alb-players').value) || '';
+        const characters = (document.getElementById('alb-characters') && document.getElementById('alb-characters').value) || '';
         return {
             adventure: adventure.trim(),
             partOfCampaign: partOfCampaign.trim(),
             sessionDate: sessionDate.trim(),
+            sessionNumber: sessionNumber.trim(),
+            dm: dm.trim(),
             players: players.trim().split(/[\n,]/).map(function (s) { return s.trim(); }).filter(Boolean),
-            sessionNumber: sessionNumber.trim()
+            characters: characters.trim()
         };
     }
 
@@ -113,8 +119,10 @@
         const adventureEl = document.getElementById('alb-adventure');
         const partOfCampaignEl = document.getElementById('alb-part-of-campaign');
         const dateEl = document.getElementById('alb-session-date');
-        const playersEl = document.getElementById('alb-players');
         const numEl = document.getElementById('alb-session-number');
+        const dmEl = document.getElementById('alb-dm');
+        const playersEl = document.getElementById('alb-players');
+        const charactersEl = document.getElementById('alb-characters');
 
         if (adventureEl && d.adventure) adventureEl.value = d.adventure;
         if (partOfCampaignEl && d.partOfCampaign) partOfCampaignEl.value = d.partOfCampaign;
@@ -126,23 +134,22 @@
         const lastPlayers = adventureSpecific && adventureSpecific.players && adventureSpecific.players.length
             ? adventureSpecific.players
             : (d.recentPlayers && Array.isArray(d.recentPlayers) ? d.recentPlayers : (typeof d.players === 'string' ? d.players.split(/[\n,]/).map(function (s) { return s.trim(); }).filter(Boolean) : []));
+        const lastDm = adventureSpecific ? adventureSpecific.dm : d.dm;
+        const lastCharacters = adventureSpecific ? adventureSpecific.characters : d.characters;
 
-        if (dateEl && lastDate) {
-            const normalized = String(lastDate).trim().replace(/-/g, '/');
-            dateEl.value = normalized;
-        }
+        if (dateEl && lastDate) dateEl.value = String(lastDate).trim().replace(/\//g, '-');
         if (numEl && lastNum != null && lastNum !== '') numEl.value = String(lastNum);
+        if (dmEl && lastDm) dmEl.value = lastDm;
         if (playersEl && lastPlayers.length) playersEl.value = lastPlayers.join(', ');
-        else if (playersEl && global.recentPlayers && global.recentPlayers.length) {
-            playersEl.value = global.recentPlayers.join(', ');
-        }
+        else if (playersEl && global.recentPlayers && global.recentPlayers.length) playersEl.value = global.recentPlayers.join(', ');
+        if (charactersEl && lastCharacters) charactersEl.value = lastCharacters;
 
         if (dateEl && !dateEl.value && lastDate) {
             try {
                 const iso = String(lastDate).trim().replace(/\//g, '-');
                 const next = new Date(iso);
                 if (!isNaN(next.getTime())) {
-                    dateEl.value = next.getFullYear() + '/' + String(next.getMonth() + 1).padStart(2, '0') + '/' + String(next.getDate()).padStart(2, '0');
+                    dateEl.value = next.toISOString().slice(0, 10);
                 }
             } catch (_) {}
         }
@@ -375,6 +382,8 @@
         d.partOfCampaign = session.partOfCampaign || d.partOfCampaign;
         d.sessionDate = session.sessionDate || d.sessionDate;
         d.sessionNumber = session.sessionNumber != null && session.sessionNumber !== '' ? session.sessionNumber : d.sessionNumber;
+        d.dm = session.dm || d.dm;
+        d.characters = session.characters || d.characters;
         if (session.players && session.players.length) {
             d.recentPlayers = session.players;
         }
@@ -386,7 +395,9 @@
             perAdv[adventureKey] = {
                 sessionDate: session.sessionDate || '',
                 sessionNumber: session.sessionNumber != null && session.sessionNumber !== '' ? session.sessionNumber : '',
-                players: session.players || []
+                dm: session.dm || '',
+                players: session.players || [],
+                characters: session.characters || ''
             };
             savePerAdventureDefaults(perAdv);
         }
@@ -448,7 +459,7 @@
             downloadBtn.onclick = function () {
                 const text = getCurrentOutputText();
                 const session = getSessionFromForm();
-                const datePart = (session.sessionDate || 'date').replace(/\//g, '-').replace(/\s+/g, '-');
+                const datePart = (session.sessionDate || 'date').replace(/\s+/g, '-');
                 const name = 'adventure-log-' + (session.adventure || 'log').replace(/\s+/g, '-') + '-' + datePart + '.md';
                 const blob = new Blob([text], { type: 'text/markdown' });
                 const a = document.createElement('a');
