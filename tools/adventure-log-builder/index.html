@@ -45,15 +45,28 @@
             <div class="alb-fields alb-table-fields">
                 <div class="alb-field alb-field-full">
                     <label for="alb-dm">DM</label>
-                    <input type="text" id="alb-dm" placeholder="Who ran the session">
+                    <input type="text" id="alb-dm" placeholder="Who ran the session" aria-describedby="alb-dm-desc">
+                    <span id="alb-dm-desc" class="alb-sr-only">Recurring default; pre-fills from last use for this adventure.</span>
                 </div>
                 <div class="alb-field alb-field-full">
-                    <label for="alb-players">Players present</label>
-                    <input type="text" id="alb-players" placeholder="Player names, comma- or newline-separated">
-                </div>
-                <div class="alb-field alb-field-full">
-                    <label for="alb-characters">Characters played</label>
-                    <input type="text" id="alb-characters" placeholder="Who played what, e.g. Alice: Val, Pelan; Bob: Thorn">
+                    <label id="alb-players-table-label">Players &amp; characters</label>
+                    <div class="alb-players-table-wrap" role="region" aria-labelledby="alb-players-table-label">
+                        <table class="alb-players-table" id="alb-players-table" aria-label="Player name, character name, and status per row">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Player name</th>
+                                    <th scope="col">Character name</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col"><span class="alb-sr-only">Remove row</span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="alb-players-tbody">
+                                <!-- Rows added by JS -->
+                            </tbody>
+                        </table>
+                        <datalist id="alb-player-suggestions"></datalist>
+                        <button type="button" id="alb-add-player-btn" class="alb-btn alb-add-row-btn" aria-label="Add player or character row">Add Player / Character</button>
+                    </div>
                 </div>
             </div>
         </section>

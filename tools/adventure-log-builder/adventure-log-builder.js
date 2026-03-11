@@ -82,14 +82,16 @@
         const perAdv = getPerAdventureDefaults();
         const key = getAdventureKey(session.adventure, session.partOfCampaign);
         const adv = (key && perAdv[key]) ? perAdv[key] : null;
+        const playersArray = (adv && adv.players && Array.isArray(adv.players)) ? adv.players : (d.players && Array.isArray(d.players) ? d.players : []);
+        const nameList = playersArray.map(function (p) { return typeof p === 'string' ? p : (p && p.player); }).filter(Boolean);
         return {
             adventure: d.adventure || '',
             partOfCampaign: d.partOfCampaign || '',
             sessionDate: adv ? adv.sessionDate : d.sessionDate,
             sessionNumber: adv ? adv.sessionNumber : d.sessionNumber,
             dm: adv ? adv.dm : d.dm,
-            recentPlayers: (adv && adv.players && adv.players.length) ? adv.players : (d.recentPlayers || global.recentPlayers || []),
-            characters: adv ? adv.characters : d.characters
+            players: playersArray,
+            recentPlayers: nameList.length ? nameList : (d.recentPlayers || global.recentPlayers || [])
         };
     }
 
@@ -99,17 +101,99 @@
         const sessionDate = (document.getElementById('alb-session-date') && document.getElementById('alb-session-date').value) || '';
         const sessionNumber = (document.getElementById('alb-session-number') && document.getElementById('alb-session-number').value) || '';
         const dm = (document.getElementById('alb-dm') && document.getElementById('alb-dm').value) || '';
-        const players = (document.getElementById('alb-players') && document.getElementById('alb-players').value) || '';
-        const characters = (document.getElementById('alb-characters') && document.getElementById('alb-characters').value) || '';
+        const tbody = document.getElementById('alb-players-tbody');
+        const players = [];
+        if (tbody) {
+            tbody.querySelectorAll('tr').forEach(function (tr) {
+                const playerInput = tr.querySelector('.alb-input-player');
+                const characterInput = tr.querySelector('.alb-input-character');
+                const statusSelect = tr.querySelector('.alb-select-status');
+                const player = (playerInput && playerInput.value) ? playerInput.value.trim() : '';
+                const character = (characterInput && characterInput.value) ? characterInput.value.trim() : '';
+                const status = (statusSelect && statusSelect.value) ? statusSelect.value : 'Present';
+                if (player || character) {
+                    players.push({ player: player, character: character, status: status });
+                }
+            });
+        }
         return {
             adventure: adventure.trim(),
             partOfCampaign: partOfCampaign.trim(),
             sessionDate: sessionDate.trim(),
             sessionNumber: sessionNumber.trim(),
             dm: dm.trim(),
-            players: players.trim().split(/[\n,]/).map(function (s) { return s.trim(); }).filter(Boolean),
-            characters: characters.trim()
+            players: players
         };
+    }
+
+    function getRecentPlayerNames() {
+        const global = getGlobalDefaults();
+        const d = getDefaults();
+        const perAdv = getPerAdventureDefaults();
+        const key = getAdventureKey(d.adventure, d.partOfCampaign);
+        const adv = (key && perAdv[key]) ? perAdv[key] : null;
+        const fromAdv = (adv && adv.players && Array.isArray(adv.players)) ? adv.players.map(function (p) { return typeof p === 'string' ? p : (p && p.player); }).filter(Boolean) : [];
+        const fromGlobal = global.recentPlayers || [];
+        const fromD = (d.players && Array.isArray(d.players)) ? d.players.map(function (p) { return typeof p === 'string' ? p : (p && p.player); }).filter(Boolean) : (d.recentPlayers || []);
+        const seen = {};
+        const out = [];
+        fromAdv.concat(fromD).concat(fromGlobal).forEach(function (name) {
+            const k = (name || '').trim().toLowerCase();
+            if (k && !seen[k]) {
+                seen[k] = true;
+                out.push((name || '').trim());
+            }
+        });
+        return out.slice(0, GLOBAL_RECENT_PLAYERS_CAP);
+    }
+
+    function refreshPlayerSuggestions() {
+        const datalist = document.getElementById('alb-player-suggestions');
+        if (!datalist) return;
+        datalist.innerHTML = '';
+        getRecentPlayerNames().forEach(function (name) {
+            const opt = document.createElement('option');
+            opt.value = name;
+            datalist.appendChild(opt);
+        });
+    }
+
+    function addPlayerRow(player, character, status) {
+        const tbody = document.getElementById('alb-players-tbody');
+        if (!tbody) return;
+        player = player || '';
+        character = character || '';
+        status = status || 'Present';
+        const tr = document.createElement('tr');
+        const playerId = 'alb-player-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+        tr.innerHTML =
+            '<td><label for="' + playerId + '" class="alb-sr-only">Player name</label><input type="text" class="alb-input-player" id="' + playerId + '" list="alb-player-suggestions" placeholder="Player name" autocomplete="off"></td>' +
+            '<td><label for="' + playerId + '-char" class="alb-sr-only">Character name</label><input type="text" class="alb-input-character" id="' + playerId + '-char" placeholder="Character name"></td>' +
+            '<td><label for="' + playerId + '-status" class="alb-sr-only">Status</label><select class="alb-select-status" id="' + playerId + '-status" aria-label="Status"><option value="Present"' + (status === 'Present' ? ' selected' : '') + '>Present</option><option value="Absent"' + (status === 'Absent' ? ' selected' : '') + '>Absent</option></select></td>' +
+            '<td class="alb-row-remove"><button type="button" class="alb-row-remove-btn" aria-label="Remove this row">\u2012</button></td>';
+        const playerInput = tr.querySelector('.alb-input-player');
+        const characterInput = tr.querySelector('.alb-input-character');
+        const statusSelect = tr.querySelector('.alb-select-status');
+        if (playerInput) playerInput.value = player;
+        if (characterInput) characterInput.value = character;
+        if (statusSelect) statusSelect.value = status;
+        tr.querySelector('.alb-row-remove-btn').addEventListener('click', function () {
+            tr.remove();
+        });
+        tbody.appendChild(tr);
+    }
+
+    function initPlayersTable() {
+        const tbody = document.getElementById('alb-players-tbody');
+        const addBtn = document.getElementById('alb-add-player-btn');
+        if (!tbody || !addBtn) return;
+        if (tbody.querySelectorAll('tr').length === 0) {
+            addPlayerRow('', '', 'Present');
+        }
+        addBtn.addEventListener('click', function () {
+            addPlayerRow('', '', 'Present');
+        });
+        refreshPlayerSuggestions();
     }
 
     function prefillForm() {
@@ -121,8 +205,7 @@
         const dateEl = document.getElementById('alb-session-date');
         const numEl = document.getElementById('alb-session-number');
         const dmEl = document.getElementById('alb-dm');
-        const playersEl = document.getElementById('alb-players');
-        const charactersEl = document.getElementById('alb-characters');
+        const tbody = document.getElementById('alb-players-tbody');
 
         if (adventureEl && d.adventure) adventureEl.value = d.adventure;
         if (partOfCampaignEl && d.partOfCampaign) partOfCampaignEl.value = d.partOfCampaign;
@@ -131,18 +214,29 @@
         const adventureSpecific = (adventureKey && perAdv[adventureKey]) ? perAdv[adventureKey] : null;
         const lastDate = adventureSpecific ? adventureSpecific.sessionDate : d.sessionDate;
         const lastNum = adventureSpecific ? adventureSpecific.sessionNumber : d.sessionNumber;
-        const lastPlayers = adventureSpecific && adventureSpecific.players && adventureSpecific.players.length
-            ? adventureSpecific.players
-            : (d.recentPlayers && Array.isArray(d.recentPlayers) ? d.recentPlayers : (typeof d.players === 'string' ? d.players.split(/[\n,]/).map(function (s) { return s.trim(); }).filter(Boolean) : []));
         const lastDm = adventureSpecific ? adventureSpecific.dm : d.dm;
-        const lastCharacters = adventureSpecific ? adventureSpecific.characters : d.characters;
+        let lastPlayers = adventureSpecific && adventureSpecific.players ? adventureSpecific.players : (d.players || []);
+        if (!Array.isArray(lastPlayers)) {
+            lastPlayers = (d.recentPlayers && Array.isArray(d.recentPlayers)) ? d.recentPlayers.map(function (name) { return { player: name, character: '', status: 'Present' }; }) : [];
+        } else if (lastPlayers.length && typeof lastPlayers[0] === 'string') {
+            lastPlayers = lastPlayers.map(function (name) { return { player: name, character: '', status: 'Present' }; });
+        }
 
         if (dateEl && lastDate) dateEl.value = String(lastDate).trim().replace(/\//g, '-');
         if (numEl && lastNum != null && lastNum !== '') numEl.value = String(lastNum);
         if (dmEl && lastDm) dmEl.value = lastDm;
-        if (playersEl && lastPlayers.length) playersEl.value = lastPlayers.join(', ');
-        else if (playersEl && global.recentPlayers && global.recentPlayers.length) playersEl.value = global.recentPlayers.join(', ');
-        if (charactersEl && lastCharacters) charactersEl.value = lastCharacters;
+
+        if (tbody && lastPlayers.length > 0) {
+            tbody.innerHTML = '';
+            lastPlayers.forEach(function (row) {
+                addPlayerRow(
+                    typeof row === 'string' ? row : (row && row.player),
+                    typeof row === 'string' ? '' : (row && row.character),
+                    typeof row === 'string' ? 'Present' : (row && row.status) || 'Present'
+                );
+            });
+        }
+        refreshPlayerSuggestions();
 
         if (dateEl && !dateEl.value && lastDate) {
             try {
@@ -383,9 +477,9 @@
         d.sessionDate = session.sessionDate || d.sessionDate;
         d.sessionNumber = session.sessionNumber != null && session.sessionNumber !== '' ? session.sessionNumber : d.sessionNumber;
         d.dm = session.dm || d.dm;
-        d.characters = session.characters || d.characters;
         if (session.players && session.players.length) {
-            d.recentPlayers = session.players;
+            d.players = session.players;
+            d.recentPlayers = session.players.map(function (p) { return p.player; }).filter(Boolean);
         }
         saveDefaults(d);
 
@@ -396,15 +490,15 @@
                 sessionDate: session.sessionDate || '',
                 sessionNumber: session.sessionNumber != null && session.sessionNumber !== '' ? session.sessionNumber : '',
                 dm: session.dm || '',
-                players: session.players || [],
-                characters: session.characters || ''
+                players: session.players || []
             };
             savePerAdventureDefaults(perAdv);
         }
 
         if (session.players && session.players.length) {
             const global = getGlobalDefaults();
-            global.recentPlayers = mergeRecentPlayers(global.recentPlayers, session.players, GLOBAL_RECENT_PLAYERS_CAP);
+            const names = session.players.map(function (p) { return p.player; }).filter(Boolean);
+            global.recentPlayers = mergeRecentPlayers(global.recentPlayers, names, GLOBAL_RECENT_PLAYERS_CAP);
             saveGlobalDefaults(global);
         }
     }
@@ -494,6 +588,7 @@
     }
 
     function init() {
+        initPlayersTable();
         prefillForm();
 
         setupDropZone('alb-notes-drop', 'alb-notes-input', 'alb-notes-text', 'alb-notes-files');
