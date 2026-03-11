@@ -648,7 +648,11 @@
                 </div>
                 <br>
             </div>
-            <div class="footer"><a href="https://github.com/Tetra-cube/Tetra-cube.github.io">Original Project</a></div>
+            <div class="footer">
+                <a href="https://github.com/Tetra-cube/Tetra-cube.github.io">Original Project</a>
+                <span style="margin: 0 0.5rem;">|</span>
+                <button type="button" class="btn btn-link p-0 border-0 align-baseline" data-bs-toggle="modal" data-bs-target="#ai-monster-instructions-modal">AI: Convert image or markdown to .monster file</button>
+            </div>
         </div>
     </div>
 
@@ -671,6 +675,32 @@
             </div>
         </div>
     </div>
+
+    <!-- AI instructions: image/markdown to .monster file -->
+    <div class="modal fade" id="ai-monster-instructions-modal" tabindex="-1" aria-labelledby="ai-monster-instructions-title" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ai-monster-instructions-title">Instructions for AI: Image or markdown to .monster file</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-2">Copy the text below and paste it into an AI assistant. Then provide your stat block as an image or markdown.</p>
+                    <textarea id="ai-monster-instructions-text" readonly class="form-control font-monospace small" rows="18" style="font-size: 0.8rem; white-space: pre;"></textarea>
+                    <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="var t=document.getElementById('ai-monster-instructions-text'); t.select(); t.setSelectionRange(0,99999); navigator.clipboard.writeText(t.value);">Copy instructions</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function () {
+            var instructions = "TASK: Given an image of a D&D 5e stat block OR a markdown/text representation of one, produce a single JSON object that is a valid .monster file for the D&D 5e Statblock Generator (Tetra).\n\nOUTPUT: Emit only valid JSON (no markdown code fence, no extra prose). The user will save it with a .monster extension and load it in the generator.\n\nSCHEMA: The JSON must match this shape. All keys must be present.\n\nTop-level (strings unless noted): name, size, type, tag, alignment, armorName, otherArmorDesc, hpText, speedDesc, customCr, legendariesDescription, lairDescription, lairDescriptionEnd, mythicDescription, regionalDescription, regionalDescriptionEnd, understandsBut, shortName, pluralName.\nNumbers: hitDice, shieldBonus, natArmorBonus, speed, burrowSpeed, climbSpeed, flySpeed, swimSpeed, strPoints, dexPoints, conPoints, intPoints, wisPoints, chaPoints, blindsight, darkvision, tremorsense, truesight, telepathy, cr, customProf, separationPoint.\nBooleans: hover, customHP, customSpeed, blind, isLegendary, isLair, isMythic, isRegional, doubleColumns.\n\nArrays (each element is an object):\n- properties, abilities, actions, bonusActions, reactions, legendaries, mythics, lairs, regionals: { \"name\": \"...\", \"desc\": \"...\" } (optional: \"note\")\n- languages: { \"name\": \"...\" } (optional: \"speaks\" boolean)\n- sthrows: { \"name\": \"str\"|\"dex\"|\"con\"|\"int\"|\"wis\"|\"cha\", \"order\": 0..5 }\n- skills: { \"name\": \"skill name\", \"stat\": \"str\"|\"dex\"|\"con\"|\"int\"|\"wis\"|\"cha\" } (optional: \"note\")\n- damagetypes, specialdamage: { \"name\": \"damage type\", \"note\": \"\", \"type\": \"v\"|\"r\"|\"i\" } (v=vulnerable, r=resistant, i=immune)\n- conditions: { \"name\": \"condition name\" }\n\nALLOWED VALUES: size: tiny, small, medium, large, huge, gargantuan. type: aberration, beast, celestial, construct, dragon, elemental, fey, fiend, giant, humanoid, monstrosity, ooze, plant, undead.\n\nEXAMPLE (minimal):\n{\"name\":\"Goblin\",\"size\":\"small\",\"type\":\"humanoid\",\"tag\":\"\",\"alignment\":\"neutral evil\",\"hitDice\":2,\"armorName\":\"leather\",\"shieldBonus\":0,\"natArmorBonus\":0,\"otherArmorDesc\":\"15 (leather)\",\"speed\":30,\"burrowSpeed\":0,\"climbSpeed\":0,\"flySpeed\":0,\"hover\":false,\"swimSpeed\":0,\"customHP\":false,\"customSpeed\":false,\"hpText\":\"7 (2d6)\",\"speedDesc\":\"30 ft.\",\"strPoints\":8,\"dexPoints\":14,\"conPoints\":10,\"intPoints\":10,\"wisPoints\":8,\"chaPoints\":8,\"blindsight\":0,\"blind\":false,\"darkvision\":60,\"tremorsense\":0,\"truesight\":0,\"telepathy\":0,\"cr\":0.25,\"customCr\":\"\",\"customProf\":2,\"isLegendary\":false,\"legendariesDescription\":\"\",\"isLair\":false,\"lairDescription\":\"\",\"lairDescriptionEnd\":\"\",\"isMythic\":false,\"mythicDescription\":\"\",\"isRegional\":false,\"regionalDescription\":\"\",\"regionalDescriptionEnd\":\"\",\"properties\":[],\"abilities\":[{\"name\":\"Nimble Escape\",\"desc\":\"The goblin can take the Disengage or Hide action as a bonus action on each of its turns.\"}],\"actions\":[{\"name\":\"Scimitar\",\"desc\":\"Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) slashing damage.\"}],\"bonusActions\":[],\"reactions\":[],\"legendaries\":[],\"mythics\":[],\"lairs\":[],\"regionals\":[],\"sthrows\":[],\"skills\":[{\"name\":\"stealth\",\"stat\":\"dex\"}],\"damagetypes\":[],\"specialdamage\":[],\"conditions\":[],\"languages\":[{\"name\":\"Common\"},{\"name\":\"Goblin\"}],\"understandsBut\":\"\",\"shortName\":\"\",\"pluralName\":\"\",\"doubleColumns\":false,\"separationPoint\":1}";
+            document.getElementById("ai-monster-instructions-text").value = instructions;
+        })();
+    </script>
 </body>
 
 </html>
