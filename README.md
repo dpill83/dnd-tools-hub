@@ -26,8 +26,8 @@ A web-based D&D 5e toolkit for Dungeon Masters and players. The central hub ([in
 ### Local development
 
 - **Static only:** Run [serve-hub.bat](serve-hub.bat) (or `python -m http.server 8080`) to browse the hub and tools. Tools that use `/api/*` (e.g. **Adventure Log Builder**) need the API; use Cloudflare Pages for that (see below).
-- **Deploy to Cloudflare Pages:** Connect the repo to Pages; the `functions/` directory is used automatically. Set `OPENAI_API_KEY` in the Pages project settings (Settings → Environment variables) so Adventure Log Builder works.
-- **Optional – test API locally:** Run [dev.bat](dev.bat) (or `npx wrangler pages dev .`) and add `OPENAI_API_KEY` to a `.dev.vars` file in the project root. Only needed if you want to try the API without deploying.
+- **Deploy to Cloudflare Pages:** Connect the repo to Pages; the `functions/` directory is used automatically. For Adventure Log Builder, set **`ADVENTURE_LOG_BUILDER_PROD`** in the Pages project (Settings → Environment variables / Variables and Secrets) to your OpenAI API key with `model.request` scope. (The function also accepts `OPENAI_API_KEY` as a fallback.)
+- **Optional – test API locally:** Run [dev.bat](dev.bat) (or `npx wrangler pages dev .`) and add `ADVENTURE_LOG_BUILDER_PROD=sk-...` (or `OPENAI_API_KEY`) to a `.dev.vars` file in the project root.
 
 ### Tetra-cube D&D tools (local copy)
 
