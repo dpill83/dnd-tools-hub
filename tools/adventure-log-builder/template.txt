@@ -1,0 +1,226 @@
+---
+
+# Adventure Log
+
+## Adventure Info
+
+**Adventure Title:**
+
+**Part of campaign (optional):**
+
+**Session Number:**
+
+**Date Played:**
+
+**In-Game Date:**
+
+**Session Length:**
+
+**System / Edition:**
+
+## DM and Table
+
+**DM:**
+
+**Players:**
+
+**Characters Present:**
+
+**Characters Absent:**
+
+## Source Info
+
+**Adventure Type:** Homebrew / Premade
+
+**Original Author / Module:**
+
+**Adapted By:**
+
+**Related Adventure Arc:**
+
+## Adventure Premise
+
+Write 2 to 5 sentences explaining the setup, why the party was involved, and what the main tension or goal was at the start.
+
+## Where the Session Began
+
+Briefly note where the party started, what they were doing, and what immediate context mattered coming into this session.
+
+## Quick Summary
+
+Write a short summary in 3 to 6 sentences covering the main flow of the adventure, the central conflict, and how the session ended.
+
+## Scene by Scene Summary
+
+### Scene 1
+
+**Location:**
+
+**What happened:**
+
+**Important outcome:**
+
+### Scene 2
+
+**Location:**
+
+**What happened:**
+
+**Important outcome:**
+
+### Scene 3
+
+**Location:**
+
+**What happened:**
+
+**Important outcome:**
+
+*Add more scenes as needed.*
+
+## Key Decisions and Consequences
+
+**Decision:**
+
+**Why it mattered:**
+
+**Consequence:**
+
+**Decision:**
+
+**Why it mattered:**
+
+**Consequence:**
+
+## NPC Cast
+
+### Major NPCs
+
+**Name:**
+
+**Role:**
+
+**Faction / Allegiance:**
+
+**What they wanted:**
+
+**What happened with them:**
+
+**Current status:**
+
+### Minor NPCs
+
+**Name:**
+
+**Role:**
+
+**Notes:**
+
+*Add more entries as needed.*
+
+## Monsters / Enemies
+
+**Name / Type:**
+
+**Where encountered:**
+
+**Notes:**
+
+**Outcome:**
+
+## Locations
+
+**Location Name:**
+
+**Why it mattered:**
+
+**What happened there:**
+
+**Current relevance:**
+
+## Factions Involved
+
+**Faction Name:**
+
+**Role in the adventure:**
+
+**Relationship to party:**
+
+**Notes:**
+
+## Clues, Lore, and Discoveries
+
+**Clue / Discovery:**
+
+**Why it matters:**
+
+**Follow-up needed:**
+
+## Rewards and Accounting
+
+### XP Awarded
+
+**Total XP Given:**
+
+**Breakdown:**
+
+- Combat:
+- Quest / Objective:
+- Exploration:
+- Roleplay:
+- Bonus / Milestone:
+
+**XP Per Character:**
+
+### Gold Awarded
+
+**Total Gold Given:**
+
+**How it was distributed:**
+
+### Other Rewards
+
+List important rewards only, such as favors, renown, titles, access, magic items, or story-based benefits.
+
+## Outcome and Current Status
+
+Summarize the final state of the adventure. Did the party succeed, fail, retreat, survive at a cost, make things worse, uncover a larger threat, or leave things unresolved?
+
+## Open Threads for Continuity
+
+- 
+- 
+- 
+
+## Rulings and Mechanical Notes
+
+Use this for unusual rulings, homebrew calls, encounter adjustments, conditions still affecting characters, or anything that may matter later.
+
+## Memorable Table Moments
+
+Use this for funny moments, strong roleplay, tense decisions, standout lines, or anything worth remembering that does not fit neatly into the main archive sections.
+
+## Raw Notes Archive
+
+Paste session notes here if available.
+
+## Transcript Archive
+
+Paste transcript here if available.
+
+## Attachments / Linked Files
+
+**Session Notes File:**
+
+**Transcript File:**
+
+**Maps / Handouts / Images:**
+
+**Related Pages:**
+
+---
+
+If you want, I can also do two cleaner versions next:
+
+1. a **full master template** for major adventures
+2. a **lighter session template** for smaller side sessions or downtime logs

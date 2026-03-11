@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventure Log Builder</title>
+    <link rel="stylesheet" href="../../global.css">
+    <link rel="stylesheet" href="adventure-log-builder.css">
+</head>
+<body>
+    <div class="alb-container">
+        <header class="alb-header">
+            <div>
+                <h1>Adventure Log Builder</h1>
+                <p class="alb-status" id="alb-subtitle">Weekly adventure logs from notes and transcripts. Recurring defaults, smart intake.</p>
+            </div>
+            <div class="alb-header-actions">
+                <a href="../../index.html" class="alb-btn" aria-label="Hub">&#127968;</a>
+                <button type="button" id="theme-toggle" class="alb-btn" aria-label="Toggle dark mode"><span class="theme-icon">&#127769;</span></button>
+            </div>
+        </header>
+
+        <section class="alb-section">
+            <h2 class="alb-section-title">Session (recurring defaults)</h2>
+            <p class="alb-helper">Session date, number, and players are remembered per adventure. Recent players are also kept globally for quick fill across adventures.</p>
+            <div class="alb-fields">
+                <div class="alb-field">
+                    <label for="alb-adventure">Adventure</label>
+                    <input type="text" id="alb-adventure" placeholder="Adventure name or title">
+                </div>
+                <div class="alb-field">
+                    <label for="alb-part-of-campaign">Part of campaign (optional)</label>
+                    <input type="text" id="alb-part-of-campaign" placeholder="e.g. Dragon Heist campaign">
+                </div>
+                <div class="alb-field">
+                    <label for="alb-session-date">Session date</label>
+                    <input type="text" id="alb-session-date" placeholder="YYYY/MM/DD" inputmode="numeric" maxlength="10" autocomplete="off">
+                </div>
+                <div class="alb-field">
+                    <label for="alb-players">Players present</label>
+                    <input type="text" id="alb-players" placeholder="Comma-separated or one per line">
+                </div>
+                <div class="alb-field">
+                    <label for="alb-session-number">Session number</label>
+                    <input type="number" id="alb-session-number" min="1" placeholder="e.g. 12">
+                </div>
+            </div>
+        </section>
+
+        <section class="alb-section">
+            <h2 class="alb-section-title">Notes (primary source)</h2>
+            <div class="alb-drop-zone" id="alb-notes-drop" data-role="notes">
+                <span>Drop .txt / .md here or click to paste</span>
+                <small class="alb-file-list" id="alb-notes-files"></small>
+            </div>
+            <input type="file" id="alb-notes-input" accept=".txt,.md" multiple hidden>
+            <div class="alb-textarea-wrap">
+                <textarea id="alb-notes-text" placeholder="Typed session notes (primary source)…"></textarea>
+            </div>
+        </section>
+
+        <section class="alb-section">
+            <h2 class="alb-section-title">Transcript (supporting)</h2>
+            <div class="alb-drop-zone" id="alb-transcript-drop" data-role="transcript">
+                <span>Drop .txt / .md here or click to add</span>
+                <small class="alb-file-list" id="alb-transcript-files"></small>
+            </div>
+            <input type="file" id="alb-transcript-input" accept=".txt,.md" multiple hidden>
+            <div class="alb-textarea-wrap">
+                <textarea id="alb-transcript-text" placeholder="Session transcript (supporting)…"></textarea>
+            </div>
+        </section>
+
+        <section class="alb-section">
+            <div class="alb-actions">
+                <button type="button" id="alb-check-btn" class="alb-btn alb-btn-primary">Check &amp; continue</button>
+                <button type="button" id="alb-generate-btn" class="alb-btn alb-btn-primary" style="display: none;">Generate log</button>
+            </div>
+            <p class="alb-status" id="alb-status"></p>
+            <div id="alb-error" class="alb-error" style="display: none;"></div>
+
+            <div id="alb-intake" class="alb-intake" style="display: none;">
+                <h3>Answer these to continue</h3>
+                <div id="alb-intake-questions"></div>
+                <button type="button" id="alb-generate-after-intake" class="alb-btn alb-btn-primary" style="margin-top: 0.5rem;">Generate log</button>
+            </div>
+            <div id="alb-uncertain" class="alb-uncertain" style="display: none;">
+                <h3>Optional: clarify these if you want</h3>
+                <div id="alb-uncertain-content"></div>
+            </div>
+        </section>
+
+        <section id="alb-output-section" class="alb-section alb-output-panel" style="display: none;">
+            <h3>Adventure log</h3>
+            <div class="alb-output-actions">
+                <button type="button" id="alb-copy-btn" class="alb-btn">Copy</button>
+                <button type="button" id="alb-download-btn" class="alb-btn">Download .md</button>
+                <button type="button" id="alb-edit-output-btn" class="alb-btn">Edit output</button>
+                <button type="button" id="alb-regenerate-btn" class="alb-btn">Regenerate</button>
+            </div>
+            <div class="alb-output-body" id="alb-output-body">
+                <pre id="alb-output-pre"></pre>
+            </div>
+        </section>
+    </div>
+
+    <script src="../../theme.js"></script>
+    <script src="adventure-log-builder.js"></script>
+</body>
+</html>

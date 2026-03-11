@@ -23,6 +23,12 @@ A web-based D&D 5e toolkit for Dungeon Masters and players. The central hub ([in
 - **Scripts:** theme.js
 - **Features:** Card grid linking to all tools; no tool-specific features.
 
+### Local development
+
+- **Static only:** Run [serve-hub.bat](serve-hub.bat) (or `python -m http.server 8080`) to browse the hub and tools. Tools that use `/api/*` (e.g. **Adventure Log Builder**) need the API; use Cloudflare Pages for that (see below).
+- **Deploy to Cloudflare Pages:** Connect the repo to Pages; the `functions/` directory is used automatically. Set `OPENAI_API_KEY` in the Pages project settings (Settings → Environment variables) so Adventure Log Builder works.
+- **Optional – test API locally:** Run [dev.bat](dev.bat) (or `npx wrangler pages dev .`) and add `OPENAI_API_KEY` to a `.dev.vars` file in the project root. Only needed if you want to try the API without deploying.
+
 ### Tetra-cube D&D tools (local copy)
 
 The hub includes a local copy of four D&D 5e tools from [Tetra-cube/Tetra-cube.github.io](https://github.com/Tetra-cube/Tetra-cube.github.io) in [tools/tetra-dnd/](tools/tetra-dnd/): **PC Options Reference** ([dnd-reference.html](tools/tetra-dnd/dnd-reference.html)), **Random Character Generator** ([dnd-char-gen.html](tools/tetra-dnd/dnd-char-gen.html)), **Magic Item Generator** ([dnd-magic-items.html](tools/tetra-dnd/dnd-magic-items.html)), and **Statblock Generator** ([dnd-statblock.html](tools/tetra-dnd/dnd-statblock.html)). They run locally; to update from upstream, replace the contents of `tools/tetra-dnd/` with a fresh copy of the `dnd` folder from the Tetra-cube repo.

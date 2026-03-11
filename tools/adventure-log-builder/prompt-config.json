@@ -1,0 +1,15 @@
+{
+  "systemPrompt": "You are helping to create a standardized adventure log for a tabletop RPG session. The primary source of truth is the typed notes; the transcript is supporting material only. Use the notes to structure the log. Use the transcript only to fill gaps or clarify. Produce Notion-ready markdown: clear headings, lists, bold where appropriate. When a template is provided, follow its structure exactly; fill in each section from the session content and preserve the template's headings and layout. Omit or shorten optional subsections (e.g. extra scenes, minor NPCs) when there is no content.",
+  "outputTemplate": "# Session date\n\n## Adventure\n\n## Part of campaign (optional)\n\n## Players present\n\n## Summary\n\n## Key events\n\n## Outstanding threads / Next time\n\n",
+  "outputFormat": "If a template is provided below, use it as the exact structure for the log. Otherwise use: Session date, Adventure, Part of campaign (optional), Players present, Summary, Key events, Outstanding threads / Next time. Fill placeholders from session metadata and from the notes/transcript; leave Raw Notes Archive and Transcript Archive empty (content is already in the source).",
+  "intakePrompt": "Given: (1) recurring defaults (adventure name, optional part of campaign, usual players, last session date, last session number), (2) current session form data (adventure, partOfCampaign, session date, players present, session number), (3) preprocessed notes and transcript. Return ONLY questions for: (a) genuinely missing data (e.g. no session date in form and none clearly stated in the content), or (b) contradictions (e.g. content says Session 12 but form says Session 11). Do NOT ask about fields that are already filled or clearly inferable from the content. Return a JSON object with keys: missingQuestions (array of strings, each one short question), uncertainItems (object with optional arrays: names, rewards, outcomes — items that appear ambiguous or uncertain in the content). If nothing missing, missingQuestions should be []. Keep questions brief and actionable.",
+  "transcriptCleaning": {
+    "fillerWords": ["um", "uh", "er", "ah", "hmm", "like", "you know", "I mean", "kind of", "sort of"],
+    "stripTimestamps": true,
+    "timestampPatterns": ["\\[?\\d{1,2}:\\d{2}(?::\\d{2})?\\]?", "\\d{1,2}:\\d{2}\\s*(?:AM|PM)?", "\\[\\d+\\.\\d+s?\\]"],
+    "stripSpeakerLabels": "optional",
+    "speakerLabelPattern": "^(?:Speaker\\s*\\d+|\\w+):\\s*",
+    "collapseRepeatedPhrases": false,
+    "maxLength": 12000
+  }
+}
