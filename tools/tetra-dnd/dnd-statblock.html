@@ -651,7 +651,7 @@
             <div class="footer">
                 <a href="https://github.com/Tetra-cube/Tetra-cube.github.io">Original Project</a>
                 <span style="margin: 0 0.5rem;">|</span>
-                <button type="button" class="btn btn-link p-0 border-0 align-baseline" data-bs-toggle="modal" data-bs-target="#ai-monster-instructions-modal">AI: Convert image or markdown to .monster file</button>
+                <button type="button" class="btn btn-link p-0 border-0 align-baseline" data-toggle="modal" data-target="#ai-monster-instructions-modal">AI: Convert image or markdown to .monster file</button>
             </div>
         </div>
     </div>
@@ -682,15 +682,15 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="ai-monster-instructions-title">Instructions for AI: Image or markdown to .monster file</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-muted small mb-2">Copy the text below and paste it into an AI assistant. Then provide your stat block as an image or markdown.</p>
+                    <p class="text-muted small mb-2">Copy the prompt below and paste it into your favorite AI (e.g. ChatGPT, Claude). Then upload your stat block as a PNG image or a .md file so the AI can convert it to a .monster file.</p>
                     <textarea id="ai-monster-instructions-text" readonly class="form-control font-monospace small" rows="18" style="font-size: 0.8rem; white-space: pre;"></textarea>
-                    <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="var t=document.getElementById('ai-monster-instructions-text'); t.select(); t.setSelectionRange(0,99999); navigator.clipboard.writeText(t.value);">Copy instructions</button>
+                    <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="var t=document.getElementById('ai-monster-instructions-text'); t.select(); t.setSelectionRange(0,99999); navigator.clipboard.writeText(t.value);">Copy prompt</button>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>

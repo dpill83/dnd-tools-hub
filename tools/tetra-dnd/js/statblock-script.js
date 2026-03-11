@@ -149,6 +149,9 @@ var SavedData = {
         reader.onload = function (e) {
             loadedFromFile = true;
             mon = JSON.parse(reader.result);
+            if (mon.cr != null && mon.cr !== "*" && typeof data !== "undefined" && data.crs && data.crs[mon.cr] == null) {
+                mon.cr = CrFunctions.getCrKey();
+            }
             Populate();
             updateAddButtonVisibility();
         };
@@ -472,7 +475,7 @@ function BuildMarkdown(isV3Markdown) {
     }
 
     markdownLines.push(
-        PrintMarkdownProperty(isV3Markdown, "Challenge", mon.cr == "*" ? mon.customCr : `${mon.cr} (${data.crs[mon.cr].xp} XP)`),
+        PrintMarkdownProperty(isV3Markdown, "Challenge", mon.cr == "*" ? mon.customCr : CrFunctions.GetString()),
         "___");
 
     AddMarkdownTraitSection(markdownLines, isV3Markdown, null, mon.abilities);
@@ -2035,16 +2038,35 @@ var MathFunctions = {
 
 // These don't really fit anywhere else
 var CrFunctions = {
+    // Normalize CR so data.crs lookup works (e.g. 0.25 -> "1/4"). data.crs uses string keys.
+    getCrKey: function () {
+        var cr = mon.cr;
+        if (cr == null || cr === "" || cr === "*") return cr;
+        if (typeof data === "undefined" || !data.crs) return cr;
+        if (data.crs[cr] != null) return cr;
+        var n = typeof cr === "number" ? cr : parseFloat(cr);
+        if (n === 0) return "0";
+        if (n === 0.125) return "1/8";
+        if (n === 0.25) return "1/4";
+        if (n === 0.5) return "1/2";
+        if (Number.isInteger(n) && n >= 1 && n <= 30) return String(n);
+        return cr;
+    },
+
     GetProf: function () {
         if (mon.cr == "*")
             return mon.customProf;
-        return data.crs[mon.cr].prof;
+        var crKey = this.getCrKey();
+        var entry = data && data.crs ? data.crs[crKey] : null;
+        return entry ? entry.prof : (typeof mon.customProf === "number" ? mon.customProf : 2);
     },
 
     GetString: function () {
         if (mon.cr == "*")
             return mon.customCr.trim();
-        return mon.cr + " (" + data.crs[mon.cr].xp + " XP)"
+        var crKey = this.getCrKey();
+        var entry = data && data.crs ? data.crs[crKey] : null;
+        return entry ? (crKey + " (" + entry.xp + " XP)") : (mon.cr + " (?? XP)");
     }
 }
 
