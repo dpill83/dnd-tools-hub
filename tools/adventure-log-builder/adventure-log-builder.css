@@ -69,6 +69,10 @@
     margin-bottom: 0.5rem;
 }
 
+.alb-table-hint {
+    margin-top: 0.5rem;
+}
+
 .alb-players-table {
     width: 100%;
     min-width: 320px;

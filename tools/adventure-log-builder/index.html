@@ -22,7 +22,7 @@
 
         <section class="alb-section">
             <h2 class="alb-section-title">Session (recurring defaults)</h2>
-            <p class="alb-helper">Session date, number, and players are remembered per adventure. Recent players are also kept globally for quick fill across adventures.</p>
+            <p class="alb-helper">Part of campaign, session date, and players are remembered per campaign. Recent players are also kept globally for quick fill.</p>
             <div class="alb-fields">
                 <div class="alb-field">
                     <label for="alb-adventure">Adventure</label>
@@ -36,26 +36,9 @@
                     <label for="alb-session-date">Session date</label>
                     <input type="date" id="alb-session-date">
                 </div>
-                <div class="alb-field">
-                    <label for="alb-session-number">Session number</label>
-                    <input type="number" id="alb-session-number" min="1" placeholder="e.g. 12">
-                </div>
-                <div class="alb-field">
-                    <label for="alb-template-toggle">Template</label>
-                    <select id="alb-template-toggle" aria-describedby="alb-template-desc">
-                        <option value="full">Full (major adventures)</option>
-                        <option value="light">Light (shorter sessions)</option>
-                    </select>
-                    <span id="alb-template-desc" class="alb-sr-only">Full template includes detailed NPC/monster sections; light is shorter.</span>
-                </div>
             </div>
-            <div class="alb-section-title alb-table-title">Table</div>
+            <div class="alb-section-title alb-table-title">Players &amp; characters</div>
             <div class="alb-fields alb-table-fields">
-                <div class="alb-field alb-field-full">
-                    <label for="alb-dm">DM</label>
-                    <input type="text" id="alb-dm" placeholder="Who ran the session" aria-describedby="alb-dm-desc">
-                    <span id="alb-dm-desc" class="alb-sr-only">Recurring default; pre-fills from last use for this adventure.</span>
-                </div>
                 <div class="alb-field alb-field-full">
                     <label id="alb-players-table-label">Players &amp; characters</label>
                     <div class="alb-players-table-wrap" role="region" aria-labelledby="alb-players-table-label">
@@ -72,6 +55,7 @@
                             </tbody>
                         </table>
                         <datalist id="alb-player-suggestions"></datalist>
+                        <p class="alb-helper alb-table-hint">Add a row with character name &quot;DM&quot; for the person who ran the session.</p>
                         <button type="button" id="alb-add-player-btn" class="alb-btn alb-add-row-btn" aria-label="Add player or character row">Add Player / Character</button>
                     </div>
                 </div>

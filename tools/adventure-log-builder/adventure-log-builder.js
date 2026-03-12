@@ -51,9 +51,8 @@
     }
 
     function getAdventureKey(adventure, partOfCampaign) {
-        const a = (adventure || '').trim();
         const p = (partOfCampaign || '').trim();
-        return a + (p ? '|' + p : '');
+        return p || '_default';
     }
 
     function mergeRecentPlayers(existing, newPlayers, cap) {
@@ -80,16 +79,19 @@
         const d = getDefaults();
         const global = getGlobalDefaults();
         const perAdv = getPerAdventureDefaults();
-        const key = getAdventureKey(session.adventure, session.partOfCampaign);
+        const key = getAdventureKey(null, session.partOfCampaign);
         const adv = (key && perAdv[key]) ? perAdv[key] : null;
         const playersArray = (adv && adv.players && Array.isArray(adv.players)) ? adv.players : (d.players && Array.isArray(d.players) ? d.players : []);
         const nameList = playersArray.map(function (p) { return typeof p === 'string' ? p : (p && p.player); }).filter(Boolean);
+        const dmFromPlayers = (Array.isArray(playersArray) && playersArray.length) ? (playersArray.find(function (p) {
+            const c = (p && typeof p === 'object' && p.character) ? String(p.character).trim().toLowerCase() : '';
+            return c === 'dm';
+        }) || {}) : {};
+        const dm = (dmFromPlayers.player != null) ? String(dmFromPlayers.player).trim() : '';
         return {
-            adventure: d.adventure || '',
             partOfCampaign: d.partOfCampaign || '',
             sessionDate: adv ? adv.sessionDate : d.sessionDate,
-            sessionNumber: adv ? adv.sessionNumber : d.sessionNumber,
-            dm: adv ? adv.dm : d.dm,
+            dm: dm,
             players: playersArray,
             recentPlayers: nameList.length ? nameList : (d.recentPlayers || global.recentPlayers || [])
         };
@@ -99,9 +101,6 @@
         const adventure = (document.getElementById('alb-adventure') && document.getElementById('alb-adventure').value) || '';
         const partOfCampaign = (document.getElementById('alb-part-of-campaign') && document.getElementById('alb-part-of-campaign').value) || '';
         const sessionDate = (document.getElementById('alb-session-date') && document.getElementById('alb-session-date').value) || '';
-        const sessionNumber = (document.getElementById('alb-session-number') && document.getElementById('alb-session-number').value) || '';
-        const template = (document.getElementById('alb-template-toggle') && document.getElementById('alb-template-toggle').value) || 'full';
-        const dm = (document.getElementById('alb-dm') && document.getElementById('alb-dm').value) || '';
         const tbody = document.getElementById('alb-players-tbody');
         const players = [];
         if (tbody) {
@@ -115,13 +114,13 @@
                 }
             });
         }
+        const dmRow = players.find(function (p) { return (p.character || '').trim().toLowerCase() === 'dm'; });
+        const dm = dmRow ? (dmRow.player || '').trim() : '';
         return {
             adventure: adventure.trim(),
             partOfCampaign: partOfCampaign.trim(),
             sessionDate: sessionDate.trim(),
-            sessionNumber: sessionNumber.trim(),
-            template: template,
-            dm: dm.trim(),
+            dm: dm,
             players: players
         };
     }
@@ -130,7 +129,7 @@
         const global = getGlobalDefaults();
         const d = getDefaults();
         const perAdv = getPerAdventureDefaults();
-        const key = getAdventureKey(d.adventure, d.partOfCampaign);
+        const key = getAdventureKey(null, d.partOfCampaign);
         const adv = (key && perAdv[key]) ? perAdv[key] : null;
         const fromAdv = (adv && adv.players && Array.isArray(adv.players)) ? adv.players.map(function (p) { return typeof p === 'string' ? p : (p && p.player); }).filter(Boolean) : [];
         const fromGlobal = global.recentPlayers || [];
@@ -199,18 +198,12 @@
         const adventureEl = document.getElementById('alb-adventure');
         const partOfCampaignEl = document.getElementById('alb-part-of-campaign');
         const dateEl = document.getElementById('alb-session-date');
-        const numEl = document.getElementById('alb-session-number');
-        const dmEl = document.getElementById('alb-dm');
         const tbody = document.getElementById('alb-players-tbody');
 
-        if (adventureEl && d.adventure) adventureEl.value = d.adventure;
         if (partOfCampaignEl && d.partOfCampaign) partOfCampaignEl.value = d.partOfCampaign;
 
-        const adventureKey = getAdventureKey(d.adventure, d.partOfCampaign);
+        const adventureKey = getAdventureKey(null, d.partOfCampaign);
         const adventureSpecific = (adventureKey && perAdv[adventureKey]) ? perAdv[adventureKey] : null;
-        const lastDate = adventureSpecific ? adventureSpecific.sessionDate : d.sessionDate;
-        const lastNum = adventureSpecific ? adventureSpecific.sessionNumber : d.sessionNumber;
-        const lastDm = adventureSpecific ? adventureSpecific.dm : d.dm;
         let lastPlayers = adventureSpecific && adventureSpecific.players ? adventureSpecific.players : (d.players || []);
         if (!Array.isArray(lastPlayers)) {
             lastPlayers = (d.recentPlayers && Array.isArray(d.recentPlayers)) ? d.recentPlayers.map(function (name) { return { player: name, character: '' }; }) : [];
@@ -220,9 +213,7 @@
             lastPlayers = lastPlayers.map(function (row) { return { player: row.player, character: row.character || '' }; });
         }
 
-        if (dateEl && lastDate) dateEl.value = String(lastDate).trim().replace(/\//g, '-');
-        if (numEl && lastNum != null && lastNum !== '') numEl.value = String(lastNum);
-        if (dmEl && lastDm) dmEl.value = lastDm;
+        if (dateEl) dateEl.value = new Date().toISOString().slice(0, 10);
 
         if (tbody && lastPlayers.length > 0) {
             tbody.innerHTML = '';
@@ -234,20 +225,6 @@
             });
         }
         refreshPlayerSuggestions();
-
-        if (dateEl && !dateEl.value && lastDate) {
-            try {
-                const iso = String(lastDate).trim().replace(/\//g, '-');
-                const next = new Date(iso);
-                if (!isNaN(next.getTime())) {
-                    dateEl.value = next.toISOString().slice(0, 10);
-                }
-            } catch (_) {}
-        }
-        if (numEl && numEl.value === '' && lastNum != null && lastNum !== '') {
-            const n = parseInt(lastNum, 10);
-            if (!isNaN(n)) numEl.value = String(n + 1);
-        }
     }
 
     function readFiles(files, callback) {
@@ -498,24 +475,19 @@
     function updateStoredDefaults() {
         const session = getSessionFromForm();
         const d = getDefaults();
-        d.adventure = session.adventure || d.adventure;
         d.partOfCampaign = session.partOfCampaign || d.partOfCampaign;
         d.sessionDate = session.sessionDate || d.sessionDate;
-        d.sessionNumber = session.sessionNumber != null && session.sessionNumber !== '' ? session.sessionNumber : d.sessionNumber;
-        d.dm = session.dm || d.dm;
         if (session.players && session.players.length) {
             d.players = session.players;
             d.recentPlayers = session.players.map(function (p) { return p.player; }).filter(Boolean);
         }
         saveDefaults(d);
 
-        const adventureKey = getAdventureKey(session.adventure, session.partOfCampaign);
+        const adventureKey = getAdventureKey(null, session.partOfCampaign);
         if (adventureKey) {
             const perAdv = getPerAdventureDefaults();
             perAdv[adventureKey] = {
                 sessionDate: session.sessionDate || '',
-                sessionNumber: session.sessionNumber != null && session.sessionNumber !== '' ? session.sessionNumber : '',
-                dm: session.dm || '',
                 players: session.players || []
             };
             savePerAdventureDefaults(perAdv);
