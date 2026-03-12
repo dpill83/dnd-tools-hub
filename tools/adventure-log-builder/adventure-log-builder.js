@@ -338,6 +338,49 @@
     }
 
     var _loadingTimer = null;
+    var _chunkTimer = null;
+
+    function clearChunkTimer() {
+        if (_chunkTimer) { clearTimeout(_chunkTimer); _chunkTimer = null; }
+    }
+
+    function resetChunkTimer() {
+        clearChunkTimer();
+        _chunkTimer = setTimeout(function () {
+            _chunkTimer = null;
+            setStreamWarning('Still working — this sometimes takes a while for long notes');
+        }, 15000);
+    }
+
+    function setStreamWarning(msg) {
+        const el = document.getElementById('alb-stream-warning');
+        if (!el) return;
+        if (msg) {
+            el.textContent = msg;
+            el.style.display = 'block';
+        } else {
+            el.style.display = 'none';
+            el.textContent = '';
+        }
+    }
+
+    function showStreamPanel() {
+        const pre = document.getElementById('alb-stream-pre');
+        if (pre) pre.textContent = '';
+        setStreamWarning('');
+    }
+
+    function hideStreamPanel() {
+        clearChunkTimer();
+    }
+
+    function appendStreamChunk(text) {
+        const pre = document.getElementById('alb-stream-pre');
+        if (!pre) return;
+        pre.textContent += text;
+        pre.scrollTop = pre.scrollHeight;
+        resetChunkTimer();
+    }
 
     function setLoading(loading, step) {
         const checkBtn = document.getElementById('alb-check-btn');
@@ -345,27 +388,22 @@
         [checkBtn, intakeSubmitBtn].forEach(function (btn) {
             if (btn) btn.disabled = loading;
         });
-        if (_loadingTimer) {
-            clearTimeout(_loadingTimer);
-            _loadingTimer = null;
-        }
+        if (_loadingTimer) { clearTimeout(_loadingTimer); _loadingTimer = null; }
         if (loading) {
             setStatus(step === 'generate' ? 'Generating log…' : 'Checking…');
-            setStatusHint(step === 'generate' ? 'This may take 30–60 seconds for long notes.' : '');
-            _loadingTimer = setTimeout(function () {
-                _loadingTimer = null;
-                const submitBtn = document.getElementById('alb-intake-submit-btn');
-                if (submitBtn && submitBtn.disabled) {
-                    setStatus(step === 'generate'
-                        ? 'Still generating… (this can take a minute for long notes)'
-                        : 'Still checking…');
-                }
-            }, 10000);
-        } else {
-            if (_loadingTimer) {
-                clearTimeout(_loadingTimer);
-                _loadingTimer = null;
+            if (step === 'generate') {
+                setStatusHint('This may take 30–60 seconds for long notes.');
+            } else {
+                setStatusHint('');
+                _loadingTimer = setTimeout(function () {
+                    _loadingTimer = null;
+                    const submitBtn = document.getElementById('alb-intake-submit-btn');
+                    if (submitBtn && submitBtn.disabled) setStatus('Still checking…');
+                }, 10000);
             }
+        } else {
+            if (_loadingTimer) { clearTimeout(_loadingTimer); _loadingTimer = null; }
+            clearChunkTimer();
             setStatus('');
             setStatusHint('');
         }
@@ -463,14 +501,17 @@
         const checkBtn = document.getElementById('alb-check-btn');
         const confidenceWrap = document.getElementById('alb-confidence');
         const outputSection = document.getElementById('alb-output-section');
+        const streamPanel = document.getElementById('alb-stream-panel');
 
-        const showIntakeArea = currentStep === 'intake' || currentStep === 'generating';
+        const showIntakeArea = currentStep === 'intake';
+        const showStream = currentStep === 'generating';
 
         if (checkBtn) checkBtn.style.display = currentStep === 'form' ? 'inline-block' : 'none';
         if (confidenceWrap) confidenceWrap.style.display = showIntakeArea && lastConfidence > 0 ? 'block' : 'none';
         if (intake) intake.style.display = showIntakeArea ? 'block' : 'none';
         if (uncertain) uncertain.style.display = showIntakeArea ? 'block' : 'none';
         if (intakeActions) intakeActions.style.display = showIntakeArea ? 'flex' : 'none';
+        if (streamPanel) streamPanel.style.display = showStream ? 'block' : 'none';
 
         if (outputSection && currentStep !== 'done') {
             outputSection.style.display = 'none';
@@ -671,35 +712,79 @@
 
         setError('');
         setCurrentStep('generating');
+        showStreamPanel();
         setLoading(true, 'generate');
 
-        apiPost({
-            step: 'generate',
-            session: session,
-            defaults: defaults,
-            notesText: notesText,
-            transcriptText: transcriptText,
-            answers: accumulatedAnswers
-        })
-            .then(function (res) {
-                return res.json().then(function (data) {
-                    if (!res.ok) throw new Error(data.error || res.statusText || 'Request failed');
-                    return data;
-                });
-            })
-            .then(function (data) {
-                setLoading(false);
-                if (data.log != null) {
-                    updateStoredDefaults();
-                    showOutput(data.log);
-                    setCurrentStep('done');
+        function onGenerateError(msg) {
+            hideStreamPanel();
+            setLoading(false);
+            setCurrentStep('intake');
+            setError(msg || 'Request failed');
+        }
+
+        function readStream(reader, decoder, fullText) {
+            return reader.read().then(function (result) {
+                if (result.done) {
+                    return fullText;
                 }
-            })
-            .catch(function (err) {
-                setLoading(false);
-                setCurrentStep('intake');
-                setError(err.message || 'Request failed');
+                var buffer = decoder.decode(result.value, { stream: true });
+                var lines = buffer.split('\n');
+                for (var i = 0; i < lines.length; i++) {
+                    var trimmed = lines[i].trim();
+                    if (!trimmed || !trimmed.startsWith('data: ')) continue;
+                    try {
+                        var parsed = JSON.parse(trimmed.slice(6));
+                        if (parsed.error) throw new Error(parsed.error);
+                        if (typeof parsed.chunk === 'string' && parsed.chunk) {
+                            fullText += parsed.chunk;
+                            appendStreamChunk(parsed.chunk);
+                        }
+                    } catch (parseErr) {
+                        if (parseErr.message && parseErr.message !== 'Unexpected token') {
+                            throw parseErr;
+                        }
+                    }
+                }
+                return readStream(reader, decoder, fullText);
             });
+        }
+
+        fetch(API_PATH, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                step: 'generate',
+                session: session,
+                defaults: defaults,
+                notesText: notesText,
+                transcriptText: transcriptText,
+                answers: accumulatedAnswers
+            })
+        })
+        .then(function (res) {
+            if (!res.ok) {
+                return res.json().then(function (data) {
+                    throw new Error(data.error || res.statusText || 'Request failed');
+                });
+            }
+            var reader = res.body.getReader();
+            var decoder = new TextDecoder();
+            return readStream(reader, decoder, '');
+        })
+        .then(function (fullText) {
+            hideStreamPanel();
+            setLoading(false);
+            if (fullText && fullText.trim()) {
+                updateStoredDefaults();
+                showOutput(fullText.trim());
+                setCurrentStep('done');
+            } else {
+                onGenerateError('No content received from the API.');
+            }
+        })
+        .catch(function (err) {
+            onGenerateError(err.message || 'Request failed');
+        });
     }
 
     function updateStoredDefaults() {
