@@ -276,6 +276,29 @@
     display: block;
     font-size: 0.875rem;
     margin-bottom: 0.25rem;
+    color: var(--text-light);
+}
+
+.alb-intake-item-textarea .alb-intake-textarea,
+.alb-intake-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 0.5rem 0.75rem;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.875rem;
+    resize: vertical;
+}
+
+.alb-intake-actions {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
 }
 
 .alb-uncertain {

@@ -55,7 +55,11 @@
 
     function getAdventureKey(adventure, partOfCampaign) {
         const p = (partOfCampaign || '').trim();
-        return p || '_default';
+        const a = (adventure || '').trim();
+        if (!p && !a) return '_default';
+        if (p && !a) return p;
+        if (!p && a) return '_default|' + a;
+        return p + '|' + a;
     }
 
     function mergeRecentPlayers(existing, newPlayers, cap) {
@@ -82,7 +86,7 @@
         const d = getDefaults();
         const global = getGlobalDefaults();
         const perAdv = getPerAdventureDefaults();
-        const key = getAdventureKey(null, session.partOfCampaign);
+        const key = getAdventureKey(session.adventure, session.partOfCampaign);
         const adv = (key && perAdv[key]) ? perAdv[key] : null;
         const playersArray = (adv && adv.players && Array.isArray(adv.players)) ? adv.players : (d.players && Array.isArray(d.players) ? d.players : []);
         const nameList = playersArray.map(function (p) { return typeof p === 'string' ? p : (p && p.player); }).filter(Boolean);
@@ -134,7 +138,11 @@
         const global = getGlobalDefaults();
         const d = getDefaults();
         const perAdv = getPerAdventureDefaults();
-        const key = getAdventureKey(null, d.partOfCampaign);
+        const adventureEl = document.getElementById('alb-adventure');
+        const campaignEl = document.getElementById('alb-part-of-campaign');
+        const adventure = (adventureEl && adventureEl.value) ? adventureEl.value.trim() : (d.adventure || '');
+        const partOfCampaign = (campaignEl && campaignEl.value) ? campaignEl.value.trim() : (d.partOfCampaign || '');
+        const key = getAdventureKey(adventure, partOfCampaign);
         const adv = (key && perAdv[key]) ? perAdv[key] : null;
         const fromAdv = (adv && adv.players && Array.isArray(adv.players)) ? adv.players.map(function (p) { return typeof p === 'string' ? p : (p && p.player); }).filter(Boolean) : [];
         const fromGlobal = global.recentPlayers || [];
@@ -206,8 +214,9 @@
         const tbody = document.getElementById('alb-players-tbody');
 
         if (partOfCampaignEl && d.partOfCampaign) partOfCampaignEl.value = d.partOfCampaign;
+        if (adventureEl && d.adventure) adventureEl.value = d.adventure;
 
-        const adventureKey = getAdventureKey(null, d.partOfCampaign);
+        const adventureKey = getAdventureKey(d.adventure, d.partOfCampaign);
         const adventureSpecific = (adventureKey && perAdv[adventureKey]) ? perAdv[adventureKey] : null;
         let lastPlayers = adventureSpecific && adventureSpecific.players ? adventureSpecific.players : (d.players || []);
         if (!Array.isArray(lastPlayers)) {
@@ -238,12 +247,18 @@
             return;
         }
         const names = [];
-        let combined = '';
+        const results = new Array(files.length);
         let done = 0;
         const total = files.length;
-        function onLoad() {
+        function onFileDone(index, text) {
+            results[index] = text;
             done++;
-            if (done === total) callback(combined, names);
+            if (done === total) {
+                const combined = results.map(function (text, j) {
+                    return j === 0 ? text : FILE_SEP + names[j] + ' ---\n\n' + text;
+                }).join('');
+                callback(combined, names);
+            }
         }
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
@@ -251,11 +266,11 @@
             names.push(name);
             const reader = new FileReader();
             reader.onload = function (e) {
-                const text = (e.target && e.target.result) || '';
-                combined += (combined ? FILE_SEP + name + ' ---\n\n' : '') + text;
-                onLoad();
+                onFileDone(i, (e.target && e.target.result) || '');
             };
-            reader.onerror = onLoad;
+            reader.onerror = function () {
+                onFileDone(i, '');
+            };
             reader.readAsText(file, 'UTF-8');
         }
     }
@@ -375,6 +390,23 @@
         });
     }
 
+    function areMandatoryQuestionsFilled() {
+        const questionsDiv = document.getElementById('alb-intake-questions');
+        if (!questionsDiv) return true;
+        const inputs = questionsDiv.querySelectorAll('[id^="alb-intake-q-"]');
+        for (let i = 0; i < inputs.length; i++) {
+            const v = (inputs[i].value || '').trim();
+            if (v === '') return false;
+        }
+        return inputs.length === 0 || true;
+    }
+
+    function updateGenerateButtonState() {
+        const genAfter = document.getElementById('alb-generate-after-intake');
+        if (!genAfter) return;
+        genAfter.disabled = !areMandatoryQuestionsFilled();
+    }
+
     function showIntake(missingQuestions, uncertainItems) {
         const intake = document.getElementById('alb-intake');
         const questionsDiv = document.getElementById('alb-intake-questions');
@@ -383,6 +415,7 @@
         const uncertainContent = document.getElementById('alb-uncertain-content');
         const followupDiv = document.getElementById('alb-intake-followup-questions');
         const answerMoreBtn = document.getElementById('alb-answer-more-btn');
+        const intakeActions = document.getElementById('alb-intake-actions');
         if (!intake || !questionsDiv) return;
 
         questionsDiv.innerHTML = '';
@@ -395,19 +428,45 @@
         }
         intake.style.display = 'none';
         uncertain.style.display = 'none';
+        if (intakeActions) intakeActions.style.display = 'none';
 
         if (missingQuestions && missingQuestions.length > 0) {
             intake.style.display = 'block';
             missingQuestions.forEach(function (q, i) {
                 const wrap = document.createElement('div');
-                wrap.className = 'alb-intake-item';
+                wrap.className = 'alb-intake-item alb-intake-item-textarea';
                 const id = 'alb-intake-q-' + i;
-                wrap.innerHTML = '<label for="' + id + '">' + escapeHtml(q) + '</label><input type="text" id="' + id + '" data-question="' + escapeHtml(q) + '">';
+                const label = document.createElement('label');
+                label.setAttribute('for', id);
+                label.textContent = q;
+                wrap.appendChild(label);
+                const textarea = document.createElement('textarea');
+                textarea.id = id;
+                textarea.setAttribute('data-question', q);
+                textarea.rows = 3;
+                textarea.className = 'alb-intake-textarea';
+                wrap.appendChild(textarea);
                 questionsDiv.appendChild(wrap);
             });
-            if (genAfter) genAfter.style.display = 'inline-block';
+            if (genAfter) {
+                genAfter.disabled = true;
+                genAfter.style.display = 'inline-block';
+            }
+            if (intakeActions) intakeActions.style.display = 'block';
+            if (answerMoreBtn && !lastUncertainItems) answerMoreBtn.style.display = 'none';
+            if (answerMoreBtn && lastUncertainItems) answerMoreBtn.style.display = 'inline-block';
+            questionsDiv.querySelectorAll('.alb-intake-textarea').forEach(function (el) {
+                el.addEventListener('input', updateGenerateButtonState);
+                el.addEventListener('change', updateGenerateButtonState);
+            });
         } else {
-            if (genAfter) genAfter.style.display = 'none';
+            if (genAfter) {
+                genAfter.disabled = false;
+                genAfter.style.display = 'inline-block';
+            }
+            if (intakeActions) intakeActions.style.display = 'block';
+            if (answerMoreBtn && !lastUncertainItems) answerMoreBtn.style.display = 'none';
+            if (answerMoreBtn && lastUncertainItems) answerMoreBtn.style.display = 'inline-block';
         }
 
         if (lastUncertainItems) {
@@ -490,6 +549,7 @@
         const session = getSessionFromForm();
         const d = getDefaults();
         d.partOfCampaign = session.partOfCampaign || d.partOfCampaign;
+        d.adventure = session.adventure || d.adventure;
         d.sessionDate = session.sessionDate || d.sessionDate;
         if (session.players && session.players.length) {
             d.players = session.players;
@@ -497,7 +557,7 @@
         }
         saveDefaults(d);
 
-        const adventureKey = getAdventureKey(null, session.partOfCampaign);
+        const adventureKey = getAdventureKey(session.adventure, session.partOfCampaign);
         if (adventureKey) {
             const perAdv = getPerAdventureDefaults();
             perAdv[adventureKey] = {
@@ -588,7 +648,6 @@
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
                 body.appendChild(textarea);
-                bindOutputButtons();
             };
         }
 
@@ -640,8 +699,8 @@
                     .then(function (data) {
                         setLoading(false);
                         showIntake(data.missingQuestions || [], data.uncertainItems);
+                        generateBtn.style.display = 'none';
                         if (!(data.missingQuestions && data.missingQuestions.length > 0)) {
-                            generateBtn.style.display = 'inline-block';
                             setStatus('No missing fields. You can generate.');
                         }
                     })
@@ -687,9 +746,18 @@
                         if (questions.length > 0 && followupDiv) {
                             questions.forEach(function (q, i) {
                                 const wrap = document.createElement('div');
-                                wrap.className = 'alb-intake-item';
+                                wrap.className = 'alb-intake-item alb-intake-item-textarea';
                                 const id = 'alb-intake-q-followup-' + followUpRound + '-' + i;
-                                wrap.innerHTML = '<label for="' + id + '">' + escapeHtml(q) + '</label><input type="text" id="' + id + '" data-question="' + escapeHtml(q) + '">';
+                                const label = document.createElement('label');
+                                label.setAttribute('for', id);
+                                label.textContent = q;
+                                wrap.appendChild(label);
+                                const textarea = document.createElement('textarea');
+                                textarea.id = id;
+                                textarea.setAttribute('data-question', q);
+                                textarea.rows = 3;
+                                textarea.className = 'alb-intake-textarea';
+                                wrap.appendChild(textarea);
                                 followupDiv.appendChild(wrap);
                             });
                             followUpRound += 1;
