@@ -134,6 +134,23 @@ async function openaiChat(apiKey, messages, config) {
     return content;
 }
 
+async function openaiChatStream(apiKey, messages, config) {
+    const model = (config && config.model) || 'gpt-4o-mini';
+    const res = await fetch(OPENAI_CHAT_URL, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ model, messages, stream: true }),
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error?.message || res.statusText || 'OpenAI request failed');
+    }
+    return res;
+}
+
 function parseIntakeResponse(content) {
     const out = { missingQuestions: [], uncertainItems: {}, confidence: null };
     try {
@@ -248,16 +265,62 @@ export async function onRequestPost(context) {
     if (step === 'generate') {
         const generateSystem = systemPrompt + '\n\n' + outputFormat + (outputTemplate ? '\n\nTemplate structure:\n' + outputTemplate : '');
         const generateUser = `Session metadata: ${JSON.stringify(session)}\n${Object.keys(answers).length ? 'Answers to intake: ' + JSON.stringify(answers) + '\n\n' : ''}Content:\n${combinedForLLM.slice(0, 20000)}`;
-        let log;
+
+        let upstreamRes;
         try {
-            log = await openaiChat(apiKey, [
+            upstreamRes = await openaiChatStream(apiKey, [
                 { role: 'system', content: generateSystem },
                 { role: 'user', content: generateUser },
             ], config);
         } catch (e) {
             return jsonResponse({ error: e.message || 'Generate request failed' }, 502);
         }
-        return jsonResponse({ log: log.trim() });
+
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
+        const { readable, writable } = new TransformStream();
+        const writer = writable.getWriter();
+
+        (async () => {
+            const reader = upstreamRes.body.getReader();
+            let buffer = '';
+            try {
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() ?? '';
+                    for (const line of lines) {
+                        const trimmed = line.trim();
+                        if (!trimmed || trimmed === 'data: [DONE]') continue;
+                        if (trimmed.startsWith('data: ')) {
+                            try {
+                                const parsed = JSON.parse(trimmed.slice(6));
+                                const chunk = parsed.choices?.[0]?.delta?.content;
+                                if (chunk) {
+                                    await writer.write(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
+                                }
+                            } catch (_) {}
+                        }
+                    }
+                }
+                await writer.write(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
+            } catch (e) {
+                try {
+                    await writer.write(encoder.encode(`data: ${JSON.stringify({ error: e.message || 'Stream error' })}\n\n`));
+                } catch (_) {}
+            } finally {
+                try { await writer.close(); } catch (_) {}
+            }
+        })();
+
+        return new Response(readable, {
+            headers: {
+                'Content-Type': 'text/event-stream',
+                'Cache-Control': 'no-cache',
+            },
+        });
     }
 
     return jsonResponse({ error: 'Invalid step' }, 400);

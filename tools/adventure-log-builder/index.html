@@ -98,6 +98,15 @@
             <p class="alb-status-hint" id="alb-status-hint"></p>
             <div id="alb-error" class="alb-error" style="display: none;"></div>
 
+            <div id="alb-stream-panel" class="alb-stream-panel" style="display: none;" aria-live="polite" aria-label="Generating adventure log">
+                <div class="alb-stream-header">
+                    <span class="alb-stream-label">Generating log</span>
+                    <span class="alb-stream-cursor" aria-hidden="true"></span>
+                </div>
+                <pre id="alb-stream-pre" class="alb-stream-pre"></pre>
+                <p id="alb-stream-warning" class="alb-stream-warning" style="display: none;"></p>
+            </div>
+
             <div id="alb-confidence" class="alb-confidence" style="display: none;">
                 <div class="alb-confidence-header">
                     <div class="alb-confidence-title">Confidence</div>

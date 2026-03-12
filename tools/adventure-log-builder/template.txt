@@ -160,15 +160,13 @@ Write a short summary in 3 to 6 sentences covering the main flow of the adventur
 
 ### XP Awarded
 
-**Total XP Given:**
+**Base XP (sum of encounters):**
 
-**Breakdown:**
+**Performance Bonus Multiplier:** \(+25\%\) to \(+75\%\) (or **x1.25** to **x1.75**), based on how the table felt about the session.
 
-- Combat:
-- Quest / Objective:
-- Exploration:
-- Roleplay:
-- Bonus / Milestone:
+**Performance Bonus (notes):** Briefly state *why* you chose the multiplier (e.g., “messy execution,” “great teamwork,” “DM ran it exceptionally well”).
+
+**Total XP Given (after bonus):**
 
 **XP Per Character:**
 
