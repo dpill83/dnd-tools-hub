@@ -7,9 +7,11 @@
     const API_PATH = '/api/adventure-log';
     const FILE_SEP = '\n\n--- File: ';
     const GLOBAL_RECENT_PLAYERS_CAP = 20;
+    const CONFIDENCE_THRESHOLD = 70;
 
     let lastUncertainItems = null;
-    let followUpRound = 0;
+    let currentStep = 'form'; // 'form' | 'intake' | 'ready' | 'generating' | 'done'
+    let lastConfidence = 0;
 
     function getDefaults() {
         try {
@@ -338,8 +340,8 @@
     function setLoading(loading, step) {
         const checkBtn = document.getElementById('alb-check-btn');
         const genBtn = document.getElementById('alb-generate-btn');
-        const genAfter = document.getElementById('alb-generate-after-intake');
-        [checkBtn, genBtn, genAfter].forEach(function (btn) {
+        const intakeSubmitBtn = document.getElementById('alb-intake-submit-btn');
+        [checkBtn, genBtn, intakeSubmitBtn].forEach(function (btn) {
             if (btn) btn.disabled = loading;
         });
         if (_loadingTimer) {
@@ -401,37 +403,158 @@
         return inputs.length === 0 || true;
     }
 
-    function updateGenerateButtonState() {
-        const genAfter = document.getElementById('alb-generate-after-intake');
-        if (!genAfter) return;
-        genAfter.disabled = !areMandatoryQuestionsFilled();
+    function clampInt(n, min, max) {
+        n = Number(n);
+        if (!Number.isFinite(n)) return min;
+        n = Math.round(n);
+        if (n < min) return min;
+        if (n > max) return max;
+        return n;
     }
 
-    function showIntake(missingQuestions, uncertainItems) {
+    function setCurrentStep(step) {
+        currentStep = step;
+        render();
+    }
+
+    function setConfidence(confidence) {
+        lastConfidence = clampInt(confidence, 0, 100);
+        const wrap = document.getElementById('alb-confidence');
+        const valueEl = document.getElementById('alb-confidence-value');
+        const hintEl = document.getElementById('alb-confidence-hint');
+        const fill = document.getElementById('alb-meter-fill');
+        const meter = wrap ? wrap.querySelector('.alb-meter') : null;
+        if (wrap) wrap.style.display = (currentStep === 'intake' || currentStep === 'ready') ? 'block' : 'none';
+        if (valueEl) valueEl.textContent = lastConfidence + '%';
+        if (fill) fill.style.width = lastConfidence + '%';
+        if (meter) meter.setAttribute('aria-valuenow', String(lastConfidence));
+        if (hintEl) {
+            hintEl.textContent = lastConfidence >= CONFIDENCE_THRESHOLD
+                ? 'Good to go. You can generate the log.'
+                : ('Answer required questions and optionally clarify uncertain items until confidence reaches ' + CONFIDENCE_THRESHOLD + '%.');
+        }
+    }
+
+    function updateButtonsEnabledState() {
+        const checkBtn = document.getElementById('alb-check-btn');
+        const genBtn = document.getElementById('alb-generate-btn');
+        const intakeSubmitBtn = document.getElementById('alb-intake-submit-btn');
+
+        if (checkBtn) checkBtn.disabled = false;
+        if (intakeSubmitBtn) {
+            intakeSubmitBtn.disabled = !areMandatoryQuestionsFilled();
+            intakeSubmitBtn.textContent = currentStep === 'ready' ? 'Update confidence' : 'Continue';
+        }
+        if (genBtn) {
+            genBtn.disabled = !(currentStep === 'ready' && lastConfidence >= CONFIDENCE_THRESHOLD);
+        }
+    }
+
+    function render() {
+        const intake = document.getElementById('alb-intake');
+        const uncertain = document.getElementById('alb-uncertain');
+        const intakeActions = document.getElementById('alb-intake-actions');
+        const checkBtn = document.getElementById('alb-check-btn');
+        const genBtn = document.getElementById('alb-generate-btn');
+        const outputSection = document.getElementById('alb-output-section');
+        const confidenceWrap = document.getElementById('alb-confidence');
+
+        if (checkBtn) checkBtn.style.display = currentStep === 'form' ? 'inline-block' : 'none';
+        if (genBtn) genBtn.style.display = currentStep === 'ready' ? 'inline-block' : 'none';
+
+        const showIntakeArea = currentStep === 'intake' || currentStep === 'ready';
+        if (intake) intake.style.display = showIntakeArea ? 'block' : 'none';
+        if (uncertain) uncertain.style.display = showIntakeArea ? 'block' : 'none';
+        if (intakeActions) intakeActions.style.display = showIntakeArea ? 'flex' : 'none';
+
+        if (confidenceWrap) confidenceWrap.style.display = showIntakeArea ? 'block' : 'none';
+
+        if (outputSection && currentStep !== 'done') {
+            // Keep output visible only in done state.
+            outputSection.style.display = 'none';
+        }
+
+        updateButtonsEnabledState();
+    }
+
+    function keyForUncertain(category, item) {
+        return 'Uncertain ' + category + ': ' + item;
+    }
+
+    function renderUncertainInputs(uncertainItems) {
+        const uncertainContent = document.getElementById('alb-uncertain-content');
+        if (!uncertainContent) return;
+
+        uncertainContent.innerHTML = '';
+        const groups = [
+            { key: 'names', label: 'Names', category: 'name' },
+            { key: 'rewards', label: 'Rewards', category: 'reward' },
+            { key: 'outcomes', label: 'Outcomes', category: 'outcome' },
+        ];
+
+        let any = false;
+        groups.forEach(function (g) {
+            const items = (uncertainItems && Array.isArray(uncertainItems[g.key])) ? uncertainItems[g.key] : [];
+            if (!items.length) return;
+            any = true;
+
+            const title = document.createElement('div');
+            title.className = 'alb-section-title';
+            title.textContent = g.label;
+            uncertainContent.appendChild(title);
+
+            items.forEach(function (raw, idx) {
+                const item = String(raw == null ? '' : raw).trim();
+                if (!item) return;
+                const wrap = document.createElement('div');
+                wrap.className = 'alb-intake-item alb-intake-item-textarea';
+                const id = 'alb-uncertain-' + g.key + '-' + idx;
+                const label = document.createElement('label');
+                label.setAttribute('for', id);
+                label.textContent = item;
+                wrap.appendChild(label);
+
+                const textarea = document.createElement('textarea');
+                textarea.id = id;
+                textarea.rows = 2;
+                textarea.className = 'alb-intake-textarea';
+                textarea.setAttribute('data-answer-key', keyForUncertain(g.category, item));
+                textarea.placeholder = 'Optional clarification (what should this be exactly?)';
+                wrap.appendChild(textarea);
+
+                uncertainContent.appendChild(wrap);
+            });
+        });
+
+        if (!any) {
+            const p = document.createElement('p');
+            p.className = 'alb-helper';
+            p.textContent = 'No uncertain items detected.';
+            uncertainContent.appendChild(p);
+        }
+
+        uncertainContent.querySelectorAll('textarea').forEach(function (el) {
+            el.addEventListener('input', updateButtonsEnabledState);
+            el.addEventListener('change', updateButtonsEnabledState);
+        });
+    }
+
+    function showIntake(missingQuestions, uncertainItems, confidence) {
         const intake = document.getElementById('alb-intake');
         const questionsDiv = document.getElementById('alb-intake-questions');
-        const genAfter = document.getElementById('alb-generate-after-intake');
         const uncertain = document.getElementById('alb-uncertain');
-        const uncertainContent = document.getElementById('alb-uncertain-content');
-        const followupDiv = document.getElementById('alb-intake-followup-questions');
-        const answerMoreBtn = document.getElementById('alb-answer-more-btn');
         const intakeActions = document.getElementById('alb-intake-actions');
         if (!intake || !questionsDiv) return;
 
         questionsDiv.innerHTML = '';
-        if (followupDiv) followupDiv.innerHTML = '';
-        followUpRound = 0;
+        if (intakeActions) intakeActions.style.display = 'flex';
+
         lastUncertainItems = uncertainItems && (uncertainItems.names?.length || uncertainItems.rewards?.length || uncertainItems.outcomes?.length) ? uncertainItems : null;
-        if (answerMoreBtn) {
-            answerMoreBtn.disabled = false;
-            answerMoreBtn.textContent = 'Answer more';
-        }
-        intake.style.display = 'none';
-        uncertain.style.display = 'none';
-        if (intakeActions) intakeActions.style.display = 'none';
+        if (uncertain) uncertain.style.display = 'block';
+        renderUncertainInputs(lastUncertainItems || {});
+        setConfidence(confidence == null ? 0 : confidence);
 
         if (missingQuestions && missingQuestions.length > 0) {
-            intake.style.display = 'block';
             missingQuestions.forEach(function (q, i) {
                 const wrap = document.createElement('div');
                 wrap.className = 'alb-intake-item alb-intake-item-textarea';
@@ -443,46 +566,20 @@
                 const textarea = document.createElement('textarea');
                 textarea.id = id;
                 textarea.setAttribute('data-question', q);
+                textarea.setAttribute('data-answer-key', q);
                 textarea.rows = 3;
                 textarea.className = 'alb-intake-textarea';
                 wrap.appendChild(textarea);
                 questionsDiv.appendChild(wrap);
             });
-            if (genAfter) {
-                genAfter.disabled = true;
-                genAfter.style.display = 'inline-block';
-            }
-            if (intakeActions) intakeActions.style.display = 'block';
-            if (answerMoreBtn && !lastUncertainItems) answerMoreBtn.style.display = 'none';
-            if (answerMoreBtn && lastUncertainItems) answerMoreBtn.style.display = 'inline-block';
             questionsDiv.querySelectorAll('.alb-intake-textarea').forEach(function (el) {
-                el.addEventListener('input', updateGenerateButtonState);
-                el.addEventListener('change', updateGenerateButtonState);
+                el.addEventListener('input', updateButtonsEnabledState);
+                el.addEventListener('change', updateButtonsEnabledState);
             });
         } else {
-            if (genAfter) {
-                genAfter.disabled = false;
-                genAfter.style.display = 'inline-block';
-            }
-            if (intakeActions) intakeActions.style.display = 'block';
-            if (answerMoreBtn && !lastUncertainItems) answerMoreBtn.style.display = 'none';
-            if (answerMoreBtn && lastUncertainItems) answerMoreBtn.style.display = 'inline-block';
         }
 
-        if (lastUncertainItems) {
-            uncertain.style.display = 'block';
-            let html = '';
-            if (uncertainItems.names && uncertainItems.names.length) {
-                html += '<p><strong>Names:</strong></p><ul><li>' + uncertainItems.names.map(escapeHtml).join('</li><li>') + '</li></ul>';
-            }
-            if (uncertainItems.rewards && uncertainItems.rewards.length) {
-                html += '<p><strong>Rewards:</strong></p><ul><li>' + uncertainItems.rewards.map(escapeHtml).join('</li><li>') + '</li></ul>';
-            }
-            if (uncertainItems.outcomes && uncertainItems.outcomes.length) {
-                html += '<p><strong>Outcomes:</strong></p><ul><li>' + uncertainItems.outcomes.map(escapeHtml).join('</li><li>') + '</li></ul>';
-            }
-            if (uncertainContent) uncertainContent.innerHTML = html;
-        }
+        updateButtonsEnabledState();
     }
 
     function escapeHtml(s) {
@@ -494,11 +591,60 @@
 
     function collectIntakeAnswers() {
         const answers = {};
-        document.querySelectorAll('[id^="alb-intake-q-"]').forEach(function (input) {
-            const q = input.getAttribute('data-question');
-            if (q) answers[q] = input.value || '';
+        document.querySelectorAll('[data-answer-key]').forEach(function (input) {
+            const k = input.getAttribute('data-answer-key');
+            if (!k) return;
+            const v = (input.value || '').trim();
+            if (v !== '') answers[k] = input.value || '';
         });
         return answers;
+    }
+
+    function runIntake() {
+        const session = getSessionFromForm();
+        const defaults = getDefaultsForRequest(session);
+        const notesText = getNotesText();
+        const transcriptText = getTranscriptText();
+        const answers = collectIntakeAnswers();
+
+        if (!notesText && !transcriptText) {
+            setError('Add at least notes or transcript content.');
+            return;
+        }
+
+        setError('');
+        setLoading(true, 'intake');
+
+        apiPost({
+            step: 'intake',
+            session: session,
+            defaults: defaults,
+            notesText: notesText,
+            transcriptText: transcriptText,
+            answers: answers
+        })
+            .then(function (res) {
+                return res.json().then(function (data) {
+                    if (!res.ok) throw new Error(data.error || res.statusText || 'Request failed');
+                    return data;
+                });
+            })
+            .then(function (data) {
+                setLoading(false);
+                const missing = data.missingQuestions || [];
+                const uncertainItems = data.uncertainItems || {};
+                const confidence = data.confidence == null ? 0 : data.confidence;
+                showIntake(missing, uncertainItems, confidence);
+                if (missing.length > 0) {
+                    setCurrentStep('intake');
+                } else {
+                    setCurrentStep('ready');
+                }
+            })
+            .catch(function (err) {
+                setLoading(false);
+                setError(err.message || 'Request failed');
+            });
     }
 
     function runGenerate() {
@@ -514,6 +660,7 @@
         }
 
         setError('');
+        setCurrentStep('generating');
         setLoading(true, 'generate');
 
         apiPost({
@@ -535,12 +682,12 @@
                 if (data.log != null) {
                     updateStoredDefaults();
                     showOutput(data.log);
-                    document.getElementById('alb-intake').style.display = 'none';
-                    document.getElementById('alb-uncertain').style.display = 'none';
+                    setCurrentStep('done');
                 }
             })
             .catch(function (err) {
                 setLoading(false);
+                setCurrentStep('ready');
                 setError(err.message || 'Request failed');
             });
     }
@@ -667,47 +814,11 @@
 
         const checkBtn = document.getElementById('alb-check-btn');
         const generateBtn = document.getElementById('alb-generate-btn');
-        const genAfter = document.getElementById('alb-generate-after-intake');
+        const intakeSubmitBtn = document.getElementById('alb-intake-submit-btn');
 
         if (checkBtn) {
             checkBtn.addEventListener('click', function () {
-                const session = getSessionFromForm();
-                const defaults = getDefaultsForRequest(session);
-                const notesText = getNotesText();
-                const transcriptText = getTranscriptText();
-
-                if (!notesText && !transcriptText) {
-                    setError('Add at least notes or transcript content.');
-                    return;
-                }
-                setError('');
-                setLoading(true, 'intake');
-
-                apiPost({
-                    step: 'intake',
-                    session: session,
-                    defaults: defaults,
-                    notesText: notesText,
-                    transcriptText: transcriptText
-                })
-                    .then(function (res) {
-                        return res.json().then(function (data) {
-                            if (!res.ok) throw new Error(data.error || res.statusText || 'Request failed');
-                            return data;
-                        });
-                    })
-                    .then(function (data) {
-                        setLoading(false);
-                        showIntake(data.missingQuestions || [], data.uncertainItems);
-                        generateBtn.style.display = 'none';
-                        if (!(data.missingQuestions && data.missingQuestions.length > 0)) {
-                            setStatus('No missing fields. You can generate.');
-                        }
-                    })
-                    .catch(function (err) {
-                        setLoading(false);
-                        setError(err.message || 'Request failed');
-                    });
+                runIntake();
             });
         }
 
@@ -715,64 +826,18 @@
             generateBtn.addEventListener('click', runGenerate);
         }
 
-        if (genAfter) {
-            genAfter.addEventListener('click', function () {
-                runGenerate();
+        if (intakeSubmitBtn) {
+            intakeSubmitBtn.addEventListener('click', function () {
+                if (!areMandatoryQuestionsFilled()) {
+                    setError('Please answer the required questions above.');
+                    return;
+                }
+                runIntake();
             });
         }
 
-        const answerMoreBtn = document.getElementById('alb-answer-more-btn');
-        if (answerMoreBtn) {
-            answerMoreBtn.addEventListener('click', function () {
-                if (!lastUncertainItems || answerMoreBtn.disabled) return;
-                const answers = collectIntakeAnswers();
-                setError('');
-                setLoading(true, 'intake');
-                apiPost({
-                    step: 'intake-followup',
-                    uncertainItems: lastUncertainItems,
-                    answers: answers
-                })
-                    .then(function (res) {
-                        return res.json().then(function (data) {
-                            if (!res.ok) throw new Error(data.error || res.statusText || 'Request failed');
-                            return data;
-                        });
-                    })
-                    .then(function (data) {
-                        setLoading(false);
-                        const questions = data.missingQuestions || [];
-                        const followupDiv = document.getElementById('alb-intake-followup-questions');
-                        if (questions.length > 0 && followupDiv) {
-                            questions.forEach(function (q, i) {
-                                const wrap = document.createElement('div');
-                                wrap.className = 'alb-intake-item alb-intake-item-textarea';
-                                const id = 'alb-intake-q-followup-' + followUpRound + '-' + i;
-                                const label = document.createElement('label');
-                                label.setAttribute('for', id);
-                                label.textContent = q;
-                                wrap.appendChild(label);
-                                const textarea = document.createElement('textarea');
-                                textarea.id = id;
-                                textarea.setAttribute('data-question', q);
-                                textarea.rows = 3;
-                                textarea.className = 'alb-intake-textarea';
-                                wrap.appendChild(textarea);
-                                followupDiv.appendChild(wrap);
-                            });
-                            followUpRound += 1;
-                        }
-                        if (questions.length === 0) {
-                            answerMoreBtn.disabled = true;
-                            answerMoreBtn.textContent = 'No more questions';
-                        }
-                    })
-                    .catch(function (err) {
-                        setLoading(false);
-                        setError(err.message || 'Request failed');
-                    });
-            });
-        }
+        setConfidence(0);
+        setCurrentStep('form');
     }
 
     if (document.readyState === 'loading') {

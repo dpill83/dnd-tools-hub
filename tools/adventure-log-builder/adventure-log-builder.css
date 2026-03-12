@@ -301,6 +301,53 @@
     align-items: center;
 }
 
+.alb-confidence {
+    margin: 0.75rem 0 1rem;
+}
+
+.alb-confidence-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.35rem;
+}
+
+.alb-confidence-title {
+    font-size: 0.875rem;
+    color: var(--text-light);
+}
+
+.alb-confidence-value {
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+.alb-meter {
+    width: 100%;
+    height: 10px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.alb-meter-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--primary-color);
+    transition: width 180ms ease;
+}
+
+.alb-uncertain .alb-intake-item {
+    margin-bottom: 0.75rem;
+}
+
+.alb-uncertain .alb-intake-textarea {
+    min-height: 60px;
+}
+
 .alb-uncertain {
     margin-top: 1rem;
     padding: 1rem;

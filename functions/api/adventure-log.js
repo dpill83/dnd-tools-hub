@@ -1,7 +1,7 @@
 /**
  * POST /api/adventure-log
  * Body: { step: 'intake' | 'generate', session: {...}, defaults: {...}, notesText: string, transcriptText?: string, answers?: {...} }
- * Returns: intake -> { missingQuestions: string[], uncertainItems?: {...} }; generate -> { log: string }
+ * Returns: intake -> { missingQuestions: string[], uncertainItems?: {...}, confidence: number }; generate -> { log: string }
  * Requires: ADVENTURE_LOG_BUILDER_PROD (or OPENAI_API_KEY as fallback). Loads prompt from prompt-config.json and output template from template.txt (same origin).
  */
 
@@ -135,7 +135,7 @@ async function openaiChat(apiKey, messages, config) {
 }
 
 function parseIntakeResponse(content) {
-    const out = { missingQuestions: [], uncertainItems: {} };
+    const out = { missingQuestions: [], uncertainItems: {}, confidence: null };
     try {
         const trimmed = content.trim();
         const jsonMatch = trimmed.match(/\{[\s\S]*\}/);
@@ -145,9 +145,16 @@ function parseIntakeResponse(content) {
             if (parsed.uncertainItems && typeof parsed.uncertainItems === 'object') {
                 out.uncertainItems = parsed.uncertainItems;
             }
+            if (typeof parsed.confidence === 'number') out.confidence = parsed.confidence;
         }
     } catch (_) {
         out.missingQuestions = [content];
+    }
+    if (out.confidence == null) {
+        const missing = Array.isArray(out.missingQuestions) ? out.missingQuestions.length : 0;
+        out.confidence = Math.max(0, Math.min(100, Math.round(100 - missing * 15)));
+    } else {
+        out.confidence = Math.max(0, Math.min(100, Math.round(out.confidence)));
     }
     return out;
 }
@@ -196,8 +203,15 @@ export async function onRequestPost(context) {
     const intakeFollowupPrompt = (config && config.intakeFollowupPrompt) || 'Given uncertain items and existing answers, generate up to 3 short questions to clarify. Return ONLY valid JSON: { "missingQuestions": [] }.';
 
     if (step === 'intake') {
-        const intakeSystem = intakePrompt + '\n\nRespond with valid JSON only.';
-        const intakeUser = `Defaults: ${JSON.stringify(defaults)}\n\nSession form: ${JSON.stringify(session)}\n\nContent (notes + transcript):\n${combinedForLLM.slice(0, 15000)}`;
+        const intakeSystem =
+            intakePrompt +
+            '\n\nAlso include a numeric confidence score from 0 to 100 in the JSON response as "confidence".' +
+            '\nRespond with valid JSON only.';
+        const intakeUser =
+            `Defaults: ${JSON.stringify(defaults)}\n\n` +
+            `Session form: ${JSON.stringify(session)}\n\n` +
+            `Answers so far (may include optional clarifications): ${JSON.stringify(answers)}\n\n` +
+            `Content (notes + transcript):\n${combinedForLLM.slice(0, 15000)}`;
         let content;
         try {
             content = await openaiChat(apiKey, [
@@ -212,7 +226,10 @@ export async function onRequestPost(context) {
     }
 
     if (step === 'intake-followup') {
-        const followupSystem = intakeFollowupPrompt + '\n\nRespond with valid JSON only.';
+        const followupSystem =
+            intakeFollowupPrompt +
+            '\n\nAlso include a numeric confidence score from 0 to 100 in the JSON response as "confidence".' +
+            '\nRespond with valid JSON only.';
         const followupUser = `Uncertain items: ${JSON.stringify(uncertainItems)}\n\nAnswers so far: ${JSON.stringify(answers)}\n\nGenerate up to 3 new questions to clarify the uncertain items. Do not repeat questions already answered.`;
         let content;
         try {
