@@ -40,6 +40,14 @@
                     <label for="alb-session-number">Session number</label>
                     <input type="number" id="alb-session-number" min="1" placeholder="e.g. 12">
                 </div>
+                <div class="alb-field">
+                    <label for="alb-template-toggle">Template</label>
+                    <select id="alb-template-toggle" aria-describedby="alb-template-desc">
+                        <option value="full">Full (major adventures)</option>
+                        <option value="light">Light (shorter sessions)</option>
+                    </select>
+                    <span id="alb-template-desc" class="alb-sr-only">Full template includes detailed NPC/monster sections; light is shorter.</span>
+                </div>
             </div>
             <div class="alb-section-title alb-table-title">Table</div>
             <div class="alb-fields alb-table-fields">
@@ -51,12 +59,11 @@
                 <div class="alb-field alb-field-full">
                     <label id="alb-players-table-label">Players &amp; characters</label>
                     <div class="alb-players-table-wrap" role="region" aria-labelledby="alb-players-table-label">
-                        <table class="alb-players-table" id="alb-players-table" aria-label="Player name, character name, and status per row">
+                        <table class="alb-players-table" id="alb-players-table" aria-label="Player name and character name per row">
                             <thead>
                                 <tr>
                                     <th scope="col">Player name</th>
                                     <th scope="col">Character name</th>
-                                    <th scope="col">Status</th>
                                     <th scope="col"><span class="alb-sr-only">Remove row</span></th>
                                 </tr>
                             </thead>
@@ -101,6 +108,7 @@
                 <button type="button" id="alb-generate-btn" class="alb-btn alb-btn-primary" style="display: none;">Generate log</button>
             </div>
             <p class="alb-status" id="alb-status"></p>
+            <p class="alb-status-hint" id="alb-status-hint"></p>
             <div id="alb-error" class="alb-error" style="display: none;"></div>
 
             <div id="alb-intake" class="alb-intake" style="display: none;">

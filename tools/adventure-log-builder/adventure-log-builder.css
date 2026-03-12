@@ -362,6 +362,13 @@
     margin-top: 0.5rem;
 }
 
+.alb-status-hint {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-top: 0.25rem;
+    opacity: 0.9;
+}
+
 .alb-file-list {
     font-size: 0.75rem;
     color: var(--text-light);

@@ -178,7 +178,10 @@ export async function onRequestPost(context) {
     const answers = body.answers && typeof body.answers === 'object' ? body.answers : {};
 
     const config = await loadConfig(request);
-    const templateText = await loadTemplate(request);
+    const useLightTemplate = session.template === 'light' && config && config.templateLight;
+    const templateText = useLightTemplate
+        ? (config.templateLight && config.templateLight.trim()) || ''
+        : await loadTemplate(request);
     const transcriptCleaning = (config && config.transcriptCleaning) || null;
 
     const notesProcessed = preprocessText(notesText);

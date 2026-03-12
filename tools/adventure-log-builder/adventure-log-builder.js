@@ -100,6 +100,7 @@
         const partOfCampaign = (document.getElementById('alb-part-of-campaign') && document.getElementById('alb-part-of-campaign').value) || '';
         const sessionDate = (document.getElementById('alb-session-date') && document.getElementById('alb-session-date').value) || '';
         const sessionNumber = (document.getElementById('alb-session-number') && document.getElementById('alb-session-number').value) || '';
+        const template = (document.getElementById('alb-template-toggle') && document.getElementById('alb-template-toggle').value) || 'full';
         const dm = (document.getElementById('alb-dm') && document.getElementById('alb-dm').value) || '';
         const tbody = document.getElementById('alb-players-tbody');
         const players = [];
@@ -107,12 +108,10 @@
             tbody.querySelectorAll('tr').forEach(function (tr) {
                 const playerInput = tr.querySelector('.alb-input-player');
                 const characterInput = tr.querySelector('.alb-input-character');
-                const statusSelect = tr.querySelector('.alb-select-status');
                 const player = (playerInput && playerInput.value) ? playerInput.value.trim() : '';
                 const character = (characterInput && characterInput.value) ? characterInput.value.trim() : '';
-                const status = (statusSelect && statusSelect.value) ? statusSelect.value : 'Present';
                 if (player || character) {
-                    players.push({ player: player, character: character, status: status });
+                    players.push({ player: player, character: character });
                 }
             });
         }
@@ -121,6 +120,7 @@
             partOfCampaign: partOfCampaign.trim(),
             sessionDate: sessionDate.trim(),
             sessionNumber: sessionNumber.trim(),
+            template: template,
             dm: dm.trim(),
             players: players
         };
@@ -158,25 +158,21 @@
         });
     }
 
-    function addPlayerRow(player, character, status) {
+    function addPlayerRow(player, character) {
         const tbody = document.getElementById('alb-players-tbody');
         if (!tbody) return;
         player = player || '';
         character = character || '';
-        status = status || 'Present';
         const tr = document.createElement('tr');
         const playerId = 'alb-player-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
         tr.innerHTML =
             '<td><label for="' + playerId + '" class="alb-sr-only">Player name</label><input type="text" class="alb-input-player" id="' + playerId + '" list="alb-player-suggestions" placeholder="Player name" autocomplete="off"></td>' +
             '<td><label for="' + playerId + '-char" class="alb-sr-only">Character name</label><input type="text" class="alb-input-character" id="' + playerId + '-char" placeholder="Character name"></td>' +
-            '<td><label for="' + playerId + '-status" class="alb-sr-only">Status</label><select class="alb-select-status" id="' + playerId + '-status" aria-label="Status"><option value="Present"' + (status === 'Present' ? ' selected' : '') + '>Present</option><option value="Absent"' + (status === 'Absent' ? ' selected' : '') + '>Absent</option></select></td>' +
             '<td class="alb-row-remove"><button type="button" class="alb-row-remove-btn" aria-label="Remove this row">\u2012</button></td>';
         const playerInput = tr.querySelector('.alb-input-player');
         const characterInput = tr.querySelector('.alb-input-character');
-        const statusSelect = tr.querySelector('.alb-select-status');
         if (playerInput) playerInput.value = player;
         if (characterInput) characterInput.value = character;
-        if (statusSelect) statusSelect.value = status;
         tr.querySelector('.alb-row-remove-btn').addEventListener('click', function () {
             tr.remove();
         });
@@ -188,10 +184,10 @@
         const addBtn = document.getElementById('alb-add-player-btn');
         if (!tbody || !addBtn) return;
         if (tbody.querySelectorAll('tr').length === 0) {
-            addPlayerRow('', '', 'Present');
+            addPlayerRow('', '');
         }
         addBtn.addEventListener('click', function () {
-            addPlayerRow('', '', 'Present');
+            addPlayerRow('', '');
         });
         refreshPlayerSuggestions();
     }
@@ -217,9 +213,11 @@
         const lastDm = adventureSpecific ? adventureSpecific.dm : d.dm;
         let lastPlayers = adventureSpecific && adventureSpecific.players ? adventureSpecific.players : (d.players || []);
         if (!Array.isArray(lastPlayers)) {
-            lastPlayers = (d.recentPlayers && Array.isArray(d.recentPlayers)) ? d.recentPlayers.map(function (name) { return { player: name, character: '', status: 'Present' }; }) : [];
+            lastPlayers = (d.recentPlayers && Array.isArray(d.recentPlayers)) ? d.recentPlayers.map(function (name) { return { player: name, character: '' }; }) : [];
         } else if (lastPlayers.length && typeof lastPlayers[0] === 'string') {
-            lastPlayers = lastPlayers.map(function (name) { return { player: name, character: '', status: 'Present' }; });
+            lastPlayers = lastPlayers.map(function (name) { return { player: name, character: '' }; });
+        } else if (lastPlayers.length && lastPlayers[0] && 'status' in lastPlayers[0]) {
+            lastPlayers = lastPlayers.map(function (row) { return { player: row.player, character: row.character || '' }; });
         }
 
         if (dateEl && lastDate) dateEl.value = String(lastDate).trim().replace(/\//g, '-');
@@ -231,8 +229,7 @@
             lastPlayers.forEach(function (row) {
                 addPlayerRow(
                     typeof row === 'string' ? row : (row && row.player),
-                    typeof row === 'string' ? '' : (row && row.character),
-                    typeof row === 'string' ? 'Present' : (row && row.status) || 'Present'
+                    typeof row === 'string' ? '' : (row && row.character)
                 );
             });
         }
@@ -339,14 +336,43 @@
         }
     }
 
-    function setLoading(loading) {
+    var _loadingTimer = null;
+
+    function setLoading(loading, step) {
         const checkBtn = document.getElementById('alb-check-btn');
         const genBtn = document.getElementById('alb-generate-btn');
         const genAfter = document.getElementById('alb-generate-after-intake');
         [checkBtn, genBtn, genAfter].forEach(function (btn) {
             if (btn) btn.disabled = loading;
         });
-        setStatus(loading ? 'Sending…' : '');
+        if (_loadingTimer) {
+            clearTimeout(_loadingTimer);
+            _loadingTimer = null;
+        }
+        if (loading) {
+            setStatus(step === 'generate' ? 'Generating log…' : 'Checking…');
+            setStatusHint(step === 'generate' ? 'This may take 30–60 seconds for long notes.' : '');
+            _loadingTimer = setTimeout(function () {
+                _loadingTimer = null;
+                if (document.getElementById('alb-generate-btn') && document.getElementById('alb-generate-btn').disabled) {
+                    setStatus('Still generating… (this can take a minute for long notes)');
+                } else if (document.getElementById('alb-check-btn') && document.getElementById('alb-check-btn').disabled) {
+                    setStatus('Still checking…');
+                }
+            }, 10000);
+        } else {
+            if (_loadingTimer) {
+                clearTimeout(_loadingTimer);
+                _loadingTimer = null;
+            }
+            setStatus('');
+            setStatusHint('');
+        }
+    }
+
+    function setStatusHint(msg) {
+        const el = document.getElementById('alb-status-hint');
+        if (el) el.textContent = msg || '';
     }
 
     function getNotesText() {
@@ -438,7 +464,7 @@
         }
 
         setError('');
-        setLoading(true);
+        setLoading(true, 'generate');
 
         apiPost({
             step: 'generate',
@@ -610,7 +636,7 @@
                     return;
                 }
                 setError('');
-                setLoading(true);
+                setLoading(true, 'intake');
 
                 apiPost({
                     step: 'intake',
