@@ -93,30 +93,29 @@
         <section class="alb-section">
             <div class="alb-actions">
                 <button type="button" id="alb-check-btn" class="alb-btn alb-btn-primary">Check &amp; continue</button>
-                <button type="button" id="alb-generate-btn" class="alb-btn alb-btn-primary" style="display: none;">Generate log</button>
             </div>
             <p class="alb-status" id="alb-status"></p>
             <p class="alb-status-hint" id="alb-status-hint"></p>
             <div id="alb-error" class="alb-error" style="display: none;"></div>
 
+            <div id="alb-confidence" class="alb-confidence" style="display: none;">
+                <div class="alb-confidence-header">
+                    <div class="alb-confidence-title">Confidence</div>
+                    <div class="alb-confidence-value" id="alb-confidence-value">0%</div>
+                </div>
+                <div class="alb-meter" role="meter" aria-label="Confidence meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <div class="alb-meter-fill" id="alb-meter-fill" style="width: 0%;"></div>
+                </div>
+                <p class="alb-helper" id="alb-confidence-hint"></p>
+            </div>
+
             <div id="alb-intake" class="alb-intake" style="display: none;">
                 <h3>Answer these to continue</h3>
-                <div id="alb-confidence" class="alb-confidence" style="display: none;">
-                    <div class="alb-confidence-header">
-                        <div class="alb-confidence-title">Confidence</div>
-                        <div class="alb-confidence-value" id="alb-confidence-value">0%</div>
-                    </div>
-                    <div class="alb-meter" role="meter" aria-label="Confidence meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                        <div class="alb-meter-fill" id="alb-meter-fill" style="width: 0%;"></div>
-                    </div>
-                    <p class="alb-helper" id="alb-confidence-hint"></p>
-                </div>
                 <div id="alb-intake-questions"></div>
             </div>
             <div id="alb-uncertain" class="alb-uncertain" style="display: none;">
                 <h3>Optional: clarify these if you want</h3>
                 <div id="alb-uncertain-content"></div>
-                <div id="alb-intake-followup-questions" class="alb-intake-followup"></div>
             </div>
             <div id="alb-intake-actions" class="alb-intake-actions" style="display: none;">
                 <button type="button" id="alb-intake-submit-btn" class="alb-btn alb-btn-primary">Continue</button>

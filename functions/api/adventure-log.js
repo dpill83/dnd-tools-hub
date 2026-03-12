@@ -184,7 +184,8 @@ export async function onRequestPost(context) {
     const defaults = body.defaults && typeof body.defaults === 'object' ? body.defaults : {};
     const notesText = typeof body.notesText === 'string' ? body.notesText : '';
     const transcriptText = typeof body.transcriptText === 'string' ? body.transcriptText : '';
-    const answers = body.answers && typeof body.answers === 'object' ? body.answers : {};
+    const answers = (body.previousAnswers && typeof body.previousAnswers === 'object' ? body.previousAnswers : null)
+        || (body.answers && typeof body.answers === 'object' ? body.answers : {});
 
     const config = await loadConfig(request);
     const useLightTemplate = session.template === 'light' && config && config.templateLight;
