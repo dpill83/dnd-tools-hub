@@ -7,7 +7,7 @@
     const API_PATH = '/api/adventure-log';
     const FILE_SEP = '\n\n--- File: ';
     const GLOBAL_RECENT_PLAYERS_CAP = 20;
-    const CONFIDENCE_THRESHOLD = 80;
+    const CONFIDENCE_THRESHOLD = 75;
 
     let lastUncertainItems = null;
     let accumulatedAnswers = {};
