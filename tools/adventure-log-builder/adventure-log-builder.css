@@ -524,3 +524,212 @@
     color: var(--text-light);
     margin-top: 0.25rem;
 }
+
+.alb-table-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+/* Manage Players modal */
+.alb-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0.2s, opacity 0.2s;
+}
+
+.alb-modal[aria-hidden="false"] {
+    visibility: visible;
+    opacity: 1;
+}
+
+.alb-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.alb-modal-panel {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.alb-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.alb-modal-header h2 {
+    font-size: 1.25rem;
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.alb-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--text-light);
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+.alb-modal-close:hover {
+    color: var(--text);
+}
+
+.alb-modal-body {
+    padding: 1rem 1.25rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.alb-manage-add-player {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: flex-end;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.alb-manage-add-player label {
+    width: 100%;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.alb-manage-add-player input {
+    flex: 1;
+    min-width: 120px;
+}
+
+.alb-manage-players-list {
+    margin-bottom: 1rem;
+}
+
+.alb-manage-player-row {
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.alb-manage-player-row summary {
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-weight: 500;
+    list-style: none;
+}
+
+.alb-manage-player-row summary::-webkit-details-marker {
+    display: none;
+}
+
+.alb-manage-player-row summary::before {
+    content: "\u25B6";
+    margin-right: 0.5rem;
+    font-size: 0.7rem;
+}
+
+.alb-manage-player-row[open] summary::before {
+    content: "\u25BC";
+}
+
+.alb-manage-character-list {
+    padding: 0.5rem 0.75rem 0.75rem;
+    background: var(--input-bg);
+    font-size: 0.875rem;
+}
+
+.alb-manage-character-list ul {
+    list-style: none;
+    margin: 0 0 0.5rem 0;
+    padding: 0;
+}
+
+.alb-manage-character-list li {
+    padding: 0.25rem 0;
+}
+
+.alb-manage-add-char {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.alb-manage-add-char input {
+    flex: 1;
+}
+
+.alb-manage-pagination {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.alb-manage-pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Rewards confirmation panel */
+.alb-rewards-panel {
+    margin-top: 1rem;
+}
+
+.alb-rewards-panel h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.alb-rewards-table-wrap {
+    overflow-x: auto;
+    margin: 0.75rem 0;
+}
+
+.alb-rewards-table-wrap table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.alb-rewards-table-wrap th,
+.alb-rewards-table-wrap td {
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    border: 1px solid var(--border);
+}
+
+.alb-rewards-table-wrap input {
+    width: 100%;
+    max-width: 100px;
+}
+
+.alb-rewards-actions {
+    margin-top: 0.75rem;
+}

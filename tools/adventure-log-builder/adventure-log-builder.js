@@ -1,13 +1,14 @@
 (function () {
     'use strict';
 
-    const STORAGE_KEY = 'adventureLogDefaults';
-    const STORAGE_KEY_GLOBAL = 'adventureLogGlobalDefaults';
-    const STORAGE_KEY_PER_ADVENTURE = 'adventureLogPerAdventure';
     const API_PATH = '/api/adventure-log';
+    const API_PLAYERS = '/api/players';
+    const API_CHARACTERS = '/api/characters';
+    const API_SESSIONS = '/api/sessions';
     const FILE_SEP = '\n\n--- File: ';
-    const GLOBAL_RECENT_PLAYERS_CAP = 20;
     const CONFIDENCE_THRESHOLD = 75;
+    const AUTOCOMPLETE_DEBOUNCE_MS = 200;
+    const MANAGE_PAGE_SIZE = 50;
 
     let lastUncertainItems = null;
     let accumulatedAnswers = {};
@@ -15,96 +16,14 @@
     let currentStep = 'form'; // 'form' | 'intake' | 'generating' | 'done'
     let lastConfidence = 0;
 
-    function getDefaults() {
-        try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (raw) return JSON.parse(raw);
-        } catch (_) {}
-        return {};
-    }
-
-    function saveDefaults(obj) {
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
-        } catch (_) {}
-    }
-
-    function getGlobalDefaults() {
-        try {
-            const raw = localStorage.getItem(STORAGE_KEY_GLOBAL);
-            if (raw) return JSON.parse(raw);
-        } catch (_) {}
-        return { recentPlayers: [] };
-    }
-
-    function saveGlobalDefaults(obj) {
-        try {
-            localStorage.setItem(STORAGE_KEY_GLOBAL, JSON.stringify(obj));
-        } catch (_) {}
-    }
-
-    function getPerAdventureDefaults() {
-        try {
-            const raw = localStorage.getItem(STORAGE_KEY_PER_ADVENTURE);
-            if (raw) return JSON.parse(raw);
-        } catch (_) {}
-        return {};
-    }
-
-    function savePerAdventureDefaults(obj) {
-        try {
-            localStorage.setItem(STORAGE_KEY_PER_ADVENTURE, JSON.stringify(obj));
-        } catch (_) {}
-    }
-
-    function getAdventureKey(adventure, partOfCampaign) {
-        const p = (partOfCampaign || '').trim();
-        const a = (adventure || '').trim();
-        if (!p && !a) return '_default';
-        if (p && !a) return p;
-        if (!p && a) return '_default|' + a;
-        return p + '|' + a;
-    }
-
-    function mergeRecentPlayers(existing, newPlayers, cap) {
-        const seen = {};
-        const out = [];
-        (newPlayers || []).forEach(function (p) {
-            const k = (p || '').trim().toLowerCase();
-            if (k && !seen[k]) {
-                seen[k] = true;
-                out.push((p || '').trim());
-            }
-        });
-        (existing || []).forEach(function (p) {
-            const k = (p || '').trim().toLowerCase();
-            if (k && !seen[k]) {
-                seen[k] = true;
-                out.push((p || '').trim());
-            }
-        });
-        return out.slice(0, cap);
-    }
-
     function getDefaultsForRequest(session) {
-        const d = getDefaults();
-        const global = getGlobalDefaults();
-        const perAdv = getPerAdventureDefaults();
-        const key = getAdventureKey(session.adventure, session.partOfCampaign);
-        const adv = (key && perAdv[key]) ? perAdv[key] : null;
-        const playersArray = (adv && adv.players && Array.isArray(adv.players)) ? adv.players : (d.players && Array.isArray(d.players) ? d.players : []);
-        const nameList = playersArray.map(function (p) { return typeof p === 'string' ? p : (p && p.player); }).filter(Boolean);
-        const dmFromPlayers = (Array.isArray(playersArray) && playersArray.length) ? (playersArray.find(function (p) {
-            const c = (p && typeof p === 'object' && p.character) ? String(p.character).trim().toLowerCase() : '';
-            return c === 'dm';
-        }) || {}) : {};
-        const dm = (dmFromPlayers.player != null) ? String(dmFromPlayers.player).trim() : '';
+        const nameList = (session.players || []).map(function (p) { return typeof p === 'string' ? p : (p && p.player); }).filter(Boolean);
         return {
-            partOfCampaign: d.partOfCampaign || '',
-            sessionDate: adv ? adv.sessionDate : d.sessionDate,
-            dm: dm,
-            players: playersArray,
-            recentPlayers: nameList.length ? nameList : (d.recentPlayers || global.recentPlayers || [])
+            partOfCampaign: session.partOfCampaign || '',
+            sessionDate: session.sessionDate || '',
+            dm: session.dm || '',
+            players: session.players || [],
+            recentPlayers: nameList
         };
     }
 
@@ -138,40 +57,35 @@
         };
     }
 
-    function getRecentPlayerNames() {
-        const global = getGlobalDefaults();
-        const d = getDefaults();
-        const perAdv = getPerAdventureDefaults();
-        const adventureEl = document.getElementById('alb-adventure');
-        const campaignEl = document.getElementById('alb-part-of-campaign');
-        const adventure = (adventureEl && adventureEl.value) ? adventureEl.value.trim() : (d.adventure || '');
-        const partOfCampaign = (campaignEl && campaignEl.value) ? campaignEl.value.trim() : (d.partOfCampaign || '');
-        const key = getAdventureKey(adventure, partOfCampaign);
-        const adv = (key && perAdv[key]) ? perAdv[key] : null;
-        const fromAdv = (adv && adv.players && Array.isArray(adv.players)) ? adv.players.map(function (p) { return typeof p === 'string' ? p : (p && p.player); }).filter(Boolean) : [];
-        const fromGlobal = global.recentPlayers || [];
-        const fromD = (d.players && Array.isArray(d.players)) ? d.players.map(function (p) { return typeof p === 'string' ? p : (p && p.player); }).filter(Boolean) : (d.recentPlayers || []);
-        const seen = {};
-        const out = [];
-        fromAdv.concat(fromD).concat(fromGlobal).forEach(function (name) {
-            const k = (name || '').trim().toLowerCase();
-            if (k && !seen[k]) {
-                seen[k] = true;
-                out.push((name || '').trim());
-            }
-        });
-        return out.slice(0, GLOBAL_RECENT_PLAYERS_CAP);
+    function debounce(fn, delay) {
+        var t = null;
+        return function () {
+            var self = this, args = arguments;
+            if (t) clearTimeout(t);
+            t = setTimeout(function () { fn.apply(self, args); }, delay);
+        };
     }
 
-    function refreshPlayerSuggestions() {
+    function updatePlayerSuggestions(query) {
         const datalist = document.getElementById('alb-player-suggestions');
         if (!datalist) return;
         datalist.innerHTML = '';
-        getRecentPlayerNames().forEach(function (name) {
-            const opt = document.createElement('option');
-            opt.value = name;
-            datalist.appendChild(opt);
-        });
+        if (!query || !query.trim()) return;
+        fetch(API_PLAYERS + '?q=' + encodeURIComponent(query.trim()))
+            .then(function (res) { return res.ok ? res.json() : []; })
+            .then(function (items) {
+                if (!Array.isArray(items)) return;
+                datalist.innerHTML = '';
+                items.forEach(function (p) {
+                    const name = p && (p.name != null) ? String(p.name) : '';
+                    if (name) {
+                        const opt = document.createElement('option');
+                        opt.value = name;
+                        datalist.appendChild(opt);
+                    }
+                });
+            })
+            .catch(function () {});
     }
 
     function addPlayerRow(player, character) {
@@ -192,6 +106,11 @@
         tr.querySelector('.alb-row-remove-btn').addEventListener('click', function () {
             tr.remove();
         });
+        var debouncedSuggest = debounce(function () {
+            updatePlayerSuggestions(playerInput.value);
+        }, AUTOCOMPLETE_DEBOUNCE_MS);
+        playerInput.addEventListener('input', debouncedSuggest);
+        playerInput.addEventListener('focus', function () { updatePlayerSuggestions(playerInput.value); });
         tbody.appendChild(tr);
     }
 
@@ -205,44 +124,6 @@
         addBtn.addEventListener('click', function () {
             addPlayerRow('', '');
         });
-        refreshPlayerSuggestions();
-    }
-
-    function prefillForm() {
-        const d = getDefaults();
-        const global = getGlobalDefaults();
-        const perAdv = getPerAdventureDefaults();
-        const adventureEl = document.getElementById('alb-adventure');
-        const partOfCampaignEl = document.getElementById('alb-part-of-campaign');
-        const dateEl = document.getElementById('alb-session-date');
-        const tbody = document.getElementById('alb-players-tbody');
-
-        if (partOfCampaignEl && d.partOfCampaign) partOfCampaignEl.value = d.partOfCampaign;
-        if (adventureEl && d.adventure) adventureEl.value = d.adventure;
-
-        const adventureKey = getAdventureKey(d.adventure, d.partOfCampaign);
-        const adventureSpecific = (adventureKey && perAdv[adventureKey]) ? perAdv[adventureKey] : null;
-        let lastPlayers = adventureSpecific && adventureSpecific.players ? adventureSpecific.players : (d.players || []);
-        if (!Array.isArray(lastPlayers)) {
-            lastPlayers = (d.recentPlayers && Array.isArray(d.recentPlayers)) ? d.recentPlayers.map(function (name) { return { player: name, character: '' }; }) : [];
-        } else if (lastPlayers.length && typeof lastPlayers[0] === 'string') {
-            lastPlayers = lastPlayers.map(function (name) { return { player: name, character: '' }; });
-        } else if (lastPlayers.length && lastPlayers[0] && 'status' in lastPlayers[0]) {
-            lastPlayers = lastPlayers.map(function (row) { return { player: row.player, character: row.character || '' }; });
-        }
-
-        if (dateEl) dateEl.value = new Date().toISOString().slice(0, 10);
-
-        if (tbody && lastPlayers.length > 0) {
-            tbody.innerHTML = '';
-            lastPlayers.forEach(function (row) {
-                addPlayerRow(
-                    typeof row === 'string' ? row : (row && row.player),
-                    typeof row === 'string' ? '' : (row && row.character)
-                );
-            });
-        }
-        refreshPlayerSuggestions();
     }
 
     function readFiles(files, callback) {
@@ -775,8 +656,8 @@
             hideStreamPanel();
             setLoading(false);
             if (fullText && fullText.trim()) {
-                updateStoredDefaults();
                 showOutput(fullText.trim());
+                showRewardsPanel(fullText.trim());
                 setCurrentStep('done');
             } else {
                 onGenerateError('No content received from the API.');
@@ -787,34 +668,126 @@
         });
     }
 
-    function updateStoredDefaults() {
-        const session = getSessionFromForm();
-        const d = getDefaults();
-        d.partOfCampaign = session.partOfCampaign || d.partOfCampaign;
-        d.adventure = session.adventure || d.adventure;
-        d.sessionDate = session.sessionDate || d.sessionDate;
-        if (session.players && session.players.length) {
-            d.players = session.players;
-            d.recentPlayers = session.players.map(function (p) { return p.player; }).filter(Boolean);
-        }
-        saveDefaults(d);
+    function parseRewardsFromLog(logText, session) {
+        var rows = [];
+        var playerNames = (session.players || []).filter(function (p) {
+            var c = (p.character || '').trim().toLowerCase();
+            return c !== 'dm';
+        }).map(function (p) { return (p.player || '').trim(); }).filter(Boolean);
+        if (!playerNames.length) return rows;
+        var rewardsSection = logText.match(/(?:##?\s*Rewards?[\s\S]*?)(?=##|\n---|\z)/i);
+        var sectionText = rewardsSection ? rewardsSection[0] : logText;
+        var xpMatch = sectionText.match(/(?:total\s+)?(?:xp|experience)[:\s]*(\d+)/i) || sectionText.match(/(\d+)\s*(?:xp|experience)/i);
+        var goldMatch = sectionText.match(/(?:total\s+)?(?:gold|gp|g\.?p\.?)[:\s]*(\d+)/i) || sectionText.match(/(\d+)\s*(?:gp|gold)/i);
+        var xp = xpMatch ? parseInt(xpMatch[1], 10) : 0;
+        var gold = goldMatch ? parseInt(goldMatch[1], 10) : 0;
+        var perPlayer = playerNames.length ? Math.floor(xp / playerNames.length) : 0;
+        var goldPerPlayer = playerNames.length ? Math.floor(gold / playerNames.length) : 0;
+        playerNames.forEach(function (name) {
+            rows.push({ player_name: name, xp: perPlayer, gold: goldPerPlayer, notes: '' });
+        });
+        return rows;
+    }
 
-        const adventureKey = getAdventureKey(session.adventure, session.partOfCampaign);
-        if (adventureKey) {
-            const perAdv = getPerAdventureDefaults();
-            perAdv[adventureKey] = {
-                sessionDate: session.sessionDate || '',
-                players: session.players || []
-            };
-            savePerAdventureDefaults(perAdv);
-        }
+    function showRewardsPanel(logText) {
+        var section = document.getElementById('alb-rewards-section');
+        var wrap = document.getElementById('alb-rewards-table-wrap');
+        var warningEl = document.getElementById('alb-rewards-warning');
+        if (!section || !wrap) return;
+        if (warningEl) { warningEl.style.display = 'none'; warningEl.textContent = ''; }
+        var session = getSessionFromForm();
+        var suggested = parseRewardsFromLog(logText, session);
+        var playerNames = (session.players || []).filter(function (p) {
+            var c = (p.character || '').trim().toLowerCase();
+            return c !== 'dm';
+        }).map(function (p) { return (p.player || '').trim(); }).filter(Boolean);
+        var seen = {};
+        var rows = [];
+        suggested.forEach(function (r) {
+            var n = (r.player_name || '').trim();
+            if (n && !seen[n]) { seen[n] = true; rows.push({ player_name: n, xp: r.xp || 0, gold: r.gold || 0, notes: r.notes || '' }); }
+        });
+        playerNames.forEach(function (n) {
+            if (n && !seen[n]) { seen[n] = true; rows.push({ player_name: n, xp: 0, gold: 0, notes: '' }); }
+        });
+        wrap.innerHTML = '';
+        var table = document.createElement('table');
+        table.innerHTML = '<thead><tr><th>Player</th><th>XP</th><th>Gold</th><th>Notes</th></tr></thead><tbody id="alb-rewards-tbody"></tbody>';
+        var tbody = table.querySelector('#alb-rewards-tbody');
+        rows.forEach(function (r, i) {
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td>' + escapeHtml(r.player_name) + '</td><td><input type="number" min="0" data-reward-idx="' + i + '" data-reward-field="xp" value="' + (r.xp || 0) + '"></td><td><input type="number" min="0" data-reward-idx="' + i + '" data-reward-field="gold" value="' + (r.gold || 0) + '"></td><td><input type="text" data-reward-idx="' + i + '" data-reward-field="notes" value="' + (r.notes || '') + '" placeholder="Optional"></td>';
+            tbody.appendChild(tr);
+        });
+        wrap.appendChild(table);
+        section.style.display = 'block';
+        window._albRewardsData = rows;
+    }
 
-        if (session.players && session.players.length) {
-            const global = getGlobalDefaults();
-            const names = session.players.map(function (p) { return p.player; }).filter(Boolean);
-            global.recentPlayers = mergeRecentPlayers(global.recentPlayers, names, GLOBAL_RECENT_PLAYERS_CAP);
-            saveGlobalDefaults(global);
-        }
+    function collectRewardsFromPanel() {
+        var data = window._albRewardsData;
+        if (!Array.isArray(data)) return [];
+        var inputs = document.querySelectorAll('#alb-rewards-table-wrap [data-reward-idx]');
+        var byIdx = {};
+        inputs.forEach(function (inp) {
+            var idx = parseInt(inp.getAttribute('data-reward-idx'), 10);
+            var field = inp.getAttribute('data-reward-field');
+            if (!byIdx[idx]) byIdx[idx] = { player_name: data[idx] && data[idx].player_name || '', xp: 0, gold: 0, notes: '' };
+            if (field === 'xp') byIdx[idx].xp = parseInt(inp.value, 10) || 0;
+            else if (field === 'gold') byIdx[idx].gold = parseInt(inp.value, 10) || 0;
+            else if (field === 'notes') byIdx[idx].notes = (inp.value || '').trim();
+        });
+        return Object.keys(byIdx).sort(function (a, b) { return Number(a) - Number(b); }).map(function (k) { return byIdx[k]; });
+    }
+
+    function saveRewardsAndStats() {
+        var session = getSessionFromForm();
+        var rewards = collectRewardsFromPanel();
+        var attendees = (session.players || []).map(function (p) {
+            var role = (p.character || '').trim().toLowerCase() === 'dm' ? 'DM' : 'PLAYER';
+            return { player_name: (p.player || '').trim(), character_name: (p.character || '').trim(), role: role };
+        }).filter(function (a) { return a.player_name || a.character_name; });
+        var payload = {
+            campaign_name: session.partOfCampaign || '',
+            adventure: session.adventure || null,
+            date: session.sessionDate || '',
+            dm_player_name: session.dm || '',
+            attendees: attendees,
+            rewards: rewards
+        };
+        fetch(API_SESSIONS, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+            .then(function (result) {
+                var warningEl = document.getElementById('alb-rewards-warning');
+                if (result.ok) {
+                    if (result.data.warnings && result.data.warnings.length) {
+                        if (warningEl) {
+                            warningEl.textContent = result.data.warnings.join(' ');
+                            warningEl.style.display = 'block';
+                        }
+                        setStatus('Session saved. Some rewards could not be matched: ' + result.data.warnings.join(' '));
+                    } else {
+                        if (warningEl) { warningEl.style.display = 'none'; warningEl.textContent = ''; }
+                        setStatus('Session and rewards saved.');
+                    }
+                } else {
+                    if (warningEl) {
+                        warningEl.textContent = result.data.error || 'Failed to save session.';
+                        warningEl.style.display = 'block';
+                    }
+                }
+            })
+            .catch(function (err) {
+                var warningEl = document.getElementById('alb-rewards-warning');
+                if (warningEl) {
+                    warningEl.textContent = err.message || 'Failed to save session.';
+                    warningEl.style.display = 'block';
+                }
+            });
     }
 
     function showOutput(logText) {
@@ -900,9 +873,113 @@
         }
     }
 
+    var managePlayersPage = 1;
+    var managePlayersTotal = 0;
+    var manageCharactersByPlayer = {};
+
+    function openManageModal() {
+        var modal = document.getElementById('alb-manage-players-modal');
+        if (!modal) return;
+        modal.setAttribute('aria-hidden', 'false');
+        managePlayersPage = 1;
+        loadManagePage(1);
+        document.body.style.overflow = 'hidden';
+        var closeBtn = modal.querySelector('.alb-modal-close');
+        if (closeBtn) closeBtn.focus();
+    }
+
+    function closeManageModal() {
+        var modal = document.getElementById('alb-manage-players-modal');
+        if (!modal) return;
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        var btn = document.getElementById('alb-manage-players-btn');
+        if (btn) btn.focus();
+    }
+
+    function loadManagePage(page) {
+        var listEl = document.getElementById('alb-manage-players-list');
+        var pageInfo = document.getElementById('alb-manage-page-info');
+        var prevBtn = document.getElementById('alb-manage-prev');
+        var nextBtn = document.getElementById('alb-manage-next');
+        if (!listEl) return;
+        listEl.innerHTML = '<p class="alb-helper">Loading…</p>';
+        fetch(API_PLAYERS + '?all=true&page=' + page + '&page_size=' + MANAGE_PAGE_SIZE)
+            .then(function (res) { return res.ok ? res.json() : { items: [], total: 0 }; })
+            .then(function (data) {
+                var items = data.items || [];
+                var total = data.total != null ? data.total : items.length;
+                managePlayersTotal = total;
+                if (prevBtn) prevBtn.disabled = page <= 1;
+                if (nextBtn) nextBtn.disabled = page * MANAGE_PAGE_SIZE >= total;
+                if (pageInfo) pageInfo.textContent = 'Page ' + page + ' of ' + (Math.ceil(total / MANAGE_PAGE_SIZE) || 1);
+                if (items.length === 0) {
+                    listEl.innerHTML = '<p class="alb-helper">No players yet. Add one below.</p>';
+                    return;
+                }
+                var ids = items.map(function (p) { return p.id; }).filter(Boolean);
+                return fetch(API_CHARACTERS + '?player_ids=' + ids.join(','))
+                    .then(function (r) { return r.ok ? r.json() : []; })
+                    .then(function (charData) {
+                        manageCharactersByPlayer = {};
+                        (charData || []).forEach(function (entry) {
+                            var pid = entry.player_id;
+                            manageCharactersByPlayer[pid] = entry.characters || [];
+                        });
+                        listEl.innerHTML = '';
+                        items.forEach(function (p) {
+                            var details = document.createElement('details');
+                            details.className = 'alb-manage-player-row';
+                            var chars = manageCharactersByPlayer[p.id] || [];
+                            var charList = chars.map(function (c) { return '<li>' + escapeHtml(c.name) + '</li>'; }).join('');
+                            var addCharId = 'alb-add-char-' + p.id;
+                            details.innerHTML = '<summary>' + escapeHtml(p.name) + '</summary>' +
+                                '<div class="alb-manage-character-list">' +
+                                (charList ? '<ul>' + charList + '</ul>' : '') +
+                                '<div class="alb-manage-add-char">' +
+                                '<input type="text" id="' + addCharId + '" placeholder="New character name" data-player-id="' + p.id + '">' +
+                                '<button type="button" class="alb-btn alb-add-char-btn" data-player-id="' + p.id + '">Add character</button>' +
+                                '</div></div>';
+                            var addBtn = details.querySelector('.alb-add-char-btn');
+                            var addInput = details.querySelector('input[data-player-id]');
+                            if (addBtn && addInput) {
+                                addBtn.addEventListener('click', function () {
+                                    var name = (addInput.value || '').trim();
+                                    if (!name) return;
+                                    fetch(API_CHARACTERS, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ player_id: p.id, name: name })
+                                    })
+                                        .then(function (res) { return res.ok ? res.json() : null; })
+                                        .then(function (created) {
+                                            if (created) {
+                                                if (!manageCharactersByPlayer[p.id]) manageCharactersByPlayer[p.id] = [];
+                                                manageCharactersByPlayer[p.id].push({ id: created.id, name: created.name });
+                                                var ul = details.querySelector('.alb-manage-character-list ul');
+                                                if (!ul) {
+                                                    ul = document.createElement('ul');
+                                                    details.querySelector('.alb-manage-character-list').insertBefore(ul, details.querySelector('.alb-manage-add-char'));
+                                                }
+                                                var li = document.createElement('li');
+                                                li.textContent = created.name;
+                                                ul.appendChild(li);
+                                                addInput.value = '';
+                                            }
+                                        });
+                                });
+                            }
+                            listEl.appendChild(details);
+                        });
+                    });
+            })
+            .catch(function () {
+                if (listEl) listEl.innerHTML = '<p class="alb-helper">Failed to load players.</p>';
+            });
+    }
+
     function init() {
         initPlayersTable();
-        prefillForm();
 
         setupDropZone('alb-notes-drop', 'alb-notes-input', 'alb-notes-text', 'alb-notes-files');
         setupDropZone('alb-transcript-drop', 'alb-transcript-input', 'alb-transcript-text', 'alb-transcript-files');
@@ -929,6 +1006,65 @@
                 }
             });
         }
+
+        var manageBtn = document.getElementById('alb-manage-players-btn');
+        if (manageBtn) manageBtn.addEventListener('click', openManageModal);
+
+        var modal = document.getElementById('alb-manage-players-modal');
+        if (modal) {
+            var closeBtn = modal.querySelector('.alb-modal-close');
+            var backdrop = modal.querySelector('.alb-modal-backdrop');
+            if (closeBtn) closeBtn.addEventListener('click', closeManageModal);
+            if (backdrop) backdrop.addEventListener('click', closeManageModal);
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') closeManageModal();
+            });
+        }
+        var managePrev = document.getElementById('alb-manage-prev');
+        var manageNext = document.getElementById('alb-manage-next');
+        if (managePrev) managePrev.addEventListener('click', function () { managePlayersPage--; loadManagePage(managePlayersPage); });
+        if (manageNext) manageNext.addEventListener('click', function () { managePlayersPage++; loadManagePage(managePlayersPage); });
+
+        var newPlayerName = document.getElementById('alb-new-player-name');
+        var newPlayerChar = document.getElementById('alb-new-player-char');
+        var addNewPlayerBtn = document.getElementById('alb-add-new-player-btn');
+        if (addNewPlayerBtn && newPlayerName) {
+            addNewPlayerBtn.addEventListener('click', function () {
+                var name = (newPlayerName.value || '').trim();
+                if (!name) return;
+                fetch(API_PLAYERS, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name })
+                })
+                    .then(function (res) {
+                        if (res.status === 409) throw new Error('Player already exists');
+                        return res.ok ? res.json() : res.json().then(function (d) { throw new Error(d.error || 'Failed'); });
+                    })
+                    .then(function (player) {
+                        var firstChar = (newPlayerChar && newPlayerChar.value) ? newPlayerChar.value.trim() : '';
+                        if (firstChar) {
+                            return fetch(API_CHARACTERS, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ player_id: player.id, name: firstChar })
+                            }).then(function () { return player; });
+                        }
+                        return player;
+                    })
+                    .then(function () {
+                        newPlayerName.value = '';
+                        if (newPlayerChar) newPlayerChar.value = '';
+                        loadManagePage(managePlayersPage);
+                    })
+                    .catch(function (err) {
+                        setError(err.message || 'Could not add player');
+                    });
+            });
+        }
+
+        var saveRewardsBtn = document.getElementById('alb-save-rewards-btn');
+        if (saveRewardsBtn) saveRewardsBtn.addEventListener('click', saveRewardsAndStats);
 
         setConfidence(0);
         setCurrentStep('form');

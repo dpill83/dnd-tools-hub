@@ -15,14 +15,15 @@
                 <p class="alb-status" id="alb-subtitle">Weekly adventure logs from notes and transcripts. Recurring defaults, smart intake.</p>
             </div>
             <div class="alb-header-actions">
+                <a href="stats.html" class="alb-btn">Stats</a>
                 <a href="../../index.html" class="alb-btn" aria-label="Hub">&#127968;</a>
                 <button type="button" id="theme-toggle" class="alb-btn" aria-label="Toggle dark mode"><span class="theme-icon">&#127769;</span></button>
             </div>
         </header>
 
         <section class="alb-section">
-            <h2 class="alb-section-title">Session (recurring defaults)</h2>
-            <p class="alb-helper">Part of campaign, session date, and players are remembered per campaign. Recent players are also kept globally for quick fill.</p>
+            <h2 class="alb-section-title">Session</h2>
+            <p class="alb-helper">Part of campaign (optional), session date, and players. Use Manage Players to add players and characters; player names autocomplete from saved data.</p>
             <div class="alb-fields">
                 <div class="alb-field">
                     <label for="alb-adventure">Adventure</label>
@@ -60,7 +61,10 @@
                         </table>
                         <datalist id="alb-player-suggestions"></datalist>
                         <p class="alb-helper alb-table-hint">Add a row with character name &quot;DM&quot; for the person who ran the session.</p>
-                        <button type="button" id="alb-add-player-btn" class="alb-btn alb-add-row-btn" aria-label="Add player or character row">Add Player / Character</button>
+                        <div class="alb-table-actions">
+                            <button type="button" id="alb-manage-players-btn" class="alb-btn">Manage Players</button>
+                            <button type="button" id="alb-add-player-btn" class="alb-btn alb-add-row-btn" aria-label="Add player or character row">Add Player / Character</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -131,6 +135,16 @@
             </div>
         </section>
 
+        <section id="alb-rewards-section" class="alb-section alb-rewards-panel" style="display: none;">
+            <h3>Rewards for this session</h3>
+            <p class="alb-helper">Confirm or edit XP and gold per player, then save to record this session and rewards.</p>
+            <div id="alb-rewards-table-wrap"></div>
+            <div class="alb-rewards-actions">
+                <button type="button" id="alb-save-rewards-btn" class="alb-btn alb-btn-primary">Save rewards &amp; stats</button>
+            </div>
+            <p id="alb-rewards-warning" class="alb-error" style="display: none;"></p>
+        </section>
+
         <section id="alb-output-section" class="alb-section alb-output-panel" style="display: none;">
             <h3>Adventure log</h3>
             <div class="alb-output-actions">
@@ -143,6 +157,31 @@
                 <pre id="alb-output-pre"></pre>
             </div>
         </section>
+    </div>
+
+    <div id="alb-manage-players-modal" class="alb-modal" aria-hidden="true" aria-modal="true" role="dialog" aria-labelledby="alb-manage-players-title">
+        <div class="alb-modal-backdrop"></div>
+        <div class="alb-modal-panel">
+            <div class="alb-modal-header">
+                <h2 id="alb-manage-players-title">Manage Players</h2>
+                <button type="button" class="alb-modal-close" aria-label="Close">&#215;</button>
+            </div>
+            <div class="alb-modal-body">
+                <div class="alb-manage-add-player">
+                    <label for="alb-new-player-name">New player name</label>
+                    <input type="text" id="alb-new-player-name" placeholder="Player name">
+                    <label for="alb-new-player-char">First character (optional)</label>
+                    <input type="text" id="alb-new-player-char" placeholder="Character name">
+                    <button type="button" id="alb-add-new-player-btn" class="alb-btn alb-btn-primary">Add player</button>
+                </div>
+                <div id="alb-manage-players-list" class="alb-manage-players-list"></div>
+                <div class="alb-manage-pagination">
+                    <button type="button" id="alb-manage-prev" class="alb-btn">Previous</button>
+                    <span id="alb-manage-page-info"></span>
+                    <button type="button" id="alb-manage-next" class="alb-btn">Next</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="../../theme.js"></script>

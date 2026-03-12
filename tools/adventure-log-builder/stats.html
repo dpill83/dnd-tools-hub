@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Stats – Adventure Log Builder</title>
+    <link rel="stylesheet" href="../../global.css">
+    <link rel="stylesheet" href="adventure-log-builder.css">
+    <style>
+        .stats-container { max-width: 900px; margin: 0 auto; padding: 1rem; }
+        .stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--border); }
+        .stats-header h1 { font-size: 1.5rem; color: var(--primary-color); margin: 0; }
+        .stats-filters { margin-bottom: 1rem; }
+        .stats-filters label { margin-right: 0.5rem; }
+        .stats-filters select { padding: 0.35rem 0.5rem; }
+        .stats-section { margin-bottom: 1.5rem; }
+        .stats-section h2 { font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--primary-color); }
+        .stats-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        .stats-table th, .stats-table td { padding: 0.5rem 0.75rem; text-align: left; border: 1px solid var(--border); }
+        .stats-calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-top: 0.5rem; }
+        .stats-calendar-day { min-height: 32px; padding: 0.25rem; font-size: 0.75rem; border: 1px solid var(--border); border-radius: 4px; background: var(--input-bg); }
+        .stats-calendar-day.has-session { background: var(--primary-color); color: var(--surface); }
+        .stats-calendar-day.empty { opacity: 0.4; }
+        .stats-calendar-weekday { font-size: 0.7rem; color: var(--text-light); text-align: center; margin-bottom: 0.25rem; }
+        .stats-month-nav { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+        .stats-month-nav button { padding: 0.35rem 0.75rem; }
+    </style>
+</head>
+<body>
+    <div class="stats-container">
+        <header class="stats-header">
+            <h1>Session Stats</h1>
+            <div>
+                <a href="index.html" class="alb-btn">Adventure Log Builder</a>
+                <a href="../../index.html" class="alb-btn" aria-label="Hub">&#127968;</a>
+                <button type="button" id="theme-toggle" class="alb-btn" aria-label="Toggle dark mode"><span class="theme-icon">&#127769;</span></button>
+            </div>
+        </header>
+
+        <div class="stats-filters">
+            <label for="stats-campaign-filter">Campaign:</label>
+            <select id="stats-campaign-filter" aria-label="Filter by campaign">
+                <option value="">All campaigns</option>
+            </select>
+            <label style="margin-left: 1rem;"><input type="checkbox" id="stats-uncampaigned"> No campaign only</label>
+        </div>
+
+        <section class="stats-section">
+            <h2>Sessions played &amp; times DM'd</h2>
+            <div id="stats-players-table-wrap">
+                <p class="alb-helper">Loading…</p>
+            </div>
+        </section>
+
+        <section class="stats-section">
+            <h2>Total XP &amp; gold per player</h2>
+            <div id="stats-rewards-table-wrap"></div>
+        </section>
+
+        <section class="stats-section">
+            <h2>Attendance calendar</h2>
+            <div class="stats-month-nav">
+                <button type="button" id="stats-prev-month" class="alb-btn">Previous</button>
+                <span id="stats-month-label"></span>
+                <button type="button" id="stats-next-month" class="alb-btn">Next</button>
+            </div>
+            <div id="stats-calendar-wrap"></div>
+        </section>
+    </div>
+
+    <script src="../../theme.js"></script>
+    <script src="stats.js"></script>
+</body>
+</html>
