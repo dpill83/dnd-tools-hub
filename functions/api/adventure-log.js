@@ -166,10 +166,12 @@ export async function onRequestPost(context) {
         return jsonResponse({ error: 'Invalid JSON body' }, 400);
     }
 
-    const step = body.step === 'intake' || body.step === 'generate' ? body.step : null;
+    const step = body.step === 'intake' || body.step === 'intake-followup' || body.step === 'generate' ? body.step : null;
     if (!step) {
-        return jsonResponse({ error: 'step must be "intake" or "generate"' }, 400);
+        return jsonResponse({ error: 'step must be "intake", "intake-followup", or "generate"' }, 400);
     }
+
+    const uncertainItems = body.uncertainItems && typeof body.uncertainItems === 'object' ? body.uncertainItems : {};
 
     const session = body.session && typeof body.session === 'object' ? body.session : {};
     const defaults = body.defaults && typeof body.defaults === 'object' ? body.defaults : {};
@@ -191,6 +193,7 @@ export async function onRequestPost(context) {
     const outputFormat = (config && config.outputFormat) || (templateText ? 'Follow the provided template structure exactly; fill in each section from the session content. Omit or shorten sections that have no content.' : 'Sections: Session date, Campaign, Players present, Summary, Key events, Next time.');
     const outputTemplate = (templateText && templateText.trim()) || (config && config.outputTemplate) || '';
     const intakePrompt = (config && config.intakePrompt) || 'Return JSON only: { "missingQuestions": string[], "uncertainItems": { "names": [], "rewards": [], "outcomes": [] } }. Ask only for missing or contradictory data.';
+    const intakeFollowupPrompt = (config && config.intakeFollowupPrompt) || 'Given uncertain items and existing answers, generate up to 3 short questions to clarify. Return ONLY valid JSON: { "missingQuestions": [] }.';
 
     if (step === 'intake') {
         const intakeSystem = intakePrompt + '\n\nRespond with valid JSON only.';
@@ -203,6 +206,22 @@ export async function onRequestPost(context) {
             ], config);
         } catch (e) {
             return jsonResponse({ error: e.message || 'Intake request failed' }, 502);
+        }
+        const result = parseIntakeResponse(content);
+        return jsonResponse(result);
+    }
+
+    if (step === 'intake-followup') {
+        const followupSystem = intakeFollowupPrompt + '\n\nRespond with valid JSON only.';
+        const followupUser = `Uncertain items: ${JSON.stringify(uncertainItems)}\n\nAnswers so far: ${JSON.stringify(answers)}\n\nGenerate up to 3 new questions to clarify the uncertain items. Do not repeat questions already answered.`;
+        let content;
+        try {
+            content = await openaiChat(apiKey, [
+                { role: 'system', content: followupSystem },
+                { role: 'user', content: followupUser },
+            ], config);
+        } catch (e) {
+            return jsonResponse({ error: e.message || 'Follow-up intake failed' }, 502);
         }
         const result = parseIntakeResponse(content);
         return jsonResponse(result);

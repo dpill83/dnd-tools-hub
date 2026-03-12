@@ -298,6 +298,14 @@
     font-size: 0.875rem;
 }
 
+.alb-intake-followup {
+    margin-top: 0.75rem;
+}
+
+.alb-intake-followup .alb-intake-item {
+    margin-bottom: 0.75rem;
+}
+
 .alb-output-panel {
     margin-top: 1.5rem;
     padding: 1rem;

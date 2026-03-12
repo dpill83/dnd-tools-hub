@@ -8,6 +8,9 @@
     const FILE_SEP = '\n\n--- File: ';
     const GLOBAL_RECENT_PLAYERS_CAP = 20;
 
+    let lastUncertainItems = null;
+    let followUpRound = 0;
+
     function getDefaults() {
         try {
             const raw = localStorage.getItem(STORAGE_KEY);
@@ -101,6 +104,7 @@
         const adventure = (document.getElementById('alb-adventure') && document.getElementById('alb-adventure').value) || '';
         const partOfCampaign = (document.getElementById('alb-part-of-campaign') && document.getElementById('alb-part-of-campaign').value) || '';
         const sessionDate = (document.getElementById('alb-session-date') && document.getElementById('alb-session-date').value) || '';
+        const discordThreadLink = (document.getElementById('alb-discord-thread') && document.getElementById('alb-discord-thread').value) || '';
         const tbody = document.getElementById('alb-players-tbody');
         const players = [];
         if (tbody) {
@@ -120,6 +124,7 @@
             adventure: adventure.trim(),
             partOfCampaign: partOfCampaign.trim(),
             sessionDate: sessionDate.trim(),
+            discordThreadLink: discordThreadLink.trim(),
             dm: dm,
             players: players
         };
@@ -376,9 +381,18 @@
         const genAfter = document.getElementById('alb-generate-after-intake');
         const uncertain = document.getElementById('alb-uncertain');
         const uncertainContent = document.getElementById('alb-uncertain-content');
+        const followupDiv = document.getElementById('alb-intake-followup-questions');
+        const answerMoreBtn = document.getElementById('alb-answer-more-btn');
         if (!intake || !questionsDiv) return;
 
         questionsDiv.innerHTML = '';
+        if (followupDiv) followupDiv.innerHTML = '';
+        followUpRound = 0;
+        lastUncertainItems = uncertainItems && (uncertainItems.names?.length || uncertainItems.rewards?.length || uncertainItems.outcomes?.length) ? uncertainItems : null;
+        if (answerMoreBtn) {
+            answerMoreBtn.disabled = false;
+            answerMoreBtn.textContent = 'Answer more';
+        }
         intake.style.display = 'none';
         uncertain.style.display = 'none';
 
@@ -396,7 +410,7 @@
             if (genAfter) genAfter.style.display = 'none';
         }
 
-        if (uncertainItems && (uncertainItems.names?.length || uncertainItems.rewards?.length || uncertainItems.outcomes?.length)) {
+        if (lastUncertainItems) {
             uncertain.style.display = 'block';
             let html = '';
             if (uncertainItems.names && uncertainItems.names.length) {
@@ -645,6 +659,50 @@
         if (genAfter) {
             genAfter.addEventListener('click', function () {
                 runGenerate();
+            });
+        }
+
+        const answerMoreBtn = document.getElementById('alb-answer-more-btn');
+        if (answerMoreBtn) {
+            answerMoreBtn.addEventListener('click', function () {
+                if (!lastUncertainItems || answerMoreBtn.disabled) return;
+                const answers = collectIntakeAnswers();
+                setError('');
+                setLoading(true, 'intake');
+                apiPost({
+                    step: 'intake-followup',
+                    uncertainItems: lastUncertainItems,
+                    answers: answers
+                })
+                    .then(function (res) {
+                        return res.json().then(function (data) {
+                            if (!res.ok) throw new Error(data.error || res.statusText || 'Request failed');
+                            return data;
+                        });
+                    })
+                    .then(function (data) {
+                        setLoading(false);
+                        const questions = data.missingQuestions || [];
+                        const followupDiv = document.getElementById('alb-intake-followup-questions');
+                        if (questions.length > 0 && followupDiv) {
+                            questions.forEach(function (q, i) {
+                                const wrap = document.createElement('div');
+                                wrap.className = 'alb-intake-item';
+                                const id = 'alb-intake-q-followup-' + followUpRound + '-' + i;
+                                wrap.innerHTML = '<label for="' + id + '">' + escapeHtml(q) + '</label><input type="text" id="' + id + '" data-question="' + escapeHtml(q) + '">';
+                                followupDiv.appendChild(wrap);
+                            });
+                            followUpRound += 1;
+                        }
+                        if (questions.length === 0) {
+                            answerMoreBtn.disabled = true;
+                            answerMoreBtn.textContent = 'No more questions';
+                        }
+                    })
+                    .catch(function (err) {
+                        setLoading(false);
+                        setError(err.message || 'Request failed');
+                    });
             });
         }
     }
