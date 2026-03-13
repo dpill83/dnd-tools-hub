@@ -2,7 +2,7 @@
  * POST /api/adventure-log
  * Body: { step: 'intake' | 'generate', session: {...}, defaults: {...}, notesText: string, transcriptText?: string, answers?: {...} }
  * Returns: intake -> { missingQuestions: string[], uncertainItems?: {...}, confidence: number }; generate -> { log: string }
- * Requires: ADVENTURE_LOG_BUILDER_PROD (or OPENAI_API_KEY as fallback). Loads prompt from prompt-config.json and output template from template.txt (same origin).
+ * Requires: ADVENTURE_LOG_BUILDER_PROD (prod), ADVENTURE_LOG_BUILDER_PREV (preview), or OPENAI_API_KEY as fallback. Loads prompt from prompt-config.json and output template from template.txt (same origin).
  */
 
 const CONFIG_PATH = '/tools/adventure-log-builder/prompt-config.json';
@@ -178,9 +178,9 @@ function parseIntakeResponse(content) {
 
 export async function onRequestPost(context) {
     const { env, request } = context;
-    const apiKey = env.ADVENTURE_LOG_BUILDER_PROD || env.OPENAI_API_KEY;
+    const apiKey = env.ADVENTURE_LOG_BUILDER_PROD || env.ADVENTURE_LOG_BUILDER_PREV || env.OPENAI_API_KEY;
     if (!apiKey) {
-        return jsonResponse({ error: 'ADVENTURE_LOG_BUILDER_PROD (or OPENAI_API_KEY) not configured' }, 503);
+        return jsonResponse({ error: 'ADVENTURE_LOG_BUILDER_PROD, ADVENTURE_LOG_BUILDER_PREV, or OPENAI_API_KEY not configured' }, 503);
     }
 
     let body;
