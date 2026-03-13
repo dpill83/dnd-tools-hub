@@ -23,14 +23,22 @@
         <main class="admin-main">
             <section class="admin-section">
                 <h2>Travel</h2>
-                <p class="admin-hint">Used for ruler travel time on the Interactive Map.</p>
-                <div class="admin-form-group">
-                    <label for="admin-travel-method">Default travel method</label>
-                    <select id="admin-travel-method" aria-label="Default travel method for ruler">
-                        <!-- Populated by admin.js from TRAVEL_METHODS -->
-                    </select>
-                    <p class="admin-hint">Default method when users open the ruler. They can change it in the ruler menu.</p>
+                <p class="admin-hint">Used for ruler travel time on the Interactive Map. Edit method names and speeds; choose the default for the ruler.</p>
+                <div class="admin-table-wrap">
+                    <table class="admin-table" id="admin-travel-methods-table" aria-label="Travel methods">
+                        <thead>
+                            <tr>
+                                <th scope="col">Method</th>
+                                <th scope="col">Speed (ft/sec)</th>
+                                <th scope="col">Default</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-travel-methods-tbody">
+                            <!-- Rows populated by admin.js -->
+                        </tbody>
+                    </table>
                 </div>
+                <p class="admin-hint">Default is used when users open the ruler. They can change it in the ruler menu.</p>
                 <button type="button" id="admin-travel-method-save" class="admin-btn admin-btn-select">Save</button>
             </section>
 

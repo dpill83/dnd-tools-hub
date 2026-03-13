@@ -6,6 +6,7 @@
     const LAST_MAP_KEY = 'interactive-map-last-map';
     const TRAVEL_METHOD_KEY = 'interactive-map-travel-method';
     const TRAVEL_METHOD_DEFAULT_KEY = 'interactive-map-travel-method-default';
+    const TRAVEL_METHODS_LIST_KEY = 'interactive-map-travel-methods';
     const API_BASE = '';
 
     const TYPE_COLORS = {
@@ -324,19 +325,42 @@
         return Math.hypot(latLng2.lat - latLng1.lat, latLng2.lng - latLng1.lng);
     }
 
+    function getEffectiveTravelMethods() {
+        try {
+            const raw = localStorage.getItem(TRAVEL_METHODS_LIST_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length > 0 && parsed.every((m) => m && typeof m.id === 'string' && typeof m.label === 'string' && Number.isFinite(Number(m.ftPerSec)))) {
+                    return parsed.map((m) => ({ id: m.id, label: String(m.label), ftPerSec: Number(m.ftPerSec) }));
+                }
+            }
+        } catch (e) { /* ignore */ }
+        return (typeof window.TRAVEL_METHODS !== 'undefined' && window.TRAVEL_METHODS.length) ? Array.from(window.TRAVEL_METHODS) : [];
+    }
+
+    function getTravelMethodByIdFromList(list, id) {
+        if (!id || !list) return null;
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].id === id) return list[i];
+        }
+        return null;
+    }
+
     function getResolvedTravelMethodId() {
+        const list = getEffectiveTravelMethods();
         const current = localStorage.getItem(TRAVEL_METHOD_KEY);
-        if (current && typeof window.getTravelMethodById === 'function' && window.getTravelMethodById(current)) return current;
+        if (current && getTravelMethodByIdFromList(list, current)) return current;
         const defaultId = localStorage.getItem(TRAVEL_METHOD_DEFAULT_KEY);
-        if (defaultId && typeof window.getTravelMethodById === 'function' && window.getTravelMethodById(defaultId)) return defaultId;
+        if (defaultId && getTravelMethodByIdFromList(list, defaultId)) return defaultId;
         return (typeof window.DEFAULT_TRAVEL_METHOD_ID !== 'undefined' ? window.DEFAULT_TRAVEL_METHOD_ID : 'walk-normal');
     }
 
     function getTravelMethod() {
+        const list = getEffectiveTravelMethods();
         const id = getResolvedTravelMethodId();
-        const method = (typeof window.getTravelMethodById === 'function' && window.getTravelMethodById(id)) || null;
+        const method = getTravelMethodByIdFromList(list, id);
         if (method) return { ftPerSec: method.ftPerSec, label: method.label };
-        const fallback = (typeof window.TRAVEL_METHODS !== 'undefined' && window.TRAVEL_METHODS[0]) ? window.TRAVEL_METHODS[0] : { ftPerSec: 4, label: 'Walk (Normal)' };
+        const fallback = list[0] || { ftPerSec: 4, label: 'Walk (Normal)' };
         return { ftPerSec: fallback.ftPerSec, label: fallback.label };
     }
 
@@ -375,14 +399,13 @@
         rulerBtn.parentNode.insertBefore(menu, rulerBtn);
         rulerMenuEl = menu;
         rulerMenuSelect = select;
-        if (typeof window.TRAVEL_METHODS !== 'undefined') {
-            window.TRAVEL_METHODS.forEach((m) => {
-                const opt = document.createElement('option');
-                opt.value = m.id;
-                opt.textContent = m.label;
-                select.appendChild(opt);
-            });
-        }
+        const methods = getEffectiveTravelMethods();
+        methods.forEach((m) => {
+            const opt = document.createElement('option');
+            opt.value = m.id;
+            opt.textContent = m.label;
+            select.appendChild(opt);
+        });
         select.addEventListener('change', () => {
             const id = select.value;
             if (id) localStorage.setItem(TRAVEL_METHOD_KEY, id);
@@ -392,9 +415,17 @@
 
     function showRulerMenu() {
         ensureRulerMenu();
-        if (rulerMenuEl) {
+        if (rulerMenuEl && rulerMenuSelect) {
             rulerMenuEl.classList.remove('wm-ruler-menu-hidden');
-            if (rulerMenuSelect) rulerMenuSelect.value = getResolvedTravelMethodId();
+            const methods = getEffectiveTravelMethods();
+            rulerMenuSelect.innerHTML = '';
+            methods.forEach((m) => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.textContent = m.label;
+                rulerMenuSelect.appendChild(opt);
+            });
+            rulerMenuSelect.value = getResolvedTravelMethodId();
         }
     }
 

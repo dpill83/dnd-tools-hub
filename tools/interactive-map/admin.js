@@ -3,6 +3,7 @@
 
     const API_BASE = '';
     const TRAVEL_METHOD_DEFAULT_KEY = 'interactive-map-travel-method-default';
+    const TRAVEL_METHODS_LIST_KEY = 'interactive-map-travel-methods';
 
     const LEGEND_ENTRIES = [
         { key: 'city', label: 'City buildings' },
@@ -93,7 +94,7 @@
     const editMapName = document.getElementById('admin-edit-map-name');
     const editMapWidthFeet = document.getElementById('admin-edit-map-width-feet');
     const editMapCancelBtn = document.getElementById('admin-edit-map-cancel');
-    const travelMethodSelect = document.getElementById('admin-travel-method');
+    const travelMethodsTbody = document.getElementById('admin-travel-methods-tbody');
     const travelMethodSaveBtn = document.getElementById('admin-travel-method-save');
 
     let selectedMapId = null;
@@ -425,39 +426,87 @@
         }
     });
 
-    function populateTravelMethodSelect() {
-        if (!travelMethodSelect || typeof window.TRAVEL_METHODS === 'undefined') return;
-        const methods = window.TRAVEL_METHODS;
-        travelMethodSelect.innerHTML = '';
+    function getEffectiveTravelMethods() {
+        try {
+            const raw = localStorage.getItem(TRAVEL_METHODS_LIST_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length > 0 && parsed.every((m) => m && typeof m.id === 'string' && typeof m.label === 'string' && Number.isFinite(Number(m.ftPerSec)))) {
+                    return parsed.map((m) => ({ id: m.id, label: String(m.label), ftPerSec: Number(m.ftPerSec) }));
+                }
+            }
+        } catch (e) { /* ignore */ }
+        return (typeof window.TRAVEL_METHODS !== 'undefined' && window.TRAVEL_METHODS.length) ? Array.from(window.TRAVEL_METHODS) : [];
+    }
+
+    function renderTravelMethodsTable() {
+        if (!travelMethodsTbody) return;
+        const methods = getEffectiveTravelMethods();
+        const defaultId = localStorage.getItem(TRAVEL_METHOD_DEFAULT_KEY) || (window.DEFAULT_TRAVEL_METHOD_ID || 'walk-normal');
+        travelMethodsTbody.innerHTML = '';
         methods.forEach((m) => {
-            const opt = document.createElement('option');
-            opt.value = m.id;
-            opt.textContent = m.label + ' (' + m.ftPerSec + ' ft/sec)';
-            travelMethodSelect.appendChild(opt);
+            const tr = document.createElement('tr');
+            tr.setAttribute('data-method-id', m.id);
+            const tdLabel = document.createElement('td');
+            const inputLabel = document.createElement('input');
+            inputLabel.type = 'text';
+            inputLabel.value = m.label;
+            inputLabel.setAttribute('aria-label', 'Method name');
+            tdLabel.appendChild(inputLabel);
+            const tdSpeed = document.createElement('td');
+            const inputSpeed = document.createElement('input');
+            inputSpeed.type = 'number';
+            inputSpeed.min = '0.5';
+            inputSpeed.step = '0.5';
+            inputSpeed.value = String(m.ftPerSec);
+            inputSpeed.setAttribute('aria-label', 'Speed ft/sec');
+            tdSpeed.appendChild(inputSpeed);
+            const tdDefault = document.createElement('td');
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = 'admin-travel-default';
+            radio.value = m.id;
+            radio.checked = (m.id === defaultId);
+            radio.setAttribute('aria-label', 'Set as default');
+            tdDefault.appendChild(radio);
+            tr.appendChild(tdLabel);
+            tr.appendChild(tdSpeed);
+            tr.appendChild(tdDefault);
+            travelMethodsTbody.appendChild(tr);
         });
     }
 
-    function loadTravelMethodDefault() {
-        if (!travelMethodSelect) return;
-        const raw = localStorage.getItem(TRAVEL_METHOD_DEFAULT_KEY);
-        const id = (raw && window.getTravelMethodById && window.getTravelMethodById(raw)) ? raw : window.DEFAULT_TRAVEL_METHOD_ID || 'walk-normal';
-        travelMethodSelect.value = id;
-    }
-
-    function saveTravelMethodDefault() {
-        if (!travelMethodSelect) return;
-        const id = travelMethodSelect.value || (window.DEFAULT_TRAVEL_METHOD_ID || 'walk-normal');
-        localStorage.setItem(TRAVEL_METHOD_DEFAULT_KEY, id);
+    function saveTravelMethods() {
+        if (!travelMethodsTbody) return;
+        const rows = travelMethodsTbody.querySelectorAll('tr[data-method-id]');
+        const methods = [];
+        let defaultId = localStorage.getItem(TRAVEL_METHOD_DEFAULT_KEY) || (window.DEFAULT_TRAVEL_METHOD_ID || 'walk-normal');
+        rows.forEach((tr) => {
+            const id = tr.getAttribute('data-method-id');
+            const labelInput = tr.querySelector('input[type="text"]');
+            const speedInput = tr.querySelector('input[type="number"]');
+            const radio = tr.querySelector('input[type="radio"]');
+            if (!id || !labelInput || !speedInput) return;
+            const label = labelInput.value.trim() || id;
+            const ftPerSec = Number(speedInput.value);
+            if (!Number.isFinite(ftPerSec) || ftPerSec <= 0) return;
+            methods.push({ id, label, ftPerSec });
+            if (radio && radio.checked) defaultId = id;
+        });
+        if (methods.length) {
+            localStorage.setItem(TRAVEL_METHODS_LIST_KEY, JSON.stringify(methods));
+            localStorage.setItem(TRAVEL_METHOD_DEFAULT_KEY, defaultId);
+        }
     }
 
     async function init() {
         setupEditModal();
         setupEditMapModal();
-        populateTravelMethodSelect();
-        loadTravelMethodDefault();
+        renderTravelMethodsTable();
         if (travelMethodSaveBtn) {
             travelMethodSaveBtn.addEventListener('click', () => {
-                saveTravelMethodDefault();
+                saveTravelMethods();
+                renderTravelMethodsTable();
             });
         }
         try {
