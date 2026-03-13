@@ -71,13 +71,120 @@ body.loot-ledger-parchment .loot-ledger-container {
 
 .loot-ledger-container #app { max-width: 900px; margin: 0 auto; padding: 1rem 0; }
 
-/* Theme toggle */
-.ledger-theme-toggle {
+/* Header actions (theme + help) */
+.ledger-header-actions {
   display: flex;
-  gap: 0.25rem;
+  align-items: center;
+  gap: 0.75rem;
   margin-top: 0.75rem;
   flex-wrap: wrap;
 }
+.ledger-theme-toggle {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+.ledger-help-btn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 1px solid var(--ll-border);
+  background: var(--ll-parchment2);
+  color: var(--ll-rust2);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.ledger-help-btn:hover {
+  border-color: var(--ll-gold);
+  color: var(--ll-ink);
+  background: var(--ll-parchment3);
+}
+
+/* Help modal */
+.ledger-help-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+.ledger-help-modal[hidden] { display: none; }
+.ledger-help-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  cursor: pointer;
+}
+.ledger-help-content {
+  position: relative;
+  max-width: 32rem;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--ll-parchment);
+  border: 1px solid var(--ll-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px var(--ll-shadow);
+}
+.ledger-help-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--ll-border);
+  flex-shrink: 0;
+}
+.ledger-help-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--ll-rust);
+  font-weight: 600;
+}
+.ledger-help-close {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ll-rust2);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, background 0.2s;
+}
+.ledger-help-close:hover {
+  background: var(--ll-parchment3);
+  color: var(--ll-ink);
+}
+.ledger-help-body {
+  padding: 1.25rem;
+  overflow-y: auto;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--ll-ink);
+}
+.ledger-help-body h3 {
+  margin: 1rem 0 0.4rem;
+  font-size: 1rem;
+  color: var(--ll-rust);
+  font-weight: 600;
+}
+.ledger-help-body h3:first-child { margin-top: 0; }
+.ledger-help-body p { margin: 0 0 0.6rem; }
+.ledger-help-body p:last-child { margin-bottom: 0; }
 .ledger-theme-btn {
   padding: 0.35rem 0.75rem;
   font-size: 0.875rem;
@@ -324,6 +431,10 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
 
 .loot-ledger-container .table-wrap { overflow-x: auto; }
 
+.roller-options { margin-bottom: 10px; }
+.roller-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.roll-seed { font-size: 0.75rem; color: var(--ll-value-range); font-style: italic; }
+
 @media (max-width: 600px) {
   .loot-ledger-container .form-row { grid-template-columns: 1fr; }
   .loot-ledger-container .form-row.three { grid-template-columns: 1fr 1fr; }
@@ -335,11 +446,45 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
     <header>
         <h1>Party Loot Ledger</h1>
         <p class="intro">Trade value, faction leverage &amp; market conditions. Track loot, roll hoards by CR, and manage factions.</p>
-        <div class="ledger-theme-toggle" role="group" aria-label="Ledger appearance">
-            <button type="button" class="ledger-theme-btn active" data-theme="hub" id="themeBtnHub">Hub style</button>
-            <button type="button" class="ledger-theme-btn" data-theme="parchment" id="themeBtnParchment">Parchment</button>
+        <div class="ledger-header-actions">
+            <div class="ledger-theme-toggle" role="group" aria-label="Ledger appearance">
+                <button type="button" class="ledger-theme-btn active" data-theme="hub" id="themeBtnHub">Hub style</button>
+                <button type="button" class="ledger-theme-btn" data-theme="parchment" id="themeBtnParchment">Parchment</button>
+            </div>
+            <button type="button" class="ledger-help-btn" id="ledgerHelpBtn" aria-label="Open help">?</button>
         </div>
     </header>
+
+    <div id="ledgerHelpModal" class="ledger-help-modal" role="dialog" aria-labelledby="ledgerHelpTitle" aria-modal="true" hidden>
+        <div class="ledger-help-overlay" id="ledgerHelpOverlay"></div>
+        <div class="ledger-help-content">
+            <div class="ledger-help-header">
+                <h2 id="ledgerHelpTitle">Party Loot Ledger – Help</h2>
+                <button type="button" class="ledger-help-close" id="ledgerHelpClose" aria-label="Close help">&times;</button>
+            </div>
+            <div class="ledger-help-body">
+                <p>Track your party’s loot with trade value, tier, status, and notes. Use the four tabs to manage items, roll random hoards, set market conditions, and track factions.</p>
+
+                <h3>Ledger</h3>
+                <p>Add items manually: name, <strong>tier</strong> (T0 Mundane through T5 Legendary), base value in gp, quantity, and <strong>status</strong> (Holding, For Sale, Sold, Leverage). Use notes for provenance or faction interest. Click a status in the table to cycle it; use &times; to remove an item. <em>Active Holdings Total</em> sums only items not marked Sold.</p>
+
+                <h3>Loot Roller</h3>
+                <p>Choose a <strong>tier system</strong>: <em>Standard 5e (CR-based)</em> uses encounter difficulty (Low/Mid/High/Deadly) and hoard type for classic 5e loot. <em>Custom (leverage / trade tiers)</em> uses the same T0–T5 tiers as the ledger plus a <strong>market context</strong> (open market, guild, faction deal, black market, political). Custom tables reflect leverage ≠ rarity: fence tax, faction currency, holding value, provenance, and legal jurisdiction. Roll to get random loot; use <em>Add All to Ledger</em> or Re-roll.</p>
+
+                <h3>Market</h3>
+                <p><strong>Market Conditions</strong> affect how you might roleplay selling (e.g. City Under Siege, Trade Festival). Randomize to set two conditions, or Clear to remove them. The <strong>Leverage Calculator</strong> shows a 0–100 leverage score by item tier and buyer type (open market, guild, noble, black market, allied faction)—useful for haggling or faction deals.</p>
+
+                <h3>Factions</h3>
+                <p>View built-in factions (Harpers, Zhentarim, etc.) and add your own. For each faction you can set alignment (Ally, Neutral, Hostile, Unknown) and what they want to buy—handy when matching ledger items to buyers.</p>
+
+                <h3>Sync &amp; data</h3>
+                <p>The bar under the header shows whether the ledger is synced. Data is saved in your browser; if the hub’s shared storage is available, the same ledger can be used across devices.</p>
+
+                <h3>Appearance</h3>
+                <p>Use <em>Hub style</em> to match the rest of the D&amp;D Tools Hub (and light/dark theme). Use <em>Parchment</em> for a darker, parchment look. Your choice is remembered.</p>
+            </div>
+        </div>
+    </div>
 
     <div id="app">
   <div class="sync-bar">
@@ -424,30 +569,64 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
   <!-- ROLLER TAB -->
   <div id="tab-roller" class="panel">
     <div class="card">
-      <div class="card-title">Roll Loot (5e CR-Based)</div>
-      <div class="form-row">
-        <div class="form-field">
-          <label>Challenge Rating</label>
-          <select id="rollCR">
-            <option value="low">Low (CR 1–4)</option>
-            <option value="mid" selected>Mid (CR 5–10)</option>
-            <option value="high">High (CR 11–16)</option>
-            <option value="deadly">Deadly (CR 17+)</option>
-          </select>
-        </div>
-        <div class="form-field">
-          <label>Hoard Type</label>
-          <select id="rollType">
-            <option value="individual">Individual Monster</option>
-            <option value="hoard" selected>Treasure Hoard</option>
-            <option value="merchant">Merchant Cache</option>
-            <option value="dungeon">Dungeon Stash</option>
-          </select>
+      <div class="card-title">Loot Roller</div>
+      <div class="form-field">
+        <label for="rollTierSystem">Tier system</label>
+        <select id="rollTierSystem" aria-label="Tier system" onchange="toggleRollerOptions()">
+          <option value="standard" selected>Standard 5e (CR-based encounter tiers)</option>
+          <option value="custom">Custom (leverage / trade tiers)</option>
+        </select>
+      </div>
+      <div id="rollerStandardOptions" class="roller-options">
+        <div class="form-row">
+          <div class="form-field">
+            <label for="rollCR">Challenge Rating</label>
+            <select id="rollCR" aria-label="Challenge rating">
+              <option value="low">Low (CR 1–4)</option>
+              <option value="mid" selected>Mid (CR 5–10)</option>
+              <option value="high">High (CR 11–16)</option>
+              <option value="deadly">Deadly (CR 17+)</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="rollType">Hoard Type</label>
+            <select id="rollType" aria-label="Hoard type">
+              <option value="individual">Individual Monster</option>
+              <option value="hoard" selected>Treasure Hoard</option>
+              <option value="merchant">Merchant Cache</option>
+              <option value="dungeon">Dungeon Stash</option>
+            </select>
+          </div>
         </div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button class="btn btn-rust" onclick="rollLoot()" id="rollBtn">🎲 Roll the Hoard</button>
-        <span style="font-size:12px;color:#8a7050;font-style:italic" id="rollSeed"></span>
+      <div id="rollerCustomOptions" class="roller-options" style="display:none">
+        <div class="form-row">
+          <div class="form-field">
+            <label for="rollCustomTier">Tier</label>
+            <select id="rollCustomTier" aria-label="Leverage tier">
+              <option value="0">T0 — Mundane</option>
+              <option value="1">T1 — Trade Goods</option>
+              <option value="2">T2 — Masterwork</option>
+              <option value="3" selected>T3 — Minor Magic</option>
+              <option value="4">T4 — Significant Magic</option>
+              <option value="5">T5 — Legendary</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="rollContext">Market context</label>
+            <select id="rollContext" aria-label="Market context">
+              <option value="open">Open market</option>
+              <option value="guild">Guild / Academy</option>
+              <option value="faction">Faction deal</option>
+              <option value="black">Black market / Fence</option>
+              <option value="political">Political / Holding</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="roller-actions">
+        <button class="btn btn-rust" onclick="rollLoot()" id="rollBtn">Roll the Hoard</button>
+        <span class="roll-seed" id="rollSeed"></span>
       </div>
     </div>
 
@@ -649,6 +828,144 @@ const LOOT_TABLES = {
   }
 };
 
+// Custom tier system: leverage ≠ rarity — scarcity, buyer competition, situational demand.
+// Keys: tier 0–5, then context (open, guild, faction, black, political).
+const CUSTOM_LOOT_TABLES = {
+  0: {
+    open: [
+      { name: 'Copper and silver mix', tier: 0, val: 15, note: 'Standard coinage; full value in stable jurisdiction' },
+      { name: 'Worn tools (thieves\' kit)', tier: 0, val: 8, note: 'Legal everywhere; fence takes 30% if sold off-book' },
+      { name: 'Common clothing, travel gear', tier: 0, val: 5, note: 'No provenance drama; easy to move' },
+    ],
+    guild: [
+      { name: 'Raw alchemical reagents', tier: 0, val: 12, note: 'Guilds pay fair; no haggling needed' },
+      { name: 'Scribed formulae (non-magical)', tier: 0, val: 20, note: 'Academy interest; information asymmetry if rare' },
+    ],
+    faction: [
+      { name: 'Intel scraps (names, dates)', tier: 0, val: 0, note: 'Faction currency — trade for favors, not gp' },
+      { name: 'Token of allegiance', tier: 0, val: 5, note: 'Worth more as proof of contact than sold' },
+    ],
+    black: [
+      { name: 'Stolen petty cash', tier: 0, val: 10, note: 'Fence tax 20–40%; legitimate buyer worth cultivating' },
+      { name: 'Unmarked goods', tier: 0, val: 8, note: 'No questions asked; value drops at fence' },
+    ],
+    political: [
+      { name: 'Inheritance documents', tier: 0, val: 0, note: 'Holding value: bargaining chip, not for sale' },
+      { name: 'Seal or signet (minor house)', tier: 0, val: 25, note: 'Provenance drama — enemies pay to suppress' },
+    ],
+  },
+  1: {
+    open: [
+      { name: 'Spice cache', tier: 1, val: 35, note: 'Supply and demand; trade festival +25%' },
+      { name: 'Fine cloth bolts', tier: 1, val: 40, note: 'Guild quality; legal in republics' },
+    ],
+    guild: [
+      { name: 'Rare herbs (alchemical)', tier: 1, val: 50, note: 'Guild pays above market; known demand' },
+      { name: 'Masterwork components (unworked)', tier: 1, val: 45, note: 'Information asymmetry if guild is desperate' },
+    ],
+    faction: [
+      { name: 'Beast components (Emerald Enclave)', tier: 1, val: 40, note: 'Faction currency; trade for land intel' },
+      { name: 'Dye vials (noble colors)', tier: 1, val: 55, note: 'Lords\' Alliance interest; political access' },
+    ],
+    black: [
+      { name: 'Stolen trade goods', tier: 1, val: 30, note: 'Fence cut; same item worth more to legitimate buyer' },
+      { name: 'Forged papers', tier: 1, val: 60, note: 'Illegal in theocracy; black market only' },
+    ],
+    political: [
+      { name: 'Noble house ledger (excerpt)', tier: 1, val: 0, note: 'Worth more in hand than sold; leverage' },
+      { name: 'Gift-quality goods', tier: 1, val: 50, note: 'Provenance matters — villain\'s enemies pay premium' },
+    ],
+  },
+  2: {
+    open: [
+      { name: 'Masterwork shortbow', tier: 2, val: 75, note: 'Full value in peacetime; +60% in faction war' },
+      { name: 'Engraved armor (crest removed)', tier: 2, val: 350, note: 'Legal jurisdiction: theocracy may confiscate' },
+    ],
+    guild: [
+      { name: 'Enchanted ink and vellum', tier: 2, val: 80, note: 'Guild pays fair; less haggling' },
+      { name: 'Spellcraft tools', tier: 2, val: 120, note: 'Academy demand; double if they\'re short' },
+    ],
+    faction: [
+      { name: 'Military surplus (Lords\' Alliance)', tier: 2, val: 200, note: 'Faction deal: favors or intel, not gp' },
+      { name: 'Holy symbols (Order of the Gauntlet)', tier: 2, val: 90, note: 'Church Inquisition: relics +200% elsewhere' },
+    ],
+    black: [
+      { name: 'Masterwork weapon (no papers)', tier: 2, val: 100, note: 'Fence tax; legitimate buyer far more valuable' },
+      { name: 'Confiscated goods', tier: 2, val: 150, note: 'Black market only; legal = zero value' },
+    ],
+    political: [
+      { name: 'Proof of noble wrongdoing', tier: 2, val: 0, note: 'Holding value; political capital, not sale' },
+      { name: 'Artifact fragment (known set)', tier: 2, val: 400, note: 'Provenance: enemies of owner pay double' },
+    ],
+  },
+  3: {
+    open: [
+      { name: '+1 weapon', tier: 3, val: 400, note: 'Faction war: worth a duchy\'s alliance' },
+      { name: 'Potion of Healing ×2', tier: 3, val: 100, note: 'Plague: +150%; legal everywhere' },
+    ],
+    guild: [
+      { name: 'Spell scroll (2nd level)', tier: 3, val: 120, note: 'Mage Guild Conclave: +80%' },
+      { name: 'Cloak of Protection', tier: 3, val: 300, note: 'Guild pays fair; information asymmetry if desperate' },
+    ],
+    faction: [
+      { name: 'Anti-evil artifact (Harpers)', tier: 3, val: 350, note: 'Faction currency: intel or access, not gold' },
+      { name: 'Healing staff (Church)', tier: 3, val: 500, note: 'Lathander pays above market' },
+    ],
+    black: [
+      { name: 'Necromantic scroll', tier: 3, val: 200, note: 'Church Inquisition: unsellable legally; fence only' },
+      { name: 'Hot magic item', tier: 3, val: 280, note: 'Fence 30–40% cut; cultivate legitimate buyer' },
+    ],
+    political: [
+      { name: 'Blackmail material (city officials)', tier: 3, val: 0, note: 'Priceless as leverage; never sell for gp' },
+      { name: 'Ex-villain artifact', tier: 3, val: 600, note: 'Provenance: enemies pay double; sympathizers zero' },
+    ],
+  },
+  4: {
+    open: [
+      { name: '+2 Plate Armor', tier: 4, val: 4000, note: 'Dragon Sighting: armor in demand' },
+      { name: 'Figurine of Wondrous Power', tier: 4, val: 3500, note: 'Utility + scarcity; buyer competition' },
+    ],
+    guild: [
+      { name: 'Spell scroll (4th level)', tier: 4, val: 800, note: 'Guild Conclave: +80%; non-magical ignored' },
+      { name: 'Ioun Stone', tier: 4, val: 1200, note: 'Guild pays fair; information asymmetry' },
+    ],
+    faction: [
+      { name: 'Holy relic (Order of the Gauntlet)', tier: 4, val: 0, note: 'Faction currency: favors, never gold' },
+      { name: 'Fiend-slaying weapon', tier: 4, val: 2500, note: 'Faction deal: intel or political access' },
+    ],
+    black: [
+      { name: 'Stolen significant magic', tier: 4, val: 2000, note: 'Fence tax; legitimate buyer far more valuable' },
+      { name: 'Illegal artifact', tier: 4, val: 1500, note: 'Theocratic jurisdiction: zero in empire' },
+    ],
+    political: [
+      { name: 'Vestige fragment', tier: 4, val: 0, note: 'Holding value: worth more in hand than sold' },
+      { name: 'Crown regalia', tier: 4, val: 0, note: 'Succession crisis: political intel priceless' },
+    ],
+  },
+  5: {
+    open: [
+      { name: 'Legendary weapon', tier: 5, val: 12000, note: 'Rarity ≠ value; utility and demand shift price' },
+      { name: 'Dragon hoard gold', tier: 5, val: 8000, note: 'Weight: 400 lbs; situational demand' },
+    ],
+    guild: [
+      { name: 'Artifact (arcane)', tier: 5, val: 0, note: 'Guild wants it; faction currency, not gp' },
+      { name: 'World-map fragment', tier: 5, val: 0, note: 'Leverage over empires; never sold' },
+    ],
+    faction: [
+      { name: 'Divine relic', tier: 5, val: 0, note: 'A god is looking; faction trade only' },
+      { name: 'Vestige of Divergence', tier: 5, val: 0, note: 'Will reshape campaign; holding value' },
+    ],
+    black: [
+      { name: 'Phylactery', tier: 5, val: 0, note: 'Lich will notice; fence can\'t move it' },
+      { name: 'Stolen artifact', tier: 5, val: 0, note: 'Fence tax irrelevant; target on your back' },
+    ],
+    political: [
+      { name: 'MacGuffin', tier: 5, val: 0, note: 'Worth more as bargaining chip in hand' },
+      { name: 'Crown of the fallen king', tier: 5, val: 0, note: 'Provenance drama; allies pay in alliance' },
+    ],
+  },
+};
+
 const MARKET_CONDITIONS = [
   { name:'City Under Siege', effect:'Tier 4 weapons +60% value · Food & supplies +40% · Luxury goods −50%', border:'#8b3a1a' },
   { name:'Mage Guild Conclave', effect:'Spell scrolls & arcane items +80% · Non-magical goods ignored', border:'#5a3a8c' },
@@ -844,21 +1161,44 @@ function renderLedger() {
 }
 
 // ── ROLLER ────────────────────────────────────────────────────────────────────
+function toggleRollerOptions() {
+  var system = document.getElementById('rollTierSystem');
+  var standardOpts = document.getElementById('rollerStandardOptions');
+  var customOpts = document.getElementById('rollerCustomOptions');
+  if (!system || !standardOpts || !customOpts) return;
+  if (system.value === 'custom') {
+    standardOpts.style.display = 'none';
+    customOpts.style.display = 'block';
+  } else {
+    standardOpts.style.display = 'block';
+    customOpts.style.display = 'none';
+  }
+}
+
 function rollLoot() {
-  const cr = document.getElementById('rollCR').value;
-  const type = document.getElementById('rollType').value;
-  const pool = LOOT_TABLES[cr][type];
+  var tierSystem = document.getElementById('rollTierSystem').value;
+  var pool;
+  if (tierSystem === 'custom') {
+    var tier = parseInt(document.getElementById('rollCustomTier').value, 10);
+    var context = document.getElementById('rollContext').value;
+    var tierTable = CUSTOM_LOOT_TABLES[tier];
+    pool = tierTable && tierTable[context] ? tierTable[context] : null;
+  } else {
+    var cr = document.getElementById('rollCR').value;
+    var type = document.getElementById('rollType').value;
+    pool = LOOT_TABLES[cr] && LOOT_TABLES[cr][type] ? LOOT_TABLES[cr][type] : null;
+  }
   if (!pool || !pool.length) {
-    document.getElementById('rollItems').innerHTML = '<div class="empty">No table for this combination — try a different type.</div>';
+    document.getElementById('rollItems').innerHTML = '<div class="empty">No table for this combination — try a different type or context.</div>';
     document.getElementById('rollOutput').classList.add('show');
     return;
   }
-  // Pick 2–5 random items
-  const shuffled = [...pool].sort(() => Math.random()-0.5);
-  const count = Math.min(pool.length, 2 + Math.floor(Math.random() * 4));
-  state.lastRolled = shuffled.slice(0, count).map(i => ({...i, id: Date.now()+Math.random(), qty:1, status:'holding'}));
-  const seed = `Roll #${Math.floor(Math.random()*9000)+1000}`;
-  document.getElementById('rollSeed').textContent = seed;
+  var shuffled = [...pool].sort(function() { return Math.random() - 0.5; });
+  var count = Math.min(pool.length, 2 + Math.floor(Math.random() * 4));
+  state.lastRolled = shuffled.slice(0, count).map(function(i) {
+    return { name: i.name, tier: i.tier, val: i.val, note: i.note, id: Date.now() + Math.random(), qty: 1, status: 'holding' };
+  });
+  document.getElementById('rollSeed').textContent = 'Roll #' + (Math.floor(Math.random() * 9000) + 1000);
   renderRollOutput();
   document.getElementById('rollOutput').classList.add('show');
 }
@@ -1029,12 +1369,45 @@ function initLedgerTheme() {
   });
 }
 
+// ── HELP MODAL ───────────────────────────────────────────────────────────────
+function openLedgerHelp() {
+  var modal = document.getElementById('ledgerHelpModal');
+  if (modal) {
+    modal.removeAttribute('hidden');
+    document.addEventListener('keydown', ledgerHelpEscape);
+  }
+}
+function closeLedgerHelp() {
+  var modal = document.getElementById('ledgerHelpModal');
+  if (modal) {
+    modal.setAttribute('hidden', '');
+    document.removeEventListener('keydown', ledgerHelpEscape);
+  }
+}
+function ledgerHelpEscape(e) {
+  if (e.key === 'Escape') closeLedgerHelp();
+}
+function initLedgerHelp() {
+  var btn = document.getElementById('ledgerHelpBtn');
+  var closeBtn = document.getElementById('ledgerHelpClose');
+  var overlay = document.getElementById('ledgerHelpOverlay');
+  if (btn) btn.addEventListener('click', openLedgerHelp);
+  if (closeBtn) closeBtn.addEventListener('click', closeLedgerHelp);
+  if (overlay) overlay.addEventListener('click', closeLedgerHelp);
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 loadState();
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initLedgerTheme);
+  document.addEventListener('DOMContentLoaded', function() {
+    initLedgerTheme();
+    initLedgerHelp();
+    toggleRollerOptions();
+  });
 } else {
   initLedgerTheme();
+  initLedgerHelp();
+  toggleRollerOptions();
 }
 </script>
     <script src="theme.js"></script>
