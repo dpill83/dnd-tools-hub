@@ -1,0 +1,867 @@
+"d400 (d4 + 2d10) = 101-499 - Roll d4 to determine hundreds place, roll 2d10 to determine the tens, and ones place.
+
+4600 (d6 + 2d10) = 101-699 - Same as prior.
+
+d800 (d8 + 2d10) = 101-899 - Same as prior.
+
+d1000 (d10 + 2d10) = 101-1099 - Roll d10 for hundreds or thousands place, roll 2d10 for tens and ones.
+
+d1200 (d12 + 2d10) = 101-1299 - Roll d12 to determine the thousands or hundreds place, roll 2d10 to determine the tens and ones place.",,,"Book Key:
+DMG = Dungeon Masters Guide 
+TCE = Tasha's Cauldron 
+XGE = Xanthars Guide 
+EGW = Explorers Guide to Wildemount 
+VSS = Valdas Spire of Secrets  
+VoM = Vault of Magic 
+GSB2 = Griffons Saddlebag 2
+TDCSR = Tal""Dorei Campaign Setting Reborn
+EnMa = Encyclopedia Magica",,,,,,,,,,,,,,,
+,,,,,,d100 ,Category ,Odds,,d100 ,Category ,,,d100 ,Category ,,,
+,,,,,,0-50,Common,50%,,0-50,Common,,,0-50,Common,,,
+,,,,,,51-75,Uncommon,25%,,51-75,Uncommon,,,51-75,Uncommon,,,
+,,,,,,76-90,Rare,15%,,76-90,Rare,,,76-90,Rare,,,
+,,,,,,91-99,Very Rare,9%,,91-99,Very Rare,,,91-99,Very Rare,,,
+,,,,,,100,Legendary,1%,,100,Legendary,,,100,Legendary,,,
+Common Magical Items,,,,Uncommon Magical Items,,,,Rare Magical Items,,,,Very Rare Magical Items,,,,Legendary Magical Items,,
+d400,Item,Source,,d800,Item,Source,,d1000,Item,Source,,d600,Item,Source,,d400,Item,Source
+101,Tailor'S Clasp,VoM,,101,Wand of Relieved Burdens,VoM,,101,bracers of defense,DMG,,101,Abjurer's Bangle,GSB2,,101,Foulton Door,VoM
+102,Headband Of The Sweatless,GSB2,,102,Dust of the Dead,VoM,,102,astromancy archive,TCE,,102,Copper Lance,EnMa,,102,"Bag of Holding (Variant), Type Ⅴ",EnMa
+103,Pole Of Collapsing,XGE,,103,feywild shard,TCE,,103,Language Pyramid,VoM,,103,Seven-Flavored Tea of Forgetfulness,VoM,,103,Draught of Ambrosia,VoM
+104,Poltergeist Candle Holder,GSB2,,104,Recondite Shield,VoM,,104,Pearl of Flying,EnMa,,104,Parchment of Spell Stealing,EnMa,,104,Gemstone of Retaliation,EnMa
+105,Comfy Slippers,VoM,,105,Scroll of Duplication,VSS,,105,necklace of fireballs,DMG,,105,Phase Mirror (Vanity),VoM,,105,Armor-Piercing Dagger,EnMa
+106,Canteen of Coolness,EnMa,,106,Air Mask,EnMa,,106,Ring of spell storing,DMG,,106,"Potion of Troll Blood, Superior",VoM,,106,Radiant Libram,VoM
+107,Silver Star Cane,GSB2,,107,Brotherhood of Fezzes,VoM,,107,Catalyst Oil (Force),VoM,,107,frost brand,DMG,,107,"Cloak of Stars, Type Ⅲ",EnMa
+108,"Oil of Armor, Type Ⅰ",EnMa,,108,Arrow of Harm,EnMa,,108,Plumb of the Elements,VoM,,108,Red Dragon's Breath,VoM,,108,Shadowsword,EnMa
+109,Everclean Towel,EnMa,,109,Glass Carver,GSB2,,109,Bag of Seeds,EnMa,,109,Helm of the Chromatic Dragon,GSB2,,109,Asp's Kiss,VoM
+110,Inker'S Armband,GSB2,,110,"Feather Token, Cloud",VoM,,110,Incense of Recovery,VoM,,110,Bridle of Plane Shifting,EnMa,,110,sovereign glue,DMG
+111,Pipe Of Smoke Monsters,XGE,,111,Wispy Sour Potion,GSB2,,111,"Figurine of Wondrous Power, Silver Carp",EnMa,,111,Eagle Cape,VoM,,111,Fell-Rider Chariot,GSB2
+112,Storyteller'S Stein,GSB2,,112,Headhunter's Bullseye Lantern,GSB2,,112,Armor of resistance (chain mail or chain shirt or leather) or scale,DMG,,112,Potion of Petrifaction,EnMa,,112,Cabal's Ruin,TDCSR
+113,Spellwrought Tattoo Cantrip,TCE,,113,Beard Cannon,GSB2,,113,Chimeric Collar,GSB2,,113,Wand of the Armory,EnMa,,113,Heaven's Edge,GSB2
+114,Flint of Fire,EnMa,,114,Weapon Charm (Hook),VSS,,114,Djinn and Tonic Potion,GSB2,,114,sword of sharpness,DMG,,114,"Graz'tchar, the Decadent End",TDCSR
+115,Bloodlink Potion,VoM,,115,Swarmfoe Suit,VoM,,115,Pact Paper,VoM,,115,Boots of Cloudwalking,EnMa,,115,"Box of Preservation, Type Ⅲ",EnMa
+116,Silver Coin Of Duvra,GSB2,,116,instrument of the bards (doss lute),DMG,,116,helm of teleportation,DMG,,116,Spirit Skull,EnMa,,116,Bell of Protection,EnMa
+117,Widemouth Bucket,GSB2,,117,Chalice of Liquid Bread,EnMa,,117,Dragonbone Broth,VoM,,117,Bag of Misplacing,EnMa,,117,Mask of Combat,EnMa
+118,Food Pouch,EnMa,,118,Bracers of Brachiating,EnMa,,118,"Snake Staff, Type Ⅰ",EnMa,,118,Horseshoes of Hades,EnMa,,118,Bonewand,EnMa
+119,Bullfrog Totem,GSB2,,119,decanter of endless water,DMG,,119,stone of controlling earth elementals,DMG,,119,Circlet of the Sharpened Mind,GSB2,,119,Dead Box,EnMa
+120,Ball Of Wild Earth,GSB2,,120,Satchel of Beast Chow,GSB2,,120,Staff of the Treant,VoM,,120,Gateway Ring,GSB2,,120,Armor of Command,EnMa
+121,Boots Of False Tracks,XGE,,121,Gauntlets of Deliverance,GSB2,,121,Dragonbreath Ammunition,GSB2,,121,Elven Sword,EnMa,,121,Blacktooth,VoM
+122,Stalwart Staff,GSB2,,122,goggles of object reading,EGtW,,122,Scarlet Scourge,GSB2,,122,Mirror of Infinite Transpondence,TDCSR,,122,Guardian Egg,EnMa
+123,Amulet of Communication,EnMa,,123,Camper's Respite Rod,GSB2,,123,"Quaal's Feather Token, Arbor",EnMa,,123,"Ioun Stone, Weariness",EnMa,,123,mighty servant of leuk-o,TCE
+124,Oil Of Sharpening,VoM,,124,Banner of the Fortunate,VoM,,124,Vengeful Coat,VoM,,124,demon Armor,DMG,,124,Ring of earth elemental command,DMG
+125,Quilted Bridge,VoM,,125,Camouflaging Tent,EnMa,,125,shadowfell brand tattoo,TCE,,125,Sea Witch's Blade,VoM,,125,Deathwalker's Ward,TDCSR
+126,Shipwright'S Watch,GSB2,,126,Heliotrope Heart,VoM,,126,Astral Caltrops,GSB2,,126,adamantine Armor (plate),DMG,,126,cloak of invisibility,DMG
+127,Scroll of Illumination,EnMa,,127,Seed of Growth,EnMa,,127,Memory Philter,VoM,,127,Cataclysm Bolts,TDCSR,,127,Coral of Enchanted Colors,VoM
+128,Rod Of Verbatim,VoM,,128,Ehagan's Moving Ladder,GSB2,,128,Bag of Traps,VoM,,128,Gargoyle Cloak,EnMa,,128,Golden Griffon Shield,VoM
+129,Deepchill Orb,VoM,,129,Spider Grenade,VoM,,129,Scarlet Mead,VoM,,129,manual of quickness of action,DMG,,129,Umbral Staff,VoM
+130,Staff Of Flowers,XGE,,130,wand of the war mage +1,DMG,,130,Hexen Blade,VoM,,130,Mourningsteel DemiGauntlets,GSB2,,130,Basin of the Angel,EnMa
+131,"Figurine Of Wondrous Power, Tin Dog",VoM,,131,amulet of the devout +1,TCE,,131,Snake Basket,VoM,,131,"Spear of Accuracy, Type Ⅱ",EnMa,,131,Black Candle,EnMa
+132,Status Signets,GSB2,,132,Invisible Ink,VSS,,132,Oceanic Weapon,TDCSR,,132,Stirge's Bite,EnMa,,132,crystal ball (Legendary version),DMG
+133,Rope Seed,VoM,,133,Bane Shield,GSB2,,133,Spellwriter's Brace,GSB2,,133,Monster Mask,EnMa,,133,Egg of Ancient Dragon's Breath,EnMa
+134,Hat Of Wizardry,XGE,,134,Cloak of the Ram,VoM,,134,Living Stake,VoM,,134,atlas of endless horizons,TCE,,134,Elf-Cleaver,EnMa
+135,Survival Knife,VoM,,135,Gnomesalt Taffy,VoM,,135,Traitor's Gauntlet,GSB2,,135,Gorgon Scale,VoM,,135,Masks of the Sacred Beasts,GSB2
+136,Spell Scroll (cantrip),DMG,,136,Alchemical Anesthetic,VSS,,136,Throwing Star of Returning,EnMa,,136,adamantine Armor (half plate),DMG,,136,Amulet of Perpetual Youth,EnMa
+137,Hasp of Locking,EnMa,,137,Focus Circlet,GSB2,,137,horn of blasting,DMG,,137,Vyra's Broken Path,GSB2,,137,Helm of the Justicars,GSB2
+138,Knockabout Billet,VoM,,138,Badge of the Savant,GSB2,,138,Stormbrewer Bracers,GSB2,,138,Wand of Merriment,GSB2,,138,defender,DMG
+139,Marble of Cleanliness,EnMa,,139,Courier Key,EnMa,,139,Maiden's Tears,VoM,,139,Arrow of Grabbing,VoM,,139,"Cloak of Stars, Type Ⅱ",EnMa
+140,Tonic For The Troubled Mind,VoM,,140,Horn Bonnet,EnMa,,140,Bounder's Ball,GSB2,,140,Hoarder's Haul,GSB2,,140,Wand of the Alicorn,GSB2
+141,Tea Weird,GSB2,,141,Deadfall Arrow,VoM,,141,Crawling Cloak,VoM,,141,Bow of the Spelldrinker,GSB2,,141,Thorn of Sleep,EnMa
+142,Orb Of Remembrance,GSB2,,142,gem of brightness,DMG,,142,wand of the war mage +2,DMG,,142,horn of valhalla (bronze),DMG,,142,Book of Eibon,VoM
+143,Candy Xorn,GSB2,,143,Angry Hornet,VoM,,143,Coffer of Memory,VoM,,143,Hornblade,EnMa,,143,"Dragonlance, Type Ⅱ",EnMa
+144,Perfume Of Bewitching,XGE,,144,Sand Arrow,VoM,,144,Potion of Forgetfulness,EnMa,,144,Retribution Armor,VoM,,144,belt of cloud giant strength,DMG
+145,Walloping Ammunition,XGE,,145,Potion of Corrosive Touch,EnMa,,145,Barding +1,EnMa,,145,"Figurine of Wondrous Power, Emerald Frog",EnMa,,145,Octavius's Saber,GSB2
+146,Mug Of Merry Drinking,VoM,,146,Oil of Elasticity,EnMa,,146,Helm of Creation,EnMa,,146,Tome of Advanced Fighting Styles,GSB2,,146,Grasping Cap,VoM
+147,"Everfull Inkwell, Type Ⅰ",EnMa,,147,Acorn Charm,GSB2,,147,Torc of the Comet,VoM,,147,manual of gainful exercise,DMG,,147,apparatus of Kwalish,DMG
+148,Minor Minstrel,VoM,,148,adamantine Armor (chain mail),XGE,,148,Bezoar of the Hippogriff,VoM,,148,Spear of the North,VoM,,148,Horn of Hades,EnMa
+149,Spellwrought Tattoo 1st Level,TCE,,149,Bezoar of the Chimera,VoM,,149,Quick Change Ring,GSB2,,149,Wand of Puppetry,GSB2,,149,Rocksplitter,EnMa
+150,Talking Doll,XGE,,150,Venomous Fangs,VoM,,150,Gemstone of Musing,EnMa,,150,"Box of Delightful Transports, Type Ⅲ",EnMa,,150,Markum's Glaive,VoM
+151,"Arrow of Extended Range, Type Ⅰ",EnMa,,151,deck of illusions,DMG,,151,Bell of Freedom,EnMa,,151,hunter's coat,TCE,,151,Assassin's Chain,VoM
+152,Agile Armor,VoM,,152,Mantle of Mist,EnMa,,152,Bloodmire Rod of the Witch Doctor,GSB2,,152,Ring of shooting stars,DMG,,152,Flask of Epiphanies,VoM
+153,"Antidote Potion, Common",EnMa,,153,coiling grasp tattoo,TCE,,153,Silvered Oar,VoM,,153,Gloomflower Corsage,VoM,,153,Ring of the Fair Folk,EnMa
+154,Unbreakable Arrow,XGE,,154,Periapt of Eldritch Knowledge,VoM,,154,Lash of the Spelldrinker,GSB2,,154,Monkey's Paw of Fortune,VoM,,154,Spear of Paralysis,EnMa
+155,Ashwood Wand,VoM,,155,Braid Whip Clasp,VoM,,155,Djinn Vessel,VoM,,155,Kraken Clutch Ring,VoM,,155,"Elixir of Life, Type Ⅱ",EnMa
+156,Spell Scroll (1st Level),DMG,,156,Chalk of Exodus,VoM,,156,duplicitous manuscript,TCE,,156,Bag of Wind,EnMa,,156,Grinning Skull,VoM
+157,Second Wind,VoM,,157,Scabbard of Holding,EnMa,,157,Meteoric Plate,VoM,,157,Gauntlets of Specialization,EnMa,,157,Underworld Asphodel Regalia,GSB2
+158,Potion of Sobriety,EnMa,,158,Potion of Mirrored Eyes,VSS,,158,Gazebo of Shade and Shelter,VoM,,158,Fool's Lamp,GSB2,,158,Staff of the Ninja,EnMa
+159,Elixir Of Mimicry,VoM,,159,Bolas of Sunlight,EnMa,,159,Wand of Plant Destruction,VoM,,159,Mirror of Reflecting,EnMa,,159,"Ioun Stone, Mental Acuity",EnMa
+160,Prosthetic Limb,TCE,,160,Scorpio Armor,GSB2,,160,River Token,VoM,,160,Radiant War Pick,GSB2,,160,tome of the stilled tongue,DMG
+161,Siege Arrow,VoM,,161,mariner's Armor,XGE,,161,Gong of Dispelling,EnMa,,161,Armor of Fear,EnMa,,161,Vrithmytrix's Bane,VoM
+162,Wand Of Depth Detection,VoM,,162,ammunition +1,DMG,,162,Sovereignseed Satchel,GSB2,,162,Lantern of Judgment,VoM,,162,Sword of Intercession,EnMa
+163,Pot Of Awakening,XGE,,163,wand of secrets,DMG,,163,Scarab of Rebirth,VoM,,163,Arc of the Alicorn,GSB2,,163,Pearl of the Tides,EnMa
+164,Robe of the Arctic Wastes,EnMa,,164,Staff of the python,DMG,,164,shield +2,DMG,,164,Potion of Childishness,EnMa,,164,Warstar of the Manticore,EnMa
+165,Torch of Continual Flame,EnMa,,165,Ring of Truth,EnMa,,165,Rod of Hellish Grounding,VoM,,165,"Dart of the Hornet's Nest, Type Ⅲ",EnMa,,165,Staff of the magi,DMG
+166,Armor Of Gleaming,XGE,,166,Staff of Channeling,VoM,,166,lyre of building,TCE,,166,candle of invocation,DMG,,166,Royal Incinerator,GSB2
+167,Linguist'S Cap,VoM,,167,Scroll Case of Holding,EnMa,,167,Badge of the Wayfarer,GSB2,,167,Scroll of Curses,EnMa,,167,Mirror of Retention,EnMa
+168,Potion of Rest,EnMa,,168,Morbid Makeup,VSS,,168,Buckle of Weaponry,EnMa,,168,ioun stone (fortitude),DMG,,168,Baba Yaga’s mortar and pestle,TCE
+169,Broth Of Bolstering,VoM,,169,Seeker's Compass,GSB2,,169,Rod of the Mariner,VoM,,169,Dart Ring,EnMa,,169,Tome of Lost Knowledge,GSB2
+170,Smoldering Armor,XGE,,170,adamantine Armor (chain shirt),XGE,,170,Staff of healing,DMG,,170,Earrings of the Storm Oyster,VoM,,170,Iron Bow,EnMa
+171,Stylist'S Circlet,GSB2,,171,Trampling Crossbow,GSB2,,171,"Figurine of Wondrous Power, Lapis Camel",VoM,,171,Devilish Doubloon,VoM,,171,Flute of Puppies,EnMa
+172,Book Of Instant Copying,GSB2,,172,Replacement Man,VSS,,172,Honey of the Master Vine,VoM,,172,Scroll of Mapping,GSB2,,172,Stolen Thunder,VoM
+173,Drowner'S Pearl,GSB2,,173,Potion of Sleeping,EnMa,,173,Aged Goodberry Wine,GSB2,,173,Silver Chalice,EnMa,,173,"Ioun Stone, Protection from Weapons",EnMa
+174,Animated Abacus,VoM,,174,Candle of Summoning,VoM,,174,Direstone Runic Wand,GSB2,,174,"Figurehead of Prowess, Narwhal",VoM,,174,Ring of fire elemental command,DMG
+175,Potion Of Climbing,DMG,,175,Potion of Malleability,VoM,,175,Primal Doom,VoM,,175,robe of stars,DMG,,175,Ankh of Life,EnMa
+176,Rainbow Extract,VoM,,176,Bear Paws,VoM,,176,Ghoulbane Rod,VoM,,176,barrier tattoo 18 AC,TCE,,176,Blood Moon Orb,VoM
+177,Skeleton Key (Copper),VoM,,177,Harvest Weapon,GSB2,,177,Gemstone of Shielding,EnMa,,177,Mayhem Mask,VoM,,177,Harp of Gold,EnMa
+178,Net of Plenty,EnMa,,178,Ring of water walking,DMG,,178,Vessel of Deadly Venoms,VoM,,178,Potion of Sand Form,VoM,,178,spell Scroll (9th level),DMG
+179,Charm Of Restoration,VoM,,179,cloak of protection,DMG,,179,Forgework Dragon Shield,GSB2,,179,Coin of Alms,EnMa,,179,ioun stone (mastery),DMG
+180,Redsmith Hammer,GSB2,,180,eyes of charming,DMG,,180,Saddle of the Spirit Horse,EnMa,,180,Cloak of Lordliness,EnMa,,180,Gorget of the Holy Soldier,GSB2
+181,Ruby Of The War Mage,XGE,,181,Weapon of Verdict,GSB2,,181,Manual of Exercise,VoM,,181,Claw of Spell-Stealing,EnMa,,181,Holy Shield,EnMa
+182,Bell Of Alarm,GSB2,,182,Honeypot of Awakening,VoM,,182,Catalyst Oil (Necrotic),VoM,,182,Crook of the Flock,VoM,,182,Dark Crown,EnMa
+183,Broom Of Sweeping,VoM,,183,Flute of Courage,EnMa,,183,Pick and Pocket,GSB2,,183,Grasping Cloak,VoM,,183,Nail of Building,EnMa
+184,Wand Of Tears,VoM,,184,Staff of the Dream Shepherd,GSB2,,184,Catalyst Oil (Lightning),VoM,,184,Greenmask,EnMa,,184,Sacred Bundle,EnMa
+185,Moon-Touched Sword,XGE,,185,Witch Ward Bottle,VoM,,185,Catalyst Oil (Radiant),VoM,,185,Hydra Charm,GSB2,,185,Nameless Cults,VoM
+186,Broken Fang Talisman,VoM,,186,Trick Shot Mirror (Ricocheting),VoM,,186,Brawn Armor,VoM,,186,Dusk Dagger,GSB2,,186,Shepherd's Flail,VoM
+187,Lucky Coin,VoM,,187,philter of love,DMG,,187,Quill Pen of Forgery,EnMa,,187,Gloves of the Walking Shade,VoM,,187,Mantooth,EnMa
+188,Hedgewitch'S Gardening Cane,GSB2,,188,Scroll of Communication,EnMa,,188,"Figurine of Wondrous Power, Moonstone Rabbit",EnMa,,188,"Ioun Stone, Translation",EnMa,,188,Rod of resurrection,DMG
+189,Liquid Courage,VoM,,189,Shifting Shirt,VoM,,189,Unstable Bombard,VoM,,189,Staff of Ice and Fire,VoM,,189,Heart of Damned Intervention,GSB2
+190,Instrument Of Scribing,XGE,,190,Sir Varion's Shield,GSB2,,190,Scroll of protection,DMG,,190,Helm of the Platinum Dragon,GSB2,,190,plate Armor of resistance,DMG
+191,Wand Of Conducting,XGE,,191,"Figurehead of Prowess, Albatross",VoM,,191,Rod of Icicles,VoM,,191,Storm Hammer,EnMa,,191,Shadowscale Shroud,GSB2
+192,Griffon Coinpouch,GSB2,,192,Rowdy's Ring,VoM,,192,Ring of animal influence,DMG,,192,Wraps of the Restless,GSB2,,192,Fountmail,VoM
+193,Oracle Charm,VoM,,193,Dramus's Dancing Shoes,GSB2,,193,Prototype Thunderberd,GSB2,,193,Hour and Minute,GSB2,,193,"Figurehead of Prowess, Sphinx",VoM
+194,Quill Of Scribing,VoM,,194,Candied Spider,VoM,,194,spell Scroll (4th level),DMG,,194,Mongrelmaker's Handbook,VoM,,194,Godsteel Warplate,GSB2
+195,Elixir Of Oracular Delirium,VoM,,195,Potion of Perception,EnMa,,195,Boots of the Swift Striker,VoM,,195,all purpose tool +3,TCE,,195,Brazen Bottle,EnMa
+196,Wand Of Scowls,XGE,,196,Windwalker Boots,VoM,,196,Bludgeon of Nightmares,VoM,,196,Scroll of Suggestion,EnMa,,196,Slaying Longbow,GSB2
+197,Snow Rider'S Sleigh,GSB2,,197,Dark Mantle,GSB2,,197,Wardancer's Spear,GSB2,,197,Lady Phantasma's Material Anchor,GSB2,,197,deck of many things,DMG
+198,Potion Of Buoyancy,VoM,,198,Scroll of Treasure Finding,VoM,,198,Gremlin's Paw,VoM,,198,Staff-Mace,EnMa,,198,Poisonsword,EnMa
+199,Needle of Repair,EnMa,,199,Phantom Walkers,GSB2,,199,Staff of the Four Winds,VoM,,199,Armor +2 splint mail,DMG,,199,Fire Shield of Rathume,VoM
+200,Bead Of Nourishment,XGE,,200,Hidden Armament,VoM,,200,Tribal Lance,EnMa,,200,Rod of alertness,DMG,,200,Cloud and Mist Immortality Tea,VoM
+201,Bookmark Of Eldritch Insight,VoM,,201,Pipes of the Sewers (Variant),EnMa,,201,Rod of Reformation,VoM,,201,Nullifier's Lexicon,VoM,,201,Portable Spring,EnMa
+202,Inspector'S Silverware,GSB2,,202,Celestial Sextant,VoM,,202,Armor of the Ngobou,VoM,,202,Ravager's Axe,VoM,,202,horn of valhalla (iron),DMG
+203,White Dandelion,VoM,,203,instrument of the bards (fochlucan bandore),DMG,,203,Wand of Bristles,VoM,,203,Hourglass of Slumber,GSB2,,203,Matched Blades of the Eternal Feudalists,VoM
+204,Cloak Of Many Fashions,XGE,,204,goggles of night,DMG,,204,Dwarven Boozehound's Backpack,GSB2,,204,Bezoar of the Dire Owlbear,VoM,,204,Storm Star,EnMa
+205,Clockwork Amulet,XGE,,205,Murk Blowgun,GSB2,,205,bell branch,TCE,,205,Shooting Star,GSB2,,205,Spellfire Bow,GSB2
+206,Shimmering Spectacles,GSB2,,206,Cloak of the Bearfolk,VoM,,206,"Ioun Stone, Mirroring",EnMa,,206,"Elixir of Life, Type Ⅰ",EnMa,,206,Spire of Conflux,TDCSR
+207,Bead Of Refreshment,XGE,,207,Bloodhound Amulet,GSB2,,207,butcher's bib,EGtW,,207,Flute of Dismissing,EnMa,,207,belt of storm giant strength,DMG
+208,Ring Of Deceiver'S Warning,VoM,,208,Winter Coat,VoM,,208,Arcanist's Scribing Wand,GSB2,,208,Staff of Camazotz,VoM,,208,Ring of air elemental command,DMG
+209,Cleaning Cube,GSB2,,209,Waterskin of Voices,GSB2,,209,Wand of Stars,GSB2,,209,White Ape Hide,VoM,,209,Armor +3 leather,DMG
+210,Dancing Ink,VoM,,210,lantern of revealing,DMG,,210,Horatio’s Impossible Ship in a Bottle,GSB2,,210,Staff of frost,DMG,,210,Agony,TDCSR
+211,"Ioun Stone, Illumination",VoM,,211,Map of Mapping,EnMa,,211,Ring of evasion,DMG,,211,planecaller's codex,TCE,,211,scarab of protection,DMG
+212,Wand Of Guidance,VoM,,212,Echo Stone,TDCSR,,212,arcane grimoire +2,TCE,,212,Hand of Remote Action,EnMa,,212,Wooden Arrow,EnMa
+213,Rod Of Warning,VoM,,213,Potion of growth,DMG,,213,spell Scroll (5th level),DMG,,213,Sand Suit,VoM,,213,plate Armor of etherealness,DMG
+214,Draught Of The Black Owl,VoM,,214,Cloak of the Empire,VoM,,214,Elixir of the Clear Mind,VoM,,214,Potion of flying,DMG,,214,Red Bulette's Hide,VoM
+215,"Potion of Defense, Type Ⅰ",EnMa,,215,Ring of the Mute Mage,GSB2,,215,Rod of Water Absorption,GSB2,,215,\+3 Hunter's Charm,VoM,,215,Diadem of Doom,EnMa
+216,Rope Caster,GSB2,,216,Ring of Dragon's Discernment,VoM,,216,Moonsteel Weapon,VoM,,216,Key of Silence,EnMa,,216,Clockwork Hare,VoM
+217,Doublet of Dramatic Demise,TDCSR,,217,Sword of Fallen Saints,VoM,,217,Dawn and Dusk,GSB2,,217,Phasing Bow,GSB2,,217,Garments of Winter's Knight,VoM
+218,Locksmith'S Oil,VoM,,218,Oil of Neutral Scent,EnMa,,218,all purpose tool +2,TCE,,218,Lightning Rod,VoM,,218,Orrery of the Planes,EnMa
+219,Glazed Blade,VoM,,219,stone of good luck,DMG,,219,libram of souls and flesh,TCE,,219,"Armor of resistance (splint, studded leather, or breastplate)",DMG,,219,Gauntlets of the Arcane Fist,VoM
+220,Oil Of Concussion,VoM,,220,Blue Rose Tea,VoM,,220,Ashes of the Fallen,VoM,,220,Helm of the Ruby Dragon,GSB2,,220,Quartermaster's Chest,EnMa
+221,Hazelwood Wand,VoM,,221,Sentinel Portrait,VoM,,221,Kinetic Bowstring,GSB2,,221,Phoenix Rocket Sword,GSB2,,221,Disintegration Chamber,EnMa
+222,Warding Icon,VoM,,222,Circlet of Persuasion,VoM,,222,Companion Guardian Tail,EnMa,,222,"Quaal's Feather Token, Jug (Type Ⅱ)",EnMa,,222,Ring of invisibility,DMG
+223,Coin Of Delving,XGE,,223,"Dagger of Throwing, Type Ⅰ",EnMa,,223,Chair of the Ancestors,EnMa,,223,Shrutinandan Sitar,VoM,,223,Ebon Skull,EnMa
+224,Dark Shard Amulet,XGE,,224,Balances of Conversion,EnMa,,224,boots of speed,DMG,,224,Deck of Chance,EnMa,,224,Staff of Conjuration,EnMa
+225,Commoner'S Veneer,VoM,,225,Saddle of the Cavalry Casters,VoM,,225,Potion of invulnerability,DMG,,225,Rod of the Infernal Realms,VoM,,225,Battlecaster's Armor,VoM
+226,Heat Stone,VoM,,226,Bookkeeper Inkpot,VoM,,226,Horned Mask,EnMa,,226,Bow of Doubling,EnMa,,226,"Morath, Scepter of the Soul Vortex",GSB2
+227,Cast-Off Armor,XGE,,227,Arrow of Biting,EnMa,,227,Potion of Forewarning,EnMa,,227,Helm of the Broken Dragon,GSB2,,227,Reliquary of Holy Memories,GSB2
+228,Veteran'S Cane,XGE,,228,Staff of the adder,DMG,,228,Orelia's Tome of Beast Familiars,GSB2,,228,Amulet of Cheetah Speed,EnMa,,228,Flag of the Cursed Fleet,VoM
+229,Light Sling,GSB2,,229,Detective's Notebook,GSB2,,229,Potion of Nutrition,EnMa,,229,"Box of Preservation, Type Ⅱ",EnMa,,229,Chalice of Planar Travel,EnMa
+230,Potion Of Bad Taste,VoM,,230,Dagger of First Light,GSB2,,230,Wand of Wonder (Variant),EnMa,,230,Window of Spying,EnMa,,230,Tenebrous Mantle,VoM
+231,Tactile Unguent,VoM,,231,Arrow of Returning,EnMa,,231,oil of etherealness,DMG,,231,Armor +2 plate,DMG,,231,Armor of the Valiant Soul,TDCSR
+232,Ear Horn Of Hearing,XGE,,232,driftglobe,DMG,,232,Captain's Flag,VoM,,232,Stair of Ascending and Descending,EnMa,,232,Armor +3 splint,DMG
+233,Box Of Secrets,VoM,,233,Mender's Mark,VoM,,233,Weapon +2,DMG,,233,cauldron of rebirth,TCE,,233,"Bag of Bones, Type Ⅱ",EnMa
+234,Instrument Of Illusions,XGE,,234,Potion of fire breath,DMG,,234,Fused Chimeric Hide Armor,GSB2,,234,Instrument of Roses and Thorns,GSB2,,234,Cauldron of Creatures,EnMa
+235,Bezoar Of The Cockatrice,VoM,,235,Orner's Venomous Crossbow,GSB2,,235,periapt of proof against poison,DMG,,235,Bituminous Orb,VoM,,235,Gembow,EnMa
+236,Clamor Bell,VoM,,236,Arrow of Blinding,EnMa,,236,Ivy Crown of Prophecy,VoM,,236,spellguard shield,DMG,,236,Healer's Hand Amulet,VoM
+237,Oakwood Wand,VoM,,237,amulet of the drunkard,EGtW,,237,acheron blade,EGtW,,237,Consuming Rod,VoM,,237,Gong of Earthquakes,EnMa
+238,Apron Of The Eager Artisan,VoM,,238,Staff of Cubic Cultivation,GSB2,,238,Anchor of Striking,VoM,,238,Vampiric Sword,EnMa,,238,sword of answering,DMG
+239,Aurora Dust,GSB2,,239,Dungeon Chains,EnMa,,239,Staff of the woodlands,DMG,,239,Ring of regeneration,DMG,,239,Staff of Spell Focusing,EnMa
+240,Performer'S Puppet,GSB2,,240,Staff of the Lantern Bearer,VoM,,240,"Figurehead of Prowess, Manta Ray",VoM,,240,ioun stone (leadership),DMG,,240,Anything Weapon,EnMa
+241,Bonfire Charm,GSB2,,241,Sagittarian Vestments,GSB2,,241,Bracers of the Iron Octopus,GSB2,,241,Gloves of the Octopus,EnMa,,241,Circlet of Barbed Vision,TDCSR
+242,Bag Of Bellstones,GSB2,,242,Scent Sponge,VoM,,242,Kobold Firework,VoM,,242,Raven's Slumber,TDCSR,,242,Unseen Ship's Crew,EnMa
+243,Camper'S Crutch,GSB2,,243,Potion of Bouncing,VoM,,243,Bed of Spikes,VoM,,243,Fellforged Armor,VoM,,243,Gong of the Whirlwind,EnMa
+244,Orb Of Direction,XGE,,244,Hideaway Vase,GSB2,,244,"Quaal's Feather Token, Binding",EnMa,,244,Ghost Dragon Horn,VoM,,244,Realmswarden Greataxe,GSB2
+245,Wand Of Direction,VoM,,245,Golden Bolt,VoM,,245,Troll Blood,VoM,,245,Weapon +3,DMG,,245,Staff of Devotion,EnMa
+246,Lucky Charm Of The Monkey King,VoM,,246,bag of tricks (gray),DMG,,246,Eyes of the Portal Masters,VoM,,246,Corecut Dagger,TDCSR,,246,sphere of annihilation,DMG
+247,Scrolls Of Correspondence,VoM,,247,Brutal Macuahuitl,GSB2,,247,horn of valhalla (silver or brass),DMG,,247,Blood Moon Blade,GSB2,,247,Ruby Crusher,VoM
+248,Wispy Sour Potion,GSB2,,248,Cord of Binding,EnMa,,248,Staff of Dispelling,EnMa,,248,spell Scroll (7th level),DMG,,248,Censer of Thaumaturgy,EnMa
+249,Tracking Dart,VoM,,249,Map of Magic,EnMa,,249,Scalehide Cream,VoM,,249,Staff of Night,EnMa,,249,Anvil of the Dwarfs,EnMa
+250,Celestial Sunrise Potion,GSB2,,250,wand of magic missiles,DMG,,250,Celestial Charter,VoM,,250,Poison Strand,VoM,,250,Ring of the Assassin Lord,GSB2
+251,Commander'S Helm,VoM,,251,Club of Dancing,GSB2,,251,Living Juggernaut,VoM,,251,Bag of Returning,EnMa,,251,Kiss of the Changebringer,TDCSR
+252,Hat Of Osnomnosis,GSB2,,252,driftglobe,DMG,,252,Wayfinder Sphere,GSB2,,252,Broth of Needful Fortitude,VoM,,252,Coronet of Communication,EnMa
+253,Flood Charm,VoM,,253,Potion of Ebbing Strength,VoM,,253,"Antidote Potion, Undead",EnMa,,253,Mace of Crushing,EnMa,,253,Ghostly Palace,EnMa
+254,Vox Seeker,EGtW,,254,Cinch of the Wolfmother,VoM,,254,Mask of the War Chief,VoM,,254,Dragonhide Cloak,EnMa,,254,Cloak of the Rogue,EnMa
+255,Foxfire Charm,GSB2,,255,Abjurer's Bangle,GSB2,,255,outer essence shard,TCE,,255,Rejuvenating Draft,GSB2,,255,Ironstar Mace,EnMa
+256,Lockbreaker,VoM,,256,Wand of Fermentation,VoM,,256,Manual of the Lesser Golem,VoM,,256,Sloughide Bombard,VoM,,256,Mask of Memory,EnMa
+257,Pole Of Angling,XGE,,257,Flood Pauldron,GSB2,,257,Potion of stone giant strength,DMG,,257,"Potion of Troll Blood, Supreme",VoM,,257,ioun stone (regeneration),DMG
+258,Handy Scroll Quiver,VoM,,258,Sandals of the Desert Wanderer,VoM,,258,"Ioun Stone, Slate",VoM,,258,Brain Juice,VoM,,258,Indigo Stray's Conviction,GSB2
+259,Potion Of Transparency,VoM,,259,Spearbiter,VoM,,259,dagger of venom,DMG,,259,Rod of Sanguine Mastery,VoM,,259,Eyes of Sight,EnMa
+260,Scout'S Coat,VoM,,260,Bottled Boat,VoM,,260,Nightstalker's Armor of the Northeastern Wind,GSB2,,260,Keffiyeh of Serendipitous Escape,VoM,,260,Wolf's Howl Ring,VoM
+261,Tankard Of Sobriety,XGE,,261,quiver of elhona,DMG,,261,Potion of Worg Form,VoM,,261,Mirror of Curing,EnMa,,261,Armor +3 half plate,DMG
+262,Muffled Armor,VoM,,262,"Scroll of Equipment, Type Ⅰ",EnMa,,262,Glass Wand of Leng,VoM,,262,Winged Mask,EnMa,,262,Gladius of the Everfighter,GSB2
+263,Griffon Key Loop,GSB2,,263,Scoundrel's Gambit,VoM,,263,Ogre's Pot,VoM,,263,"Berserker's Kilt, Bear Fur",VoM,,263,Purified Phoenix Tear,VoM
+264,Oil Of Numbing,VoM,,264,Dragonfire Pepper,VoM,,264,belt of hill giant strength,DMG,,264,Witch's Circle,VoM,,264,Crown of Leadership,EnMa
+265,Aromatic Pipe,EnMa,,265,Bezoar of the Bespectacled Owlbear,VoM,,265,Widow's Tea,GSB2,,265,Staff of Midnight,VoM,,265,Eye of the Golden God,VoM
+266,Cordial Of Understanding,VoM,,266,Circlet of Holly,VoM,,266,Ring of Misdirection,GSB2,,266,Ring of Tongues,EnMa,,266,Trickster's Boots,VoM
+267,"Antidote Potion, Plants & Oozes",EnMa,,267,Burrage’s Collegiate Case,GSB2,,267,Ring of Imperious Command,VoM,,267,Coffin of Creation,EnMa,,267,Battle Star,EnMa
+268,Clothes Of Mending,XGE,,268,Murderous Bombard,VoM,,268,Amulet of the Lycanthrope,GSB2,,268,Healthful Honeypot,VoM,,268,Skylit Greaves,GSB2
+269,Candleflame Helm,GSB2,,269,Clockwork Rogue Ring,VoM,,269,Greater Scroll of Conjuring,VoM,,269,Selket's Bracer,VoM,,269,"Barding of Easy Travel, Type Ⅱ",EnMa
+270,Screaming Skull,VoM,,270,Wand of Revealing,VoM,,270,Slimeblade,VoM,,270,"Feather Token, Held Heart",VoM,,270,Dirgeblade,VoM
+271,Orb Of Time,XGE,,271,Sir Varion's Mantle,GSB2,,271,Whirling Weapons,GSB2,,271,Wand of Illumination,EnMa,,271,Talisman of Tongues,EnMa
+272,Oaken Candle,GSB2,,272,Potion of Recall,EnMa,,272,Spiritwalker Breastplate,GSB2,,272,carpet of flying,DMG,,272,Cailebryn,VoM
+273,Rod Of Vapor,VoM,,273,Chalice of Identification,EnMa,,273,sword of wounding,DMG,,273,Skeleton Key (Crystal),VoM,,273,Mirror of Truth,EnMa
+274,Saffron-Dusted Carrot,VoM,,274,Second Fiddle,GSB2,,274,Mageplate Ring,GSB2,,274,spell Scroll (8th level),DMG,,274,Ring of lordly might,DMG
+275,Distracting Doubloon,VoM,,275,Prism of Distraction,EnMa,,275,Warhammer of Eruptions,GSB2,,275,Potion of possibility,EGtW,,275,Honor's Last Stand,TDCSR
+276,Blessed Pauper'S Purse,VoM,,276,Dream Stone,EnMa,,276,Conspirator's Coat,GSB2,,276,dwarven thrower,DMG,,276,Fingernails of Rending,EnMa
+277,Chime of Time,EnMa,,277,Potion of animal friendship,DMG,,277,Potion of Venom,EnMa,,277,Impact Plate,GSB2,,277,Armor of invulnerability,DMG
+278,Wand Of Extinguishing,VoM,,278,Relocation Cable,VoM,,278,Amulet of Whirlwinds,VoM,,278,Fulminar Bracers,VoM,,278,Godsteel Worldcarver,GSB2
+279,Wand Of Flame Control,VoM,,279,Book of Clothier's Croquis,GSB2,,279,"Feather Token, Dark of the Moon",VoM,,279,bag of devouring,DMG,,279,Bottle of Trapping,EnMa
+280,Illuminator'S Tattoo,TCE,,280,Feywatch Shield,GSB2,,280,Boots of the Grandmother,VoM,,280,Honey of Warped Wildflowers,VoM,,280,"Dagger of Concealment, Type Ⅱ",EnMa
+281,Brawler'S Leather,VoM,,281,Potion of resistance,DMG,,281,Pin of Communication,EnMa,,281,Cape of Shadows,EnMa,,281,Crown of the Pharaoh,VoM
+282,Cloak Of Billowing,XGE,,282,Astronomer's Boon,GSB2,,282,sword of life stealing,DMG,,282,Bracers of Attraction,EnMa,,282,talisman of ultimate evil,DMG
+283,Ring Of Small Mercies,VoM,,283,Amulet of Sustaining Health,VoM,,283,Potion of mind reading,DMG,,283,Sword of Insanity,EnMa,,283,Quiver of Elemental Chaos,GSB2
+284,Bountiful Cauldron,VoM,,284,Bands of Restraint,VoM,,284,Pearl of Diving,VoM,,284,Backbiter,EnMa,,284,Demonomicon of Iggwilv,TCE
+285,Shield Of Expression,XGE,,285,Owlbear Leather Armor,GSB2,,285,Elixir of the Deep,VoM,,285,"Feather Token, Jackdaw's Dart",VoM,,285,Rod of Terror,EnMa
+286,Mystery Key,XGE,,286,Alchemical Lantern,VoM,,286,Amulet of the Beast,EnMa,,286,Matron's Mug,GSB2,,286,robe of the archmagi,DMG
+287,Potion Of Effulgence,VoM,,287,bloodwell vial +1,TCE,,287,chime of opening,DMG,,287,"Figurehead of Prowess, Dragon Turtle",VoM,,287,Condemner,TDCSR
+288,Sleepytime Sheep Stuffy,GSB2,,288,Royal Jelly,VoM,,288,Stormrider Boots,TDCSR,,288,Frostburn Spear,GSB2,,288,"Hatred, the Wrathful Edge",GSB2
+289,Breathing Bubble,EGtW,,289,Satchel of Seawalking,VoM,,289,Skald's Harp,VoM,,289,Ki Blade,GSB2,,289,Luba’s Tarokka of souls,TCE
+290,Abacus of Calculation,EnMa,,290,Crafter Shabti,VoM,,290,Ring of Extension,EnMa,,290,Trident of the Yearning Tide,VoM,,290,"Arista, Wand of the Spire",GSB2
+291,Djinn And Tonic Potion,GSB2,,291,"Figurine of Wondrous Power, Basalt Cockatrice",VoM,,291,Mincemeat Pie,VoM,,291,Chronal Sphere,GSB2,,291,"Armor of Absorption, Type Ⅱ",EnMa
+292,Sacrificial Knife,VoM,,292,Candle of Protection,EnMa,,292,Bag of Beans (Variant),EnMa,,292,Horn of the Wild Hunt,GSB2,,292,Whisper,TDCSR
+293,Dress Of Many Pockets,GSB2,,293,Pegasus Quill,GSB2,,293,Bezoar of the Screech Owlbear,VoM,,293,Spider Fang,EnMa,,293,Dust of the Black Arts,EnMa
+294,Last Chance Quiver,VoM,,294,Bandana of Brachiation,VoM,,294,Rod of the pact keeper +2,DMG,,294,"Faerie Flute, Type Ⅱ",EnMa,,294,Ring of water elemental command,DMG
+295,Shifter'S Shine Potion,GSB2,,295,Splinter Staff,VoM,,295,robe of eyes,DMG,,295,Bloodwhisper Cauldron,VoM,,295,Scorpion Feet,VoM
+296,Breathing Reed,VoM,,296,sending stones,DMG,,296,Arcane Shot,EnMa,,296,Cane of Armament,EnMa,,296,Uthariel's Diadem,VoM
+297,Rod Of Repossession,VoM,,297,Axe of the Ancients,VoM,,297,Nightmare Flask,GSB2,,297,nine lives stealer,DMG,,297,Armor +3 studded leather,DMG
+298,Fortune'S Flower,GSB2,,298,Radiant Bracers,VoM,,298,shadowfell shard,TCE,,298,"Ioun Stone, Granite",VoM,,298,talisman of the sphere,DMG
+299,Ring Of Shadows,VoM,,299,Death's Mirror,VoM,,299,Stonedrift Staff,VoM,,299,Potion of supreme healing,DMG,,299,Blood Spike Armor,VoM
+300,Phidjetz Spinner,VoM,,300,Liquid Shadow,VoM,,300,astral shard,TCE,,300,amulet of the planes,DMG,,300,Death's Shadow,GSB2
+301,Wand Of Pyrotechnics,DMG,,301,Golden Dawn,VoM,,301,spellwrought tattoo 5th level,TCE,,301,scimitar of speed,DMG,,301,Spirit Cleaver,GSB2
+302,Bloody Marilith Potion,GSB2,,302,Rod of Ghastly Might,VoM,,302,Cataloguing Book,VoM,,302,Scroll of Creation,EnMa,,302,Staff of the Peaks,VoM
+303,Masquerade Tattoo,TCE,,303,Spoon of Medicine,EnMa,,303,Spider Staff,VoM,,303,ioun stone (absorption),DMG,,303,Oak Heart Figurine,VoM
+304,Leatherbeard,GSB2,,304,Adamantine Polish,VSS,,304,Mug of Plenty,EnMa,,304,Gloves of Mimicry,GSB2,,304,Charm of Distraction,EnMa
+305,Masks Of The Sacred Beasts,GSB2,,305,Spirit Oil,EnMa,,305,Marvelous Clockwork Mallard,VoM,,305,orb of the veil,TCE,,305,Pyremaul,TDCSR
+306,Wayfarer'S Candle,VoM,,306,Clockwork Gauntlet,VoM,,306,Staff of Desolation,VoM,,306,Deceptor's Boots,EnMa,,306,Crown of Storms,GSB2
+307,Ring of Light,EnMa,,307,Resolute Bracer,VoM,,307,Pipes of Madness,VoM,,307,Sticky Shield,EnMa,,307,Fenthras,TDCSR
+308,Orostead Iced Tea,GSB2,,308,spellwrought tattoo 2nd level,TCE,,308,Staff of the Armada,VoM,,308,Key of Entrance,EnMa,,308,H'rethi Soul Scepter,GSB2
+309,Lantern Of Selective Illumination,VoM,,309,Ward Against Wild Appetites,VoM,,309,Inescapable Lash,TDCSR,,309,Slippers of Kicking,EnMa,,309,Black Pearl,EnMa
+310,Hammer Of Throwing,VoM,,310,Ring of the Dolphin,VoM,,310,"Quaal's Feather Token, Spoon",EnMa,,310,Elemental Wraps,VoM,,310,Chariot of Flames,EnMa
+311,Candle Of The Deep,XGE,,311,Noisome Spirit Chaser,EnMa,,311,devotee's censer,TCE,,311,Masks of the Sacred Beasts,GSB2,,311,Ring of spell turning,DMG
+312,Redsmith Crucible Set,GSB2,,312,Boots of Solid Footing,VoM,,312,Belt of the Hell Hound,GSB2,,312,helm of brilliance,DMG,,312,Barding +3,EnMa
+313,Whispergust Mote,GSB2,,313,Ointment of Flying,EnMa,,313,sun blade,DMG,,313,Dragon Eye,EnMa,,313,Well of Dreams,EnMa
+314,Staff Of Adornment,XGE,,314,Serpent's Tooth,VoM,,314,Nightstalker's Mask,GSB2,,314,Firebow,EnMa,,314,Meta Mantle,GSB2
+315,Candle of Everburning,EnMa,,315,Gelatinous Whip,GSB2,,315,Aberrant Agreement,VoM,,315,Carrion Shroud,GSB2,,315,Tarrasque Plate,GSB2
+316,Case Of Preservation,VoM,,316,Oil of Defoliation,VoM,,316,Skeleton Key,VoM,,316,Dramatic Mask,EnMa,,316,Crown of Stars,EnMa
+317,Dancing Caltrops,VoM,,317,Mage Wine,EnMa,,317,Ivy Bracelet,EnMa,,317,Staff of power,DMG,,317,Cloak of the Clouds,EnMa
+318,Smuggler'S Bag,VoM,,318,Pollinator Pants,GSB2,,318,Dust of Illusion,EnMa,,318,Boots of Haste,TDCSR,,318,Interplanar Paint,VoM
+319,Storm Seer Lamp,GSB2,,319,Frungilator,VoM,,319,Feysworn Contract,VoM,,319,Barding of Flight,EnMa,,319,Teeth of Dahlver-Nar,TCE
+320,Worry Stone,VoM,,320,Honey of Dead Fields,VoM,,320,Captain's Pride,GSB2,,320,Ring of scintillating colors,DMG,,320,Mourningsteel Half Plate,GSB2
+321,Tide Turner,GSB2,,321,Eyes of the Beheld,GSB2,,321,Ring of Spell Negation (Red),VoM,,321,Rod of security,DMG,,321,Eternal Slayer,GSB2
+322,Magnificent Pocket Vanity,GSB2,,322,Map of Illusions,EnMa,,322,Ring of Powerful Summons,VoM,,322,dispelling stone,DMG,,322,Black Bow,EnMa
+323,Dust of Piquantness,EnMa,,323,Zipline Ring,VoM,,323,Catalyst Oil (Cold),VoM,,323,Honey of Planar Flora,VoM,,323,blood fury tattoo,TCE
+324,Pocket Spark,VoM,,324,Bagpipes of Battle,VoM,,324,Philter of Glibness,EnMa,,324,"Oil of Vision, Type Ⅱ",EnMa,,324,Cauldron of Potion-Brewing,EnMa
+325,Wand Of Resistance,VoM,,325,Orb of Obfuscation,VoM,,325,fulminating treatise,TCE,,325,Enzymatic Gastrostaff,GSB2,,325,Ring of Glyphs,EnMa
+326,Hellfire Armor,VoM,,326,Boots of Balance,EnMa,,326,Diviner's Dice,GSB2,,326,Ring of the Split Mind,GSB2,,326,Helm of Velamish,VoM
+327,Robe of the Desert,EnMa,,327,Rod of Thought Projection,GSB2,,327,Tome of Knowledge,VoM,,327,Chronomancer's Eyepiece,GSB2,,327,Potion of storm giant strength,DMG
+328,Williwig'S Time Stopper,GSB2,,328,Cloak of Coagulation,VoM,,328,Feather Token,VoM,,328,tome of understanding,DMG,,328,Starmetal Nova Armor,GSB2
+329,Ersatz Eye,XGE,,329,\+1 Hunter's Charm,VoM,,329,Potion of Monsters,EnMa,,329,Oil of Agelessness,EnMa,,329,"Ioun Stone, Greater Protection",EnMa
+330,Signaling Arrow,EnMa,,330,Book Shroud,VoM,,330,Potion of superior healing,DMG,,330,figurine of wonderous power (obsidian steed),DMG,,330,Wraps of Dyamak,TDCSR
+331,Wand Of Air Glyphs,VoM,,331,bracers of archery,DMG,,331,Wand of the Timekeeper,VoM,,331,Cloak of Many Colors,EnMa,,331,Soul-Searing Scythe,GSB2
+332,Oil of Beauty,EnMa,,332,Fanged Mask,VoM,,332,Hammer of Decrees,VoM,,332,War's Wager,GSB2,,332,Kelgror's Hammer,VoM
+333,Grifter'S Deck,VoM,,333,Ring of Featherweight Weapons,VoM,,333,War Shirt,EnMa,,333,Potion of Mind Restoration,EnMa,,333,Mirror of Mental Prowess,EnMa
+334,Prism Glasses,GSB2,,334,Clockwork Hand,VoM,,334,"Oil of Armor, Type Ⅲ",EnMa,,334,"Mask of the War Chief, Behir",VoM,,334,"Cloak of Stars, Type Ⅰ",EnMa
+335,Hat Of Vermin,XGE,,335,Bulette Bulwark,GSB2,,335,Figurehead of Prowess,VoM,,335,Portable Bridge,EnMa,,335,Scorpion Sting Scimitar,VoM
+336,Potion Of Healing,DMG,,336,Goggles of Shade,VoM,,336,Dream Saber,GSB2,,336,Zephyr Shield,VoM,,336,Ao Hai's Fang,GSB2
+337,Whispering Powder,VoM,,337,Belt of Many Pouches,EnMa,,337,Platter of Purity,EnMa,,337,horseshoes of a zephyr,DMG,,337,Cauldron of Doom,EnMa
+338,Dust Of Muffling,VoM,,338,moon sickle +1,TCE,,338,elixer of health,DMG,,338,Deathly Diadem,GSB2,,338,Staff of Master Lu Po,VoM
+339,Wand Of Giggles,VoM,,339,Granny Wax,VoM,,339,Philter of Stammering and Stuttering,EnMa,,339,"Armor +1 splint, studded leather, or breastplate",DMG,,339,Ring of djinni summoning,DMG
+340,Staff Of Birdcalls,XGE,,340,Farhealing Bandages,VoM,,340,Breaker Lance,VoM,,340,"Goblet of Potions, Type Ⅱ",EnMa,,340,Incubalum,EnMa
+341,Fairy Sparkler,VoM,,341,Blue Willow Cloak,VoM,,341,Catalyst Oil (Acid),VoM,,341,Freerunner Rod,VoM,,341,Quill Pen of Copying,EnMa
+342,Spice Box Spoon,VoM,,342,Manticore's Tail,VoM,,342,elven chain,DMG,,342,Dread Scarab,VoM,,342,holy avenger,DMG
+343,Lifeblood Gear,VoM,,343,eyes of minute seeing,DMG,,343,Amulet of Charming,EnMa,,343,manual of bodily health,DMG,,343,Rod of Death,EnMa
+344,Companion'S Broth,VoM,,344,Oil of Cloaking,EnMa,,344,Big Dipper,VoM,,344,Hair Pick of Protection,VoM,,344,crook of Rao,TCE
+345,Freerunner'S Armor,GSB2,,345,gauntlets of ogre power,DMG,,345,"Bag of Holding (Variant), Type Ⅲ",EnMa,,345,Chieftain's Axe,VoM,,345,Bracers of Ganis'briel,VoM
+346,Bird'S-Eye Bolt,GSB2,,346,"Dragon Bones, Type Ⅰ",EnMa,,346,Searing Whip,VoM,,346,arcane cannon,TCE,,346,Half Plate of the Blind Martyr,GSB2
+347,Turtle Brooch,GSB2,,347,Gusting Blowgun,GSB2,,347,Hammer of Silence,EnMa,,347,Archivist's Key,GSB2,,347,Raurrick's Axe,VoM
+348,Sturdy Scroll Tube,VoM,,348,"Dagger of Throwing, Type Ⅲ",EnMa,,348,Cloak of Charming,EnMa,,348,"Bag of Holding (Variant), Type Ⅳ",EnMa,,348,Staff of Winter and Ice,VoM
+349,Cleaning Concoction,VoM,,349,Potion of Lethargy,EnMa,,349,Egg of Adult Dragon's Breath,EnMa,,349,Skull Mask,EnMa,,349,Gem of Income,EnMa
+350,Vox Seeker,EGtW,,350,Radiance Bomb,VoM,,350,Dragonband,GSB2,,350,Potion of vitality,DMG,,350,Bloodprice Armor,VoM
+351,Slick Cuirass,VoM,,351,"Figurehead of Prowess, Basilisk",VoM,,351,Leaf-Bladed Sword,VoM,,351,Boots of Quaking,VoM,,351,Rod of Beguiling,EnMa
+352,Tonic Of Blandness,VoM,,352,Cloak of Petals,VoM,,352,"Figurine of Wondrous Power, Jade Snakes",EnMa,,352,Barding +2,EnMa,,352,Frostreaver,EnMa
+353,Forecaster'S Cloak,GSB2,,353,Gauntlets of Holding,EnMa,,353,Periapt of Proof Against Lies,VoM,,353,Ring of Gargoyles,EnMa,,353,Rejuvenating Draft,GSB2
+354,Staff Of Minor Curses,VoM,,354,Potion of False Visions,EnMa,,354,Oil of Metal Fatigue,EnMa,,354,Girdle of Femininity and Masculinity,EnMa,,354,Oil of Timelessness,EnMa
+355,Prospecting Compass,VoM,,355,Sanctuary Shell,VoM,,355,Staff of withering,DMG,,355,Ring of telekinesis,DMG,,355,Bloodmire Soulflame Lantern,GSB2
+356,Bow Of Accuracy,VoM,,356,Needle of Lively Tattoos,EnMa,,356,Tamer's Whip,VoM,,356,last stand Armor,TCE,,356,Heaven's Gavel,GSB2
+357,"Bag of Holding (Variant), Type Ⅰ",EnMa,,357,Mantle of Blood Vengeance,VoM,,357,\+2 Ring of Protection,TDCSR,,357,Elixir of Madness,EnMa,,357,Titanstone Knuckles,TDCSR
+358,Periscope Rod,GSB2,,358,Sleep Pellet,VoM,,358,Abjurer's Bangle,GSB2,,358,Green Mantle,VoM,,358,Deathstriker Axe,EnMa
+359,Wand Of Smiles,XGE,,359,Potion of Insomnia,EnMa,,359,Staff of the ivory claw,EGtW,,359,Pavilion of Dreams,VoM,,359,Anuraag's Crucible,VoM
+360,Crusader'S Shield,VoM,,360,Masks of the Sacred Beasts,GSB2,,360,Sweet Subjects,VoM,,360,oil of sharpness,DMG,,360,Buckle of Blasting,VoM
+361,Rod Of Endless Light,GSB2,,361,gloves of swimming and climbing,DMG,,361,dragon slayer,DMG,,361,Dragon Horn Pauldron,GSB2,,361,"Ring of Shapechanging, Type Ⅲ",EnMa
+362,Flash Bullet,VoM,,362,Helm of the Slashing Fin,VoM,,362,Dart of Branding,EnMa,,362,duskcrusher,TCE,,362,talisman of pure good,DMG
+363,Shield Of The Fallen,VoM,,363,Hushed Ring,GSB2,,363,amulet of the devout +2,TCE,,363,Talisman of the Cockatrice,EnMa,,363,Staff of Parzelon,VoM
+364,Candle Of Visions,VoM,,364,Ear Cuff of the Climber,GSB2,,364,Flamefriend Lantern,TDCSR,,364,tome of leadership and influence,DMG,,364,Hands of the Healing Spirit,EnMa
+365,"Oil of Vision, Type Ⅰ",EnMa,,365,Verdant Elixir,VoM,,365,Devil's Barb,VoM,,365,Magebane Poison,GSB2,,365,Jade Scepter of Defending,EnMa
+366,Lock Of Trickery,XGE,,366,Grave Reagent,VoM,,366,Rod of Refstophobia,GSB2,,366,Smuggler's Coat,VoM,,366,"Ioun Stone, Spirit Storage",EnMa
+367,Rope Of Mending,XGE,,367,Dowsing Rod,VSS,,367,Oni Mask,VoM,,367,Mask of Knowledge,EnMa,,367,Mage Eater Scythe,GSB2
+368,Charlatan'S Die,XGE,,368,Bracers of the Merfolk,EnMa,,368,vicious Weapon,DMG,,368,Pearl of Entrancement,EnMa,,368,"Nimbus, First Staff of the Thunderbirds",GSB2
+369,Horn Of Silent Alarm,XGE,,369,Forgekeeper's Spark,GSB2,,369,Crocodile Armor,VoM,,369,Spear of the Western Whale,VoM,,369,Thought Bottle,EnMa
+370,Ferryman'S Coins,VoM,,370,Scroll of Fabrication,VoM,,370,Blue Rose,VoM,,370,Bracelet of Charms,EnMa,,370,Armor +3 chain mail,DMG
+371,Potion Of Skating,VoM,,371,Mountaineer's Crossbow,VoM,,371,Brass Snake Ball,VoM,,371,Staff of Harming,EnMa,,371,Armor +3 plate,DMG
+372,Dread Helm,XGE,,372,Cloak of Survival,EnMa,,372,Seraphim's Stiletto,GSB2,,372,Soul Bond Chalice,VoM,,372,Champion's Plate,VoM
+373,Rose Quartz Koi,GSB2,,373,robe of useful items,DMG,,373,Wand of Vapors,VoM,,373,Ring of Lunar Might,GSB2,,373,Airboat,EnMa
+374,Almanac Of Common Wisdom,VoM,,374,Wisp of the Void,VoM,,374,rope of entanglement,DMG,,374,tome of clear thought,DMG,,374,Star Razor,TDCSR
+375,Wand Of Ignition,VoM,,375,bag of tricks (tan),DMG,,375,Defender's Harp,EnMa,,375,Sword of Volsung,VoM,,375,Wanderer's Book,VoM
+376,Master Angler'S Tackle,VoM,,376,Night Owl's Half-Moon Spectacles,GSB2,,376,Bloodthirsty Weapon,VoM,,376,Ring of Depetrification,EnMa,,376,Dragonhelm,EnMa
+377,Enduring Spellbook,XGE,,377,Least Scroll of Conjuring,VoM,,377,Eldritch Bident,GSB2,,377,Locket of Dragon Vitality,VoM,,377,ioun stone (greater absorption),DMG
+378,Blackguard'S Blade,VoM,,378,Locket of Remembrance,VoM,,378,Hoarder's Haul,GSB2,,378,Frostfire Lantern,VoM,,378,Potent Cure-All,VoM
+379,Vigilant Mug,VoM,,379,guardian emblem,EGtW,,379,Contingency Band,GSB2,,379,"Armor +2 chain mail, chain shirt, or leather",DMG,,379,Rod of Building,EnMa
+380,Heward'S Handy Spice Pouch,XGE,,380,Blasphemous Writ,VoM,,380,Primal Doom of Pain,VoM,,380,Flute of Peace,EnMa,,380,Catalogue of Outer Planar Artifacts,EnMa
+380-499,Re Roll / DM Choice,,,381,Dirk of Daring,VoM,,381,Explosive Orb of Obfuscation,VoM,,381,Shield of the Medusae,EnMa,,381,"Silverwind, the Cleansing Breeze",GSB2
+,,,,382,Life Tether Ankh,GSB2,,382,Casket of the Wind Spy,EnMa,,382,efreeti bottle,DMG,,382,Incense of Meditation,EnMa
+,,,,383,"Everfull Inkwell, Type Ⅱ",EnMa,,383,Bezoar of the Manticore,VoM,,383,Crystal Mirror,EnMa,,383,Davy Jones's Key,GSB2
+,,,,384,Everflowing Bowl,VoM,,384,Dust of Desiccation,VoM,,384,Orostead Iced Tea,GSB2,,384,Extract of Dual-Mindedness,VoM
+,,,,385,Eldritch Rod,VoM,,385,Pipes of Pain,EnMa,,385,Staff of fire,DMG,,385,Violet King's Promise,GSB2
+,,,,386,Sickle of Thorns,VoM,,386,Rod of the Jester,VoM,,386,crystal ball (Very Rare version),DMG,,386,Ring of three wishes,DMG
+,,,,387,Crimson Carpet,VoM,,387,Infinite Rope,EnMa,,387,Rowan Staff,VoM,,387,Sovereign's Scepter,VoM
+,,,,388,Ceremonial Sacrificial Knife,VoM,,388,"Armor +1 chain mail or chain shirt, or leather, or scale",DMG,,388,wand of the war mage +3,DMG,,388,Phase Mirror (Floor),VoM
+,,,,389,spell Scroll (2nd level),DMG,,389,Bonebreaker,VoM,,389,Spice Box of Zest,VoM,,389,Mythcarver,TDCSR
+,,,,390,No-Stones,GSB2,,390,Ring of Giant Mingling,VoM,,390,Cap of Thorns,VoM,,390,instrument of the bards (Ollamh Harp),DMG
+,,,,391,Ball of Endless String,EnMa,,391,Rod of Bubbles,VoM,,391,\+3 Armor of Warding,VoM,,391,luck blade,DMG
+,,,,392,Gale Javelin,VoM,,392,Beady Eye,EnMa,,392,Mixing Spoon,EnMa,,392,"Whip of Frost, Fire, and Fear",EnMa
+,,,,393,dust of deliciousness,EGtW,,393,Scarf of Deception,VoM,,393,Horn of Dolphins,EnMa,,393,"Ioun Stone, Magic Resistance",EnMa
+,,,,394,Bracelet of the Fire Tender,VoM,,394,"Fang Dagger, Type Ⅰ",EnMa,,394,Staff of thunder and lightning,DMG,,394,Lightseer's Gaze,GSB2
+,,,,395,saddle of the cavalier,DMG,,395,"Figurine of Wondrous Power, Marble Mistwolf",VoM,,395,absorbing tattoo,TCE,,395,Glaive of the Revenant King,GSB2
+,,,,396,periapt of wound closure,DMG,,396,Cube of Teleportation,GSB2,,396,Nolzur's marvelous pigments,DMG,,396,Mage Hunter's Armor,VoM
+,,,,397,Scorn Pouch,VoM,,397,Wand of Size Alteration,EnMa,,397,"Snake Staff, Type Ⅱ",EnMa,,397,Mace of Pain,EnMa
+,,,,398,Courtesan's Allure,VoM,,398,Inkwell of Scrollmaking,EnMa,,398,Scepter of Faith,GSB2,,398,Smoking Plate of Heithmir,VoM
+,,,,399,Charlatan's Veneer,VoM,,399,Claw of the Bear,EnMa,,399,Mask of the Wraith,EnMa,,399,The Griffon’s Saddlebag,GSB2
+,,,,400,Direstone Dwarven Key,GSB2,,400,Coldfire Anvil,GSB2,,400,Tarian Graddfeydd Ddraig,VoM,,400,Magical Fountain,EnMa
+,,,,401,Rod of the pact keeper +1,DMG,,401,Whip of the Blue Wyrm,VoM,,401,Globe of Serenity,EnMa,,401,Plate of the Dawnmartyr,TDCSR
+,,,,402,Potion of greater healing,DMG,,402,instrument of the bards (canaith mandolin or cli lyre),DMG,,402,Kraken Band,GSB2,,402,Sacred Mountain Armor,VoM
+,,,,403,Rust Arrow,GSB2,,403,Rod of Reverberation,GSB2,,403,Wind and Whirl,GSB2,,403,Mask of Death,EnMa
+,,,,404,"Box of Preservation, Type Ⅰ",EnMa,,404,Wavecutter,GSB2,,404,belt of fire giant strength,DMG,,404,vorpal sword,DMG
+,,,,405,Wrathful Vapors,VoM,,405,Chair of Insomnia,EnMa,,405,Flute of Wind Dancing,EnMa,,405,Wand of Frost,EnMa
+,,,,406,Craven's Heart,VoM,,406,Wind-Up Merchant,GSB2,,406,dwarven plate,DMG,,406,iron flask,DMG
+,,,,407,"Ointment of Healing, Type Ⅰ",EnMa,,407,Mirror of Vanity,EnMa,,407,"Ring of Cantrips, Type Ⅱ",EnMa,,407,universal solvent,DMG
+,,,,408,Pisces Shield,GSB2,,408,Ring of Command,EnMa,,408,ioun stone (insight),DMG,,408,Red Queen's Burden,GSB2
+,,,,409,Staff of the Vineyard,GSB2,,409,alchemical compendium,TCE,,409,ghost step tattoo,TCE,,409,Voidwalker,VoM
+,,,,410,Shifter's Shine Potion,GSB2,,410,Potion of Fright,EnMa,,410,Amulet of Magic Resistance,EnMa,,410,Balances of Power,EnMa
+,,,,411,Mask of the Leaping Gazelle,VoM,,411,portable hole,DMG,,411,Yellow Harbinger's Path,GSB2,,411,Phoenix Ember,VoM
+,,,,412,Riff's Dimensional Ripper,GSB2,,412,Gloves of Lightning,EnMa,,412,Bone Whip,VoM,,412,"Ointment of Healing, Type Ⅱ",EnMa
+,,,,413,Ring of the Frog,VoM,,413,Rudder of Guidance,EnMa,,413,reveler's concertina,TCE,,413,Life Turner,GSB2
+,,,,414,"Ioun Stone, Sandstone",VoM,,414,Binding Oath,VoM,,414,Armor +2 half plate,DMG,,414,Guardian's Reliquary,GSB2
+,,,,415,Brawler's Ring,GSB2,,415,Gentleman's Saber,GSB2,,415,Oil of Scrying,EnMa,,415,well of many worlds,DMG
+,,,,416,Crawling Cloak (Sturdy),VoM,,416,Javelin of Distance,EnMa,,416,Dragonstooth Blade,VoM,,416,Sword of Blackflame,EnMa
+,,,,417,Jo'Catian Denier,GSB2,,417,Kyshaarth's Fang,VoM,,417,Trident of the Vortex,VoM,,417,cubic gate,DMG
+,,,,418,Serpentine Bracers,VoM,,418,Earrings of the Agent,VoM,,418,shield +3,DMG,,418,hammer of thunderbolts,DMG
+,,,,419,Club of the Rook,GSB2,,419,Moonstone Bracers,GSB2,,419,Staff of Dissolution,VoM,,419,efreeti chain,DMG
+,,,,420,Saddle of Flying,EnMa,,420,Harbinger's Flail,GSB2,,420,Crystal Coffin,EnMa,,420,Mirror of Duplication,EnMa
+,,,,421,Sweet Nature,VoM,,421,Eyes of the Arcanist,EnMa,,421,Bloody Marilith Potion,GSB2,,420-499,Re-Roll/DM Choice,
+,,,,422,Headrest of the Cattle Queens,VoM,,422,Blade of Quickness,EnMa,,422,"Bloodpearl Bracelet, Gold",VoM,,,,
+,,,,423,Wisp Cloak,GSB2,,423,Valkyrie's Bite,VoM,,423,Ogramau's Graveyard,GSB2,,,,
+,,,,424,Key of Reunion,EnMa,,424,wand of lightning bolts,DMG,,424,Wand of Necrosis,GSB2,,,,
+,,,,425,Deafening Kobold-Barker,VoM,,425,Blade of Petals,VoM,,425,dragon scale mail,DMG,,,,
+,,,,426,Angler's Armor,GSB2,,426,Mutineer's Blade,VoM,,426,Alembic of Unmaking,VoM,,,,
+,,,,427,Goggles of Firesight,VoM,,427,Magma Mantle,VoM,,427,arcane grimoire +3,TCE,,,,
+,,,,428,Mourningsteel Ghost Candle,GSB2,,428,Catalyst Oil (Psychic),VoM,,428,Dragon Scale Shield,EnMa,,,,
+,,,,429,Treebleed Bucket,VoM,,429,Torrdok's Magnificent Forgery,GSB2,,429,rhythm maker's drum +3,TCE,,,,
+,,,,430,Quill Pen of Necromancy,EnMa,,430,Ring of the Water Dancer,VoM,,430,Robe of Vanishing,EnMa,,,,
+,,,,431,Umbral Band,VoM,,431,Siege Staff,GSB2,,431,Chimes of Interruption,EnMa,,,,
+,,,,432,Fists of the Guiding Star,GSB2,,432,Bloodshard Trident,GSB2,,432,belt of frost (or stone) giant strength,DMG,,,,
+,,,,433,Ring of Shocking Grasp,EnMa,,433,Fanged Mask,EnMa,,433,Wand of Warding,EnMa,,,,
+,,,,434,Armor of the Leaf,VoM,,434,Ring of Blinking,EnMa,,434,Thunderbolt,EnMa,,,,
+,,,,435,Gritless Grease,VoM,,435,Oil of Extreme Bludgeoning,VoM,,435,Rod of the pact keeper +3,DMG,,,,
+,,,,436,Sling Stone of Screeching,VoM,,436,\+2 Hunter's Charm,VoM,,436,Ring of Sealing,VoM,,,,
+,,,,437,Potion of Lesser Restoration,EnMa,,437,Gauntlets of Eldritch Ferocity,GSB2,,437,Bone Ring,EnMa,,,,
+,,,,438,Roast Bean Juice,VoM,,438,Warrior Shabti,VoM,,438,Rod of absorption,DMG,,,,
+,,,,439,Sandals of Sand Skating,VoM,,439,Scorned Heart Breastplate,GSB2,,439,Xibalban Blade,GSB2,,,,
+,,,,440,cloak of the manta ray,DMG,,440,Cloak of the Rat,VoM,,440,Mountain Hewer,VoM,,,,
+,,,,441,Stuffy Familiar,GSB2,,441,Potion of Agility,EnMa,,441,Cloche of Surprise Treats,GSB2,,,,
+,,,,442,dust of sneezing and choking,DMG,,442,Amulet of the Oracle,VoM,,442,Cloak of Flame,EnMa,,,,
+,,,,443,Caduceus Staff,EnMa,,443,protective verses,TCE,,443,Staff of dunamancy,TCE,,,,
+,,,,444,Blood Mark,VoM,,444,Ghost Thread,VoM,,444,Bloodthirster Scimitar,GSB2,,,,
+,,,,445,Whip of Fangs,VoM,,445,Meta Medallion,GSB2,,445,Ring of temporal salvations,TCE,,,,
+,,,,446,mithral Armor,DMG,,446,Spirit Sheath,GSB2,,446,Black Scythe,EnMa,,,,
+,,,,447,Alchemist's Potion Belt,GSB2,,447,Dragon Slippers,EnMa,,447,Potion of cloud giant strength,DMG,,,,
+,,,,448,Bracelet of Beastly Command,EnMa,,448,Rift Sheath,GSB2,,448,"Ring of Shapechanging, Type Ⅱ",EnMa,,,,
+,,,,449,Chalice of Forbidden Ecstasies,VoM,,449,giant slayer,DMG,,449,Talisman of the Snow Queen,VoM,,,,
+,,,,450,Wafer of Warmth,VoM,,450,"Ioun Stone, Airy Water",EnMa,,450,Staff of Thorns,VoM,,,,
+,,,,451,Silver Strings,VoM,,451,Holy Verdant Bat Droppings,VoM,,451,"Goblet of Potions, Type Ⅰ",EnMa,,,,
+,,,,452,Eye of Accuracy,EnMa,,452,Necklace of Mystic Eidolons,EnMa,,452,manual of golems,DMG,,,,
+,,,,453,broom of flying,DMG,,453,"Quaal's Feather Token, Finger",EnMa,,453,Potion of longevity,DMG,,,,
+,,,,454,Medusan Signet Ring,GSB2,,454,spellwrought tattoo 4th level,TCE,,454,Grave Ward Armor,VoM,,,,
+,,,,455,Swashing Plumage,VoM,,455,"Quaal's Feather Token, Key",EnMa,,455,Golden Sickle,EnMa,,,,
+,,,,456,Odorless Oil,VoM,,456,Mantle of Security,GSB2,,456,Green Knight's Vow,GSB2,,,,
+,,,,457,helm of telepathy,DMG,,457,Staff of Voices,VoM,,457,Chillblain Armor,VoM,,,,
+,,,,458,dust of dryness,DMG,,458,Bands of the Beast,EnMa,,458,Void-Touched Buckler,VoM,,,,
+,,,,459,Signaling Compass,VoM,,459,Catalyst Oil (Fire),VoM,,459,Chronomancer's Pocket Clock,VoM,,,,
+,,,,460,Ballista Prosthesis,GSB2,,460,Cape of Targeting,VoM,,460,Dragon Turtle Barding,GSB2,,,,
+,,,,461,Locket of the Stolen Heart,GSB2,,461,Armor +3 chain shirt,DMG,,461,Folding Moat,EnMa,,,,
+,,,,462,"Quaal's Feather Token, Jug (Type Ⅰ)",EnMa,,462,Wyrmling Wristlet,GSB2,,462,Gauntlet of the Iron Sphere,VoM,,,,
+,,,,463,Bramble Buckler,GSB2,,463,Xorn-Sole Boots,GSB2,,463,wand of polymorph,DMG,,,,
+,,,,464,Lucky Eyepatch,VoM,,464,Undine Plate,VoM,,464,Potion of invisibility,DMG,,,,
+,,,,465,Air Seed,VoM,,465,Catalyst Oil (Thunder),VoM,,465,Burning Skull,VoM,,,,
+,,,,466,Candle of Communion,VoM,,466,Tick Stop Watch,VoM,,466,Medallion of Defense,EnMa,,,,
+,,,,467,Token Sword,EnMa,,467,"Figurine of Wondrous Power, Violet Octopoid",VoM,,467,Oathkeeper's Resolve,GSB2,,,,
+,,,,468,keoghtom's ointment,DMG,,468,Leonino Wings,VoM,,468,ioun stone (agility),DMG,,,,
+,,,,469,Headscarf of the Oasis,VoM,,469,Spectral Blade,VoM,,469,Wand of Accompaniment,VoM,,,,
+,,,,470,Ring of Arcane Adjustment,VoM,,470,Cloak of Squirrels,VoM,,470,crystalline chronicle,TCE,,,,
+,,,,471,barrier tattoo 12+dex,TCE,,471,Covolt Scythe,GSB2,,471,Key of Storage,EnMa,,,,
+,,,,472,"Arrow of Extended Range, Type Ⅱ",EnMa,,472,Quaal's feather token,DMG,,472,"Figurine of Wondrous Power, Coral Dragon",EnMa,,,,
+,,,,473,Magentan Sun-Saw,GSB2,,473,Comet Ballista,GSB2,,473,Ebon Shards,VoM,,,,
+,,,,474,Ring of obscuRing,EGtW,,474,Justicar's Mask,VoM,,474,"Honey Buckle, White",VoM,,,,
+,,,,475,Evoker's Exchange,GSB2,,475,Stonechewer Gauntlets,VoM,,475,Staff of the White Necromancer,VoM,,,,
+,,,,476,Defender Shabti,VoM,,476,"Quaal's Feather Token, Bridge",EnMa,,476,Furious Flail,GSB2,,,,
+,,,,477,Potion of Gray Slumber,EnMa,,477,Scimitar of the Desert Winds,VoM,,477,Dove's Harp,EnMa,,,,
+,,,,478,Dress of Amazement,EnMa,,478,Teapot of Soothing,VoM,,478,Wolf Brush,VoM,,,,
+,,,,479,Swolbold Wraps,VoM,,479,Staff of charming,DMG,,479,Manual of Vine Golems,VoM,,,,
+,,,,480,Ring of Stolen Alacrity,GSB2,,480,Potion of fire giant strength,DMG,,480,Tincture of Moonlit Blossom,VoM,,,,
+,,,,481,Rug of Safe Haven,VoM,,481,Insatiable Tome,GSB2,,481,Mouse Chariot,EnMa,,,,
+,,,,482,bag of holding,DMG,,482,Rod of Underworld Navigation,VoM,,482,"Scroll of Equipment, Type Ⅱ",EnMa,,,,
+,,,,483,Parchment of Sending,VSS,,483,Staff of Fate,VoM,,483,Commander's Visage,VoM,,,,
+,,,,484,Dust of Green Sleeping,EnMa,,484,Mindshatter Bombard,VoM,,484,"Bag of Bones, Type Ⅰ",EnMa,,,,
+,,,,485,Pollinator Carapace Armor,GSB2,,485,Snake Fountain,VoM,,485,Sword of Cleaving,EnMa,,,,
+,,,,486,cap of water breathing,DMG,,486,Wand of Harrowing,VoM,,486,"Ioun Stone, Empowerment",EnMa,,,,
+,,,,487,Oil of Fumbling,EnMa,,487,Appraiser's Eye,GSB2,,487,Candied Axe,VoM,,,,
+,,,,488,periapt of health,DMG,,488,Mirror of Eavesdropping,VoM,,488,ioun stone (strength),DMG,,,,
+,,,,489,Headdress of the Serpent King,GSB2,,489,Zombie Blood Potion,EnMa,,489,Wand of Eyes,EnMa,,,,
+,,,,490,"Dagger of Throwing, Type Ⅱ",EnMa,,490,Vial of Sunlight,VoM,,490,spell Scroll (6th level),DMG,,,,
+,,,,491,Marlin Lunger,GSB2,,491,"Figurine of Wondrous Power, Tourmaline Turtle",EnMa,,491,"Fang Dagger, Type Ⅱ",EnMa,,,,
+,,,,492,Weapon Charm (Ghost),VSS,,492,Heavy Golem Armor,GSB2,,492,Warding Staff,GSB2,,,,
+,,,,493,boots of the winterlands,DMG,,493,Webgrip Bow,GSB2,,493,Pocket Oasis,VoM,,,,
+,,,,494,Mimicloak,GSB2,,494,Goblin Shield,VoM,,494,reincarnation dust,DMG,,,,
+,,,,495,Potion of poison,DMG,,495,Oculi of the Ancestor,VoM,,495,Soul Jug,VoM,,,,
+,,,,496,instrument of the bards (mac-fuimidh cittern),DMG,,496,Lamian Facestealer,GSB2,,496,Rod of Justice,EnMa,,,,
+,,,,497,Ring of warmth,DMG,,497,ammunition +2,DMG,,497,Moonfield Lens,VoM,,,,
+,,,,498,Crimson Starfall Arrow,VoM,,498,Phase Mirror,VoM,,498,"Ioun Stone, Greater Light",EnMa,,,,
+,,,,499,Ring of Fearlessness,EnMa,,499,Potion of Tongues,EnMa,,499,Stone Staff,VoM,,,,
+,,,,500,Candle of Exploding,EnMa,,500,Potion of Craftsmanship,EnMa,,500,Everfull Purse,EnMa,,,,
+,,,,501,Baleful Wardrums,VoM,,501,Trick Shot Mirror (Spellbending),VoM,,501,Armor +2 studded leather,DMG,,,,
+,,,,502,Bellhop Topper,GSB2,,502,Potion of Useful Appendages,EnMa,,502,Tinkertop Boltblaster 1000,TDCSR,,,,
+,,,,503,Gliding Cloak,VoM,,503,Whispering Cloak,VoM,,503,Trollsblood Elixir,VoM,,,,
+,,,,504,Elixir of Focus,VoM,,504,Bagpipes of Confusion,EnMa,,504,Crystal Staff,VoM,,,,
+,,,,505,Scroll of Shelter,EnMa,,505,Bagpipes of Fear,EnMa,,505,"Dragon Bones, Type Ⅱ",EnMa,,,,
+,,,,506,"Mask of the War Chief, Cave Bear",VoM,,506,Potion of diminution,DMG,,506,Ring of Sustenance,EnMa,,,,
+,,,,507,wind fan,DMG,,507,Umbral Chopper,VoM,,507,Sweet Water,EnMa,,,,
+,,,,508,Throttler's Gauntlets,VoM,,508,Blooddrinker Spear,VoM,,508,Wand of Drowning,VoM,,,,
+,,,,509,Blinding Lantern,VoM,,509,Amulet of Memory,VoM,,509,oathbow,DMG,,,,
+,,,,510,Ring of Healer's Heroism,GSB2,,510,Oil of the Dryad,EnMa,,510,Wyrmhelm,EnMa,,,,
+,,,,511,Grasping Shield,VoM,,511,Spellsword,GSB2,,511,arrow of slaying,DMG,,,,
+,,,,512,Commander's Plate,VoM,,512,Frost Pellet,VoM,,512,Ring of Spell Negation (Black),VoM,,,,
+,,,,513,Wardstone,EnMa,,513,Shadow Tag,GSB2,,513,Titan's Tooth Claymore,GSB2,,,,
+,,,,514,Potion of Confusion,EnMa,,514,Riverine Blade,VoM,,514,Eyes of the Outer Dark,VoM,,,,
+,,,,515,"Dart of the Hornet's Nest, Type Ⅰ",EnMa,,515,Skeletal Potion,EnMa,,515,bloodwell vial +3,TCE,,,,
+,,,,516,cloak of elvenkind,DMG,,516,Air Render,GSB2,,516,Infernal Chain,GSB2,,,,
+,,,,517,Snake Charmer's Flute,GSB2,,517,Priest Light,VoM,,517,Royal Blade of Amphibios,GSB2,,,,
+,,,,518,Grim Escutcheon,VoM,,518,wand of fireballs,DMG,,518,Book of Ebon Tides,VoM,,,,
+,,,,519,Dust of Dullness,EnMa,,519,Larkmail,VoM,,519,amulet of the devout +3,TCE,,,,
+,,,,520,Luckleaf,GSB2,,520,Arcanist Gauntlets,GSB2,,520,animated shield,DMG,,,,
+,,,,521,Felling Greataxe,GSB2,,521,Golem Sapper,GSB2,,521,Amulet of the Spirit Naga,GSB2,,,,
+,,,,522,Ring of Bravado,VoM,,522,needle of mending,EGtW,,522,Copper Shield,EnMa,,,,
+,,,,523,Philter of Luck,VoM,,523,Oil of Stone Passage,EnMa,,523,Blackflame Dagger,EnMa,,,,
+,,,,524,Oil of Unlocking,EnMa,,524,Mourningsteel War Banner,GSB2,,524,Reef Splitter,VoM,,,,
+,,,,525,circlet of blasting,DMG,,525,Bow of the Cobra,GSB2,,525,Undeadbane,EnMa,,,,
+,,,,526,"Ring of Cantrips, Type Ⅰ",EnMa,,526,Figurine of wonderous power (see below),DMG,,526,bloodaxe,TCE,,,,
+,,,,527,Oil of Resistance,EnMa,,527,Staff of Scrying,VoM,,527,Ghoul Light,VoM,,,,
+,,,,528,amulet of proof against detection and location,DMG,,528,Deserter's Boots,VoM,,528,lifewell tattoo,TCE,,,,
+,,,,529,Clockwork Mace of Divinity,VoM,,529,Berserker's Kilt,VoM,,529,ammunition +3,DMG,,,,
+,,,,530,Bloodmire Phiale,GSB2,,530,"Dragonlance, Type Ⅰ",EnMa,,530,Ring of Many Cantrips,EnMa,,,,
+,,,,531,Sanguine Lance,VoM,,531,Bloodpearl Bracelet,VoM,,531,Staff of Battle,EnMa,,,,
+,,,,532,Blinding Goblin-Cracker,VoM,,532,"Ring of Fire Starting, Type Ⅱ",EnMa,,532,\+3 Whip of the Blue Wyrm,VoM,,,,
+,,,,533,"Mask of the War Chief, Mammoth",VoM,,533,Sream's Stoppered Oasis,GSB2,,533,Oil of Animation,EnMa,,,,
+,,,,534,Hewer's Draught,VoM,,534,Potion of heroism,DMG,,534,Healer Shabti,VoM,,,,
+,,,,535,Buckle of Lockpicks,EnMa,,535,\+2 Whip of the Blue Wyrm,VoM,,535,Purposed Sword,EnMa,,,,
+,,,,536,Witch's Brew,VoM,,536,far realm shard,TCE,,536,cloak of arachnida,DMG,,,,
+,,,,537,Anointing Mace,VoM,,537,arrow-catching shield,DMG,,537,Grasping Staff,GSB2,,,,
+,,,,538,"Dagger of Concealment, Type Ⅰ",EnMa,,538,Storm's Eye Shield,GSB2,,538,Unquiet Dagger,VoM,,,,
+,,,,539,trident of fish command,DMG,,539,Bloodbow,VoM,,539,Armor +2 scale mail,DMG,,,,
+,,,,540,Guardian Tail,EnMa,,540,Firebird Feather,VoM,,540,Mindmaster's Monocle,GSB2,,,,
+,,,,541,Fly Whisk of Authority,VoM,,541,Tremor Spike Rod,GSB2,,541,dancing sword,DMG,,,,
+,,,,542,Mnemonic Fob,VoM,,542,"Figurehead of Prowess, Octopus",VoM,,542,ioun stone (intellect),DMG,,,,
+,,,,543,Clockwork Earwig,GSB2,,543,bowl of commanding water elementals,DMG,,543,mirror of life trapping,DMG,,,,
+,,,,544,Dart of Light,EnMa,,544,Medusan Lavalier,GSB2,,544,Mirror of Sending,EnMa,,,,
+,,,,545,Fog Stone,VoM,,545,Bone of Animation,EnMa,,545,"Armor of Absorption, Type Ⅰ",EnMa,,,,
+,,,,546,brooch of shielding,DMG,,546,Potion of Pursuit,EnMa,,546,Starmetal Sliver,GSB2,,,,
+,,,,547,"Potion of Defense, Type Ⅱ",EnMa,,547,Chain Devil Gloves,GSB2,,547,Rod of Health,EnMa,,,,
+,,,,548,Thirsting Scalpel,VoM,,548,Wand of the Frostrose,GSB2,,548,Oil of Disenchantment,EnMa,,,,
+,,,,549,Angler's Worldly Fisher,GSB2,,549,Staff of Binding,VoM,,549,Ghoulbane Oil,VoM,,,,
+,,,,550,Root of the World Tree,VoM,,550,Wand of Earth and Stone,EnMa,,550,moon sickle +3,TCE,,,,
+,,,,551,Fear-Eater's Mask,VoM,,551,Wand of Windows,VoM,,551,Blood-Soaked Hide,VoM,,,,
+,,,,552,Wildskin Armor,GSB2,,552,Clockwork Spider Cloak,VoM,,552,"Figurehead of Prowess, Xorn",VoM,,,,
+,,,,553,Bag of Many Bags,EnMa,,553,Adamantine Spearbiter,VoM,,553,Fire Gem,EnMa,,,,
+,,,,554,bag of tricks (rust),DMG,,554,belt of dwarvenkind,DMG,,554,Key of Inquiry,EnMa,,,,
+,,,,555,Efficacious Eyewash,VoM,,555,Pack of Revisibility Bombs,GSB2,,555,Primal Doom of Rage,VoM,,,,
+,,,,556,Mirrored Armor,VoM,,556,Giggling Orb,VoM,,556,Encouraging Armor,VoM,,,,
+,,,,557,spell Scroll (2nd level),DMG,,557,Changeling Cloak,EnMa,,557,"Ioun Stone, Emerald Shard",VoM,,,,
+,,,,558,boots of striding and springing,DMG,,558,Wax of Careful Hearing,EnMa,,558,Aciurgist's Blade,GSB2,,,,
+,,,,559,Primordial Scale,VoM,,559,Chi-Balancing Tea,GSB2,,559,Bulette Torpedo,GSB2,,,,
+,,,,560,Belt of the Wilds,VoM,,560,wings of flying,DMG,,560,Novanite Armor,GSB2,,,,
+,,,,561,Masher Basher,VoM,,561,Alabaster Salt Shaker,VoM,,561,instrument of the bards (Anstruth harp),DMG,,,,
+,,,,562,Rattle of Exorcism,EnMa,,562,"Ioun Stone, Free Action",EnMa,,562,Shovel of Animation,EnMa,,,,
+,,,,563,Primal Doom of Anguish,VoM,,563,Medzo's Crossbow,GSB2,,563,Heartless Cage Pendant,GSB2,,,,
+,,,,564,Elixir of Wakefulness,VoM,,564,Absinth Oil,EnMa,,564,Staff of Portals,VoM,,,,
+,,,,565,Ring of mind shielding,DMG,,565,Nithing Pole,VoM,,565,Charged Rapier,GSB2,,,,
+,,,,566,Black Phial,VoM,,566,Dancing Floret,VoM,,566,Camilla's Quicksilver Mirror,GSB2,,,,
+,,,,567,Bag of Bramble Beasts,VoM,,567,"Ioun Stone, Darksight",EnMa,,567,Girdle of Traveling Alchemy,VoM,,,,
+,,,,568,Honey Lamp,VoM,,568,Dust of Blandness,EnMa,,568,Phoenix Breastplate,GSB2,,,,
+,,,,569,Potion of greater healing,DMG,,569,"Ioun Stone, Water Walking",EnMa,,569,Scarf of the Dry Steppes,EnMa,,,,
+,,,,570,hat of disguise,DMG,,570,Bartender's Armistice,GSB2,,570,Arborguard Shield,GSB2,,,,
+,,,,571,Great Owl's Shroud,GSB2,,571,Slingstone of Pulverizing,EnMa,,571,Magentan Sun-Saw,GSB2,,,,
+,,,,572,\+1 Whip of the Blue Wyrm,VoM,,572,horseshoes of speed,DMG,,572,Spear of the Stilled Heart,VoM,,,,
+,,,,573,Lodestone Caltrops,VoM,,573,brazier of commanding fire elementals,DMG,,573,Pickled Aboleth Brain,VoM,,,,
+,,,,574,Pestilent Spear,VoM,,574,Parchment of Monster Holding,EnMa,,574,Ring of Bladeturning,EnMa,,,,
+,,,,575,Cloak of Sails,VoM,,575,Dowsing Key,EnMa,,575,Pistol of the Umbral Court,VoM,,,,
+,,,,576,Luna Moth Cape,GSB2,,576,Clockwork Mynah Bird,VoM,,576,Ointment of Poison,EnMa,,,,
+,,,,577,Potion of Blindness,EnMa,,577,"Figurehead of Prowess, Kraken",VoM,,577,Reliquary of Holy Memories,GSB2,,,,
+,,,,578,Bullseye Arrow,VoM,,578,"Ioun Stone, Devil's Sight",VoM,,578,Staff of striking,DMG,,,,
+,,,,579,Oil of Immovability,EnMa,,579,Electric Eel Sushi,VoM,,579,"Figurine of Wondrous Power, Amber Monkeys",EnMa,,,,
+,,,,580,Hadiya's Handy Quill,GSB2,,580,Myceliaweave Armor,GSB2,,580,Potion of speed,DMG,,,,
+,,,,581,Egg of Primal Water,GSB2,,581,Servile Shabti,VoM,,581,"Goblet of Potions, Type Ⅲ",EnMa,,,,
+,,,,582,Bridle of Calm,EnMa,,582,Shield of Missile Reversal,VoM,,582-699,Re Roll / DM Choice,,,,,
+,,,,583,Bottle of Fireflies,EnMa,,583,Redeemer's Regards,GSB2,,,,,,,,
+,,,,584,Enchanting Elf-Fountain,VoM,,584,Aurochs Bracers,VoM,,,,,,,,
+,,,,585,Oil of Rust-Proofing,EnMa,,585,Dagger of Denial,TDCSR,,,,,,,,
+,,,,586,pipes of haunting,DMG,,586,Verax Weapon,GSB2,,,,,,,,
+,,,,587,Portable Cannonballs,VSS,,587,Band of Iron Thorns,VoM,,,,,,,,
+,,,,588,sentinel shield,DMG,,588,"Figurine of Wondrous Power, Opal Cats",EnMa,,,,,,,,
+,,,,589,Celestial Sunrise Potion,GSB2,,589,Potion of Spirit-Binding,EnMa,,,,,,,,
+,,,,590,Rod of Conveyance,VoM,,590,Net of Spirit Snaring,EnMa,,,,,,,,
+,,,,591,"Bloodpearl Bracelet, Silver",VoM,,591,Masks of the Sacred Beasts,GSB2,,,,,,,,
+,,,,592,Dust of Magic Detection,EnMa,,592,Lantern of Auspex,VoM,,,,,,,,
+,,,,593,"Honey Buckle, Black",VoM,,593,Ring of Ursa,VoM,,,,,,,,
+,,,,594,Briarthorn Bracers,VoM,,594,Adventurer's Overcoat,GSB2,,,,,,,,
+,,,,595,Necklace of Protection from Charm,EnMa,,595,Tenebrous Flail of Screams,VoM,,,,,,,,
+,,,,596,"Box of Delightful Transports, Type Ⅰ",EnMa,,596,tentacle Rod,DMG,,,,,,,,
+,,,,597,Hardening Polish,VoM,,597,Mosshide Troll Belt,GSB2,,,,,,,,
+,,,,598,Wand of Dowsing,GSB2,,598,Farmer Shabti,VoM,,,,,,,,
+,,,,599,Vestments of the Bleak Shinobi,VoM,,599,Fleshspurned Mask,VoM,,,,,,,,
+,,,,600,Cloak of the Eel,VoM,,600,Communal Flute,VoM,,,,,,,,
+,,,,601,Potion of hill giant strength,DMG,,601,Boots of Attraction,EnMa,,,,,,,,
+,,,,602,Shield of Absorption,EnMa,,602,Pipes of Sounding,EnMa,,,,,,,,
+,,,,603,Lupine Mask,GSB2,,603,"Ioun Stone, Might",EnMa,,,,,,,,
+,,,,604,javelin of lightning,DMG,,604,Homeroot,GSB2,,,,,,,,
+,,,,605,Potion of Creation,EnMa,,605,Rod of rulership,DMG,,,,,,,,
+,,,,606,all purpose tool +1,TCE,,606,Salamander Flame Gauntlets,GSB2,,,,,,,,
+,,,,607,Oil of Scribes,EnMa,,607,Serpent Staff,VoM,,,,,,,,
+,,,,608,Mail of the Sword Master,VoM,,608,necklace of prayer beads,DMG,,,,,,,,
+,,,,609,Arrow of Glue,VSS,,609,Ring of the Arcane Berserker,GSB2,,,,,,,,
+,,,,610,Covolt Dagger,GSB2,,610,Coat of the Crest,TDCSR,,,,,,,,
+,,,,611,nature's mantle,EGtW,,611,"Ioun Stone, Protection",EnMa,,,,,,,,
+,,,,612,Signaling Ammunition,VoM,,612,Ironleaf Impaler,GSB2,,,,,,,,
+,,,,613,Ring of Spell Negation (Blue),VoM,,613,Animated Chain Mail,VoM,,,,,,,,
+,,,,614,oil of slipperiness,DMG,,614,Luring Perfume,VoM,,,,,,,,
+,,,,615,Ring of Volleys,GSB2,,615,Armor of resistance (half plate),DMG,,,,,,,,
+,,,,616,Skullcap of Deep Wisdom,VoM,,616,Necromantic Ink,VoM,,,,,,,,
+,,,,617,Steadfast Splint,VoM,,617,Tyrannosaurus Rax,GSB2,,,,,,,,
+,,,,618,Flamebreather Staff,GSB2,,618,Scroll of the Jester,GSB2,,,,,,,,
+,,,,619,Staff of the Unhatched,VoM,,619,Headdress of Majesty,VoM,,,,,,,,
+,,,,620,Phase Arrow,VSS,,620,"Mask of the War Chief, Winter Wolf",VoM,,,,,,,,
+,,,,621,Potion of Freezing Fog,VoM,,621,Shimmering Sash,EnMa,,,,,,,,
+,,,,622,Tyrant's Whip,VoM,,622,Mantle of the Void,VoM,,,,,,,,
+,,,,623,adamantine Armor (breastplate or splint),XGE,,623,Harmonizing Instrument,VoM,,,,,,,,
+,,,,624,wand of magic detection,DMG,,624,wand of paralysis,DMG,,,,,,,,
+,,,,625,adamantine Armor (scale mail),XGE,,625,Bow of the Twilight Valkyrie,GSB2,,,,,,,,
+,,,,626,Weapon Charm (Feather),VSS,,626,Faeflame Torch,GSB2,,,,,,,,
+,,,,627,\+1 Armor of Warding,VoM,,627,Shadow Tome,VoM,,,,,,,,
+,,,,628,Amulet of the Spirit,EnMa,,628,daern's instant fortress,DMG,,,,,,,,
+,,,,629,wand of web,DMG,,629,Earthboard,TDCSR,,,,,,,,
+,,,,630,Titan Cricket Greaves,GSB2,,630,Failed Purity Spear,GSB2,,,,,,,,
+,,,,631,Cloak of the Inconspicuous Rake,VoM,,631,Bracers of Defenselessness,EnMa,,,,,,,,
+,,,,632,Jax,VSS,,632,Periapt of Proof Against Sound,EnMa,,,,,,,,
+,,,,633,Anklet of Hobbling,EnMa,,633,Amulet of Immutability,GSB2,,,,,,,,
+,,,,634,Humble Cudgel of Temperance,VoM,,634,Spellblade,EnMa,,,,,,,,
+,,,,635,spell Scroll (3rd level),DMG,,635,Dimensional Net,VoM,,,,,,,,
+,,,,636,Quill Pen of Transcription,EnMa,,636,Potion of Dreaming,EnMa,,,,,,,,
+,,,,637,Arrow of Teleportation,VSS,,637,Elixir of Corruption,VoM,,,,,,,,
+,,,,638,Censer of Dark Shadows,VoM,,638,Necklace of Strangulation,EnMa,,,,,,,,
+,,,,639,Vain Virtuoso's Violin,GSB2,,639,Potion of Magic Resistance,EnMa,,,,,,,,
+,,,,640,Ring of jumping,DMG,,640,"Ring of Shapechanging, Type Ⅰ",EnMa,,,,,,,,
+,,,,641,"Antidote Potion, Abberations & Fey",EnMa,,641,Sash of Sorcerous Synergy,GSB2,,,,,,,,
+,,,,642,Potion of Deafness,EnMa,,642,Champion's Greatbow,GSB2,,,,,,,,
+,,,,643,Medal of Valor,VoM,,643,Collar of Change,EnMa,,,,,,,,
+,,,,644,Canister of Vreyval's Soothing Tea,GSB2,,644,Amulet of the Sentinel,GSB2,,,,,,,,
+,,,,645,Ambitious Medic's Box,GSB2,,645,Scourge of Devotion,VoM,,,,,,,,
+,,,,646,Lesser Scroll of Conjuring,VoM,,646,Rogue's Aces,VoM,,,,,,,,
+,,,,647,Impact Club,VoM,,647,Ring of Flying,EnMa,,,,,,,,
+,,,,648,Web Arrows,VoM,,648,Mace of the Priest,GSB2,,,,,,,,
+,,,,649,Earrings of the Eclipse,VoM,,649,Signet of the Magister,VoM,,,,,,,,
+,,,,650,Hoarder's Haul,GSB2,,650,Staff of Feathers,VoM,,,,,,,,
+,,,,651,Griffon Component Pack,GSB2,,651,Elixir of Spike Skin,VoM,,,,,,,,
+,,,,652,Gloves of the Great Badger,GSB2,,652,Poison Armor of Amphibios,GSB2,,,,,,,,
+,,,,653,Seer's Starlight Cloak,GSB2,,653,bead of force,DMG,,,,,,,,
+,,,,654,Reliquary of Holy Memories,GSB2,,654,Sky Anchor,GSB2,,,,,,,,
+,,,,655,Clarifying Goggles,VoM,,655,Corpsehunter's Medallion,VoM,,,,,,,,
+,,,,656,Three-Section Boots,VoM,,656,Ziphian Eye Amulet,VoM,,,,,,,,
+,,,,657,necklace of adaptation,DMG,,657,Black and White Daggers,VoM,,,,,,,,
+,,,,658,Cat's Eye Ring,EnMa,,658,Pick of Proficiency,EnMa,,,,,,,,
+,,,,659,Verminous Snipsnaps,VoM,,659,Unseelie Staff,VoM,,,,,,,,
+,,,,660,Helmet of Sensory Protection,EnMa,,660,Ring of the Jarl,VoM,,,,,,,,
+,,,,661,Honeyed Halfheart,VoM,,661,Odd Bodkin,VoM,,,,,,,,
+,,,,662,Ring of Quick Action,EnMa,,662,Magician's Judge,TDCSR,,,,,,,,
+,,,,663,Dust of the Black Veil,EnMa,,663,Gauntlets of Dexterity,EnMa,,,,,,,,
+,,,,664,"Figurine of Wondrous Power, Amber Bee",VoM,,664,Battle Cloak,EnMa,,,,,,,,
+,,,,665,Jo'Catian Rebuker,GSB2,,665,Rod of the Wastes,VoM,,,,,,,,
+,,,,666,Hedonic Motivator,GSB2,,666,Deathloop Watch,GSB2,,,,,,,,
+,,,,667,Decoy Card,VoM,,667,Gloves of the Magister,VoM,,,,,,,,
+,,,,668,Aroma of Dreams,EnMa,,668,flame tongue,DMG,,,,,,,,
+,,,,669,Ring of Stored Vitality,VoM,,669,Drums of Thunder,EnMa,,,,,,,,
+,,,,670,Honey of the Hungry Flower,VoM,,670,Giantcraft Ambusher,GSB2,,,,,,,,
+,,,,671,Hat of the Sanguine Coven,GSB2,,671,Webbed Staff,VoM,,,,,,,,
+,,,,672,Arcanist's Magnificent Magnifier,GSB2,,672,Cephalopod Breastplate,VoM,,,,,,,,
+,,,,673,Crab Gloves,VoM,,673,Dagger of the Barbed Devil,VoM,,,,,,,,
+,,,,674,Arrow of Anchoring,GSB2,,674,Badge of Freedom,EnMa,,,,,,,,
+,,,,675,Chamrosh Salve,VoM,,675,censer of controlling air elementals,DMG,,,,,,,,
+,,,,676,Thomas's Dimensional Trousers,GSB2,,676,Wand of Animation,EnMa,,,,,,,,
+,,,,677,Ring of Remembrance,VoM,,677,Gauntlets of Heat,EnMa,,,,,,,,
+,,,,678,"Berserker's Kilt, Wolf Fur",VoM,,678,Ring of Immunity,EnMa,,,,,,,,
+,,,,679,Locket of Remembrance,VSS,,679,cloak of the bat,DMG,,,,,,,,
+,,,,680,Amulet of Buoyancy,GSB2,,680,Constant Dagger,VoM,,,,,,,,
+,,,,681,Whirlpool Dart,GSB2,,681,amulet of health,DMG,,,,,,,,
+,,,,682,"Oil of Armor, Type Ⅱ",EnMa,,682,Spyglass of Summoning,VoM,,,,,,,,
+,,,,683,immovable Rod,DMG,,683,Ankh of Aten,VoM,,,,,,,,
+,,,,684,Potion of Troll Blood,VoM,,684,Pennypuncher Slingshot,GSB2,,,,,,,,
+,,,,685,Mapping Ink,VoM,,685,Staff of the Scion,VoM,,,,,,,,
+,,,,686,Roaring Whip,GSB2,,686,elemental essence shard,TCE,,,,,,,,
+,,,,687,Ghost Barding,VoM,,687,Riptide Crossbow,GSB2,,,,,,,,
+,,,,688,"Ioun Stone, Limestone",VoM,,688,Shimmer Ring,VoM,,,,,,,,
+,,,,689,dust of disappearance,DMG,,689,heward's handy haversack,DMG,,,,,,,,
+,,,,690,Weaving Wasp Needles,GSB2,,690,Stalagmight Geode,GSB2,,,,,,,,
+,,,,691,gloves of theivery,DMG,,691,Skeleton Key (Bone),VoM,,,,,,,,
+,,,,692,Weapon of warning,DMG,,692,Peregrine Spear,GSB2,,,,,,,,
+,,,,693,Dire Bacon,VoM,,693,mantle of spell resistance,DMG,,,,,,,,
+,,,,694,Ol' Stumpy,GSB2,,694,Iceblink,VoM,,,,,,,,
+,,,,695,Elixir of Deep Slumber,VoM,,695,Akaasit Blade,VoM,,,,,,,,
+,,,,696,Scrimshaw Comb,VoM,,696,bloodwell vial +2,TCE,,,,,,,,
+,,,,697,Eye of Horus,VoM,,697,Monarch Mantle,GSB2,,,,,,,,
+,,,,698,arcane grimoire +1,TCE,,698,Honey of Ancient Meadows,VoM,,,,,,,,
+,,,,699,Amulet of Hunting,EnMa,,699,Ring of protection,DMG,,,,,,,,
+,,,,700,slippers of spider climbing,DMG,,700,Scroll of Conjuring,VoM,,,,,,,,
+,,,,701,Doubloon Diver's Goggles,GSB2,,701,Honey Buckle,VoM,,,,,,,,
+,,,,702,Bloodthirsty Bistoury,GSB2,,702,Gi of Shifting Seasons,GSB2,,,,,,,,
+,,,,703,Arrow of Direction,EnMa,,703,"Quaal's Feather Token, Crown",EnMa,,,,,,,,
+,,,,704,Bubbling Retort,VoM,,704,Rod of Thorns,VoM,,,,,,,,
+,,,,705,Shovel of Digging,EnMa,,705,Rings of the True Companions,GSB2,,,,,,,,
+,,,,706,rhythm maker's drum +1,TCE,,706,Stinger,VoM,,,,,,,,
+,,,,707,Ring of Hoarded Life,VoM,,707,"Spear of Accuracy, Type Ⅰ",EnMa,,,,,,,,
+,,,,708,Essence of Darkness,EnMa,,708,Heavenly Chalice,GSB2,,,,,,,,
+,,,,709,Rod of Mercurial Form,TDCSR,,709,Verses of Vengeance,VoM,,,,,,,,
+,,,,710,Cloak of Wicked Wings,VoM,,710,Trick Shot Mirror,VoM,,,,,,,,
+,,,,711,Mock Box,VoM,,711,Clacking Teeth,VoM,,,,,,,,
+,,,,712,Ring of swimming,DMG,,712,barrier tattoo 15+ 2 dex,TCE,,,,,,,,
+,,,,713,Dust of Appearance,EnMa,,713,"Faerie Flute, Type Ⅰ",EnMa,,,,,,,,
+,,,,714,Ensnaring Ammunition,VoM,,714,Vile Razor,VoM,,,,,,,,
+,,,,715,Jungle Mess Kit,VoM,,715,Impaling Weapon,VoM,,,,,,,,
+,,,,716,Antimagic Bell,VSS,,716,boots of levitation,DMG,,,,,,,,
+,,,,717,headband of intellect,DMG,,717,Summer's Dance,TDCSR,,,,,,,,
+,,,,718,Blood Pearl,VoM,,718,Mantle of the Lion,VoM,,,,,,,,
+,,,,719,Gloves of Amphibios,GSB2,,719,Bezoar of the Great Horned Owlbear,VoM,,,,,,,,
+,,,,720,Umber Beans,VoM,,720,Lupine Crown,VoM,,,,,,,,
+,,,,721,Jeweler's Anvil,VoM,,721,Matryoshka Dolls,VoM,,,,,,,,
+,,,,722,Mandible Bident,GSB2,,722,wand of fear,DMG,,,,,,,,
+,,,,723,Shadow Weaver's Guise,GSB2,,723,Power Collar,GSB2,,,,,,,,
+,,,,724,Bandana of Bravado,VoM,,724,"Antidote Potion, Mystical",EnMa,,,,,,,,
+,,,,725,Mask of Attractiveness,EnMa,,725,Hunter's Charm,VoM,,,,,,,,
+,,,,726,bag of holding,DMG,,726,Chromatic Obsidian Greataxe,GSB2,,,,,,,,
+,,,,727,Worg Salve,VoM,,727,"Potion of Troll Blood, Greater",VoM,,,,,,,,
+,,,,728,medallion of thoughts,DMG,,728,Wyrmshide Bow,GSB2,,,,,,,,
+,,,,729,Dart of Stunning,EnMa,,729,Brass Clockwork Staff,VoM,,,,,,,,
+,,,,730,pipes of the sewers,DMG,,730,Hallucinatory Dust,VoM,,,,,,,,
+,,,,731,Clockwork Mend-A-Pillar,GSB2,,731,Tipstaff,VoM,,,,,,,,
+,,,,732,Pipes of Animal Calls,EnMa,,732,Dusk Cleaver,GSB2,,,,,,,,
+,,,,733,Potion of Curing Lycanthropy,EnMa,,733,Voidskin Cloak,VoM,,,,,,,,
+,,,,734,"Quaal's Feather Token, Sword",EnMa,,734,Rejuvenating Draft,GSB2,,,,,,,,
+,,,,735,spellwrought tattoo 3rd level,TCE,,735,Rod of the Magicycle,GSB2,,,,,,,,
+,,,,736,Feywood Ivy,GSB2,,736,Armor of Spite,VoM,,,,,,,,
+,,,,737,Centaur Wrist-Wraps,VoM,,737,Spectral Sword,EnMa,,,,,,,,
+,,,,738,Molten Hellfire Armor,VoM,,738,Staff of swarming insects,DMG,,,,,,,,
+,,,,739,Gnashing Key,GSB2,,739,Ring of the Frost Knight,VoM,,,,,,,,
+,,,,740,Parasol of Temperate Weather,VoM,,740,cape of the mountebank,DMG,,,,,,,,
+,,,,741,Ring of Rituals,GSB2,,741,heart weaver's primer,TCE,,,,,,,,
+,,,,742,Battlechef Field Dresser,GSB2,,742,Rust Monster Shell,VoM,,,,,,,,
+,,,,743,Orb of Enthralling Patterns,VoM,,743,Potion of gaseous form,DMG,,,,,,,,
+,,,,744,Dusk Dagger,GSB2,,744,Wind Riders,GSB2,,,,,,,,
+,,,,745,rope of climbing,DMG,,745,Ring of the Grove's Guardian,VoM,,,,,,,,
+,,,,746,Mace of the Pumpkin King,GSB2,,746,Dastardly Quill and Parchment,VoM,,,,,,,,
+,,,,747,helm of comprehending languages,DMG,,747,Ring of Spell Negation,VoM,,,,,,,,
+,,,,748,eversmoking bottle,DMG,,748,Doom Bloom,GSB2,,,,,,,,
+,,,,749,Butter of Disbelief,VoM,,749,Vielle of Weirding and Warding,VoM,,,,,,,,
+,,,,750,shield +1,DMG,,750,Forgefire Hammer,VoM,,,,,,,,
+,,,,751,Egg of Cloudkill,EnMa,,751,Dusk Dagger,GSB2,,,,,,,,
+,,,,752,Accursed Idol,VoM,,752,Elk Horn Rod,VoM,,,,,,,,
+,,,,753,Collar of Beast Armor,VoM,,753,Bezoar of the Hoary Owlbear,VoM,,,,,,,,
+,,,,754,Digger Shabti,VoM,,754,Ring of the ram,DMG,,,,,,,,
+,,,,755,Potion of Plant Growth,EnMa,,755,Devil Shark Mask,VoM,,,,,,,,
+,,,,756,Sir Varion's Helm,GSB2,,756,Sheeshah of Revelations,VoM,,,,,,,,
+,,,,757,Ring of Liquid Identification,EnMa,,757,Hydra Flail,GSB2,,,,,,,,
+,,,,758,Cuff of Captions,GSB2,,758,Muzzle of Lycanthropic Control,EnMa,,,,,,,,
+,,,,759,Hat of Holding,EnMa,,759,Thirsting Thorn,VoM,,,,,,,,
+,,,,760,Prying Mace,GSB2,,760,Arcanaphage Stone,VoM,,,,,,,,
+,,,,761,Pick of Ice Breaking,VoM,,761,"Potion of Defense, Type Ⅲ",EnMa,,,,,,,,
+,,,,762,"String of Warding, Type Ⅰ",EnMa,,762,Bezoar of the Behir,VoM,,,,,,,,
+,,,,763,Rain of Chaos,VoM,,763,Arrow of Bow-Breaking,EnMa,,,,,,,,
+,,,,764,Toothsome Purse,VoM,,764,Blade of the Dervish,VoM,,,,,,,,
+,,,,765,Jewelry of Equus,EnMa,,765,Black Dragon Oil,VoM,,,,,,,,
+,,,,766,Enraging Ammunition,VoM,,766,Potion of Greater Restoration,EnMa,,,,,,,,
+,,,,767,eyes of the eagle,DMG,,767,Skyglider Shield,GSB2,,,,,,,,
+,,,,768,Club of the Forest Drake,GSB2,,768,Gloves of Healing,GSB2,,,,,,,,
+,,,,769,Skeleton Key (Silver),VoM,,769,Everbountiful Soup Kettle,EnMa,,,,,,,,
+,,,,770,Boots of the Vigilant,TDCSR,,770,Wand of Treasure Finding,VoM,,,,,,,,
+,,,,771,Overseer's Spade,GSB2,,771,Ring of feather falling,DMG,,,,,,,,
+,,,,772,Candleflame Bow,GSB2,,772,Potion of Shadow Form,EnMa,,,,,,,,
+,,,,773,Slippers of the Cat,VoM,,773,Queen Bee,VoM,,,,,,,,
+,,,,774,Blade of the Temple Guardian,VoM,,774,Skipstone,VoM,,,,,,,,
+,,,,775,elemental gem,DMG,,775,Armor of Icarus,GSB2,,,,,,,,
+,,,,776,Slipshod Hammer,VoM,,776,Urnblade,GSB2,,,,,,,,
+,,,,777,Chameleon Concoction,VSS,,777,Scroll of Nightmares,GSB2,,,,,,,,
+,,,,778,Quick-Change Mirror,VoM,,778,Lightning Khopesh,GSB2,,,,,,,,
+,,,,779,Dominic’s Field Guide to Language,GSB2,,779,Staff of the Cephalopod,VoM,,,,,,,,
+,,,,780,Burglar's Lock and Key,VoM,,780,wand of enemy detection,DMG,,,,,,,,
+,,,,781,Flute of Saurian Summoning,VoM,,781,Moon Through the Trees,VoM,,,,,,,,
+,,,,782,Countermelody Crystals,VoM,,782,Dune Cowl,GSB2,,,,,,,,
+,,,,783,Potion of Rainbow Hues,EnMa,,783,Witch Hunter's Armor,VoM,,,,,,,,
+,,,,784,Revenant's Shawl,VoM,,784,batteRing shield,EGtW,,,,,,,,
+,,,,785,Arrow of Holding,EnMa,,785,Ring of free action,DMG,,,,,,,,
+,,,,786,Shoes of the Shingled Canopy,VoM,,786,"Magical Chess Set, Type Ⅱ",EnMa,,,,,,,,
+,,,,787,Octopus Bracers,VoM,,787,Potion of frost giant strength,DMG,,,,,,,,
+,,,,788,figurine of wonderous power (silver raven),DMG,,788,Armor of vulnerability,DMG,,,,,,,,
+,,,,789,Potion of water breathing,DMG,,789,Rod of Deflection,VoM,,,,,,,,
+,,,,790,Quill Pen of Long Writing,EnMa,,790,Hat of Mental Acuity,VoM,,,,,,,,
+,,,,791,Eyedrops of Clarity,GSB2,,791,Wand of Feathers,EnMa,,,,,,,,
+,,,,792,Angelic Earrings,VoM,,792,Brazen Bulwark,VoM,,,,,,,,
+,,,,793,Arrow of Unpleasant Herbs,VoM,,793,Gnawing Spear,VoM,,,,,,,,
+,,,,794,winged boots,DMG,,794,Lightscreen Hover Boots,GSB2,,,,,,,,
+,,,,795,pearl of power,DMG,,795,wand of wonder,DMG,,,,,,,,
+,,,,796,Oil of Feather Falling,EnMa,,796,Talisman of Memorization,EnMa,,,,,,,,
+,,,,797,Rejuvenating Draft,GSB2,,797,Dress of Defense,GSB2,,,,,,,,
+,,,,798,Prayer Mat,VoM,,798,"Figurine of Wondrous Power, Coral Shark",VoM,,,,,,,,
+,,,,799,nature's mantle,EGtW,,799,Ring of Awareness,EnMa,,,,,,,,
+,,,,800,alchemy jug,DMG,,800,Staff of Giantkin,VoM,,,,,,,,
+,,,,801,Pollinator Visor,GSB2,,801,Standard of Divinity,VoM,,,,,,,,
+,,,,802,Obedient Hourglass,EnMa,,802,Skysail,TDCSR,,,,,,,,
+,,,,803,Potion of Air Breathing,VoM,,803,Captain's Goggles,VoM,,,,,,,,
+,,,,804,Ring of Light's Comfort,VoM,,804,Shield of Gnawing,VoM,,,,,,,,
+,,,,805,gloves of missile snaring,DMG,,805,Timeworn Timepiece,VoM,,,,,,,,
+,,,,806,Eclipse Spear,GSB2,,806,Warlock's Aegis,VoM,,,,,,,,
+,,,,807,Ouroboros Amulet,VoM,,807,Scrimshaw Parrot,VoM,,,,,,,,
+,,,,808,Claymore of the Great Badger,GSB2,,808,Buzzing Blade,VoM,,,,,,,,
+,,,,809,Ironskin Oil,VoM,,809,Spell Disruptor Horn,VoM,,,,,,,,
+,,,,810,Courtesan's Fanblade,GSB2,,810,Labyrs of the Raging Bull,VoM,,,,,,,,
+,,,,811,Weapon +1,DMG,,811,Life's Flower Restorative,GSB2,,,,,,,,
+,,,,812,Oil of the Pickpocket,EnMa,,812,Bow of the Eldritch Archer,GSB2,,,,,,,,
+,,,,813,Wraithstone,VoM,,813,Potion of Lycanthropy,EnMa,,,,,,,,
+,,,,814,Soldra's Staff,VoM,,814,Starmetal Shard Spear,GSB2,,,,,,,,
+,,,,815,Glamour Rings,VoM,,815,dimensional shackles,DMG,,,,,,,,
+,,,,816,Scorpion Lasher,GSB2,,816,Potion of Empowering Truth,VoM,,,,,,,,
+,,,,817,Ash of the Ebon Birch,VoM,,817,Ring of x-ray vision,DMG,,,,,,,,
+,,,,818,Rod of Blade Bending,VoM,,818,Robe of Stone,EnMa,,,,,,,,
+,,,,819,Potion of Dire Cleansing,VoM,,819,Ring of Clumsiness,EnMa,,,,,,,,
+,,,,820,Sir Varion's Lance,GSB2,,820,Scepter of Majesty,VoM,,,,,,,,
+,,,,821,Rod of retribution,DMG,,821,\+2 Armor of Warding,VoM,,,,,,,,
+,,,,822,brooch of living essence,EGtW,,822,Staff of Spores,VoM,,,,,,,,
+,,,,823,Armor of Cushioning,VoM,,823,Belt of the Lions,EnMa,,,,,,,,
+,,,,824,Brazen Band,VoM,,824,cloak of displacement,DMG,,,,,,,,
+,,,,825,Kestra's Bent Spoon,GSB2,,825,Troll Skin Armor,VoM,,,,,,,,
+,,,,826,Talking Tablets,VoM,,826,Caduceus Flail,GSB2,,,,,,,,
+,,,,827,Dust of Tracelessness,EnMa,,827,Rod of Swarming Skulls,VoM,,,,,,,,
+,,,,828,Neutralizing Bead,VoM,,828,Rift Orb,VoM,,,,,,,,
+,,,,829,Shadowhound's Muzzle,VoM,,829,Chainbreaker Blade,VoM,,,,,,,,
+,,,,830,Thunderous Kazoo,VoM,,830,Homeward Boots,GSB2,,,,,,,,
+,,,,831,"Bag of Holding (Variant), Type Ⅱ",EnMa,,831,glamoured studded leather,DMG,,,,,,,,
+,,,,832,Boots of Tracks,EnMa,,832,Slatelight Ring,VoM,,,,,,,,
+,,,,833,Rod of the Disciplinarian,VoM,,833,Seelie Staff,VoM,,,,,,,,
+,,,,834,Badger Hide,VoM,,834,Warp Anchor Rod,GSB2,,,,,,,,
+,,,,835,Oil of Eternal Fire,EnMa,,835,Potion of maximum power,EGtW,,,,,,,,
+,,,,836,Ring of Night's Solace,VoM,,836,Everglacier Prosthesis,GSB2,,,,,,,,
+,,,,837,Oil of Buoyancy,EnMa,,837,corpse slayer,EGtW,,,,,,,,
+,,,,838,Cure-All,VSS,,838,Thornish Nocturnal,VoM,,,,,,,,
+,,,,839,Battle Standard of Passage,VoM,,839,Clockwork Pendant,VoM,,,,,,,,
+,,,,840,"Ring of Fire Starting, Type Ⅰ",EnMa,,840,Storyteller's Pipe,VoM,,,,,,,,
+,,,,841,Potion of Truth,EnMa,,841,Monster Tamer's Shield,GSB2,,,,,,,,
+,,,,842,Stonemason's Companion,GSB2,,842,Ioun Stone,VoM,,,,,,,,
+,,,,843,sword of vengeance,DMG,,843,Honey of Gloomy Flowers,VoM,,,,,,,,
+,,,,844,eldritch claw tattoo,TCE,,844,"Figurine of Wondrous Power, Hematite Aurochs",VoM,,,,,,,,
+,,,,845,boots of elvenkind,DMG,,845,Gauze of Appearance,EnMa,,,,,,,,
+,,,,846,Dawn Shard,VoM,,846,Serpent's Scales,VoM,,,,,,,,
+,,,,847,Everfull Cask,EnMa,,847,Weapon of certain death,EGtW,,,,,,,,
+,,,,848,Silver Eagle Studded Cuirass,GSB2,,848,"ioun stone (awareness, protection, reserve, sustenance)",DMG,,,,,,,,
+,,,,849,Rowdy's Club,VoM,,849,Harp of Healing,EnMa,,,,,,,,
+,,,,850,Scroll of Mapping,GSB2,,850,"Quaal's Feather Token, Eye",EnMa,,,,,,,,
+,,,,851,"Magical Chess Set, Type Ⅰ",EnMa,,851,cube of force,DMG,,,,,,,,
+,,,,852-899,Re Roll / DM Choice,,,852,Clockwork Colony Toolbox,GSB2,,,,,,,,
+,,,,,,,,853,Shark Tooth Crown,VoM,,,,,,,,
+,,,,,,,,854,Phase Mirror (Handheld),VoM,,,,,,,,
+,,,,,,,,855,Sharkskin Vest,VoM,,,,,,,,
+,,,,,,,,856,Robe of Holding,EnMa,,,,,,,,
+,,,,,,,,857,"mace of (disruption, smiting or terror)",DMG,,,,,,,,
+,,,,,,,,858,Reliquary of Holy Memories,GSB2,,,,,,,,
+,,,,,,,,859,shield of missile attraction,DMG,,,,,,,,
+,,,,,,,,860,"Box of Delightful Transports, Type Ⅱ",EnMa,,,,,,,,
+,,,,,,,,861,Hangman's Noose,VoM,,,,,,,,
+,,,,,,,,862,Unerring Dowsing Rod,VoM,,,,,,,,
+,,,,,,,,863,Focus Breaker,GSB2,,,,,,,,
+,,,,,,,,864,Plunderer's Sea Chest,VoM,,,,,,,,
+,,,,,,,,865,"Dart of the Hornet's Nest, Type Ⅱ",EnMa,,,,,,,,
+,,,,,,,,866,"Barding of Easy Travel, Type Ⅰ",EnMa,,,,,,,,
+,,,,,,,,867,Wolfbite Ring,VoM,,,,,,,,
+,,,,,,,,868,Rod of Storms,GSB2,,,,,,,,
+,,,,,,,,869,Bead of Exsanguination,VoM,,,,,,,,
+,,,,,,,,870,Howling Rod,VoM,,,,,,,,
+,,,,,,,,871,Table of Plenty,EnMa,,,,,,,,
+,,,,,,,,872,Ring of resistance,DMG,,,,,,,,
+,,,,,,,,873,gem of seeing,DMG,,,,,,,,
+,,,,,,,,874,Wildfire Ammunition,GSB2,,,,,,,,
+,,,,,,,,875,"Honey Buckle, Brown",VoM,,,,,,,,
+,,,,,,,,876,Umbral Lantern,VoM,,,,,,,,
+,,,,,,,,877,Wave Chain Mail,VoM,,,,,,,,
+,,,,,,,,878,Shield of the Justicars,GSB2,,,,,,,,
+,,,,,,,,879,berserker axe,DMG,,,,,,,,
+,,,,,,,,880,Ring of Clear Thought,EnMa,,,,,,,,
+,,,,,,,,881,Exsanguinating Blade,VoM,,,,,,,,
+,,,,,,,,882,Ring of Readiness,EnMa,,,,,,,,
+,,,,,,,,883,Voyage Collar,GSB2,,,,,,,,
+,,,,,,,,884,Stygian Crook,VoM,,,,,,,,
+,,,,,,,,885,Potion of clairvoyance,DMG,,,,,,,,
+,,,,,,,,886,Staff of the Artisan,VoM,,,,,,,,
+,,,,,,,,887,Tempest Griffon Bracers,GSB2,,,,,,,,
+,,,,,,,,888,bag of beans,DMG,,,,,,,,
+,,,,,,,,889,Steam Harpoon,GSB2,,,,,,,,
+,,,,,,,,890,Catalyst Oil,VoM,,,,,,,,
+,,,,,,,,891,Armor +1 half plate,DMG,,,,,,,,
+,,,,,,,,892,Dust of Images,EnMa,,,,,,,,
+,,,,,,,,893,Whirlwind Bolas,VoM,,,,,,,,
+,,,,,,,,894,Bandolier of the Elements,GSB2,,,,,,,,
+,,,,,,,,895,Scepter of Truth,EnMa,,,,,,,,
+,,,,,,,,896,Ring of Changing Shapes,GSB2,,,,,,,,
+,,,,,,,,897,Viper Khopesh,GSB2,,,,,,,,
+,,,,,,,,898,Honey Trap,VoM,,,,,,,,
+,,,,,,,,899,Loom of Fate,VoM,,,,,,,,
+,,,,,,,,900,Egg of Wonder,EnMa,,,,,,,,
+,,,,,,,,901,Troll's Bane,EnMa,,,,,,,,
+,,,,,,,,902,folding boat,DMG,,,,,,,,
+,,,,,,,,903,Beads of Meditation,GSB2,,,,,,,,
+,,,,,,,,904,Song-Saddle of the Khan,VoM,,,,,,,,
+,,,,,,,,905,Cottage Chest,GSB2,,,,,,,,
+,,,,,,,,906,Mordant Blade,VoM,,,,,,,,
+,,,,,,,,907,Rod of Sacrificial Blessing,VoM,,,,,,,,
+,,,,,,,,908,Heart of Bravery,EnMa,,,,,,,,
+,,,,,,,,909,Thalamus Thread,GSB2,,,,,,,,
+,,,,,,,,910,Monster Tamer's Sword,GSB2,,,,,,,,
+,,,,,,,,911,Seneschal's Gloves,VoM,,,,,,,,
+,,,,,,,,912,Hallowed Effigy,VoM,,,,,,,,
+,,,,,,,,913,Elder Sequoia Scale Mail,GSB2,,,,,,,,
+,,,,,,,,914,"String of Warding, Type Ⅱ",EnMa,,,,,,,,
+,,,,,,,,915,iron bands of bilarro,DMG,,,,,,,,
+,,,,,,,,916,Ring of Affliction,EnMa,,,,,,,,
+,,,,,,,,917,Splinterguard,GSB2,,,,,,,,
+,,,,,,,,918,Mantle of the Forest Lord,VoM,,,,,,,,
+,,,,,,,,919,Vest of Missile Protection,EnMa,,,,,,,,
+,,,,,,,,920,Armor +1 scale mail,DMG,,,,,,,,
+,,,,,,,,921,Flask of Curses,EnMa,,,,,,,,
+,,,,,,,,922,Fiendish Charter,VoM,,,,,,,,
+,,,,,,,,923,Bloodfuel Weapon,VoM,,,,,,,,
+,,,,,,,,924,rhythm maker's drum +2,TCE,,,,,,,,
+,,,,,,,,925,"Berserker's Kilt, Elk Fur",VoM,,,,,,,,
+,,,,,,,,926,Mistwalker Armor,GSB2,,,,,,,,
+,,,,,,,,927,Soul Pendant,GSB2,,,,,,,,
+,,,,,,,,928,wand of binding,DMG,,,,,,,,
+,,,,,,,,929,Doppelganger Ointment,VoM,,,,,,,,
+,,,,,,,,930,Blackthorn Spear of the Moonless Hunter,GSB2,,,,,,,,
+,,,,,,,,931,Crown of the Mindmaster Matriarch,GSB2,,,,,,,,
+,,,,,,,,932,Baba Yaga's Cinderskull,VoM,,,,,,,,
+,,,,,,,,933,moon sickle +2,TCE,,,,,,,,
+,,,,,,,,934,Wand of Gilding,GSB2,,,,,,,,
+,,,,,,,,935,Boots of Pouncing,VoM,,,,,,,,
+,,,,,,,,936,Talking Torches,VoM,,,,,,,,
+,,,,,,,,937,Ring of Solar's Sight,GSB2,,,,,,,,
+,,,,,,,,938,Armor +1 plate,DMG,,,,,,,,
+,,,,,,,,939,Entrenching Mattock,VoM,,,,,,,,
+,,,,,,,,940,Armor +2 breastplate,DMG,,,,,,,,
+,,,,,,,,941-1099,Re Roll / DM Choice,,,,,,,,,

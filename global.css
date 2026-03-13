@@ -104,3 +104,47 @@ a:focus-visible {
     outline: 2px solid var(--primary-color);
     outline-offset: 2px;
 }
+
+/* Shared tools header/footer (used when tools include shared/header.html and footer.html) */
+.tools-hub-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.tools-hub-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.tools-hub-home:hover {
+    color: var(--primary-color);
+}
+
+.tools-hub-footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--border);
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.tools-hub-footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.tools-hub-footer a:hover {
+    text-decoration: underline;
+}

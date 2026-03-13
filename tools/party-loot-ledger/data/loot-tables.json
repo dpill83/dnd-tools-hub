@@ -1,0 +1,102 @@
+{
+  "low": {
+    "individual": [
+      {"name": "Silver coins", "tier": 0, "val": 5, "note": "Standard coinage"},
+      {"name": "Crude iron dagger", "tier": 0, "val": 2, "note": "Worn but functional"},
+      {"name": "Leather pouch of herbs", "tier": 1, "val": 8, "note": "Alchemical interest"},
+      {"name": "Potion of Healing", "tier": 3, "val": 50, "note": "Common adventuring supply"}
+    ],
+    "hoard": [
+      {"name": "Copper and silver mixed", "tier": 0, "val": 30, "note": "Loose coins, 300sp equiv"},
+      {"name": "Tanned wolf hides", "tier": 1, "val": 18, "note": "3 pelts, leatherworker demand"},
+      {"name": "Masterwork shortbow", "tier": 2, "val": 40, "note": "Carved grip, elven make"},
+      {"name": "Scroll of Sleep", "tier": 3, "val": 75, "note": "1st level, still sealed"},
+      {"name": "Potion of Healing ×2", "tier": 3, "val": 100, "note": "Standard red vials"}
+    ],
+    "merchant": [
+      {"name": "Spice cache", "tier": 1, "val": 25, "note": "Saffron & cardamom"},
+      {"name": "Fine wool bolts ×4", "tier": 1, "val": 40, "note": "Dyed blue, guild quality"},
+      {"name": "Forged travel documents", "tier": 2, "val": 60, "note": "Nobles would pay to suppress"},
+      {"name": "Potion of Healing", "tier": 3, "val": 50, "note": "Personal stock"}
+    ],
+    "dungeon": [
+      {"name": "Rusted copper coins", "tier": 0, "val": 12, "note": "Old mint, still spendable"},
+      {"name": "Gemstone dust (onyx)", "tier": 1, "val": 30, "note": "Necromantic reagent"},
+      {"name": "Iron key, unknown lock", "tier": 2, "val": 15, "note": "Unusual teeth pattern"},
+      {"name": "Scroll of Detect Magic", "tier": 3, "val": 60, "note": "Cracked wax seal"}
+    ]
+  },
+  "mid": {
+    "individual": [
+      {"name": "Gold coins", "tier": 0, "val": 45, "note": "Standard hoard"},
+      {"name": "Rare dye vials ×3", "tier": 1, "val": 55, "note": "Violet & crimson"},
+      {"name": "Masterwork longsword", "tier": 2, "val": 120, "note": "Dwarven runes on pommel"},
+      {"name": "+1 Shield", "tier": 3, "val": 250, "note": "Enchanted rim, minor abjuration"}
+    ],
+    "hoard": [
+      {"name": "Gold & platinum coins", "tier": 0, "val": 180, "note": "Mixed denomination chest"},
+      {"name": "Dragon pepper cache", "tier": 1, "val": 90, "note": "Rare spice, 5× city value"},
+      {"name": "Masterwork plate armor", "tier": 2, "val": 400, "note": "Engraved noble crest — removed"},
+      {"name": "+1 Longsword", "tier": 3, "val": 400, "note": "Blade hums faintly at dusk"},
+      {"name": "Bag of Holding", "tier": 3, "val": 350, "note": "Faint smell of sulfur inside"},
+      {"name": "Eyes of the Eagle", "tier": 3, "val": 250, "note": "Wrapped in velvet"},
+      {"name": "Spell Scroll (3rd level)", "tier": 3, "val": 300, "note": "Fireball, ink still bright"}
+    ],
+    "merchant": [
+      {"name": "Gem cache (mixed)", "tier": 1, "val": 200, "note": "Garnets, amethysts, citrines"},
+      {"name": "Masterwork lute", "tier": 2, "val": 180, "note": "Signed by Thornwall of Baldur's Gate"},
+      {"name": "Potion of Greater Healing ×3", "tier": 3, "val": 375, "note": "Bard's personal stock"},
+      {"name": "Cloak of Protection", "tier": 3, "val": 300, "note": "Monogrammed lining"},
+      {"name": "Trade ledger (blackmail?)", "tier": 4, "val": 600, "note": "Names several city officials"}
+    ],
+    "dungeon": [
+      {"name": "Ancient coins (old empire)", "tier": 1, "val": 120, "note": "Collector value 3× face"},
+      {"name": "Crystal vials ×6", "tier": 2, "val": 80, "note": "Alchemical grade glass"},
+      {"name": "Ioun Stone (protection)", "tier": 4, "val": 1200, "note": "Orbiting a skeletal hand"},
+      {"name": "+1 Warhammer", "tier": 3, "val": 380, "note": "Dwarven clan mark"},
+      {"name": "Scroll of Animate Dead", "tier": 3, "val": 450, "note": "Illegal in most jurisdictions"}
+    ]
+  },
+  "high": {
+    "individual": [
+      {"name": "Platinum coins", "tier": 0, "val": 300, "note": "Rare mint, war commander's pouch"},
+      {"name": "Masterwork weapons cache", "tier": 2, "val": 600, "note": "Six blades, named set"},
+      {"name": "+2 Longsword", "tier": 4, "val": 2000, "note": "Runes glow in combat"},
+      {"name": "Potion of Heroism", "tier": 4, "val": 900, "note": "Smells of victory"}
+    ],
+    "hoard": [
+      {"name": "Gold hoard", "tier": 0, "val": 1200, "note": "Smelted bars + loose coins"},
+      {"name": "Rare gems ×8", "tier": 1, "val": 800, "note": "Diamonds, rubies, sapphires"},
+      {"name": "Figurine of Wondrous Power", "tier": 4, "val": 3500, "note": "Silver raven, watchful eyes"},
+      {"name": "+2 Plate Armor", "tier": 4, "val": 4000, "note": "Bloodstained, recently used"},
+      {"name": "Staff of Healing", "tier": 4, "val": 3000, "note": "Church of Lathander will pay above market"},
+      {"name": "Cloak of Invisibility", "tier": 4, "val": 4500, "note": "Every guild wants this"}
+    ],
+    "merchant": [],
+    "dungeon": [
+      {"name": "Ancient library scrolls", "tier": 1, "val": 500, "note": "Sage value exceeds gp"},
+      {"name": "Legendary weapon (fragment)", "tier": 5, "val": 8000, "note": "One piece of a known set"},
+      {"name": "+2 Staff of Fire", "tier": 4, "val": 3500, "note": "Char marks on the handle"},
+      {"name": "Deck of Many Things", "tier": 5, "val": 0, "note": "Price is irrelevant. Run."}
+    ]
+  },
+  "deadly": {
+    "individual": [
+      {"name": "Platinum war-chest", "tier": 0, "val": 2000, "note": "Sealed with a broken crown"},
+      {"name": "+3 Weapon", "tier": 5, "val": 12000, "note": "This is the MacGuffin now"}
+    ],
+    "hoard": [
+      {"name": "Dragon hoard gold", "tier": 0, "val": 8000, "note": "Weight: 400 lbs. Good luck"},
+      {"name": "Legendary gems ×5", "tier": 1, "val": 3000, "note": "Each stone has a name"},
+      {"name": "Artifact weapon", "tier": 5, "val": 0, "note": "Priceless. Also a target."},
+      {"name": "Vestiges of Divergence", "tier": 5, "val": 0, "note": "Will reshape your campaign"},
+      {"name": "+3 Armor", "tier": 5, "val": 15000, "note": "Worn by a now-dead king"},
+      {"name": "Divine relic", "tier": 5, "val": 0, "note": "A god is looking for this"}
+    ],
+    "merchant": [],
+    "dungeon": [
+      {"name": "Ancient phylactery", "tier": 5, "val": 0, "note": "Lich will notice it's gone"},
+      {"name": "World-map fragment", "tier": 5, "val": 0, "note": "Leverage over entire empires"}
+    ]
+  }
+}

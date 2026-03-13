@@ -1,0 +1,10 @@
+[
+  { "name": "City Under Siege", "effect": "Tier 4 weapons +60% value · Food & supplies +40% · Luxury goods −50%", "border": "#8b3a1a" },
+  { "name": "Mage Guild Conclave", "effect": "Spell scrolls & arcane items +80% · Non-magical goods ignored", "border": "#5a3a8c" },
+  { "name": "Trade Festival", "effect": "All Tier 1–2 goods +25% · Masterwork items fetch full price easily", "border": "#b8860b" },
+  { "name": "Church Inquisition", "effect": "Necromantic items unsellable · Holy relics +200% · Black market more active", "border": "#7a1515" },
+  { "name": "Noble Succession Crisis", "effect": "Political intel & blackmail material priceless · Faction items volatile", "border": "#2d5a2d" },
+  { "name": "Plague Outbreak", "effect": "Healing potions +150% · Rare herbs +100% · Social access restricted", "border": "#4a8c4a" },
+  { "name": "Dragon Sighting", "effect": "Armor & weapons in demand · Fear premium on everything · Travel slowed", "border": "#a0451f" },
+  { "name": "Peaceful Prosperity", "effect": "Standard prices · Luxury goods move well · Normal faction activity", "border": "#1e3a1e" }
+]

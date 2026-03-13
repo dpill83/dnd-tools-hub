@@ -1,0 +1,8 @@
+[
+  { "name": "Harpers", "align": "ally", "wants": "Information, anti-evil artifacts, scrolls", "color": "#b8cce8", "textColor": "#0d2a50" },
+  { "name": "Zhentarim", "align": "neutral", "wants": "Weapons, black market items, leverage", "color": "#f0b8b8", "textColor": "#5a0000" },
+  { "name": "Lords' Alliance", "align": "ally", "wants": "Noble goods, military items, political intel", "color": "#d4b8e8", "textColor": "#2e1a4a" },
+  { "name": "Emerald Enclave", "align": "neutral", "wants": "Natural materials, beast components, land info", "color": "#c8ddb0", "textColor": "#1e3a1e" },
+  { "name": "Order of the Gauntlet", "align": "ally", "wants": "Holy relics, fiend-slaying weapons, undead intel", "color": "#f0c8a0", "textColor": "#5a2000" },
+  { "name": "Xanathar's Guild", "align": "hostile", "wants": "Rare magic, blackmail, anything valuable", "color": "#d4ceb8", "textColor": "#2a1a08" }
+]

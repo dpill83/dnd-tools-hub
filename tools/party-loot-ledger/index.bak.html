@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../../styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-/* Ledger-local variables – hub style only */
+/* Ledger-local variables: hub (default) uses global theme */
 .loot-ledger-container {
   --ll-ink: var(--text);
   --ll-parchment: var(--surface);
@@ -34,14 +34,54 @@
   --ll-item-note: var(--text-light);
 }
 
+/* Parchment theme: body background + variable overrides */
+body.loot-ledger-parchment {
+  background: #2a1f0e;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, #3d2a0e 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, #1a1005 0%, transparent 60%);
+  font-family: 'Crimson Text', Georgia, serif;
+  color: #1a1209;
+}
+
+body.loot-ledger-parchment .loot-ledger-container {
+  --ll-ink: #1a1209;
+  --ll-parchment: #f5eed8;
+  --ll-parchment2: #ede4c8;
+  --ll-parchment3: #e3d9b8;
+  --ll-gold: #b8860b;
+  --ll-gold2: #d4a017;
+  --ll-gold-light: #f0c84a;
+  --ll-rust: #8b3a1a;
+  --ll-rust2: #a0451f;
+  --ll-border: rgba(184,134,11,0.35);
+  --ll-shadow: rgba(26,18,9,0.18);
+  --ll-sync-bar-bg: rgba(0,0,0,0.25);
+  --ll-sync-bar-text: rgba(240,200,74,0.6);
+  --ll-tab-inactive: rgba(240,200,74,0.5);
+  --ll-tab-hover: #f0c84a;
+  --ll-table-row-border: rgba(184,134,11,0.15);
+  --ll-table-row-hover: rgba(184,134,11,0.06);
+  --ll-condition-bg: rgba(184,134,11,0.08);
+  --ll-empty: #8a7050;
+  --ll-total-row-bg: rgba(184,134,11,0.1);
+  --ll-value-range: #8a7050;
+  --ll-item-note: #7a6040;
+}
+
 .loot-ledger-container #app { max-width: 900px; margin: 0 auto; padding: 1rem 0; }
 
-/* Header actions (help button) */
+/* Header actions (theme + help) */
 .ledger-header-actions {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+.ledger-theme-toggle {
+  display: flex;
+  gap: 0.25rem;
   flex-wrap: wrap;
 }
 .ledger-help-btn {
@@ -412,12 +452,15 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
 </style>
 </head>
 <body>
-<div id="hub-header-placeholder"></div>
 <div class="container loot-ledger-container">
     <header>
         <h1>Party Loot Ledger</h1>
         <p class="intro">Trade value, faction leverage &amp; market conditions. Track loot, roll hoards by CR, and manage factions.</p>
         <div class="ledger-header-actions">
+            <div class="ledger-theme-toggle" role="group" aria-label="Ledger appearance">
+                <button type="button" class="ledger-theme-btn active" data-theme="hub" id="themeBtnHub">Hub style</button>
+                <button type="button" class="ledger-theme-btn" data-theme="parchment" id="themeBtnParchment">Parchment</button>
+            </div>
             <button type="button" class="ledger-help-btn" id="ledgerHelpBtn" aria-label="Open help">?</button>
         </div>
     </header>
@@ -713,7 +756,7 @@ async function loadData() {
   try {
     var base = window.location.pathname;
     base = base.substring(0, base.lastIndexOf('/') + 1);
-    var prefix = (base ? base : './') + 'data/';
+    var prefix = base ? base : './';
     var r1 = await fetch(prefix + 'tier-info.json');
     var r2 = await fetch(prefix + 'market-conditions.json');
     var r3 = await fetch(prefix + 'loot-tables.json');
@@ -1089,6 +1132,37 @@ function renderAll() {
   calcLeverage();
 }
 
+// ── LEDGER THEME (hub vs parchment) ───────────────────────────────────────────
+const THEME_KEY = 'loot-ledger-theme';
+function getStoredLedgerTheme() {
+  try { return localStorage.getItem(THEME_KEY) || 'hub'; } catch (e) { return 'hub'; }
+}
+function setStoredLedgerTheme(theme) {
+  try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+}
+function applyLedgerTheme(theme) {
+  if (theme === 'parchment') {
+    document.body.classList.add('loot-ledger-parchment');
+    document.getElementById('themeBtnParchment').classList.add('active');
+    document.getElementById('themeBtnHub').classList.remove('active');
+  } else {
+    document.body.classList.remove('loot-ledger-parchment');
+    document.getElementById('themeBtnHub').classList.add('active');
+    document.getElementById('themeBtnParchment').classList.remove('active');
+  }
+}
+function initLedgerTheme() {
+  applyLedgerTheme(getStoredLedgerTheme());
+  document.getElementById('themeBtnHub').addEventListener('click', function() {
+    setStoredLedgerTheme('hub');
+    applyLedgerTheme('hub');
+  });
+  document.getElementById('themeBtnParchment').addEventListener('click', function() {
+    setStoredLedgerTheme('parchment');
+    applyLedgerTheme('parchment');
+  });
+}
+
 // ── HELP MODAL ───────────────────────────────────────────────────────────────
 function openLedgerHelp() {
   var modal = document.getElementById('ledgerHelpModal');
@@ -1209,6 +1283,7 @@ function initRefModals() {
 async function init() {
   await loadData();
   loadState();
+  initLedgerTheme();
   initLedgerHelp();
   initRefModals();
   toggleRollerOptions();
@@ -1220,7 +1295,5 @@ if (document.readyState === 'loading') {
 }
 </script>
     <script src="../../theme.js"></script>
-    <script src="../../shared/header-footer.js"></script>
-    <div id="hub-footer-placeholder"></div>
 </body>
 </html>

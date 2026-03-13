@@ -1,0 +1,8 @@
+[
+  { "label": "T0", "name": "Mundane", "range": "cp–sp", "leverage": 5, "color": "t0" },
+  { "label": "T1", "name": "Trade Goods", "range": "sp–2gp", "leverage": 18, "color": "t1" },
+  { "label": "T2", "name": "Masterwork", "range": "5–50gp", "leverage": 38, "color": "t2" },
+  { "label": "T3", "name": "Minor Magic", "range": "100–500gp", "leverage": 55, "color": "t3" },
+  { "label": "T4", "name": "Significant", "range": "500–5000gp", "leverage": 74, "color": "t4" },
+  { "label": "T5", "name": "Legendary", "range": "5000gp+", "leverage": 95, "color": "t5" }
+]

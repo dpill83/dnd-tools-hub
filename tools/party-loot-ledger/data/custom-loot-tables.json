@@ -1,0 +1,135 @@
+{
+  "0": {
+    "open": [
+      {"name": "Copper and silver mix", "tier": 0, "val": 15, "note": "Standard coinage; full value in stable jurisdiction"},
+      {"name": "Worn tools (thieves' kit)", "tier": 0, "val": 8, "note": "Legal everywhere; fence takes 30% if sold off-book"},
+      {"name": "Common clothing, travel gear", "tier": 0, "val": 5, "note": "No provenance drama; easy to move"}
+    ],
+    "guild": [
+      {"name": "Raw alchemical reagents", "tier": 0, "val": 12, "note": "Guilds pay fair; no haggling needed"},
+      {"name": "Scribed formulae (non-magical)", "tier": 0, "val": 20, "note": "Academy interest; information asymmetry if rare"}
+    ],
+    "faction": [
+      {"name": "Intel scraps (names, dates)", "tier": 0, "val": 0, "note": "Faction currency — trade for favors, not gp"},
+      {"name": "Token of allegiance", "tier": 0, "val": 5, "note": "Worth more as proof of contact than sold"}
+    ],
+    "black": [
+      {"name": "Stolen petty cash", "tier": 0, "val": 10, "note": "Fence tax 20–40%; legitimate buyer worth cultivating"},
+      {"name": "Unmarked goods", "tier": 0, "val": 8, "note": "No questions asked; value drops at fence"}
+    ],
+    "political": [
+      {"name": "Inheritance documents", "tier": 0, "val": 0, "note": "Holding value: bargaining chip, not for sale"},
+      {"name": "Seal or signet (minor house)", "tier": 0, "val": 25, "note": "Provenance drama — enemies pay to suppress"}
+    ]
+  },
+  "1": {
+    "open": [
+      {"name": "Spice cache", "tier": 1, "val": 35, "note": "Supply and demand; trade festival +25%"},
+      {"name": "Fine cloth bolts", "tier": 1, "val": 40, "note": "Guild quality; legal in republics"}
+    ],
+    "guild": [
+      {"name": "Rare herbs (alchemical)", "tier": 1, "val": 50, "note": "Guild pays above market; known demand"},
+      {"name": "Masterwork components (unworked)", "tier": 1, "val": 45, "note": "Information asymmetry if guild is desperate"}
+    ],
+    "faction": [
+      {"name": "Beast components (Emerald Enclave)", "tier": 1, "val": 40, "note": "Faction currency; trade for land intel"},
+      {"name": "Dye vials (noble colors)", "tier": 1, "val": 55, "note": "Lords' Alliance interest; political access"}
+    ],
+    "black": [
+      {"name": "Stolen trade goods", "tier": 1, "val": 30, "note": "Fence cut; same item worth more to legitimate buyer"},
+      {"name": "Forged papers", "tier": 1, "val": 60, "note": "Illegal in theocracy; black market only"}
+    ],
+    "political": [
+      {"name": "Noble house ledger (excerpt)", "tier": 1, "val": 0, "note": "Worth more in hand than sold; leverage"},
+      {"name": "Gift-quality goods", "tier": 1, "val": 50, "note": "Provenance matters — villain's enemies pay premium"}
+    ]
+  },
+  "2": {
+    "open": [
+      {"name": "Masterwork shortbow", "tier": 2, "val": 75, "note": "Full value in peacetime; +60% in faction war"},
+      {"name": "Engraved armor (crest removed)", "tier": 2, "val": 350, "note": "Legal jurisdiction: theocracy may confiscate"}
+    ],
+    "guild": [
+      {"name": "Enchanted ink and vellum", "tier": 2, "val": 80, "note": "Guild pays fair; less haggling"},
+      {"name": "Spellcraft tools", "tier": 2, "val": 120, "note": "Academy demand; double if they're short"}
+    ],
+    "faction": [
+      {"name": "Military surplus (Lords' Alliance)", "tier": 2, "val": 200, "note": "Faction deal: favors or intel, not gp"},
+      {"name": "Holy symbols (Order of the Gauntlet)", "tier": 2, "val": 90, "note": "Church Inquisition: relics +200% elsewhere"}
+    ],
+    "black": [
+      {"name": "Masterwork weapon (no papers)", "tier": 2, "val": 100, "note": "Fence tax; legitimate buyer far more valuable"},
+      {"name": "Confiscated goods", "tier": 2, "val": 150, "note": "Black market only; legal = zero value"}
+    ],
+    "political": [
+      {"name": "Proof of noble wrongdoing", "tier": 2, "val": 0, "note": "Holding value; political capital, not sale"},
+      {"name": "Artifact fragment (known set)", "tier": 2, "val": 400, "note": "Provenance: enemies of owner pay double"}
+    ]
+  },
+  "3": {
+    "open": [
+      {"name": "+1 weapon", "tier": 3, "val": 400, "note": "Faction war: worth a duchy's alliance"},
+      {"name": "Potion of Healing ×2", "tier": 3, "val": 100, "note": "Plague: +150%; legal everywhere"}
+    ],
+    "guild": [
+      {"name": "Spell scroll (2nd level)", "tier": 3, "val": 120, "note": "Mage Guild Conclave: +80%"},
+      {"name": "Cloak of Protection", "tier": 3, "val": 300, "note": "Guild pays fair; information asymmetry if desperate"}
+    ],
+    "faction": [
+      {"name": "Anti-evil artifact (Harpers)", "tier": 3, "val": 350, "note": "Faction currency: intel or access, not gold"},
+      {"name": "Healing staff (Church)", "tier": 3, "val": 500, "note": "Lathander pays above market"}
+    ],
+    "black": [
+      {"name": "Necromantic scroll", "tier": 3, "val": 200, "note": "Church Inquisition: unsellable legally; fence only"},
+      {"name": "Hot magic item", "tier": 3, "val": 280, "note": "Fence 30–40% cut; cultivate legitimate buyer"}
+    ],
+    "political": [
+      {"name": "Blackmail material (city officials)", "tier": 3, "val": 0, "note": "Priceless as leverage; never sell for gp"},
+      {"name": "Ex-villain artifact", "tier": 3, "val": 600, "note": "Provenance: enemies pay double; sympathizers zero"}
+    ]
+  },
+  "4": {
+    "open": [
+      {"name": "+2 Plate Armor", "tier": 4, "val": 4000, "note": "Dragon Sighting: armor in demand"},
+      {"name": "Figurine of Wondrous Power", "tier": 4, "val": 3500, "note": "Utility + scarcity; buyer competition"}
+    ],
+    "guild": [
+      {"name": "Spell scroll (4th level)", "tier": 4, "val": 800, "note": "Guild Conclave: +80%; non-magical ignored"},
+      {"name": "Ioun Stone", "tier": 4, "val": 1200, "note": "Guild pays fair; information asymmetry"}
+    ],
+    "faction": [
+      {"name": "Holy relic (Order of the Gauntlet)", "tier": 4, "val": 0, "note": "Faction currency: favors, never gold"},
+      {"name": "Fiend-slaying weapon", "tier": 4, "val": 2500, "note": "Faction deal: intel or political access"}
+    ],
+    "black": [
+      {"name": "Stolen significant magic", "tier": 4, "val": 2000, "note": "Fence tax; legitimate buyer far more valuable"},
+      {"name": "Illegal artifact", "tier": 4, "val": 1500, "note": "Theocratic jurisdiction: zero in empire"}
+    ],
+    "political": [
+      {"name": "Vestige fragment", "tier": 4, "val": 0, "note": "Holding value: worth more in hand than sold"},
+      {"name": "Crown regalia", "tier": 4, "val": 0, "note": "Succession crisis: political intel priceless"}
+    ]
+  },
+  "5": {
+    "open": [
+      {"name": "Legendary weapon", "tier": 5, "val": 12000, "note": "Rarity ≠ value; utility and demand shift price"},
+      {"name": "Dragon hoard gold", "tier": 5, "val": 8000, "note": "Weight: 400 lbs; situational demand"}
+    ],
+    "guild": [
+      {"name": "Artifact (arcane)", "tier": 5, "val": 0, "note": "Guild wants it; faction currency, not gp"},
+      {"name": "World-map fragment", "tier": 5, "val": 0, "note": "Leverage over empires; never sold"}
+    ],
+    "faction": [
+      {"name": "Divine relic", "tier": 5, "val": 0, "note": "A god is looking; faction trade only"},
+      {"name": "Vestige of Divergence", "tier": 5, "val": 0, "note": "Will reshape campaign; holding value"}
+    ],
+    "black": [
+      {"name": "Phylactery", "tier": 5, "val": 0, "note": "Lich will notice; fence can't move it"},
+      {"name": "Stolen artifact", "tier": 5, "val": 0, "note": "Fence tax irrelevant; target on your back"}
+    ],
+    "political": [
+      {"name": "MacGuffin", "tier": 5, "val": 0, "note": "Worth more as bargaining chip in hand"},
+      {"name": "Crown of the fallen king", "tier": 5, "val": 0, "note": "Provenance drama; allies pay in alliance"}
+    ]
+  }
+}
