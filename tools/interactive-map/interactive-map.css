@@ -464,6 +464,39 @@ body.interactive-map-app {
     display: none;
 }
 
+.wm-ruler-menu {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow);
+    flex-shrink: 0;
+    z-index: 1000;
+}
+
+.wm-ruler-menu.wm-ruler-menu-hidden {
+    display: none;
+}
+
+.wm-ruler-menu-label {
+    font-size: 0.875rem;
+    color: var(--text);
+    white-space: nowrap;
+}
+
+.wm-ruler-menu-select {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    background: var(--input-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    min-width: 10rem;
+}
+
 .wm-ruler-label {
     background: var(--surface);
     border: 1px solid var(--border);

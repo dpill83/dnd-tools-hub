@@ -2,8 +2,7 @@
     'use strict';
 
     const API_BASE = '';
-    const WALKING_SPEED_KEY = 'interactive-map-walking-speed-ft-per-sec';
-    const DEFAULT_WALKING_SPEED = 4;
+    const TRAVEL_METHOD_DEFAULT_KEY = 'interactive-map-travel-method-default';
 
     const LEGEND_ENTRIES = [
         { key: 'city', label: 'City buildings' },
@@ -94,8 +93,8 @@
     const editMapName = document.getElementById('admin-edit-map-name');
     const editMapWidthFeet = document.getElementById('admin-edit-map-width-feet');
     const editMapCancelBtn = document.getElementById('admin-edit-map-cancel');
-    const walkingSpeedInput = document.getElementById('admin-walking-speed');
-    const walkingSpeedSaveBtn = document.getElementById('admin-walking-speed-save');
+    const travelMethodSelect = document.getElementById('admin-travel-method');
+    const travelMethodSaveBtn = document.getElementById('admin-travel-method-save');
 
     let selectedMapId = null;
     let editingMapId = null;
@@ -426,37 +425,39 @@
         }
     });
 
-    function loadWalkingSpeed() {
-        if (!walkingSpeedInput) return;
-        const raw = localStorage.getItem(WALKING_SPEED_KEY);
-        if (raw != null && raw !== '') {
-            const n = Number(raw);
-            if (Number.isFinite(n) && n > 0) {
-                walkingSpeedInput.value = String(n);
-                return;
-            }
-        }
-        walkingSpeedInput.value = String(DEFAULT_WALKING_SPEED);
+    function populateTravelMethodSelect() {
+        if (!travelMethodSelect || typeof window.TRAVEL_METHODS === 'undefined') return;
+        const methods = window.TRAVEL_METHODS;
+        travelMethodSelect.innerHTML = '';
+        methods.forEach((m) => {
+            const opt = document.createElement('option');
+            opt.value = m.id;
+            opt.textContent = m.label + ' (' + m.ftPerSec + ' ft/sec)';
+            travelMethodSelect.appendChild(opt);
+        });
     }
 
-    function saveWalkingSpeed() {
-        if (!walkingSpeedInput) return;
-        const raw = walkingSpeedInput.value.trim();
-        const n = raw === '' ? DEFAULT_WALKING_SPEED : Number(raw);
-        if (!Number.isFinite(n) || n <= 0) {
-            alert('Walking speed must be a positive number.');
-            return;
-        }
-        localStorage.setItem(WALKING_SPEED_KEY, String(n));
+    function loadTravelMethodDefault() {
+        if (!travelMethodSelect) return;
+        const raw = localStorage.getItem(TRAVEL_METHOD_DEFAULT_KEY);
+        const id = (raw && window.getTravelMethodById && window.getTravelMethodById(raw)) ? raw : window.DEFAULT_TRAVEL_METHOD_ID || 'walk-normal';
+        travelMethodSelect.value = id;
+    }
+
+    function saveTravelMethodDefault() {
+        if (!travelMethodSelect) return;
+        const id = travelMethodSelect.value || (window.DEFAULT_TRAVEL_METHOD_ID || 'walk-normal');
+        localStorage.setItem(TRAVEL_METHOD_DEFAULT_KEY, id);
     }
 
     async function init() {
         setupEditModal();
         setupEditMapModal();
-        loadWalkingSpeed();
-        if (walkingSpeedSaveBtn) {
-            walkingSpeedSaveBtn.addEventListener('click', () => {
-                saveWalkingSpeed();
+        populateTravelMethodSelect();
+        loadTravelMethodDefault();
+        if (travelMethodSaveBtn) {
+            travelMethodSaveBtn.addEventListener('click', () => {
+                saveTravelMethodDefault();
             });
         }
         try {

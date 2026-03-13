@@ -737,8 +737,8 @@ async function loadData() {
   }
 }
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
-let state = { items: [], conditions: [], factions: [...DEFAULT_FACTIONS], lastRolled: [] };
+// ── STATE (factions filled from DEFAULT_FACTIONS after loadData()) ──────────────
+let state = { items: [], conditions: [], factions: [], lastRolled: [] };
 let syncing = false;
 
 // ── STORAGE (hub storage API or localStorage fallback) ─────────────────────────
@@ -793,7 +793,9 @@ async function loadState() {
       const d = JSON.parse(str);
       state.items = d.items || [];
       state.conditions = d.conditions || [];
-      state.factions = d.factions && d.factions.length ? d.factions : [...DEFAULT_FACTIONS];
+      state.factions = d.factions && d.factions.length ? d.factions : (DEFAULT_FACTIONS ? [...DEFAULT_FACTIONS] : []);
+    } else {
+      state.factions = DEFAULT_FACTIONS && Array.isArray(DEFAULT_FACTIONS) ? [...DEFAULT_FACTIONS] : [];
     }
   } catch (e) {}
   renderAll();
@@ -927,12 +929,17 @@ function toggleRollerOptions() {
 }
 
 function rollLoot() {
+  if (!LOOT_TABLES || !CUSTOM_LOOT_TABLES) {
+    document.getElementById('rollItems').innerHTML = '<div class="empty">Data still loading. Try again in a moment.</div>';
+    document.getElementById('rollOutput').classList.add('show');
+    return;
+  }
   var tierSystem = document.getElementById('rollTierSystem').value;
   var pool;
   if (tierSystem === 'custom') {
     var tier = parseInt(document.getElementById('rollCustomTier').value, 10);
     var context = document.getElementById('rollContext').value;
-    var tierTable = CUSTOM_LOOT_TABLES[tier];
+    var tierTable = CUSTOM_LOOT_TABLES[tier] || CUSTOM_LOOT_TABLES[String(tier)];
     pool = tierTable && tierTable[context] ? tierTable[context] : null;
   } else {
     var cr = document.getElementById('rollCR').value;
@@ -1121,6 +1128,12 @@ function openConditionsRef() {
   var body = document.getElementById('conditionsRefBody');
   var modal = document.getElementById('conditionsRefModal');
   if (!body || !modal) return;
+  if (!MARKET_CONDITIONS || !Array.isArray(MARKET_CONDITIONS)) {
+    body.innerHTML = '<p class="empty">Data still loading.</p>';
+    modal.removeAttribute('hidden');
+    document.addEventListener('keydown', conditionsRefEscape);
+    return;
+  }
   body.innerHTML = MARKET_CONDITIONS.map(function(c) {
     return '<div class="ref-condition-item" style="border-left-color:' + (c.border || 'var(--ll-gold)') + '">' +
       '<div class="condition-name">' + c.name + '</div>' +
@@ -1137,6 +1150,7 @@ function closeConditionsRef() {
 function conditionsRefEscape(e) { if (e.key === 'Escape') closeConditionsRef(); }
 
 function getCurrentLootPool() {
+  if (!LOOT_TABLES || !CUSTOM_LOOT_TABLES) return { pool: [], title: 'Data loading…' };
   var tierSystem = document.getElementById('rollTierSystem').value;
   var pool, title;
   if (tierSystem === 'custom') {

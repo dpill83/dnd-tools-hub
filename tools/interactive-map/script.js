@@ -4,8 +4,8 @@
     'use strict';
 
     const LAST_MAP_KEY = 'interactive-map-last-map';
-    const WALKING_SPEED_KEY = 'interactive-map-walking-speed-ft-per-sec';
-    const DEFAULT_WALKING_SPEED = 4;
+    const TRAVEL_METHOD_KEY = 'interactive-map-travel-method';
+    const TRAVEL_METHOD_DEFAULT_KEY = 'interactive-map-travel-method-default';
     const API_BASE = '';
 
     const TYPE_COLORS = {
@@ -76,6 +76,7 @@
     const detailContent = $('wm-detail-content');
     const legendList = $('wm-legend-list');
     const rulerBtn = $('wm-ruler-btn');
+    const mapOverlays = document.querySelector('.wm-map-overlays');
     const fab = $('wm-add-marker');
     const modal = $('wm-add-marker-modal');
     const addForm = $('wm-add-marker-form');
@@ -323,11 +324,20 @@
         return Math.hypot(latLng2.lat - latLng1.lat, latLng2.lng - latLng1.lng);
     }
 
-    function getWalkingSpeedFtPerSec() {
-        const raw = localStorage.getItem(WALKING_SPEED_KEY);
-        if (raw == null || raw === '') return DEFAULT_WALKING_SPEED;
-        const n = Number(raw);
-        return (Number.isFinite(n) && n > 0) ? n : DEFAULT_WALKING_SPEED;
+    function getResolvedTravelMethodId() {
+        const current = localStorage.getItem(TRAVEL_METHOD_KEY);
+        if (current && typeof window.getTravelMethodById === 'function' && window.getTravelMethodById(current)) return current;
+        const defaultId = localStorage.getItem(TRAVEL_METHOD_DEFAULT_KEY);
+        if (defaultId && typeof window.getTravelMethodById === 'function' && window.getTravelMethodById(defaultId)) return defaultId;
+        return (typeof window.DEFAULT_TRAVEL_METHOD_ID !== 'undefined' ? window.DEFAULT_TRAVEL_METHOD_ID : 'walk-normal');
+    }
+
+    function getTravelMethod() {
+        const id = getResolvedTravelMethodId();
+        const method = (typeof window.getTravelMethodById === 'function' && window.getTravelMethodById(id)) || null;
+        if (method) return { ftPerSec: method.ftPerSec, label: method.label };
+        const fallback = (typeof window.TRAVEL_METHODS !== 'undefined' && window.TRAVEL_METHODS[0]) ? window.TRAVEL_METHODS[0] : { ftPerSec: 4, label: 'Walk (Normal)' };
+        return { ftPerSec: fallback.ftPerSec, label: fallback.label };
     }
 
     function formatTravelTime(seconds) {
@@ -345,6 +355,53 @@
         return h > 0 ? d + ' days ' + h + ' hr' : d + ' days';
     }
 
+    let rulerMenuEl = null;
+    let rulerMenuSelect = null;
+
+    function ensureRulerMenu() {
+        if (rulerMenuEl && mapOverlays) return;
+        if (!mapOverlays) return;
+        const menu = document.createElement('div');
+        menu.className = 'wm-ruler-menu wm-ruler-menu-hidden';
+        menu.setAttribute('aria-label', 'Travel method for ruler');
+        const label = document.createElement('label');
+        label.className = 'wm-ruler-menu-label';
+        label.textContent = 'Travel:';
+        const select = document.createElement('select');
+        select.className = 'wm-ruler-menu-select';
+        select.setAttribute('aria-label', 'Travel method');
+        menu.appendChild(label);
+        menu.appendChild(select);
+        rulerBtn.parentNode.insertBefore(menu, rulerBtn);
+        rulerMenuEl = menu;
+        rulerMenuSelect = select;
+        if (typeof window.TRAVEL_METHODS !== 'undefined') {
+            window.TRAVEL_METHODS.forEach((m) => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.textContent = m.label;
+                select.appendChild(opt);
+            });
+        }
+        select.addEventListener('change', () => {
+            const id = select.value;
+            if (id) localStorage.setItem(TRAVEL_METHOD_KEY, id);
+            updateRulerLayer();
+        });
+    }
+
+    function showRulerMenu() {
+        ensureRulerMenu();
+        if (rulerMenuEl) {
+            rulerMenuEl.classList.remove('wm-ruler-menu-hidden');
+            if (rulerMenuSelect) rulerMenuSelect.value = getResolvedTravelMethodId();
+        }
+    }
+
+    function hideRulerMenu() {
+        if (rulerMenuEl) rulerMenuEl.classList.add('wm-ruler-menu-hidden');
+    }
+
     function clearRuler() {
         rulerActive = false;
         rulerPoints = [];
@@ -355,6 +412,7 @@
         if (rulerBtn) {
             rulerBtn.setAttribute('aria-pressed', 'false');
         }
+        hideRulerMenu();
     }
 
     function updateRulerLayer() {
@@ -404,10 +462,10 @@
                     : 'Total: ' + Math.round(total) + ' px';
                 if (scaleFeetPerPixel != null) {
                     const totalFeet = total * scaleFeetPerPixel;
-                    const speed = getWalkingSpeedFtPerSec();
-                    const timeSeconds = totalFeet / speed;
+                    const travel = getTravelMethod();
+                    const timeSeconds = totalFeet / travel.ftPerSec;
                     const timeStr = formatTravelTime(timeSeconds);
-                    if (timeStr) totalLabel += ' — ~' + timeStr + ' walk';
+                    if (timeStr) totalLabel += ' — ~' + timeStr + ' (' + travel.label + ')';
                 }
                 const label = L.marker(last, {
                     icon: L.divIcon({
@@ -440,6 +498,7 @@
         if (rulerLayer && map.hasLayer(rulerLayer)) map.removeLayer(rulerLayer);
         rulerLayer = L.layerGroup().addTo(map);
         if (rulerBtn) rulerBtn.setAttribute('aria-pressed', 'true');
+        showRulerMenu();
     }
 
     function loadAndRenderMarkers() {
