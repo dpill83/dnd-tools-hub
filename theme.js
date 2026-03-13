@@ -6,6 +6,8 @@
 
     const THEME_KEY = 'dnd-hub-theme';
     const DARK_MODE_CLASS = 'dark-mode';
+    const THEME_VARS_KEY = 'dnd-hub-theme-vars-v1';
+    const THEME_STYLE_ID = 'dnd-hub-theme-overrides';
 
     // Get saved theme preference or default to system preference
     function getInitialTheme() {
@@ -18,6 +20,59 @@
             return 'dark';
         }
         return 'light';
+    }
+
+    // Apply theme variable overrides from config object
+    function applyThemeVariables(config) {
+        if (!config || typeof config !== 'object') return;
+
+        const head = document.head || document.getElementsByTagName('head')[0];
+        if (!head) return;
+
+        let styleTag = document.getElementById(THEME_STYLE_ID);
+        if (!styleTag) {
+            styleTag = document.createElement('style');
+            styleTag.id = THEME_STYLE_ID;
+            head.appendChild(styleTag);
+        }
+
+        const lightVars = config.light || {};
+        const darkVars = config.dark || {};
+
+        function serializeVars(vars) {
+            return Object.keys(vars)
+                .filter((key) => key.startsWith('--'))
+                .map((key) => `    ${key}: ${vars[key]};`)
+                .join('\n');
+        }
+
+        const lightBlock = Object.keys(lightVars).length
+            ? `:root {\n${serializeVars(lightVars)}\n}\n`
+            : '';
+
+        const darkBlock = Object.keys(darkVars).length
+            ? `.dark-mode {\n${serializeVars(darkVars)}\n}\n`
+            : '';
+
+        styleTag.textContent = `${lightBlock}${darkBlock}`;
+    }
+
+    function loadThemeVariables() {
+        try {
+            const raw = localStorage.getItem(THEME_VARS_KEY);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== 'object') return null;
+            return parsed;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function saveThemeVariables(config) {
+        if (!config || typeof config !== 'object') return;
+        localStorage.setItem(THEME_VARS_KEY, JSON.stringify(config));
+        applyThemeVariables(config);
     }
 
     // Apply theme to document
@@ -55,6 +110,11 @@
         const theme = getInitialTheme();
         applyTheme(theme);
 
+        const overrides = loadThemeVariables();
+        if (overrides) {
+            applyThemeVariables(overrides);
+        }
+
         // Set up theme toggle button
         const toggleBtn = document.getElementById('theme-toggle');
         if (toggleBtn) {
@@ -84,4 +144,6 @@
     window.getCurrentTheme = function() {
         return document.documentElement.classList.contains(DARK_MODE_CLASS) ? 'dark' : 'light';
     };
+    window.getThemeVariables = loadThemeVariables;
+    window.setThemeVariables = saveThemeVariables;
 })();

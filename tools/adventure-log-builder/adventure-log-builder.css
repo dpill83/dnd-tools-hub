@@ -703,13 +703,13 @@ tr.alb-row-player-matched .alb-cell-player input {
 }
 
 .alb-manage-player-row summary::before {
-    content: "\u25B6";
+    content: "\25B6";
     margin-right: 0.5rem;
     font-size: 0.7rem;
 }
 
 .alb-manage-player-row[open] summary::before {
-    content: "\u25BC";
+    content: "\25BC";
 }
 
 .alb-manage-character-list {

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D Theme Lab</title>
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../../global.css">
+    <link rel="stylesheet" href="theme-lab.css">
+</head>
+<body>
+    <div class="container">
+        <header class="lab-header">
+            <div class="lab-header-main">
+                <h1>D&D Theme Lab</h1>
+                <p class="intro">
+                    Customize the shared colors for the hub and all tools. Changes are saved in your browser and applied everywhere that uses <code>global.css</code>.
+                </p>
+            </div>
+            <div class="lab-header-actions">
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <section class="lab-section">
+            <h2>How it works</h2>
+            <p>
+                This page edits the CSS variables defined in <code>:root</code> and <code>.dark-mode</code> from <code>global.css</code>.
+                The overrides are stored in <strong>localStorage</strong> only on this browser and applied on every page via <code>theme.js</code>.
+            </p>
+        </section>
+
+        <section class="lab-section">
+            <div class="mode-tabs" role="tablist" aria-label="Theme mode">
+                <button class="mode-tab active" data-mode="light" role="tab" aria-selected="true">Light theme</button>
+                <button class="mode-tab" data-mode="dark" role="tab" aria-selected="false">Dark theme</button>
+            </div>
+
+            <div class="mode-panels">
+                <div class="mode-panel" data-mode-panel="light">
+                    <h2>Light theme variables</h2>
+                    <div id="light-vars" class="vars-grid" aria-label="Light theme variables"></div>
+                </div>
+                <div class="mode-panel hidden" data-mode-panel="dark">
+                    <h2>Dark theme variables</h2>
+                    <div id="dark-vars" class="vars-grid" aria-label="Dark theme variables"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="lab-section">
+            <h2>Presets & storage</h2>
+            <div class="button-row">
+                <button id="btn-save" class="btn-primary">Save theme</button>
+                <button id="btn-reset" class="btn-secondary">Reset to defaults</button>
+                <button id="btn-clear" class="btn-secondary danger">Clear custom theme</button>
+            </div>
+            <p class="help-text">
+                <strong>Save theme</strong> updates your local overrides and applies them immediately.
+                <strong>Reset to defaults</strong> restores the original palette values shown below but keeps the override system.
+                <strong>Clear custom theme</strong> removes all overrides so pages fall back to the values in <code>global.css</code>.
+            </p>
+        </section>
+
+        <section class="lab-section">
+            <h2>Raw configuration (advanced)</h2>
+            <p class="help-text">
+                You can copy this JSON for backup or paste a configuration from another browser. Invalid JSON will be ignored.
+            </p>
+            <label for="config-json" class="visually-hidden">Theme configuration JSON</label>
+            <textarea id="config-json" class="config-json" rows="8" spellcheck="false" aria-label="Theme configuration JSON"></textarea>
+            <div class="button-row">
+                <button id="btn-apply-json" class="btn-secondary">Apply JSON</button>
+            </div>
+        </section>
+    </div>
+
+    <script src="../../theme.js"></script>
+    <script src="theme-lab.js"></script>
+</body>
+</html>
+

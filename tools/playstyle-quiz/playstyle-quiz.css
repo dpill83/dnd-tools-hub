@@ -295,6 +295,29 @@
     text-align: center;
 }
 
+.results-mbti {
+    margin-bottom: 2rem;
+    padding: 1.25rem;
+    background-color: var(--quiz-bg);
+    border: 2px solid var(--quiz-border);
+    border-radius: 8px;
+}
+
+.mbti-type {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--quiz-primary);
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+}
+
+.mbti-description {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--quiz-text);
+}
+
 .results-summary {
     margin-bottom: 2rem;
 }

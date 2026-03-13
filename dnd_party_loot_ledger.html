@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Party Loot Ledger – D&D Tools Hub</title>
+    <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* Ledger-local variables: hub (default) uses global theme */
+.loot-ledger-container {
+  --ll-ink: var(--text);
+  --ll-parchment: var(--surface);
+  --ll-parchment2: var(--card-bg);
+  --ll-parchment3: var(--input-bg);
+  --ll-gold: var(--accent-color);
+  --ll-gold2: var(--accent-color);
+  --ll-gold-light: var(--primary-light);
+  --ll-rust: var(--primary-color);
+  --ll-rust2: var(--primary-light);
+  --ll-border: var(--border);
+  --ll-shadow: var(--shadow);
+  --ll-sync-bar-bg: rgba(0,0,0,0.08);
+  --ll-sync-bar-text: var(--text-light);
+  --ll-tab-inactive: var(--text-light);
+  --ll-tab-hover: var(--primary-color);
+  --ll-table-row-border: rgba(0,0,0,0.06);
+  --ll-table-row-hover: rgba(0,0,0,0.04);
+  --ll-condition-bg: rgba(0,0,0,0.04);
+  --ll-empty: var(--text-light);
+  --ll-total-row-bg: rgba(0,0,0,0.05);
+  --ll-value-range: var(--text-light);
+  --ll-item-note: var(--text-light);
+}
+
+/* Parchment theme: body background + variable overrides */
+body.loot-ledger-parchment {
+  background: #2a1f0e;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, #3d2a0e 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, #1a1005 0%, transparent 60%);
+  font-family: 'Crimson Text', Georgia, serif;
+  color: #1a1209;
+}
+
+body.loot-ledger-parchment .loot-ledger-container {
+  --ll-ink: #1a1209;
+  --ll-parchment: #f5eed8;
+  --ll-parchment2: #ede4c8;
+  --ll-parchment3: #e3d9b8;
+  --ll-gold: #b8860b;
+  --ll-gold2: #d4a017;
+  --ll-gold-light: #f0c84a;
+  --ll-rust: #8b3a1a;
+  --ll-rust2: #a0451f;
+  --ll-border: rgba(184,134,11,0.35);
+  --ll-shadow: rgba(26,18,9,0.18);
+  --ll-sync-bar-bg: rgba(0,0,0,0.25);
+  --ll-sync-bar-text: rgba(240,200,74,0.6);
+  --ll-tab-inactive: rgba(240,200,74,0.5);
+  --ll-tab-hover: #f0c84a;
+  --ll-table-row-border: rgba(184,134,11,0.15);
+  --ll-table-row-hover: rgba(184,134,11,0.06);
+  --ll-condition-bg: rgba(184,134,11,0.08);
+  --ll-empty: #8a7050;
+  --ll-total-row-bg: rgba(184,134,11,0.1);
+  --ll-value-range: #8a7050;
+  --ll-item-note: #7a6040;
+}
+
+.loot-ledger-container #app { max-width: 900px; margin: 0 auto; padding: 1rem 0; }
+
+/* Theme toggle */
+.ledger-theme-toggle {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+.ledger-theme-btn {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-light);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.ledger-theme-btn:hover { color: var(--primary-color); border-color: var(--primary-color); }
+.ledger-theme-btn.active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+body.loot-ledger-parchment .ledger-theme-btn {
+  background: rgba(0,0,0,0.2);
+  color: rgba(240,200,74,0.7);
+  border-color: rgba(184,134,11,0.4);
+}
+body.loot-ledger-parchment .ledger-theme-btn:hover { color: #f0c84a; border-color: #b8860b; }
+body.loot-ledger-parchment .ledger-theme-btn.active { background: #b8860b; color: #1a0e00; border-color: #b8860b; }
+
+/* Tabs */
+.loot-ledger-container .tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 14px;
+  background: var(--ll-sync-bar-bg);
+  border-radius: 8px;
+  padding: 3px;
+}
+.loot-ledger-container .tab {
+  flex: 1;
+  padding: 8px 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ll-tab-inactive);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+body.loot-ledger-parchment .loot-ledger-container .tab { font-family: 'Cinzel', serif; }
+.loot-ledger-container .tab.active {
+  background: var(--ll-parchment2);
+  color: var(--ll-ink);
+}
+.loot-ledger-container .tab:hover:not(.active) { color: var(--ll-tab-hover); }
+
+/* Panel */
+.loot-ledger-container .panel { display: none; }
+.loot-ledger-container .panel.active { display: block; }
+
+/* Card */
+.loot-ledger-container .card {
+  background: var(--ll-parchment);
+  border: 1px solid var(--ll-border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px var(--ll-shadow);
+}
+body.loot-ledger-parchment .loot-ledger-container .card {
+  background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  box-shadow: 0 4px 20px var(--ll-shadow), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.loot-ledger-container .card-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ll-rust);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+body.loot-ledger-parchment .loot-ledger-container .card-title { font-family: 'Cinzel', serif; }
+.loot-ledger-container .card-title::after { content: ''; flex: 1; height: 1px; background: var(--ll-border); }
+
+/* Form elements */
+.loot-ledger-container label { font-size: 0.8125rem; color: var(--ll-rust2); font-weight: 600; display: block; margin-bottom: 3px; }
+.loot-ledger-container input,
+.loot-ledger-container select,
+.loot-ledger-container textarea {
+  width: 100%;
+  padding: 7px 10px;
+  background: var(--ll-parchment2);
+  border: 1px solid var(--ll-border);
+  border-radius: 5px;
+  font-size: 0.875rem;
+  color: var(--ll-ink);
+  outline: none;
+  transition: border-color 0.2s;
+}
+body.loot-ledger-parchment .loot-ledger-container input,
+body.loot-ledger-parchment .loot-ledger-container select,
+body.loot-ledger-parchment .loot-ledger-container textarea { font-family: 'Crimson Text', serif; }
+.loot-ledger-container input:focus,
+.loot-ledger-container select:focus,
+.loot-ledger-container textarea:focus { border-color: var(--ll-gold); }
+.loot-ledger-container .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.loot-ledger-container .form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+.loot-ledger-container .form-field { margin-bottom: 10px; }
+
+/* Buttons */
+.loot-ledger-container .btn {
+  padding: 8px 16px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 5px;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+body.loot-ledger-parchment .loot-ledger-container .btn { font-family: 'Cinzel', serif; }
+.loot-ledger-container .btn-gold {
+  background: linear-gradient(135deg, var(--ll-gold2), var(--ll-gold));
+  border-color: var(--ll-gold);
+  color: #1a0e00;
+}
+.loot-ledger-container .btn-gold:hover { background: linear-gradient(135deg, var(--ll-gold-light), var(--ll-gold2)); filter: brightness(1.05); }
+.loot-ledger-container .btn-rust {
+  background: linear-gradient(135deg, var(--ll-rust2), var(--ll-rust));
+  border-color: var(--ll-rust);
+  color: var(--ll-parchment);
+}
+.loot-ledger-container .btn-rust:hover { filter: brightness(1.1); }
+.loot-ledger-container .btn-ghost {
+  background: transparent;
+  border-color: var(--ll-border);
+  color: var(--ll-rust2);
+}
+.loot-ledger-container .btn-ghost:hover { border-color: var(--ll-gold); color: var(--ll-ink); }
+.loot-ledger-container .btn-sm { padding: 4px 10px; font-size: 0.625rem; }
+
+/* Tier badges */
+.loot-ledger-container .tier-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+body.loot-ledger-parchment .loot-ledger-container .tier-badge { font-family: 'Cinzel', serif; }
+.loot-ledger-container .t0 { background: #d4ceb8; color: #4a4030; }
+.loot-ledger-container .t1 { background: #c8ddb0; color: #1e3a1e; }
+.loot-ledger-container .t2 { background: #b8cce8; color: #0d2a50; }
+.loot-ledger-container .t3 { background: #d4b8e8; color: #2e1a4a; }
+.loot-ledger-container .t4 { background: #f0c8a0; color: #5a2000; }
+.loot-ledger-container .t5 { background: #f0b8b8; color: #5a0000; }
+
+/* Ledger table */
+.loot-ledger-container .ledger-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+.loot-ledger-container .ledger-table th {
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--ll-rust);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--ll-border);
+  text-align: left;
+}
+body.loot-ledger-parchment .loot-ledger-container .ledger-table th { font-family: 'Cinzel', serif; }
+.loot-ledger-container .ledger-table td { padding: 7px 8px; border-bottom: 1px solid var(--ll-table-row-border); vertical-align: middle; }
+.loot-ledger-container .ledger-table tr:last-child td { border-bottom: none; }
+.loot-ledger-container .ledger-table tr:hover td { background: var(--ll-table-row-hover); }
+.loot-ledger-container .item-name { font-weight: 600; color: var(--ll-ink); }
+.loot-ledger-container .item-note { font-size: 0.6875rem; color: var(--ll-item-note); font-style: italic; margin-top: 1px; }
+.loot-ledger-container .value-gp { font-size: 0.75rem; color: var(--ll-gold); font-weight: 600; }
+body.loot-ledger-parchment .loot-ledger-container .value-gp { font-family: 'Cinzel', serif; }
+.loot-ledger-container .value-range { font-size: 0.6875rem; color: var(--ll-value-range); }
+
+/* Market conditions */
+.loot-ledger-container .condition-card {
+  border-left: 3px solid var(--ll-gold);
+  padding: 8px 12px;
+  background: var(--ll-condition-bg);
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 8px;
+}
+.loot-ledger-container .condition-name { font-size: 0.75rem; font-weight: 600; color: var(--ll-rust); }
+body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family: 'Cinzel', serif; }
+.loot-ledger-container .condition-effect { font-size: 0.8125rem; color: var(--ll-ink); margin-top: 2px; }
+
+/* Faction pill */
+.loot-ledger-container .faction-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  margin: 2px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+.loot-ledger-container .faction-pill.selected { font-weight: 600; }
+
+/* Animations */
+@keyframes ll-spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+@keyframes ll-pop { 0%{transform:scale(0.8);opacity:0} 60%{transform:scale(1.05)} 100%{transform:scale(1);opacity:1} }
+.loot-ledger-container .rolling { animation: ll-spin 0.4s ease-out; }
+.loot-ledger-container .popped { animation: ll-pop 0.3s ease-out; }
+
+/* Sync */
+.loot-ledger-container .sync-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+}
+.loot-ledger-container .sync-ok { background: #4a8c4a; }
+.loot-ledger-container .sync-pending { background: var(--ll-gold2); animation: ll-pulse 1s infinite; }
+@keyframes ll-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.loot-ledger-container .sync-bar {
+  background: var(--ll-sync-bar-bg);
+  border-radius: 6px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 0.75rem;
+  color: var(--ll-sync-bar-text);
+}
+
+.loot-ledger-container .empty { text-align: center; padding: 28px; color: var(--ll-empty); font-style: italic; font-size: 0.875rem; }
+
+.loot-ledger-container .total-row { background: var(--ll-total-row-bg); font-weight: 600; }
+.loot-ledger-container .total-row td { border-top: 1px solid var(--ll-border) !important; }
+
+.loot-ledger-container .roll-output { display: none; }
+.loot-ledger-container .roll-output.show { display: block; animation: ll-pop 0.3s ease-out; }
+.loot-ledger-container .roll-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--ll-table-row-border); gap: 8px; }
+.loot-ledger-container .roll-item:last-child { border-bottom: none; }
+
+.loot-ledger-container .table-wrap { overflow-x: auto; }
+
+@media (max-width: 600px) {
+  .loot-ledger-container .form-row { grid-template-columns: 1fr; }
+  .loot-ledger-container .form-row.three { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container loot-ledger-container">
+    <header>
+        <h1>Party Loot Ledger</h1>
+        <p class="intro">Trade value, faction leverage &amp; market conditions. Track loot, roll hoards by CR, and manage factions.</p>
+        <div class="ledger-theme-toggle" role="group" aria-label="Ledger appearance">
+            <button type="button" class="ledger-theme-btn active" data-theme="hub" id="themeBtnHub">Hub style</button>
+            <button type="button" class="ledger-theme-btn" data-theme="parchment" id="themeBtnParchment">Parchment</button>
+        </div>
+    </header>
+
+    <div id="app">
+  <div class="sync-bar">
+    <div><span class="sync-dot sync-ok" id="syncDot"></span><span id="syncLabel">Synced · shared ledger</span></div>
+    <div id="partyCount" style="font-size:11px"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab(event, 'ledger')">Ledger</button>
+    <button class="tab" onclick="switchTab(event, 'roller')">Loot Roller</button>
+    <button class="tab" onclick="switchTab(event, 'market')">Market</button>
+    <button class="tab" onclick="switchTab(event, 'factions')">Factions</button>
+  </div>
+
+  <!-- LEDGER TAB -->
+  <div id="tab-ledger" class="panel active">
+    <div class="card">
+      <div class="card-title">Add Item to Ledger</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Item Name</label>
+          <input id="itemName" placeholder="e.g. Cloak of Elvenkind" />
+        </div>
+        <div class="form-field">
+          <label for="itemTier">Tier</label>
+          <select id="itemTier" aria-label="Item tier">
+            <option value="0">T0 — Mundane</option>
+            <option value="1">T1 — Trade Goods</option>
+            <option value="2">T2 — Masterwork</option>
+            <option value="3" selected>T3 — Minor Magic</option>
+            <option value="4">T4 — Significant Magic</option>
+            <option value="5">T5 — Legendary</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row three">
+        <div class="form-field">
+          <label>Base Value (gp)</label>
+          <input id="itemValue" type="number" placeholder="450" min="0" />
+        </div>
+        <div class="form-field">
+          <label for="itemQty">Quantity</label>
+          <input id="itemQty" type="number" value="1" min="1" aria-label="Quantity" />
+        </div>
+        <div class="form-field">
+          <label for="itemStatus">Status</label>
+          <select id="itemStatus" aria-label="Item status">
+            <option value="holding">Holding</option>
+            <option value="forsale">For Sale</option>
+            <option value="sold">Sold</option>
+            <option value="leverage">Leverage</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Notes (provenance, quirks, faction interest)</label>
+        <input id="itemNotes" placeholder="e.g. Belonged to the Duchess — Harpers will pay premium" />
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-gold" onclick="addItem()">Add to Ledger</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Party Haul</div>
+      <div class="table-wrap">
+        <table class="ledger-table" id="ledgerTable">
+          <thead>
+            <tr>
+              <th>Item</th><th>Tier</th><th>Qty</th><th>Base Value</th><th>Status</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="ledgerBody">
+            <tr><td colspan="6" class="empty">No loot yet — roll some or add manually above</td></tr>
+          </tbody>
+          <tfoot id="ledgerFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROLLER TAB -->
+  <div id="tab-roller" class="panel">
+    <div class="card">
+      <div class="card-title">Roll Loot (5e CR-Based)</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Challenge Rating</label>
+          <select id="rollCR">
+            <option value="low">Low (CR 1–4)</option>
+            <option value="mid" selected>Mid (CR 5–10)</option>
+            <option value="high">High (CR 11–16)</option>
+            <option value="deadly">Deadly (CR 17+)</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Hoard Type</label>
+          <select id="rollType">
+            <option value="individual">Individual Monster</option>
+            <option value="hoard" selected>Treasure Hoard</option>
+            <option value="merchant">Merchant Cache</option>
+            <option value="dungeon">Dungeon Stash</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-rust" onclick="rollLoot()" id="rollBtn">🎲 Roll the Hoard</button>
+        <span style="font-size:12px;color:#8a7050;font-style:italic" id="rollSeed"></span>
+      </div>
+    </div>
+
+    <div class="card roll-output" id="rollOutput">
+      <div class="card-title">Results</div>
+      <div id="rollItems"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button class="btn btn-gold btn-sm" onclick="addAllToLedger(event)">Add All to Ledger</button>
+        <button class="btn btn-ghost btn-sm" onclick="rollLoot()">Re-roll</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MARKET TAB -->
+  <div id="tab-market" class="panel">
+    <div class="card">
+      <div class="card-title">Market Conditions</div>
+      <div id="conditionsList"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-rust btn-sm" onclick="rollConditions()">🎲 Randomize Conditions</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearConditions()">Clear</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Leverage Calculator</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Item Tier</label>
+          <select id="calcTier" onchange="calcLeverage()">
+            <option value="0">T0 Mundane</option>
+            <option value="1">T1 Trade Goods</option>
+            <option value="2">T2 Masterwork</option>
+            <option value="3" selected>T3 Minor Magic</option>
+            <option value="4">T4 Significant Magic</option>
+            <option value="5">T5 Legendary</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Selling To</label>
+          <select id="calcBuyer" onchange="calcLeverage()">
+            <option value="market">Open Market</option>
+            <option value="guild">Guild / Academy</option>
+            <option value="noble">Noble / Lord</option>
+            <option value="black">Black Market / Fence</option>
+            <option value="faction">Faction (allied)</option>
+          </select>
+        </div>
+      </div>
+      <div id="leverageResult" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <!-- FACTIONS TAB -->
+  <div id="tab-factions" class="panel">
+    <div class="card">
+      <div class="card-title">Active Factions</div>
+      <div id="factionList"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Add Custom Faction</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Faction Name</label>
+          <input id="factionName" placeholder="e.g. The Cobalt Syndicate" />
+        </div>
+        <div class="form-field">
+          <label>Alignment</label>
+          <select id="factionAlign">
+            <option value="ally">Ally</option>
+            <option value="neutral">Neutral</option>
+            <option value="hostile">Hostile</option>
+            <option value="unknown">Unknown</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Wants / Buys</label>
+        <input id="factionWants" placeholder="e.g. Arcane artifacts, spell scrolls, information" />
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-gold" onclick="addFaction()">Add Faction</button>
+      </div>
+    </div>
+  </div>
+    </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const TIER_INFO = [
+  { label:'T0', name:'Mundane', range:'cp–sp', leverage:5, color:'t0' },
+  { label:'T1', name:'Trade Goods', range:'sp–2gp', leverage:18, color:'t1' },
+  { label:'T2', name:'Masterwork', range:'5–50gp', leverage:38, color:'t2' },
+  { label:'T3', name:'Minor Magic', range:'100–500gp', leverage:55, color:'t3' },
+  { label:'T4', name:'Significant', range:'500–5000gp', leverage:74, color:'t4' },
+  { label:'T5', name:'Legendary', range:'5000gp+', leverage:95, color:'t5' },
+];
+
+const LOOT_TABLES = {
+  low: {
+    individual: [
+      {name:'Silver coins', tier:0, val:5, note:'Standard coinage'},
+      {name:'Crude iron dagger', tier:0, val:2, note:'Worn but functional'},
+      {name:'Leather pouch of herbs', tier:1, val:8, note:'Alchemical interest'},
+      {name:'Potion of Healing', tier:3, val:50, note:'Common adventuring supply'},
+    ],
+    hoard: [
+      {name:'Copper and silver mixed', tier:0, val:30, note:'Loose coins, 300sp equiv'},
+      {name:'Tanned wolf hides', tier:1, val:18, note:'3 pelts, leatherworker demand'},
+      {name:'Masterwork shortbow', tier:2, val:40, note:'Carved grip, elven make'},
+      {name:'Scroll of Sleep', tier:3, val:75, note:'1st level, still sealed'},
+      {name:'Potion of Healing ×2', tier:3, val:100, note:'Standard red vials'},
+    ],
+    merchant:[
+      {name:'Spice cache', tier:1, val:25, note:'Saffron & cardamom'},
+      {name:'Fine wool bolts ×4', tier:1, val:40, note:'Dyed blue, guild quality'},
+      {name:'Forged travel documents', tier:2, val:60, note:'Nobles would pay to suppress'},
+      {name:'Potion of Healing', tier:3, val:50, note:'Personal stock'},
+    ],
+    dungeon:[
+      {name:'Rusted copper coins', tier:0, val:12, note:'Old mint, still spendable'},
+      {name:'Gemstone dust (onyx)', tier:1, val:30, note:'Necromantic reagent'},
+      {name:'Iron key, unknown lock', tier:2, val:15, note:'Unusual teeth pattern'},
+      {name:'Scroll of Detect Magic', tier:3, val:60, note:'Cracked wax seal'},
+    ]
+  },
+  mid: {
+    individual:[
+      {name:'Gold coins', tier:0, val:45, note:'Standard hoard'},
+      {name:'Rare dye vials ×3', tier:1, val:55, note:'Violet & crimson'},
+      {name:'Masterwork longsword', tier:2, val:120, note:'Dwarven runes on pommel'},
+      {name:'+1 Shield', tier:3, val:250, note:'Enchanted rim, minor abjuration'},
+    ],
+    hoard:[
+      {name:'Gold & platinum coins', tier:0, val:180, note:'Mixed denomination chest'},
+      {name:'Dragon pepper cache', tier:1, val:90, note:'Rare spice, 5× city value'},
+      {name:'Masterwork plate armor', tier:2, val:400, note:'Engraved noble crest — removed'},
+      {name:'+1 Longsword', tier:3, val:400, note:'Blade hums faintly at dusk'},
+      {name:'Bag of Holding', tier:3, val:350, note:'Faint smell of sulfur inside'},
+      {name:'Eyes of the Eagle', tier:3, val:250, note:'Wrapped in velvet'},
+      {name:'Spell Scroll (3rd level)', tier:3, val:300, note:'Fireball, ink still bright'},
+    ],
+    merchant:[
+      {name:'Gem cache (mixed)', tier:1, val:200, note:'Garnets, amethysts, citrines'},
+      {name:'Masterwork lute', tier:2, val:180, note:'Signed by Thornwall of Baldur\'s Gate'},
+      {name:'Potion of Greater Healing ×3', tier:3, val:375, note:'Bard\'s personal stock'},
+      {name:'Cloak of Protection', tier:3, val:300, note:'Monogrammed lining'},
+      {name:'Trade ledger (blackmail?)', tier:4, val:600, note:'Names several city officials'},
+    ],
+    dungeon:[
+      {name:'Ancient coins (old empire)', tier:1, val:120, note:'Collector value 3× face'},
+      {name:'Crystal vials ×6', tier:2, val:80, note:'Alchemical grade glass'},
+      {name:'Ioun Stone (protection)', tier:4, val:1200, note:'Orbiting a skeletal hand'},
+      {name:'+1 Warhammer', tier:3, val:380, note:'Dwarven clan mark'},
+      {name:'Scroll of Animate Dead', tier:3, val:450, note:'Illegal in most jurisdictions'},
+    ]
+  },
+  high: {
+    individual:[
+      {name:'Platinum coins', tier:0, val:300, note:'Rare mint, war commander\'s pouch'},
+      {name:'Masterwork weapons cache', tier:2, val:600, note:'Six blades, named set'},
+      {name:'+2 Longsword', tier:4, val:2000, note:'Runes glow in combat'},
+      {name:'Potion of Heroism', tier:4, val:900, note:'Smells of victory'},
+    ],
+    hoard:[
+      {name:'Gold hoard', tier:0, val:1200, note:'Smelted bars + loose coins'},
+      {name:'Rare gems ×8', tier:1, val:800, note:'Diamonds, rubies, sapphires'},
+      {name:'Figurine of Wondrous Power', tier:4, val:3500, note:'Silver raven, watchful eyes'},
+      {name:'+2 Plate Armor', tier:4, val:4000, note:'Bloodstained, recently used'},
+      {name:'Staff of Healing', tier:4, val:3000, note:'Church of Lathander will pay above market'},
+      {name:'Cloak of Invisibility', tier:4, val:4500, note:'Every guild wants this'},
+    ],
+    merchant:[],
+    dungeon:[
+      {name:'Ancient library scrolls', tier:1, val:500, note:'Sage value exceeds gp'},
+      {name:'Legendary weapon (fragment)', tier:5, val:8000, note:'One piece of a known set'},
+      {name:'+2 Staff of Fire', tier:4, val:3500, note:'Char marks on the handle'},
+      {name:'Deck of Many Things', tier:5, val:0, note:'Price is irrelevant. Run.'},
+    ]
+  },
+  deadly:{
+    individual:[
+      {name:'Platinum war-chest', tier:0, val:2000, note:'Sealed with a broken crown'},
+      {name:'+3 Weapon', tier:5, val:12000, note:'This is the MacGuffin now'},
+    ],
+    hoard:[
+      {name:'Dragon hoard gold', tier:0, val:8000, note:'Weight: 400 lbs. Good luck'},
+      {name:'Legendary gems ×5', tier:1, val:3000, note:'Each stone has a name'},
+      {name:'Artifact weapon', tier:5, val:0, note:'Priceless. Also a target.'},
+      {name:'Vestiges of Divergence', tier:5, val:0, note:'Will reshape your campaign'},
+      {name:'+3 Armor', tier:5, val:15000, note:'Worn by a now-dead king'},
+      {name:'Divine relic', tier:5, val:0, note:'A god is looking for this'},
+    ],
+    merchant:[],
+    dungeon:[
+      {name:'Ancient phylactery', tier:5, val:0, note:'Lich will notice it\'s gone'},
+      {name:'World-map fragment', tier:5, val:0, note:'Leverage over entire empires'},
+    ]
+  }
+};
+
+const MARKET_CONDITIONS = [
+  { name:'City Under Siege', effect:'Tier 4 weapons +60% value · Food & supplies +40% · Luxury goods −50%', border:'#8b3a1a' },
+  { name:'Mage Guild Conclave', effect:'Spell scrolls & arcane items +80% · Non-magical goods ignored', border:'#5a3a8c' },
+  { name:'Trade Festival', effect:'All Tier 1–2 goods +25% · Masterwork items fetch full price easily', border:'#b8860b' },
+  { name:'Church Inquisition', effect:'Necromantic items unsellable · Holy relics +200% · Black market more active', border:'#7a1515' },
+  { name:'Noble Succession Crisis', effect:'Political intel & blackmail material priceless · Faction items volatile', border:'#2d5a2d' },
+  { name:'Plague Outbreak', effect:'Healing potions +150% · Rare herbs +100% · Social access restricted', border:'#4a8c4a' },
+  { name:'Dragon Sighting', effect:'Armor & weapons in demand · Fear premium on everything · Travel slowed', border:'#a0451f' },
+  { name:'Peaceful Prosperity', effect:'Standard prices · Luxury goods move well · Normal faction activity', border:'#1e3a1e' },
+];
+
+const DEFAULT_FACTIONS = [
+  { name:'Harpers', align:'ally', wants:'Information, anti-evil artifacts, scrolls', color:'#b8cce8', textColor:'#0d2a50' },
+  { name:'Zhentarim', align:'neutral', wants:'Weapons, black market items, leverage', color:'#f0b8b8', textColor:'#5a0000' },
+  { name:'Lords\' Alliance', align:'ally', wants:'Noble goods, military items, political intel', color:'#d4b8e8', textColor:'#2e1a4a' },
+  { name:'Emerald Enclave', align:'neutral', wants:'Natural materials, beast components, land info', color:'#c8ddb0', textColor:'#1e3a1e' },
+  { name:'Order of the Gauntlet', align:'ally', wants:'Holy relics, fiend-slaying weapons, undead intel', color:'#f0c8a0', textColor:'#5a2000' },
+  { name:'Xanathar\'s Guild', align:'hostile', wants:'Rare magic, blackmail, anything valuable', color:'#d4ceb8', textColor:'#2a1a08' },
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let state = { items: [], conditions: [], factions: [...DEFAULT_FACTIONS], lastRolled: [] };
+let syncing = false;
+
+// ── STORAGE (hub storage API or localStorage fallback) ─────────────────────────
+const storage = (function() {
+  const key = 'loot-ledger-v1';
+  const hasStorage = typeof window !== 'undefined' && window.storage && typeof window.storage.get === 'function' && typeof window.storage.set === 'function';
+  return {
+    async get(shared) {
+      if (hasStorage) {
+        try {
+          const r = await window.storage.get(key, shared);
+          return r && r.value != null ? r : null;
+        } catch (e) { return null; }
+      }
+      try {
+        const raw = localStorage.getItem(key);
+        return raw != null ? { value: raw } : null;
+      } catch (e) { return null; }
+    },
+    async set(value, shared) {
+      const str = typeof value === 'string' ? value : JSON.stringify(value);
+      if (hasStorage) {
+        try {
+          await window.storage.set(key, str, shared);
+          return;
+        } catch (e) {}
+      }
+      try { localStorage.setItem(key, str); } catch (e) {}
+    }
+  };
+})();
+
+async function saveState() {
+  setSyncing(true);
+  try {
+    await storage.set({
+      items: state.items,
+      conditions: state.conditions,
+      factions: state.factions,
+      ts: Date.now()
+    }, true);
+  } catch (e) {}
+  setSyncing(false);
+}
+
+async function loadState() {
+  try {
+    const r = await storage.get(true);
+    const raw = r && (r.value != null ? r.value : r);
+    const str = typeof raw === 'string' ? raw : (raw && raw.value);
+    if (str) {
+      const d = JSON.parse(str);
+      state.items = d.items || [];
+      state.conditions = d.conditions || [];
+      state.factions = d.factions && d.factions.length ? d.factions : [...DEFAULT_FACTIONS];
+    }
+  } catch (e) {}
+  renderAll();
+}
+
+function setSyncing(val) {
+  syncing = val;
+  const dot = document.getElementById('syncDot');
+  const lbl = document.getElementById('syncLabel');
+  if (dot) { dot.className = 'sync-dot ' + (val ? 'sync-pending' : 'sync-ok'); }
+  if (lbl) { lbl.textContent = val ? 'Syncing...' : 'Synced · shared ledger'; }
+}
+
+// Poll for remote changes every 8s
+setInterval(async () => {
+  try {
+    const r = await storage.get(true);
+    if (r && r.value) {
+      const d = JSON.parse(typeof r.value === 'string' ? r.value : JSON.stringify(r.value));
+      if ((d.items || []).length !== state.items.length || JSON.stringify(d.conditions) !== JSON.stringify(state.conditions)) {
+        state.items = d.items || state.items;
+        state.conditions = d.conditions || state.conditions;
+        state.factions = d.factions && d.factions.length ? d.factions : state.factions;
+        renderAll();
+      }
+    }
+  } catch (e) {}
+}, 8000);
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function switchTab(evt, id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const panel = document.getElementById('tab-'+id);
+  if (panel) panel.classList.add('active');
+  const target = (evt && evt.target) ? evt.target : document.querySelector('.tab[onclick*="'+id+'"]');
+  if (target) target.classList.add('active');
+  if (id === 'market') calcLeverage();
+}
+
+// ── LEDGER ────────────────────────────────────────────────────────────────────
+function addItem() {
+  const name = document.getElementById('itemName').value.trim();
+  if (!name) { document.getElementById('itemName').focus(); return; }
+  const item = {
+    id: Date.now(),
+    name,
+    tier: parseInt(document.getElementById('itemTier').value),
+    val: parseFloat(document.getElementById('itemValue').value) || 0,
+    qty: parseInt(document.getElementById('itemQty').value) || 1,
+    status: document.getElementById('itemStatus').value,
+    notes: document.getElementById('itemNotes').value.trim()
+  };
+  state.items.push(item);
+  saveState();
+  renderLedger();
+  ['itemName','itemValue','itemNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('itemQty').value = '1';
+}
+
+function removeItem(id) {
+  state.items = state.items.filter(i => i.id !== id);
+  saveState();
+  renderLedger();
+}
+
+function cycleStatus(id) {
+  const cycle = ['holding','forsale','sold','leverage'];
+  const item = state.items.find(i => i.id === id);
+  if (item) {
+    item.status = cycle[(cycle.indexOf(item.status)+1) % cycle.length];
+    saveState();
+    renderLedger();
+  }
+}
+
+const STATUS_COLOR = { holding:'#8a7050', forsale:'#1e5a1e', sold:'#5a0000', leverage:'#2e1a4a' };
+const STATUS_LABEL = { holding:'Holding', forsale:'For Sale', sold:'Sold', leverage:'Leverage' };
+
+function renderLedger() {
+  const tbody = document.getElementById('ledgerBody');
+  const tfoot = document.getElementById('ledgerFoot');
+  if (!state.items.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">No loot yet — roll some or add manually</td></tr>';
+    tfoot.innerHTML = '';
+    return;
+  }
+  let totalGp = 0;
+  tbody.innerHTML = state.items.map(item => {
+    const t = TIER_INFO[item.tier];
+    const lineVal = item.val * item.qty;
+    totalGp += item.status !== 'sold' ? lineVal : 0;
+    return `<tr>
+      <td>
+        <div class="item-name">${item.name}</div>
+        ${item.notes ? `<div class="item-note">${item.notes}</div>` : ''}
+      </td>
+      <td><span class="tier-badge ${t.color}">${t.label}</span></td>
+      <td style="font-size:13px;color:#5a3a00">${item.qty}</td>
+      <td>
+        <div class="value-gp">${item.val > 0 ? item.val+'gp' : '—'}</div>
+        <div class="value-range">${t.range}</div>
+      </td>
+      <td>
+        <span style="font-size:11px;font-weight:600;cursor:pointer;color:${STATUS_COLOR[item.status]};padding:2px 6px;background:${STATUS_COLOR[item.status]}18;border-radius:10px"
+          onclick="cycleStatus(${item.id})" title="Click to cycle status">${STATUS_LABEL[item.status]}</span>
+      </td>
+      <td><button class="btn btn-ghost btn-sm" onclick="removeItem(${item.id})" title="Remove">×</button></td>
+    </tr>`;
+  }).join('');
+  tfoot.innerHTML = `<tr class="total-row">
+    <td colspan="3" style="font-size:11px;color:var(--ll-rust);text-transform:uppercase;letter-spacing:0.05em">Active Holdings Total</td>
+    <td class="value-gp" style="font-size:14px">${totalGp.toLocaleString()}gp</td>
+    <td colspan="2"></td>
+  </tr>`;
+}
+
+// ── ROLLER ────────────────────────────────────────────────────────────────────
+function rollLoot() {
+  const cr = document.getElementById('rollCR').value;
+  const type = document.getElementById('rollType').value;
+  const pool = LOOT_TABLES[cr][type];
+  if (!pool || !pool.length) {
+    document.getElementById('rollItems').innerHTML = '<div class="empty">No table for this combination — try a different type.</div>';
+    document.getElementById('rollOutput').classList.add('show');
+    return;
+  }
+  // Pick 2–5 random items
+  const shuffled = [...pool].sort(() => Math.random()-0.5);
+  const count = Math.min(pool.length, 2 + Math.floor(Math.random() * 4));
+  state.lastRolled = shuffled.slice(0, count).map(i => ({...i, id: Date.now()+Math.random(), qty:1, status:'holding'}));
+  const seed = `Roll #${Math.floor(Math.random()*9000)+1000}`;
+  document.getElementById('rollSeed').textContent = seed;
+  renderRollOutput();
+  document.getElementById('rollOutput').classList.add('show');
+}
+
+function renderRollOutput() {
+  document.getElementById('rollItems').innerHTML = state.lastRolled.map((item,i) => {
+    const t = TIER_INFO[item.tier];
+    return `<div class="roll-item">
+      <div style="flex:1">
+        <span class="item-name">${item.name}</span>
+        <span class="item-note" style="margin-left:8px">${item.note}</span>
+      </div>
+      <span class="tier-badge ${t.color}" style="margin:0 8px">${t.label}</span>
+      <span class="value-gp">${item.val > 0 ? item.val+'gp' : 'Priceless'}</span>
+    </div>`;
+  }).join('');
+}
+
+function addAllToLedger(evt) {
+  state.lastRolled.forEach(item => {
+    state.items.push({ id: Date.now() + Math.random(), name: item.name, tier: item.tier, val: item.val, qty: 1, status: 'holding', notes: item.note });
+  });
+  saveState();
+  renderLedger();
+  const btn = (evt && evt.target) ? evt.target : document.querySelector('#rollOutput .btn-gold');
+  if (btn) {
+    btn.textContent = 'Added!';
+    setTimeout(function() { btn.textContent = 'Add All to Ledger'; }, 1500);
+  }
+}
+
+// ── MARKET ────────────────────────────────────────────────────────────────────
+function rollConditions() {
+  const shuffled = [...MARKET_CONDITIONS].sort(() => Math.random()-0.5);
+  state.conditions = shuffled.slice(0, 2);
+  saveState();
+  renderConditions();
+}
+
+function clearConditions() {
+  state.conditions = [];
+  saveState();
+  renderConditions();
+}
+
+function renderConditions() {
+  const el = document.getElementById('conditionsList');
+  if (!state.conditions.length) {
+    el.innerHTML = '<div class="empty" style="padding:12px">No active conditions — roll to set market state</div>';
+    return;
+  }
+  el.innerHTML = state.conditions.map(c => `
+    <div class="condition-card" style="border-left-color:${c.border}">
+      <div class="condition-name">${c.name}</div>
+      <div class="condition-effect">${c.effect}</div>
+    </div>
+  `).join('');
+}
+
+function calcLeverage() {
+  const tier = parseInt(document.getElementById('calcTier').value);
+  const buyer = document.getElementById('calcBuyer').value;
+  const t = TIER_INFO[tier];
+  const base = t.leverage;
+  const mods = {
+    market: { mod: 0, note: 'Standard market rate · expect haggling' },
+    guild: { mod: +12, note: 'Guilds pay fair value for relevant items · less haggling' },
+    noble: { mod: +8, note: 'Status items command premium · slow transaction' },
+    black: { mod: -25, note: 'Fence takes 30–40% cut · no questions asked' },
+    faction: { mod: +20, note: 'Allied faction may pay above market or offer non-monetary value' },
+  };
+  const m = mods[buyer];
+  const final = Math.max(0, Math.min(100, base + m.mod));
+  const barColor = ['#888780','#639922','#185FA5','#9C58D8','#D85A30','#D4537E'][tier];
+  document.getElementById('leverageResult').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <span class="tier-badge ${t.color}">${t.label} ${t.name}</span>
+      <span style="font-size:13px;color:#8a7050">→</span>
+      <span style="font-size:13px;color:var(--ll-rust);font-weight:600">${final}/100 leverage</span>
+    </div>
+    <div style="height:8px;background:var(--ll-parchment3);border-radius:4px;overflow:hidden;margin-bottom:8px">
+      <div style="height:100%;width:${final}%;background:${barColor};border-radius:4px;transition:width 0.3s"></div>
+    </div>
+    <div style="font-size:13px;color:#5a3a00;font-style:italic">${m.note}</div>
+    <div style="font-size:12px;color:#8a7050;margin-top:4px">Base value range: ${t.range}</div>
+  `;
+}
+
+// ── FACTIONS ──────────────────────────────────────────────────────────────────
+function addFaction() {
+  const name = document.getElementById('factionName').value.trim();
+  if (!name) return;
+  const hue = Math.floor(Math.random() * 360);
+  state.factions.push({
+    name,
+    align: document.getElementById('factionAlign').value,
+    wants: document.getElementById('factionWants').value.trim(),
+    color: `hsl(${hue},30%,82%)`,
+    textColor: `hsl(${hue},40%,25%)`
+  });
+  saveState();
+  renderFactions();
+  document.getElementById('factionName').value = '';
+  document.getElementById('factionWants').value = '';
+}
+
+function removeFaction(i) {
+  state.factions.splice(i, 1);
+  saveState();
+  renderFactions();
+}
+
+const ALIGN_LABEL = { ally:'Ally', neutral:'Neutral', hostile:'Hostile', unknown:'Unknown' };
+const ALIGN_COLOR = { ally:'#1e5a1e', neutral:'#5a3a00', hostile:'#7a1515', unknown:'#3a3a3a' };
+
+function renderFactions() {
+  const el = document.getElementById('factionList');
+  el.innerHTML = state.factions.map((f, i) => `
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(184,134,11,0.15);${i===state.factions.length-1?'border:none':''}">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:13px;font-weight:600;color:var(--ll-ink)">${f.name}</span>
+          <span style="font-size:11px;font-weight:600;color:${ALIGN_COLOR[f.align]};background:${ALIGN_COLOR[f.align]}18;padding:1px 7px;border-radius:10px">${ALIGN_LABEL[f.align]}</span>
+        </div>
+        ${f.wants ? `<div style="font-size:12px;color:#8a7050;margin-top:3px;font-style:italic">Wants: ${f.wants}</div>` : ''}
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="removeFaction(${i})" title="Remove">×</button>
+    </div>
+  `).join('');
+}
+
+// ── RENDER ALL ────────────────────────────────────────────────────────────────
+function renderAll() {
+  renderLedger();
+  renderConditions();
+  renderFactions();
+  calcLeverage();
+}
+
+// ── LEDGER THEME (hub vs parchment) ───────────────────────────────────────────
+const THEME_KEY = 'loot-ledger-theme';
+function getStoredLedgerTheme() {
+  try { return localStorage.getItem(THEME_KEY) || 'hub'; } catch (e) { return 'hub'; }
+}
+function setStoredLedgerTheme(theme) {
+  try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+}
+function applyLedgerTheme(theme) {
+  if (theme === 'parchment') {
+    document.body.classList.add('loot-ledger-parchment');
+    document.getElementById('themeBtnParchment').classList.add('active');
+    document.getElementById('themeBtnHub').classList.remove('active');
+  } else {
+    document.body.classList.remove('loot-ledger-parchment');
+    document.getElementById('themeBtnHub').classList.add('active');
+    document.getElementById('themeBtnParchment').classList.remove('active');
+  }
+}
+function initLedgerTheme() {
+  applyLedgerTheme(getStoredLedgerTheme());
+  document.getElementById('themeBtnHub').addEventListener('click', function() {
+    setStoredLedgerTheme('hub');
+    applyLedgerTheme('hub');
+  });
+  document.getElementById('themeBtnParchment').addEventListener('click', function() {
+    setStoredLedgerTheme('parchment');
+    applyLedgerTheme('parchment');
+  });
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+loadState();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initLedgerTheme);
+} else {
+  initLedgerTheme();
+}
+</script>
+    <script src="theme.js"></script>
+</body>
+</html>

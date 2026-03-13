@@ -77,6 +77,45 @@ const styleNames = {
     I: "Episodic / Procedural"
 };
 
+// Myers-Briggs: for each original prompt index, which dimension and which style id maps to which letter
+const promptMBTI = [
+    { dim: 'TF', idToLetter: { A: 'F', B: 'T' } },   // 0: story vs combat
+    { dim: 'SN', idToLetter: { C: 'S', D: 'N' } },   // 1: places vs plans
+    { dim: 'TF', idToLetter: { E: 'T', G: 'F' } },   // 2: logic vs fun
+    { dim: 'TF', idToLetter: { F: 'T', A: 'F' } },   // 3: mechanical vs depth
+    { dim: 'JP', idToLetter: { B: 'P', I: 'J' } },   // 4: fight vs clear goal
+    { dim: 'SN', idToLetter: { C: 'S', D: 'N' } },   // 5: supplies vs outsmart
+    { dim: 'JP', idToLetter: { H: 'J', G: 'P' } },   // 6: tension vs relaxed
+    { dim: 'TF', idToLetter: { E: 'T', A: 'F' } },   // 7: consequences vs emotional
+    { dim: 'JP', idToLetter: { F: 'J', B: 'P' } },   // 8: rules deeply vs tactics moment
+    { dim: 'JP', idToLetter: { I: 'J', C: 'P' } },   // 9: complete sessions vs discovery
+    { dim: 'JP', idToLetter: { D: 'P', E: 'J' } },   // 10: freedom vs push back
+    { dim: 'TF', idToLetter: { H: 'F', F: 'T' } },   // 11: vulnerable vs capable
+    { dim: 'TF', idToLetter: { A: 'F', B: 'T' } },   // 12: character moments vs clutch combats
+    { dim: 'EI', idToLetter: { G: 'E', D: 'I' } },   // 13: friends vs brain
+    { dim: 'JP', idToLetter: { I: 'P', H: 'J' } }   // 14: adventure week vs slow tension
+];
+
+// Myers-Briggs type descriptions (D&D playstyle lens)
+const mbtiDescriptions = {
+    INTJ: "Strategic and world-driven. You like consistent worlds, long-term consequences, and mastering systems.",
+    INTP: "Idea-focused and exploratory. You prefer freedom, discovery, and outsmarting obstacles over strict structure.",
+    ENTJ: "Decisive and tactical. You enjoy clear goals, tough combats, and applying logic under pressure.",
+    ENTP: "Adaptive and clever. You like variety, problem-solving, and sessions that keep you thinking.",
+    INFJ: "Character and meaning first. You care about emotional payoff, growth, and memorable story moments.",
+    INFP: "Inner world and narrative. You enjoy character depth, discovery, and emotional stakes.",
+    ENFJ: "Social and story-driven. You play for connection, shared fun, and character moments at the table.",
+    ENFP: "Enthusiastic and open-ended. You like relaxed vibes, freedom, and discovery over rigid structure.",
+    ISTJ: "Consistent and by-the-book. You value logic, consequences, and well-run structure.",
+    ISFJ: "Supportive and grounded. You care about the group having fun and emotional payoff.",
+    ESTJ: "Organized and tactical. You like clear goals, tough fights, and effective outcomes.",
+    ESFJ: "Friendly and collaborative. You play to spend time with friends and keep the table happy.",
+    ISTP: "In-the-moment and capable. You enjoy tactics, mechanics, and adapting to challenges.",
+    ISFP: "Present and character-focused. You remember character moments and emotional beats.",
+    ESTP: "Action-oriented and effective. You like clutch combats and feeling capable.",
+    ESFP: "Social and spontaneous. You enjoy relaxed sessions and making memorable moments with others."
+};
+
 // State Management
 let state = {
     currentPromptIndex: 0,
@@ -164,6 +203,7 @@ const elements = {
     navNext: document.getElementById('nav-next'),
     quizSection: document.getElementById('quiz-section'),
     resultsSection: document.getElementById('results-section'),
+    resultsMbti: document.getElementById('results-mbti'),
     resultsSummary: document.getElementById('results-summary'),
     resultsChart: document.getElementById('results-chart'),
     resultsAll: document.getElementById('results-all'),
@@ -518,11 +558,38 @@ function updateProgress() {
     elements.progressText.setAttribute('aria-label', `Quiz progress: ${answered} of ${state.randomizedPrompts.length} prompts answered`);
 }
 
+// Calculate Myers-Briggs type from answers (uses original prompt order)
+function calculateMBTI() {
+    if (!state.promptOrder || state.promptOrder.length !== originalPrompts.length) {
+        return { type: '—', description: 'Complete all prompts to see your Myers-Briggs playstyle type.', counts: {} };
+    }
+    const counts = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+    for (let i = 0; i < state.answers.length; i++) {
+        const answer = state.answers[i];
+        if (answer === null) continue;
+        const originalIndex = state.promptOrder[i];
+        const mapping = promptMBTI[originalIndex];
+        if (!mapping || !mapping.idToLetter[answer]) continue;
+        const letter = mapping.idToLetter[answer];
+        counts[letter]++;
+    }
+    const type =
+        (counts.E >= counts.I ? 'E' : 'I') +
+        (counts.S >= counts.N ? 'S' : 'N') +
+        (counts.T >= counts.F ? 'T' : 'F') +
+        (counts.J >= counts.P ? 'J' : 'P');
+    return {
+        type,
+        description: mbtiDescriptions[type] || "Your playstyle mix doesn't map neatly to one type—you're a blend.",
+        counts
+    };
+}
+
 // Calculate Results
 function calculateResults() {
     const results = [];
     const totalAnswers = 15;
-    
+
     for (let id of 'ABCDEFGHI') {
         const count = state.styleCounts[id] || 0;
         if (count > 0) {
@@ -535,7 +602,7 @@ function calculateResults() {
             });
         }
     }
-    
+
     // Sort by percentage (descending), then alphabetically for ties
     results.sort((a, b) => {
         if (b.percentage !== a.percentage) {
@@ -543,7 +610,7 @@ function calculateResults() {
         }
         return a.id.localeCompare(b.id);
     });
-    
+
     return results;
 }
 
@@ -611,7 +678,15 @@ function displayResults() {
     if (elements.shareButton) {
         elements.shareButton.onclick = shareResults;
     }
-    
+
+    // Display Myers-Briggs type
+    const mbti = calculateMBTI();
+    elements.resultsMbti.innerHTML = `
+        <div class="mbti-type">${mbti.type}</div>
+        <p class="mbti-description">${mbti.description}</p>
+    `;
+    elements.resultsMbti.setAttribute('aria-label', `Myers-Briggs playstyle type: ${mbti.type}. ${mbti.description}`);
+
     // Display Top 3
     elements.resultsSummary.innerHTML = '';
     top3.forEach((result, index) => {
@@ -671,14 +746,16 @@ function displayResults() {
 // Build Share Text
 function buildShareText(results) {
     const { top3, all } = handleTies(results);
+    const mbti = calculateMBTI();
     let text = 'My D&D Playstyle Results:\n';
-    
+    text += `Myers-Briggs playstyle type: ${mbti.type}\n${mbti.description}\n\n`;
+
     // Top 3
     top3.forEach((result, index) => {
         const rank = index + 1;
         text += `${rank}) ${result.name} ${result.percentage}%\n`;
     });
-    
+
     // Full breakdown (include all results)
     if (all.length > 0) {
         text += '\nFull breakdown: ';
@@ -686,10 +763,10 @@ function buildShareText(results) {
         text += breakdown;
         text += '\n';
     }
-    
+
     // Add URL
     text += `\n${location.href}`;
-    
+
     return text;
 }
 
@@ -796,8 +873,10 @@ function updateAccessibilityAnnouncements(context = 'prompt') {
         const announcement = `Prompt ${state.currentPromptIndex + 1} of ${state.randomizedPrompts.length}. ${answered} prompts answered.`;
         elements.srAnnouncements.textContent = announcement;
     } else if (context === 'results') {
+        const mbti = calculateMBTI();
         const { top3 } = handleTies(calculateResults());
-        let announcement = 'Quiz complete. Your top playstyle preferences: ';
+        let announcement = `Quiz complete. Your Myers-Briggs playstyle type: ${mbti.type}. ${mbti.description} `;
+        announcement += 'Your top playstyle preferences: ';
         top3.forEach((result, index) => {
             const rank = index === 0 ? 'first' : index === 1 ? 'second' : 'third';
             announcement += `${rank}, ${result.name} at ${result.percentage} percent. `;
