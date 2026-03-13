@@ -42,16 +42,20 @@
                     <input type="url" id="alb-discord-thread" placeholder="https://discord.com/…" autocomplete="url">
                 </div>
             </div>
-            <div class="alb-section-title alb-table-title">Players &amp; characters</div>
+            <div class="alb-section-title alb-table-title">
+                Players &amp; characters
+                <a href="#" id="alb-manage-players-btn" class="alb-btn alb-btn-link" aria-label="Manage players and characters in database">Manage Players</a>
+            </div>
             <div class="alb-fields alb-table-fields">
                 <div class="alb-field alb-field-full">
-                    <label id="alb-players-table-label">Players &amp; characters</label>
+                    <label id="alb-players-table-label" class="alb-sr-only">Players and characters</label>
                     <div class="alb-players-table-wrap" role="region" aria-labelledby="alb-players-table-label">
-                        <table class="alb-players-table" id="alb-players-table" aria-label="Player name and character name per row">
+                        <table class="alb-players-table" id="alb-players-table" aria-label="Player name, character name, and role per row">
                             <thead>
                                 <tr>
                                     <th scope="col">Player name</th>
                                     <th scope="col">Character name</th>
+                                    <th scope="col">Role</th>
                                     <th scope="col"><span class="alb-sr-only">Remove row</span></th>
                                 </tr>
                             </thead>
@@ -60,10 +64,8 @@
                             </tbody>
                         </table>
                         <datalist id="alb-player-suggestions"></datalist>
-                        <p class="alb-helper alb-table-hint">Add a row with character name &quot;DM&quot; for the person who ran the session.</p>
                         <div class="alb-table-actions">
-                            <button type="button" id="alb-manage-players-btn" class="alb-btn">Manage Players</button>
-                            <button type="button" id="alb-add-player-btn" class="alb-btn alb-add-row-btn" aria-label="Add player or character row">Add Player / Character</button>
+                            <button type="button" id="alb-add-player-btn" class="alb-btn alb-add-row-btn" aria-label="Add row">Add Row</button>
                         </div>
                     </div>
                 </div>

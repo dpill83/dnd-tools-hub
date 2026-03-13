@@ -34,19 +34,21 @@
         const discordThreadLink = (document.getElementById('alb-discord-thread') && document.getElementById('alb-discord-thread').value) || '';
         const tbody = document.getElementById('alb-players-tbody');
         const players = [];
+        let dm = '';
         if (tbody) {
             tbody.querySelectorAll('tr').forEach(function (tr) {
                 const playerInput = tr.querySelector('.alb-input-player');
                 const characterInput = tr.querySelector('.alb-input-character');
+                const roleSelect = tr.querySelector('.alb-input-role');
                 const player = (playerInput && playerInput.value) ? playerInput.value.trim() : '';
                 const character = (characterInput && characterInput.value) ? characterInput.value.trim() : '';
+                const role = (roleSelect && roleSelect.value) ? roleSelect.value : 'PLAYER';
                 if (player || character) {
-                    players.push({ player: player, character: character });
+                    players.push({ player: player, character: character, role: role });
+                    if (role === 'DM') dm = player;
                 }
             });
         }
-        const dmRow = players.find(function (p) { return (p.character || '').trim().toLowerCase() === 'dm'; });
-        const dm = dmRow ? (dmRow.player || '').trim() : '';
         return {
             adventure: adventure.trim(),
             partOfCampaign: partOfCampaign.trim(),
@@ -66,11 +68,31 @@
         };
     }
 
+    function markMatchedRows(items) {
+        if (!Array.isArray(items)) return;
+        const namesMap = {};
+        items.forEach(function (p) {
+            const n = (p && p.name != null) ? String(p.name).trim().toLowerCase() : '';
+            if (n) namesMap[n] = true;
+        });
+        const tbody = document.getElementById('alb-players-tbody');
+        if (!tbody) return;
+        tbody.querySelectorAll('tr').forEach(function (tr) {
+            const playerInput = tr.querySelector('.alb-input-player');
+            const val = (playerInput && playerInput.value) ? playerInput.value.trim().toLowerCase() : '';
+            const matched = val && namesMap[val];
+            tr.classList.toggle('alb-row-player-matched', !!matched);
+        });
+    }
+
     function updatePlayerSuggestions(query) {
         const datalist = document.getElementById('alb-player-suggestions');
         if (!datalist) return;
         datalist.innerHTML = '';
-        if (!query || !query.trim()) return;
+        if (!query || !query.trim()) {
+            markMatchedRows([]);
+            return;
+        }
         fetch(API_PLAYERS + '?q=' + encodeURIComponent(query.trim()))
             .then(function (res) { return res.ok ? res.json() : []; })
             .then(function (items) {
@@ -84,27 +106,51 @@
                         datalist.appendChild(opt);
                     }
                 });
+                markMatchedRows(items);
             })
-            .catch(function () {});
+            .catch(function () { markMatchedRows([]); });
     }
 
-    function addPlayerRow(player, character) {
+    function updateRemoveButtons() {
+        const tbody = document.getElementById('alb-players-tbody');
+        if (!tbody) return;
+        const rows = tbody.querySelectorAll('tr');
+        const showRemove = rows.length > 1;
+        rows.forEach(function (tr) {
+            const removeCell = tr.querySelector('.alb-row-remove');
+            if (removeCell) removeCell.style.visibility = showRemove ? 'visible' : 'hidden';
+        });
+    }
+
+    function addPlayerRow(player, character, role) {
         const tbody = document.getElementById('alb-players-tbody');
         if (!tbody) return;
         player = player || '';
         character = character || '';
+        role = role || 'PLAYER';
         const tr = document.createElement('tr');
         const playerId = 'alb-player-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+        const roleId = playerId + '-role';
         tr.innerHTML =
-            '<td><label for="' + playerId + '" class="alb-sr-only">Player name</label><input type="text" class="alb-input-player" id="' + playerId + '" list="alb-player-suggestions" placeholder="Player name" autocomplete="off"></td>' +
+            '<td class="alb-cell-player">' +
+            '<label for="' + playerId + '" class="alb-sr-only">Player name</label>' +
+            '<input type="text" class="alb-input-player" id="' + playerId + '" list="alb-player-suggestions" placeholder="Player name" autocomplete="off">' +
+            '<span class="alb-player-matched" aria-hidden="true" title="Known player">&#10003;</span>' +
+            '</td>' +
             '<td><label for="' + playerId + '-char" class="alb-sr-only">Character name</label><input type="text" class="alb-input-character" id="' + playerId + '-char" placeholder="Character name"></td>' +
+            '<td><label for="' + roleId + '" class="alb-sr-only">Role</label><select class="alb-input-role" id="' + roleId + '" aria-label="Role"><option value="PLAYER">Player</option><option value="DM">DM</option></select></td>' +
             '<td class="alb-row-remove"><button type="button" class="alb-row-remove-btn" aria-label="Remove this row">\u2012</button></td>';
         const playerInput = tr.querySelector('.alb-input-player');
         const characterInput = tr.querySelector('.alb-input-character');
+        const roleSelect = tr.querySelector('.alb-input-role');
         if (playerInput) playerInput.value = player;
         if (characterInput) characterInput.value = character;
+        if (roleSelect) {
+            roleSelect.value = role === 'DM' ? 'DM' : 'PLAYER';
+        }
         tr.querySelector('.alb-row-remove-btn').addEventListener('click', function () {
             tr.remove();
+            updateRemoveButtons();
         });
         var debouncedSuggest = debounce(function () {
             updatePlayerSuggestions(playerInput.value);
@@ -112,6 +158,7 @@
         playerInput.addEventListener('input', debouncedSuggest);
         playerInput.addEventListener('focus', function () { updatePlayerSuggestions(playerInput.value); });
         tbody.appendChild(tr);
+        updateRemoveButtons();
     }
 
     function initPlayersTable() {
@@ -671,8 +718,7 @@
     function parseRewardsFromLog(logText, session) {
         var rows = [];
         var playerNames = (session.players || []).filter(function (p) {
-            var c = (p.character || '').trim().toLowerCase();
-            return c !== 'dm';
+            return (p.role || 'PLAYER') !== 'DM';
         }).map(function (p) { return (p.player || '').trim(); }).filter(Boolean);
         if (!playerNames.length) return rows;
         var rewardsSection = logText.match(/(?:##?\s*Rewards?[\s\S]*?)(?=##|\n---|\z)/i);
@@ -698,8 +744,7 @@
         var session = getSessionFromForm();
         var suggested = parseRewardsFromLog(logText, session);
         var playerNames = (session.players || []).filter(function (p) {
-            var c = (p.character || '').trim().toLowerCase();
-            return c !== 'dm';
+            return (p.role || 'PLAYER') !== 'DM';
         }).map(function (p) { return (p.player || '').trim(); }).filter(Boolean);
         var seen = {};
         var rows = [];
@@ -744,7 +789,7 @@
         var session = getSessionFromForm();
         var rewards = collectRewardsFromPanel();
         var attendees = (session.players || []).map(function (p) {
-            var role = (p.character || '').trim().toLowerCase() === 'dm' ? 'DM' : 'PLAYER';
+            var role = (p.role === 'DM') ? 'DM' : 'PLAYER';
             return { player_name: (p.player || '').trim(), character_name: (p.character || '').trim(), role: role };
         }).filter(function (a) { return a.player_name || a.character_name; });
         var payload = {
@@ -1008,7 +1053,12 @@
         }
 
         var manageBtn = document.getElementById('alb-manage-players-btn');
-        if (manageBtn) manageBtn.addEventListener('click', openManageModal);
+        if (manageBtn) {
+            manageBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                openManageModal();
+            });
+        }
 
         var modal = document.getElementById('alb-manage-players-modal');
         if (modal) {

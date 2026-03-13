@@ -1,0 +1,15 @@
+# Cloudflare Pages + D1 for Adventure Log Builder
+# 1. Create the D1 database: npx wrangler d1 create adventure-log-db
+# 2. Replace database_id below with the id from that command
+# 3. From this directory (project root, where schema.sql lives), apply schema:
+#    npx wrangler d1 execute ADVENTURE_LOG_DB --remote --file=schema.sql
+# 4. Deploy: npx wrangler pages deploy (or connect repo to Pages; bindings from this file apply when using Wrangler deploy)
+
+name = "dnd-tools-hub"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "ADVENTURE_LOG_DB"
+database_name = "adventure-log-db"
+# Replace with your database id from: npx wrangler d1 create adventure-log-db
+database_id = "7786bca6-fb87-45cf-bb53-6bd841d5c753"
