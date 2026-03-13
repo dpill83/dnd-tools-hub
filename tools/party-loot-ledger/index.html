@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Party Loot Ledger – D&D Tools Hub</title>
-    <link rel="stylesheet" href="global.css">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../../global.css">
+    <link rel="stylesheet" href="../../styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 /* Ledger-local variables: hub (default) uses global theme */
@@ -435,6 +435,16 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
 .roller-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .roll-seed { font-size: 0.75rem; color: var(--ll-value-range); font-style: italic; }
 
+.market-conditions-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+.ledger-help-content-wide { max-width: 42rem; }
+.ref-condition-item { border-left: 3px solid var(--ll-gold); padding: 8px 12px; background: var(--ll-condition-bg); border-radius: 0 6px 6px 0; margin-bottom: 8px; }
+.ref-condition-item:last-child { margin-bottom: 0; }
+.ref-loot-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--ll-table-row-border); }
+.ref-loot-item:last-child { border-bottom: none; }
+.ref-loot-name { font-weight: 600; color: var(--ll-ink); }
+.ref-loot-note { font-size: 0.75rem; color: var(--ll-item-note); font-style: italic; margin-top: 2px; }
+
 @media (max-width: 600px) {
   .loot-ledger-container .form-row { grid-template-columns: 1fr; }
   .loot-ledger-container .form-row.three { grid-template-columns: 1fr 1fr; }
@@ -483,6 +493,28 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
                 <h3>Appearance</h3>
                 <p>Use <em>Hub style</em> to match the rest of the D&amp;D Tools Hub (and light/dark theme). Use <em>Parchment</em> for a darker, parchment look. Your choice is remembered.</p>
             </div>
+        </div>
+    </div>
+
+    <div id="conditionsRefModal" class="ledger-help-modal" role="dialog" aria-labelledby="conditionsRefTitle" aria-modal="true" hidden>
+        <div class="ledger-help-overlay" id="conditionsRefOverlay"></div>
+        <div class="ledger-help-content">
+            <div class="ledger-help-header">
+                <h2 id="conditionsRefTitle">All market conditions</h2>
+                <button type="button" class="ledger-help-close" id="conditionsRefClose" aria-label="Close">&times;</button>
+            </div>
+            <div class="ledger-help-body" id="conditionsRefBody"></div>
+        </div>
+    </div>
+
+    <div id="lootTableRefModal" class="ledger-help-modal" role="dialog" aria-labelledby="lootTableRefTitle" aria-modal="true" hidden>
+        <div class="ledger-help-overlay" id="lootTableRefOverlay"></div>
+        <div class="ledger-help-content ledger-help-content-wide">
+            <div class="ledger-help-header">
+                <h2 id="lootTableRefTitle">Current loot table</h2>
+                <button type="button" class="ledger-help-close" id="lootTableRefClose" aria-label="Close">&times;</button>
+            </div>
+            <div class="ledger-help-body" id="lootTableRefBody"></div>
         </div>
     </div>
 
@@ -626,6 +658,7 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
       </div>
       <div class="roller-actions">
         <button class="btn btn-rust" onclick="rollLoot()" id="rollBtn">Roll the Hoard</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="viewLootTableBtn">View current table</button>
         <span class="roll-seed" id="rollSeed"></span>
       </div>
     </div>
@@ -642,14 +675,6 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
 
   <!-- MARKET TAB -->
   <div id="tab-market" class="panel">
-    <div class="card">
-      <div class="card-title">Market Conditions</div>
-      <div id="conditionsList"></div>
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button class="btn btn-rust btn-sm" onclick="rollConditions()">🎲 Randomize Conditions</button>
-        <button class="btn btn-ghost btn-sm" onclick="clearConditions()">Clear</button>
-      </div>
-    </div>
     <div class="card">
       <div class="card-title">Leverage Calculator</div>
       <div class="form-row">
@@ -676,6 +701,15 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
         </div>
       </div>
       <div id="leverageResult" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Market Conditions</div>
+      <div id="conditionsList"></div>
+      <div class="market-conditions-actions">
+        <button type="button" class="btn btn-rust btn-sm" onclick="rollConditions()">Randomize Conditions</button>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="clearConditions()">Clear</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="viewConditionsRefBtn">View all conditions</button>
+      </div>
     </div>
   </div>
 
@@ -1396,20 +1430,111 @@ function initLedgerHelp() {
   if (overlay) overlay.addEventListener('click', closeLedgerHelp);
 }
 
+// ── REFERENCE MODALS (market conditions list, current loot table) ──────────────
+function openConditionsRef() {
+  var body = document.getElementById('conditionsRefBody');
+  var modal = document.getElementById('conditionsRefModal');
+  if (!body || !modal) return;
+  body.innerHTML = MARKET_CONDITIONS.map(function(c) {
+    return '<div class="ref-condition-item" style="border-left-color:' + (c.border || 'var(--ll-gold)') + '">' +
+      '<div class="condition-name">' + c.name + '</div>' +
+      '<div class="condition-effect">' + c.effect + '</div></div>';
+  }).join('');
+  modal.removeAttribute('hidden');
+  document.addEventListener('keydown', conditionsRefEscape);
+}
+function closeConditionsRef() {
+  var modal = document.getElementById('conditionsRefModal');
+  if (modal) modal.setAttribute('hidden', '');
+  document.removeEventListener('keydown', conditionsRefEscape);
+}
+function conditionsRefEscape(e) { if (e.key === 'Escape') closeConditionsRef(); }
+
+function getCurrentLootPool() {
+  var tierSystem = document.getElementById('rollTierSystem').value;
+  var pool, title;
+  if (tierSystem === 'custom') {
+    var tier = parseInt(document.getElementById('rollCustomTier').value, 10);
+    var context = document.getElementById('rollContext').value;
+    var tierTable = CUSTOM_LOOT_TABLES[tier];
+    pool = tierTable && tierTable[context] ? tierTable[context] : [];
+    var tierLabel = TIER_INFO[tier] ? TIER_INFO[tier].label + ' ' + TIER_INFO[tier].name : 'T' + tier;
+    var contextLabels = { open: 'Open market', guild: 'Guild / Academy', faction: 'Faction deal', black: 'Black market / Fence', political: 'Political / Holding' };
+    title = tierLabel + ' · ' + (contextLabels[context] || context);
+  } else {
+    var cr = document.getElementById('rollCR').value;
+    var type = document.getElementById('rollType').value;
+    pool = LOOT_TABLES[cr] && LOOT_TABLES[cr][type] ? LOOT_TABLES[cr][type] : [];
+    var crLabels = { low: 'Low (CR 1–4)', mid: 'Mid (CR 5–10)', high: 'High (CR 11–16)', deadly: 'Deadly (CR 17+)' };
+    var typeLabels = { individual: 'Individual Monster', hoard: 'Treasure Hoard', merchant: 'Merchant Cache', dungeon: 'Dungeon Stash' };
+    title = (crLabels[cr] || cr) + ' · ' + (typeLabels[type] || type);
+  }
+  return { pool: pool, title: title };
+}
+
+function openLootTableRef() {
+  var result = getCurrentLootPool();
+  var body = document.getElementById('lootTableRefBody');
+  var titleEl = document.getElementById('lootTableRefTitle');
+  var modal = document.getElementById('lootTableRefModal');
+  if (!body || !titleEl || !modal) return;
+  titleEl.textContent = 'Current loot table: ' + result.title;
+  if (!result.pool.length) {
+    body.innerHTML = '<p class="empty">No table for this selection.</p>';
+  } else {
+    body.innerHTML = result.pool.map(function(i) {
+      var t = TIER_INFO[i.tier];
+      var tierClass = t ? t.color : 't0';
+      var tierLabel = t ? t.label : 'T' + i.tier;
+      return '<div class="ref-loot-item">' +
+        '<div><span class="ref-loot-name">' + i.name + '</span>' +
+        (i.note ? '<div class="ref-loot-note">' + i.note + '</div>' : '') + '</div>' +
+        '<span class="tier-badge ' + tierClass + '">' + tierLabel + '</span>' +
+        '<span class="value-gp">' + (i.val > 0 ? i.val + 'gp' : '—') + '</span></div>';
+    }).join('');
+  }
+  modal.removeAttribute('hidden');
+  document.addEventListener('keydown', lootTableRefEscape);
+}
+function closeLootTableRef() {
+  var modal = document.getElementById('lootTableRefModal');
+  if (modal) modal.setAttribute('hidden', '');
+  document.removeEventListener('keydown', lootTableRefEscape);
+}
+function lootTableRefEscape(e) { if (e.key === 'Escape') closeLootTableRef(); }
+
+function initRefModals() {
+  var viewConditionsBtn = document.getElementById('viewConditionsRefBtn');
+  var conditionsOverlay = document.getElementById('conditionsRefOverlay');
+  var conditionsClose = document.getElementById('conditionsRefClose');
+  if (viewConditionsBtn) viewConditionsBtn.addEventListener('click', openConditionsRef);
+  if (conditionsOverlay) conditionsOverlay.addEventListener('click', closeConditionsRef);
+  if (conditionsClose) conditionsClose.addEventListener('click', closeConditionsRef);
+
+  var viewLootTableBtn = document.getElementById('viewLootTableBtn');
+  var lootTableOverlay = document.getElementById('lootTableRefOverlay');
+  var lootTableClose = document.getElementById('lootTableRefClose');
+  if (viewLootTableBtn) viewLootTableBtn.addEventListener('click', openLootTableRef);
+  if (lootTableOverlay) lootTableOverlay.addEventListener('click', closeLootTableRef);
+  if (lootTableClose) lootTableClose.addEventListener('click', closeLootTableRef);
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 loadState();
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', function() {
     initLedgerTheme();
     initLedgerHelp();
+    initRefModals();
     toggleRollerOptions();
   });
 } else {
   initLedgerTheme();
   initLedgerHelp();
+  initRefModals();
   toggleRollerOptions();
 }
 </script>
-    <script src="theme.js"></script>
+    <script src="../../theme.js"></script>
 </body>
 </html>

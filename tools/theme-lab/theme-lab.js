@@ -39,6 +39,244 @@
         '--card-bg': '#353535'
     };
 
+    /** Curated palettes for "Surprise me" – each is a full light + dark theme with consistent contrast and semantics. */
+    const SURPRISE_PALETTES = [
+        {
+            name: 'Forest',
+            light: {
+                '--primary-color': '#1a472a',
+                '--primary-light': '#2d5a3d',
+                '--secondary-color': '#5d4e37',
+                '--accent-color': '#c9a227',
+                '--background': '#f0f4ef',
+                '--surface': '#ffffff',
+                '--text': '#2c2c2c',
+                '--text-light': '#5a5a5a',
+                '--border': '#c5d4c4',
+                '--error': '#c53030',
+                '--warning': '#d69e2e',
+                '--success': '#276749',
+                '--shadow': 'rgba(0, 0, 0, 0.08)',
+                '--shadow-hover': 'rgba(0, 0, 0, 0.12)',
+                '--input-bg': '#f8faf8',
+                '--card-bg': '#f8faf8'
+            },
+            dark: {
+                '--primary-color': '#68d391',
+                '--primary-light': '#9ae6b4',
+                '--secondary-color': '#c4a574',
+                '--accent-color': '#faf089',
+                '--background': '#1a2421',
+                '--surface': '#2d3d36',
+                '--text': '#e8f0ec',
+                '--text-light': '#9cb5a8',
+                '--border': '#3d5249',
+                '--error': '#fc8181',
+                '--warning': '#f6e05e',
+                '--success': '#68d391',
+                '--shadow': 'rgba(0, 0, 0, 0.35)',
+                '--shadow-hover': 'rgba(0, 0, 0, 0.45)',
+                '--input-bg': '#354d42',
+                '--card-bg': '#354d42'
+            }
+        },
+        {
+            name: 'Ocean',
+            light: {
+                '--primary-color': '#2c5282',
+                '--primary-light': '#2b6cb0',
+                '--secondary-color': '#2b6cb0',
+                '--accent-color': '#ed8936',
+                '--background': '#ebf8ff',
+                '--surface': '#ffffff',
+                '--text': '#2d3748',
+                '--text-light': '#4a5568',
+                '--border': '#bee3f8',
+                '--error': '#c53030',
+                '--warning': '#d69e2e',
+                '--success': '#276749',
+                '--shadow': 'rgba(0, 0, 0, 0.08)',
+                '--shadow-hover': 'rgba(0, 0, 0, 0.12)',
+                '--input-bg': '#ebf8ff',
+                '--card-bg': '#ebf8ff'
+            },
+            dark: {
+                '--primary-color': '#63b3ed',
+                '--primary-light': '#90cdf4',
+                '--secondary-color': '#90cdf4',
+                '--accent-color': '#fbd38d',
+                '--background': '#1a202c',
+                '--surface': '#2d3748',
+                '--text': '#e2e8f0',
+                '--text-light': '#a0aec0',
+                '--border': '#4a5568',
+                '--error': '#fc8181',
+                '--warning': '#f6e05e',
+                '--success': '#68d391',
+                '--shadow': 'rgba(0, 0, 0, 0.3)',
+                '--shadow-hover': 'rgba(0, 0, 0, 0.4)',
+                '--input-bg': '#2d3748',
+                '--card-bg': '#2d3748'
+            }
+        },
+        {
+            name: 'Parchment',
+            light: {
+                '--primary-color': '#744210',
+                '--primary-light': '#975a16',
+                '--secondary-color': '#744210',
+                '--accent-color': '#b7791f',
+                '--background': '#faf5eb',
+                '--surface': '#fefdfb',
+                '--text': '#3d2914',
+                '--text-light': '#6b5344',
+                '--border': '#e8dcc8',
+                '--error': '#c53030',
+                '--warning': '#b7791f',
+                '--success': '#276749',
+                '--shadow': 'rgba(55, 45, 25, 0.1)',
+                '--shadow-hover': 'rgba(55, 45, 25, 0.15)',
+                '--input-bg': '#f5efe3',
+                '--card-bg': '#f5efe3'
+            },
+            dark: {
+                '--primary-color': '#d69e2e',
+                '--primary-light': '#ecc94b',
+                '--secondary-color': '#d69e2e',
+                '--accent-color': '#ecc94b',
+                '--background': '#211a12',
+                '--surface': '#352d22',
+                '--text': '#f0e6d8',
+                '--text-light': '#c4b59a',
+                '--border': '#4a3f2e',
+                '--error': '#fc8181',
+                '--warning': '#f6e05e',
+                '--success': '#68d391',
+                '--shadow': 'rgba(0, 0, 0, 0.35)',
+                '--shadow-hover': 'rgba(0, 0, 0, 0.45)',
+                '--input-bg': '#3d3428',
+                '--card-bg': '#3d3428'
+            }
+        },
+        {
+            name: 'Dungeon',
+            light: {
+                '--primary-color': '#553c9a',
+                '--primary-light': '#6b46c1',
+                '--secondary-color': '#805ad5',
+                '--accent-color': '#d69e2e',
+                '--background': '#faf5ff',
+                '--surface': '#ffffff',
+                '--text': '#322659',
+                '--text-light': '#553c9a',
+                '--border': '#e9d8fd',
+                '--error': '#c53030',
+                '--warning': '#d69e2e',
+                '--success': '#276749',
+                '--shadow': 'rgba(0, 0, 0, 0.08)',
+                '--shadow-hover': 'rgba(0, 0, 0, 0.12)',
+                '--input-bg': '#faf5ff',
+                '--card-bg': '#faf5ff'
+            },
+            dark: {
+                '--primary-color': '#9f7aea',
+                '--primary-light': '#b794f4',
+                '--secondary-color': '#b794f4',
+                '--accent-color': '#f6e05e',
+                '--background': '#1a1625',
+                '--surface': '#2d2640',
+                '--text': '#e9d8fd',
+                '--text-light': '#b794f4',
+                '--border': '#44337a',
+                '--error': '#fc8181',
+                '--warning': '#f6e05e',
+                '--success': '#68d391',
+                '--shadow': 'rgba(0, 0, 0, 0.4)',
+                '--shadow-hover': 'rgba(0, 0, 0, 0.5)',
+                '--input-bg': '#352d45',
+                '--card-bg': '#352d45'
+            }
+        },
+        {
+            name: 'Ember',
+            light: {
+                '--primary-color': '#c05621',
+                '--primary-light': '#dd6b20',
+                '--secondary-color': '#9c4221',
+                '--accent-color': '#ecc94b',
+                '--background': '#fffaf0',
+                '--surface': '#ffffff',
+                '--text': '#2d2d2d',
+                '--text-light': '#5a4a42',
+                '--border': '#fbd38d',
+                '--error': '#c53030',
+                '--warning': '#d69e2e',
+                '--success': '#276749',
+                '--shadow': 'rgba(0, 0, 0, 0.08)',
+                '--shadow-hover': 'rgba(0, 0, 0, 0.12)',
+                '--input-bg': '#fffaf0',
+                '--card-bg': '#fffaf0'
+            },
+            dark: {
+                '--primary-color': '#ed8936',
+                '--primary-light': '#f6ad55',
+                '--secondary-color': '#dd6b20',
+                '--accent-color': '#faf089',
+                '--background': '#1a1410',
+                '--surface': '#2d2218',
+                '--text': '#fef3e8',
+                '--text-light': '#c4a574',
+                '--border': '#553c2e',
+                '--error': '#fc8181',
+                '--warning': '#f6e05e',
+                '--success': '#68d391',
+                '--shadow': 'rgba(0, 0, 0, 0.35)',
+                '--shadow-hover': 'rgba(0, 0, 0, 0.45)',
+                '--input-bg': '#35281e',
+                '--card-bg': '#35281e'
+            }
+        },
+        {
+            name: 'Slate',
+            light: {
+                '--primary-color': '#2d3748',
+                '--primary-light': '#4a5568',
+                '--secondary-color': '#4a5568',
+                '--accent-color': '#4299e1',
+                '--background': '#f7fafc',
+                '--surface': '#ffffff',
+                '--text': '#1a202c',
+                '--text-light': '#718096',
+                '--border': '#e2e8f0',
+                '--error': '#c53030',
+                '--warning': '#d69e2e',
+                '--success': '#276749',
+                '--shadow': 'rgba(0, 0, 0, 0.06)',
+                '--shadow-hover': 'rgba(0, 0, 0, 0.1)',
+                '--input-bg': '#edf2f7',
+                '--card-bg': '#edf2f7'
+            },
+            dark: {
+                '--primary-color': '#a0aec0',
+                '--primary-light': '#cbd5e0',
+                '--secondary-color': '#a0aec0',
+                '--accent-color': '#63b3ed',
+                '--background': '#171923',
+                '--surface': '#2d3748',
+                '--text': '#e2e8f0',
+                '--text-light': '#a0aec0',
+                '--border': '#4a5568',
+                '--error': '#fc8181',
+                '--warning': '#f6e05e',
+                '--success': '#68d391',
+                '--shadow': 'rgba(0, 0, 0, 0.3)',
+                '--shadow-hover': 'rgba(0, 0, 0, 0.4)',
+                '--input-bg': '#2d3748',
+                '--card-bg': '#2d3748'
+            }
+        }
+    ];
+
     const COLOR_LIKE_KEYS = new Set([
         '--primary-color',
         '--primary-light',
@@ -196,12 +434,32 @@
         });
     }
 
+    function pickSurprisePalette() {
+        const i = Math.floor(Math.random() * SURPRISE_PALETTES.length);
+        const preset = SURPRISE_PALETTES[i];
+        return {
+            light: { ...DEFAULT_LIGHT, ...preset.light },
+            dark: { ...DEFAULT_DARK, ...preset.dark }
+        };
+    }
+
     function initButtons(config) {
+        const btnSurprise = document.getElementById('btn-surprise');
         const btnSave = document.getElementById('btn-save');
         const btnReset = document.getElementById('btn-reset');
         const btnClear = document.getElementById('btn-clear');
         const btnApplyJson = document.getElementById('btn-apply-json');
         const textarea = document.getElementById('config-json');
+
+        if (btnSurprise) {
+            btnSurprise.addEventListener('click', () => {
+                const next = pickSurprisePalette();
+                config.light = next.light;
+                config.dark = next.dark;
+                renderInputs(config);
+                applyConfig(next);
+            });
+        }
 
         if (btnSave) {
             btnSave.addEventListener('click', () => {
