@@ -3,7 +3,7 @@
  * Body: { sessionVibe, rewardStrength, georgeContext, visibleStance, baseTitle, baseBody, baseRiskLine, sessionNote }
  * Returns: { title, body, risk_line, notion_prompt }
  * Refines a handcrafted George Reward Engine result so it echoes the session note.
- * Requires: OPENAI_API_KEY
+ * Requires: OPENAI_API_KEY, or ADVENTURE_LOG_BUILDER_PROD / ADVENTURE_LOG_BUILDER_PREV (same as Adventure Log Builder).
  */
 
 const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions';
@@ -43,9 +43,9 @@ Rules:
 
 export async function onRequestPost(context) {
   const { env, request } = context;
-  const apiKey = env.OPENAI_API_KEY;
+  const apiKey = env.ADVENTURE_LOG_BUILDER_PROD || env.ADVENTURE_LOG_BUILDER_PREV || env.OPENAI_API_KEY;
   if (!apiKey) {
-    return jsonResponse({ error: 'OPENAI_API_KEY not configured' }, 503);
+    return jsonResponse({ error: 'ADVENTURE_LOG_BUILDER_PROD, ADVENTURE_LOG_BUILDER_PREV, or OPENAI_API_KEY not configured' }, 503);
   }
 
   let body;
