@@ -564,6 +564,7 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
         <select id="rollTierSystem" aria-label="Tier system" onchange="toggleRollerOptions()">
           <option value="standard" selected>Standard 5e (CR-based encounter tiers)</option>
           <option value="custom">Custom (leverage / trade tiers)</option>
+          <option value="magic">Magic items (rarity table)</option>
         </select>
       </div>
       <div id="rollerStandardOptions" class="roller-options">
@@ -609,6 +610,22 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
               <option value="faction">Faction deal</option>
               <option value="black">Black market / Fence</option>
               <option value="political">Political / Holding</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div id="rollerMagicOptions" class="roller-options" style="display:none">
+        <p style="font-size:0.8125rem;color:var(--ll-item-note);margin:0">Roll d100 for rarity (50% Common, 25% Uncommon, 15% Rare, 9% Very Rare, 1% Legendary), then one random item from that table. Or choose a rarity below to force that tier.</p>
+        <div class="form-row" style="margin-top:8px">
+          <div class="form-field">
+            <label for="rollMagicRarity">Rarity</label>
+            <select id="rollMagicRarity" aria-label="Magic item rarity">
+              <option value="">Roll d100 for rarity</option>
+              <option value="common">Common</option>
+              <option value="uncommon">Uncommon</option>
+              <option value="rare">Rare</option>
+              <option value="veryRare">Very Rare</option>
+              <option value="legendary">Legendary</option>
             </select>
           </div>
         </div>
@@ -707,7 +724,7 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
 
 <script>
 // ── DATA (loaded from external JSON in tools/party-loot-ledger/) ─────────────────
-var TIER_INFO, LOOT_TABLES, CUSTOM_LOOT_TABLES, MARKET_CONDITIONS, DEFAULT_FACTIONS;
+var TIER_INFO, LOOT_TABLES, CUSTOM_LOOT_TABLES, MAGIC_ITEM_TABLES, MARKET_CONDITIONS, DEFAULT_FACTIONS;
 
 async function loadData() {
   try {
@@ -719,12 +736,14 @@ async function loadData() {
     var r3 = await fetch(prefix + 'loot-tables.json');
     var r4 = await fetch(prefix + 'custom-loot-tables.json');
     var r5 = await fetch(prefix + 'default-factions.json');
+    var r6 = await fetch(prefix + 'magic-items.json');
     if (!r1.ok || !r2.ok || !r3.ok || !r4.ok || !r5.ok) throw new Error('Data fetch failed');
     TIER_INFO = await r1.json();
     MARKET_CONDITIONS = await r2.json();
     LOOT_TABLES = await r3.json();
     CUSTOM_LOOT_TABLES = await r4.json();
     DEFAULT_FACTIONS = await r5.json();
+    MAGIC_ITEM_TABLES = r6.ok ? await r6.json() : { common: [{ name: 'Potion of Healing', tier: 3, val: 50, note: 'DMG' }] };
     return true;
   } catch (e) {
     console.error('Party Loot Ledger: failed to load data from JSON files. Serve the tool from a server (e.g. http) or check that the JSON files exist.', e);
@@ -732,6 +751,7 @@ async function loadData() {
     MARKET_CONDITIONS = [{ name: 'Peaceful Prosperity', effect: 'Standard prices', border: '#1e3a1e' }];
     LOOT_TABLES = { mid: { hoard: [{ name: 'Gold coins', tier: 0, val: 100, note: 'Fallback' }] } };
     CUSTOM_LOOT_TABLES = { '3': { open: [{ name: 'Potion of Healing', tier: 3, val: 50, note: 'Fallback' }] } };
+    MAGIC_ITEM_TABLES = { common: [{ name: 'Potion of Healing', tier: 3, val: 50, note: 'DMG' }] };
     DEFAULT_FACTIONS = [{ name: 'Harpers', align: 'ally', wants: 'Information', color: '#b8cce8', textColor: '#0d2a50' }];
     return false;
   }
@@ -918,23 +938,49 @@ function toggleRollerOptions() {
   var system = document.getElementById('rollTierSystem');
   var standardOpts = document.getElementById('rollerStandardOptions');
   var customOpts = document.getElementById('rollerCustomOptions');
+  var magicOpts = document.getElementById('rollerMagicOptions');
   if (!system || !standardOpts || !customOpts) return;
-  if (system.value === 'custom') {
-    standardOpts.style.display = 'none';
-    customOpts.style.display = 'block';
-  } else {
-    standardOpts.style.display = 'block';
-    customOpts.style.display = 'none';
-  }
+  standardOpts.style.display = system.value === 'standard' ? 'block' : 'none';
+  customOpts.style.display = system.value === 'custom' ? 'block' : 'none';
+  if (magicOpts) magicOpts.style.display = system.value === 'magic' ? 'block' : 'none';
 }
 
 function rollLoot() {
+  var tierSystem = document.getElementById('rollTierSystem').value;
+  if (tierSystem === 'magic') {
+    if (!MAGIC_ITEM_TABLES) {
+      document.getElementById('rollItems').innerHTML = '<div class="empty">Data still loading. Try again in a moment.</div>';
+      document.getElementById('rollOutput').classList.add('show');
+      return;
+    }
+    var raritySelect = document.getElementById('rollMagicRarity');
+    var rarityKey = raritySelect && raritySelect.value ? raritySelect.value : null;
+    if (!rarityKey) {
+      var d100 = 1 + Math.floor(Math.random() * 100);
+      if (d100 <= 50) rarityKey = 'common';
+      else if (d100 <= 75) rarityKey = 'uncommon';
+      else if (d100 <= 90) rarityKey = 'rare';
+      else if (d100 <= 99) rarityKey = 'veryRare';
+      else rarityKey = 'legendary';
+    }
+    var pool = MAGIC_ITEM_TABLES[rarityKey];
+    if (!pool || !pool.length) {
+      document.getElementById('rollItems').innerHTML = '<div class="empty">No items for this rarity.</div>';
+      document.getElementById('rollOutput').classList.add('show');
+      return;
+    }
+    var item = pool[Math.floor(Math.random() * pool.length)];
+    state.lastRolled = [{ name: item.name, tier: item.tier, val: item.val, note: item.note, id: Date.now() + Math.random(), qty: 1, status: 'holding' }];
+    document.getElementById('rollSeed').textContent = 'Roll #' + (Math.floor(Math.random() * 9000) + 1000);
+    renderRollOutput();
+    document.getElementById('rollOutput').classList.add('show');
+    return;
+  }
   if (!LOOT_TABLES || !CUSTOM_LOOT_TABLES) {
     document.getElementById('rollItems').innerHTML = '<div class="empty">Data still loading. Try again in a moment.</div>';
     document.getElementById('rollOutput').classList.add('show');
     return;
   }
-  var tierSystem = document.getElementById('rollTierSystem').value;
   var pool;
   if (tierSystem === 'custom') {
     var tier = parseInt(document.getElementById('rollCustomTier').value, 10);
@@ -1150,8 +1196,18 @@ function closeConditionsRef() {
 function conditionsRefEscape(e) { if (e.key === 'Escape') closeConditionsRef(); }
 
 function getCurrentLootPool() {
-  if (!LOOT_TABLES || !CUSTOM_LOOT_TABLES) return { pool: [], title: 'Data loading…' };
   var tierSystem = document.getElementById('rollTierSystem').value;
+  if (tierSystem === 'magic') {
+    var magicCounts = MAGIC_ITEM_TABLES ? {
+      common: (MAGIC_ITEM_TABLES.common || []).length,
+      uncommon: (MAGIC_ITEM_TABLES.uncommon || []).length,
+      rare: (MAGIC_ITEM_TABLES.rare || []).length,
+      veryRare: (MAGIC_ITEM_TABLES.veryRare || []).length,
+      legendary: (MAGIC_ITEM_TABLES.legendary || []).length
+    } : null;
+    return { pool: [], title: 'Magic items (rarity table)', magicCounts: magicCounts };
+  }
+  if (!LOOT_TABLES || !CUSTOM_LOOT_TABLES) return { pool: [], title: 'Data loading…' };
   var pool, title;
   if (tierSystem === 'custom') {
     var tier = parseInt(document.getElementById('rollCustomTier').value, 10);
@@ -1179,7 +1235,14 @@ function openLootTableRef() {
   var modal = document.getElementById('lootTableRefModal');
   if (!body || !titleEl || !modal) return;
   titleEl.textContent = 'Current loot table: ' + result.title;
-  if (!result.pool.length) {
+  if (result.magicCounts) {
+    body.innerHTML = '<p style="margin-bottom:12px;font-size:0.8125rem;color:var(--ll-ink)">Magic Item Master Table by rarity. Roll d100 for rarity (50% Common, 25% Uncommon, 15% Rare, 9% Very Rare, 1% Legendary), then one random item from that table.</p>' +
+      '<div class="ref-loot-item"><div><span class="ref-loot-name">Common</span></div><span class="value-gp">' + result.magicCounts.common + ' items</span></div>' +
+      '<div class="ref-loot-item"><div><span class="ref-loot-name">Uncommon</span></div><span class="value-gp">' + result.magicCounts.uncommon + ' items</span></div>' +
+      '<div class="ref-loot-item"><div><span class="ref-loot-name">Rare</span></div><span class="value-gp">' + result.magicCounts.rare + ' items</span></div>' +
+      '<div class="ref-loot-item"><div><span class="ref-loot-name">Very Rare</span></div><span class="value-gp">' + result.magicCounts.veryRare + ' items</span></div>' +
+      '<div class="ref-loot-item"><div><span class="ref-loot-name">Legendary</span></div><span class="value-gp">' + result.magicCounts.legendary + ' items</span></div>';
+  } else if (!result.pool.length) {
     body.innerHTML = '<p class="empty">No table for this selection.</p>';
   } else {
     body.innerHTML = result.pool.map(function(i) {

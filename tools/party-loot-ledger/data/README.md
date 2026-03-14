@@ -49,6 +49,11 @@ This folder contains all of the **editable data** that powers the Party Loot Led
   - Each item object has the same shape as in `loot-tables.json` (`name`, `tier`, `val`, `note`), but the notes are written with **leverage, faction demand, fence tax, and legal context** in mind.
   - Used by: custom Loot Roller and “View current table” reference when tier system = `"custom"`.
 
+- **`magic-items.json`**
+  - **Magic Item Master Table** by rarity, used when the Loot Roller tier system is set to “Magic items (rarity table)”.
+  - Source: generated from `Magic Item Master Table.csv` (in the tool folder). Regenerate with: `node tools/party-loot-ledger/scripts/csv-to-magic-items.js` from the repo root.
+  - Top-level keys are rarities: `"common"`, `"uncommon"`, `"rare"`, `"veryRare"`, `"legendary"`. Each value is an array of item objects with the same shape as other loot (`name`, `tier`, `val`, `note`). The `note` field holds the source code (e.g. DMG, VoM, TCE). Rarity maps to tier (Common→T2, Uncommon/Rare→T3, Very Rare→T4, Legendary→T5); `val` is a default gp per tier.
+
 - **`default-factions.json`**
   - Default **faction list** shown in the Factions tab before you add custom factions.
   - Each entry has:
