@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>George Reward Engine – D&D Tools Hub</title>
+    <link rel="stylesheet" href="../../global.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+.george-reward-engine {
+  --gre-found: #2d5a3d;
+  --gre-opportunity: #a67c52;
+  --gre-hook: #4a5568;
+}
+.dark-mode .george-reward-engine {
+  --gre-found: #4a9b5f;
+  --gre-opportunity: #c4956a;
+  --gre-hook: #718096;
+}
+
+.george-reward-engine {
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: 1.5rem 0;
+  font-family: 'Crimson Text', Georgia, serif;
+}
+
+.george-reward-engine h1 {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+  color: var(--text);
+}
+
+.george-reward-engine .gre-tagline {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  margin-bottom: 1.5rem;
+}
+
+.gre-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+.gre-header-actions a {
+  color: var(--text);
+  text-decoration: none;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.gre-header-actions a:hover { border-color: var(--primary-color); color: var(--primary-color); }
+.gre-header-actions .theme-toggle { margin-left: auto; }
+
+.gre-input-group {
+  margin-bottom: 1.25rem;
+}
+.gre-input-group label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-light);
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.gre-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.gre-pill {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.gre-pill:hover { border-color: var(--primary-color); }
+.gre-pill.active {
+  border-color: var(--primary-color);
+  background: var(--primary-color);
+  color: #fff;
+}
+
+.gre-end-btn {
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  margin-top: 1.25rem;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 1rem;
+  border: 2px solid var(--primary-color);
+  border-radius: 8px;
+  background: var(--primary-color);
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.gre-end-btn:hover { opacity: 0.95; transform: translateY(-1px); }
+.gre-end-btn:disabled { opacity: 0.7; cursor: wait; }
+
+.gre-teaser {
+  text-align: center;
+  padding: 2rem 1rem;
+  margin-top: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card-bg);
+}
+.gre-teaser.hidden { display: none; }
+.gre-teaser-line {
+  font-family: 'Cinzel', serif;
+  font-size: 1.15rem;
+  color: var(--text);
+  margin-bottom: 1rem;
+  font-style: italic;
+}
+.gre-teaser.reveal-found .gre-teaser-line { color: var(--gre-found); }
+.gre-teaser.reveal-opportunity .gre-teaser-line { color: var(--gre-opportunity); }
+.gre-teaser.reveal-hook .gre-teaser-line { color: var(--gre-hook); }
+.gre-reveal-btn {
+  padding: 0.5rem 1.25rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.gre-reveal-btn:hover { border-color: var(--primary-color); background: var(--input-bg); }
+
+.gre-result-card {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 4px 16px var(--shadow);
+}
+.gre-result-card.hidden { display: none; }
+.gre-result-card.animate-in {
+  animation: greReveal 0.5s ease-out forwards;
+}
+@keyframes greReveal {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.gre-result-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+}
+.gre-result-badge.found { background: var(--gre-found); color: #fff; }
+.gre-result-badge.opportunity { background: var(--gre-opportunity); color: #fff; }
+.gre-result-badge.hook { background: var(--gre-hook); color: #fff; }
+.gre-result-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--text);
+}
+.gre-result-flavor {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 0.75rem;
+}
+.gre-result-rationale {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--text-light);
+  margin-bottom: 0.5rem;
+}
+.gre-result-complication {
+  font-size: 0.85rem;
+  color: var(--warning);
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+.gre-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.gre-result-actions button,
+.gre-result-actions a.gre-btn {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+  transition: border-color 0.2s, background 0.2s;
+}
+.gre-result-actions button:hover,
+.gre-result-actions a.gre-btn:hover { border-color: var(--primary-color); background: var(--input-bg); }
+
+.gre-saved {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+.gre-saved h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-light);
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.gre-saved-list { list-style: none; }
+.gre-saved-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--border);
+}
+.gre-saved-list li:last-child { border-bottom: none; }
+.gre-saved-list .gre-badge-small {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+.gre-saved-list .gre-badge-small.found { background: var(--gre-found); color: #fff; }
+.gre-saved-list .gre-badge-small.opportunity { background: var(--gre-opportunity); color: #fff; }
+.gre-saved-list .gre-badge-small.hook { background: var(--gre-hook); color: #fff; }
+.gre-saved-list .gre-remove {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--text-light);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  padding: 0.2rem;
+}
+.gre-saved-list .gre-remove:hover { color: var(--error); }
+</style>
+</head>
+<body>
+<div class="george-reward-engine">
+  <header class="gre-header-actions">
+    <a href="../../index.html" aria-label="Back to hub">Hub</a>
+    <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">&#127769;</button>
+  </header>
+
+  <h1>George Reward Engine</h1>
+  <p class="gre-tagline">What the session left behind.</p>
+
+  <div class="gre-input-group">
+    <label>Session vibe</label>
+    <div class="gre-pills" id="vibe-pills" role="group" aria-label="Session vibe">
+      <button type="button" class="gre-pill" data-vibe="dungeon">Dungeon</button>
+      <button type="button" class="gre-pill" data-vibe="intrigue">Intrigue</button>
+      <button type="button" class="gre-pill" data-vibe="undead">Undead</button>
+      <button type="button" class="gre-pill" data-vibe="faction">Faction</button>
+      <button type="button" class="gre-pill active" data-vibe="street">Street</button>
+      <button type="button" class="gre-pill" data-vibe="temple">Temple</button>
+      <button type="button" class="gre-pill" data-vibe="noble">Noble</button>
+      <button type="button" class="gre-pill" data-vibe="criminal">Criminal</button>
+    </div>
+  </div>
+  <div class="gre-input-group">
+    <label>Reward strength</label>
+    <div class="gre-pills" id="strength-pills" role="group" aria-label="Reward strength">
+      <button type="button" class="gre-pill" data-strength="minor">Minor</button>
+      <button type="button" class="gre-pill active" data-strength="standard">Standard</button>
+      <button type="button" class="gre-pill" data-strength="major">Major</button>
+    </div>
+  </div>
+  <div class="gre-input-group">
+    <label>George's situation</label>
+    <div class="gre-pills" id="context-pills" role="group" aria-label="George's situation">
+      <button type="button" class="gre-pill" data-context="broke">Broke</button>
+      <button type="button" class="gre-pill" data-context="favored">Favored</button>
+      <button type="button" class="gre-pill" data-context="indebted">Indebted</button>
+      <button type="button" class="gre-pill" data-context="hunted">Hunted</button>
+      <button type="button" class="gre-pill active" data-context="rising">Rising</button>
+      <button type="button" class="gre-pill" data-context="watched">Watched</button>
+    </div>
+  </div>
+
+  <button type="button" id="end-session" class="gre-end-btn">End the Session</button>
+
+  <div id="teaser" class="gre-teaser hidden">
+    <p class="gre-teaser-line" id="teaser-line"></p>
+    <button type="button" id="reveal-btn" class="gre-reveal-btn">Reveal</button>
+  </div>
+
+  <div id="result-card" class="gre-result-card hidden">
+    <span class="gre-result-badge" id="result-badge"></span>
+    <h2 class="gre-result-title" id="result-title"></h2>
+    <p class="gre-result-flavor" id="result-flavor"></p>
+    <p class="gre-result-rationale" id="result-rationale"></p>
+    <p class="gre-result-complication hidden" id="result-complication"></p>
+    <div class="gre-result-actions">
+      <button type="button" id="reroll-btn">Reroll</button>
+      <button type="button" id="copy-btn">Copy for Notion</button>
+      <button type="button" id="save-btn">Save this one</button>
+    </div>
+  </div>
+
+  <section class="gre-saved" id="saved-section">
+    <h2>Saved</h2>
+    <ul class="gre-saved-list" id="saved-list"></ul>
+  </section>
+</div>
+
+<script>
+(function () {
+  const TEASER = {
+    found: 'Something came with you.',
+    opportunity: 'A door is open.',
+    hook: 'You heard something.'
+  };
+
+  const POOL = [
+    { id: 'f1', bucket: 'found', title: "A Clerk's Sealed Writ", flavor: "A tax clerk who crossed the wrong people left a partially-signed writ of passage in his coat. It names no one yet. George found it.", rationale: "The session left paperwork and loose ends; this one slipped into his hands.", vibes: ['street', 'intrigue', 'noble'], strengths: ['minor'], contexts: ['broke', 'rising'], base: 1 },
+    { id: 'f2', bucket: 'found', title: "A Sending Stone, Unclaimed", flavor: "One of a matched pair. The other side answered once — a woman's voice, then silence. One charge remains.", rationale: "Something was left behind in the chaos; the stone chose no one.", vibes: ['dungeon', 'intrigue', 'street'], strengths: ['standard'], contexts: [], base: 1 },
+    { id: 'f3', bucket: 'found', title: "A Borrowed Cloak", flavor: "Someone left a good wool cloak in a corner. Pinned inside is a small guild token — not enough to claim membership, but enough to get a foot in the door.", rationale: "The session put him in a place where people shed identities.", vibes: ['street', 'criminal', 'faction'], strengths: ['minor'], contexts: ['broke'], base: 1 },
+    { id: 'f4', bucket: 'found', title: "A Half-Finished Letter", flavor: "A dead cultist's pocket held a letter. It names a place, a \"delivery,\" and a date three days from now. The handwriting is precise.", rationale: "The session left a thread; the dead don't get to finish their correspondence.", vibes: ['undead', 'dungeon', 'intrigue'], strengths: ['standard'], contexts: ['hunted', 'rising'], base: 2 },
+    { id: 'f5', bucket: 'found', title: "A Devotional Medal", flavor: "A small medal of Tymora, worn smooth. Whoever carried it ran out of luck before George found it.", rationale: "Temples and faith were in the air; so was loss.", vibes: ['temple', 'street', 'undead'], strengths: ['minor'], contexts: [], base: 1 },
+    { id: 'f6', bucket: 'found', title: "A Key with a Cipher", flavor: "A key. The bow is stamped with a noble house cipher — no label, but someone in the right circles could name it.", rationale: "Noble business leaves traces; keys change hands.", vibes: ['noble', 'intrigue'], strengths: ['standard'], contexts: ['favored', 'rising'], base: 1 },
+    { id: 'f7', bucket: 'found', title: "A Guardsman's Notebook", flavor: "Patrol times, a few addresses, and one name circled. The guard who owned it isn't in a position to ask for it back.", rationale: "The Watch was part of the story; so was someone's carelessness.", vibes: ['street', 'criminal', 'faction'], strengths: ['standard'], contexts: ['watched', 'hunted'], base: 2 },
+    { id: 'f8', bucket: 'found', title: "A Sealed Dose of Antitoxin", flavor: "A healer's kit, abandoned. One dose of antitoxin, still sealed. Whoever carried it didn't need it in the end.", rationale: "The session was heavy enough that someone didn't make it out; their kit did.", vibes: ['dungeon', 'temple', 'undead'], strengths: ['major'], contexts: ['indebted', 'rising'], base: 2 },
+
+    { id: 'o1', bucket: 'opportunity', title: "Brother Aldric's Debt", flavor: "A lay brother at the Font of Knowledge owes George a quiet favor. He has access to restricted records and no love for the people George is watching.", rationale: "The session put George in a position to do someone a good turn; clergy remember.", vibes: ['temple', 'intrigue'], strengths: ['standard'], contexts: ['rising', 'watched'], base: 3 },
+    { id: 'o2', bucket: 'opportunity', title: "The Merchant's Backroom", flavor: "Halveth the chandler moves more than candles. He's been told George can be trusted. He hasn't said with what yet.", rationale: "Guarded merchants open doors when the right name is mentioned.", vibes: ['street', 'criminal', 'noble'], strengths: ['major'], contexts: ['favored', 'rising'], base: 3 },
+    { id: 'o3', bucket: 'opportunity', title: "A Fence Who Takes Favors", flavor: "There's a fence in the Dock Ward who'd rather be owed than paid. George has done enough to be offered the arrangement.", rationale: "Street work builds odd kinds of credit.", vibes: ['criminal', 'street'], strengths: ['minor'], contexts: ['broke', 'indebted'], base: 2 },
+    { id: 'o4', bucket: 'opportunity', title: "A Guild Contact's Vouch", flavor: "Someone with guild standing is willing to put in a word. Not membership — not yet — but a door that usually stays closed will open once.", rationale: "The session earned someone's respect; guilds trade in favors.", vibes: ['faction', 'street', 'noble'], strengths: ['standard'], contexts: ['rising', 'favored'], base: 3 },
+    { id: 'o5', bucket: 'opportunity', title: "Healing for a Discrete Errand", flavor: "A temple healer will see to George's wounds — or a friend's — in exchange for one discrete errand. No questions asked on either side.", rationale: "Temples need things done that don't fit in a sermon.", vibes: ['temple', 'street'], strengths: ['standard'], contexts: ['broke', 'indebted'], base: 2 },
+    { id: 'o6', bucket: 'opportunity', title: "A Secretary Who'll Pass a Message", flavor: "A noble's secretary has agreed to slip one message into the right pile. One. The rest is on George.", rationale: "Noble households run on quiet arrangements.", vibes: ['noble', 'intrigue'], strengths: ['standard'], contexts: ['rising', 'watched'], base: 3 },
+    { id: 'o7', bucket: 'opportunity', title: "Someone in the Watch Remembers", flavor: "A guardsman George helped once is willing to return the favor. One tip, one warning, or one look the other way — then they're even.", rationale: "The Watch has long memories and longer grudges.", vibes: ['street', 'faction', 'criminal'], strengths: ['standard'], contexts: ['hunted', 'watched'], base: 3 },
+    { id: 'o8', bucket: 'opportunity', title: "An Invitation to a Private Sale", flavor: "Invitation only. The kind of sale where the goods aren't advertised and the buyers are vetted. George's name came up.", rationale: "Rising stock gets you into rooms that used to be closed.", vibes: ['noble', 'intrigue', 'street'], strengths: ['major'], contexts: ['favored', 'rising'], base: 3 },
+    { id: 'o9', bucket: 'opportunity', title: "A Scribe Who Can Forge a Pass", flavor: "A scribe in the wrong part of town can produce a pass that will hold up to a casual glance. For a price, and for silence.", rationale: "Street-level bureaucracy has its specialists.", vibes: ['street', 'criminal'], strengths: ['minor'], contexts: ['broke', 'hunted'], base: 2 },
+    { id: 'o10', bucket: 'opportunity', title: "A Captain Who Needs a Witness", flavor: "A ship's captain needs someone to testify — quietly — that a certain cargo was never loaded. No court. Just the right ears.", rationale: "The docks run on favors and plausible deniability.", vibes: ['street', 'criminal', 'faction'], strengths: ['standard'], contexts: ['indebted', 'rising'], base: 2 },
+    { id: 'o11', bucket: 'opportunity', title: "A Priest Who Wants a Name", flavor: "A priest with a grudge against a certain kind of sinner will offer sanctuary — or information — in exchange for a name. One name.", rationale: "Clergy have their own debts and their own justice.", vibes: ['temple', 'intrigue'], strengths: ['standard'], contexts: ['hunted', 'watched'], base: 3 },
+    { id: 'o12', bucket: 'opportunity', title: "A Dealer with a Back Room", flavor: "A secondhand dealer in the Trades Ward has a back room. He's been known to move things that aren't strictly merchandise. He's willing to talk.", rationale: "Guarded merchants test the water before they swim.", vibes: ['street', 'noble', 'criminal'], strengths: ['standard'], contexts: ['rising'], base: 2 },
+    { id: 'o13', bucket: 'opportunity', title: "A Harper Willing to Trade", flavor: "A Harper contact is willing to trade information — not for gold, but for something George can do or learn. They've been watching him.", rationale: "The Harpers collect people as much as secrets.", vibes: ['faction', 'intrigue'], strengths: ['major'], contexts: ['rising', 'watched'], base: 3 },
+    { id: 'o14', bucket: 'opportunity', title: "A Zhentarim Debt to Clear", flavor: "Someone in the Zhentarim owes George — or owes someone who owes George. One job, done right, and the slate is clean. They said.", rationale: "Criminal organizations keep score; sometimes it works in your favor.", vibes: ['criminal', 'faction'], strengths: ['major'], contexts: ['indebted', 'hunted'], base: 3, complication: "The job will be ugly. The kind that leaves marks." },
+    { id: 'o15', bucket: 'opportunity', title: "A Tailor Who Dresses Nobles", flavor: "A tailor who dresses noble clients also listens. He's offered to share what he hears — in exchange for the occasional favor. Discretion required.", rationale: "Noble pressure flows through people who stand in fitting rooms.", vibes: ['noble', 'intrigue', 'street'], strengths: ['standard'], contexts: ['rising', 'favored'], base: 2 },
+    { id: 'o16', bucket: 'opportunity', title: "A Courier Off the Books", flavor: "A courier who doesn't ask questions will carry one package, one time, no records. After that, they're square.", rationale: "Street networks run on one-off favors.", vibes: ['street', 'criminal'], strengths: ['minor'], contexts: ['broke', 'indebted'], base: 2 },
+
+    { id: 'h1', bucket: 'hook', title: "The Contact Who Went Quiet", flavor: "Mira hasn't sent a report in six days. Her last message mentioned George by name — not in a good way. Someone read it before he did.", rationale: "The session put George in the middle; now the middle is folding in.", vibes: ['intrigue', 'faction', 'street'], strengths: ['standard'], contexts: ['watched', 'hunted'], base: 3 },
+    { id: 'h2', bucket: 'hook', title: "A Name on Two Dead Men's Lips", flavor: "Two unrelated deaths in the Dock Ward. Different causes. Same name spoken to different people in the hours before. George heard it third-hand. It's his name.", rationale: "Rumors with teeth find the people they're about.", vibes: ['street', 'criminal', 'intrigue'], strengths: ['major'], contexts: ['hunted', 'watched'], base: 3 },
+    { id: 'h3', bucket: 'hook', title: "A Shipment That Never Arrived", flavor: "A rumor: a shipment was supposed to land last tenday. It didn't. The right people are asking the wrong questions. George caught a whiff of it.", rationale: "Street talk carries; sometimes it carries to you.", vibes: ['street', 'criminal'], strengths: ['minor'], contexts: ['broke', 'rising'], base: 2 },
+    { id: 'h4', bucket: 'hook', title: "Graffiti That Matches", flavor: "A phrase from the session — a phrase George heard or said — is turning up as graffiti in two different wards. Same hand. Someone's paying attention.", rationale: "The session left echoes; someone is tracing them.", vibes: ['street', 'intrigue', 'faction'], strengths: ['standard'], contexts: ['watched', 'rising'], base: 3 },
+    { id: 'h5', bucket: 'hook', title: "A Dying Man's Direction", flavor: "A dying man pointed. Not at George — at a building, a door, a name on a sign. He didn't have time to explain. Someone else might have seen.", rationale: "Death leaves loose ends; George was close enough to catch one.", vibes: ['dungeon', 'undead', 'street'], strengths: ['standard'], contexts: [], base: 2 },
+    { id: 'h6', bucket: 'hook', title: "Two Factions, One Name", flavor: "Two different factions have been asking about the same person. Not George — but the questions overlap in ways that suggest they're not supposed to.", rationale: "The session brushed against faction business; the brush left a mark.", vibes: ['faction', 'intrigue'], strengths: ['standard'], contexts: ['rising', 'watched'], base: 3 },
+    { id: 'h7', bucket: 'hook', title: "A Letter with His Name On It", flavor: "A sealed letter. George's name on the outside. It was delivered to the wrong address — a place he'd never use. The seal is broken. Someone else read it first.", rationale: "Someone is drawing him in; the session made him visible.", vibes: ['intrigue', 'noble', 'faction'], strengths: ['major'], contexts: ['watched', 'hunted'], base: 3 },
+    { id: 'h8', bucket: 'hook', title: "Someone's Been Asking at the Tavern", flavor: "A stranger has been asking after George at a tavern he uses. Not threatening — curious. The barkeep passed it along. No name, no description that stuck.", rationale: "Quiet attention is still attention.", vibes: ['street', 'criminal'], strengths: ['minor'], contexts: ['watched', 'rising'], base: 2 },
+    { id: 'h9', bucket: 'hook', title: "A Witness List", flavor: "There's a witness list. For something. George doesn't know the case. He does know his name is on it — and that the list wasn't supposed to leave the room it was in.", rationale: "Noble pressure and legal machinery leave paper trails.", vibes: ['noble', 'intrigue'], strengths: ['major'], contexts: ['watched', 'hunted'], base: 3, complication: "Being on the list might be protection. Or a target." },
+    { id: 'h10', bucket: 'hook', title: "Something Got Loose", flavor: "A ritual was interrupted. Something was summoned — or partially summoned — and then the bindings broke. No one's sure what got out. Rumors are spreading.", rationale: "The session touched something that wasn't meant to be touched.", vibes: ['dungeon', 'temple', 'undead'], strengths: ['standard'], contexts: ['rising'], base: 2 },
+    { id: 'h11', bucket: 'hook', title: "A Diary Page", flavor: "A single page from a noble's diary. It slipped into George's hands in the confusion — or was slipped. The handwriting is precise. The entry is about a meeting. A name. A sum.", rationale: "Noble intrigue leaves paper in the wrong places.", vibes: ['noble', 'intrigue'], strengths: ['standard'], contexts: ['favored', 'rising'], base: 2 },
+    { id: 'h12', bucket: 'hook', title: "The Quiet Man Sent Her", flavor: "A child approached George. She said \"the quiet man\" told her to find him and give him a token — a worn copper piece. She didn't know what it meant. She ran off before he could ask.", rationale: "The session put George in someone's plans; now the plan is moving.", vibes: ['street', 'intrigue'], strengths: ['minor'], contexts: ['watched', 'rising'], base: 2 }
+  ];
+
+  function getSelected(container, attr) {
+    const btn = container.querySelector('.gre-pill.active');
+    return btn ? btn.getAttribute(attr) : null;
+  }
+
+  function setPills(container, attr, value) {
+    container.querySelectorAll('.gre-pill').forEach(function (el) {
+      el.classList.toggle('active', el.getAttribute(attr) === value);
+    });
+  }
+
+  function scoreEntry(entry, vibe, strength, context) {
+    if (!entry.strengths.includes(strength)) return 0;
+    let s = entry.base;
+    if (entry.vibes.length) s += entry.vibes.includes(vibe) ? 3 : 0;
+    else s += 1;
+    if (entry.contexts.length) s += entry.contexts.includes(context) ? 2 : 0;
+    else s += 1;
+    return s;
+  }
+
+  function weightedPick(pool, vibe, strength, context) {
+    const scored = pool.map(function (e) {
+      return { entry: e, score: scoreEntry(e, vibe, strength, context) };
+    }).filter(function (x) { return x.score > 0; });
+    if (!scored.length) return pool[Math.floor(Math.random() * pool.length)];
+    let total = 0;
+    scored.forEach(function (x) { total += x.score; });
+    let r = Math.random() * total;
+    for (let i = 0; i < scored.length; i++) {
+      r -= scored[i].score;
+      if (r <= 0) return scored[i].entry;
+    }
+    return scored[scored.length - 1].entry;
+  }
+
+  let currentResult = null;
+  let saved = [];
+
+  const vibePills = document.getElementById('vibe-pills');
+  const strengthPills = document.getElementById('strength-pills');
+  const contextPills = document.getElementById('context-pills');
+  const endBtn = document.getElementById('end-session');
+  const teaserEl = document.getElementById('teaser');
+  const teaserLine = document.getElementById('teaser-line');
+  const revealBtn = document.getElementById('reveal-btn');
+  const resultCard = document.getElementById('result-card');
+  const resultBadge = document.getElementById('result-badge');
+  const resultTitle = document.getElementById('result-title');
+  const resultFlavor = document.getElementById('result-flavor');
+  const resultRationale = document.getElementById('result-rationale');
+  const resultComplication = document.getElementById('result-complication');
+  const rerollBtn = document.getElementById('reroll-btn');
+  const copyBtn = document.getElementById('copy-btn');
+  const saveBtn = document.getElementById('save-btn');
+  const savedSection = document.getElementById('saved-section');
+  const savedList = document.getElementById('saved-list');
+
+  vibePills.querySelectorAll('.gre-pill').forEach(function (btn) {
+    btn.addEventListener('click', function () { setPills(vibePills, 'data-vibe', btn.getAttribute('data-vibe')); });
+  });
+  strengthPills.querySelectorAll('.gre-pill').forEach(function (btn) {
+    btn.addEventListener('click', function () { setPills(strengthPills, 'data-strength', btn.getAttribute('data-strength')); });
+  });
+  contextPills.querySelectorAll('.gre-pill').forEach(function (btn) {
+    btn.addEventListener('click', function () { setPills(contextPills, 'data-context', btn.getAttribute('data-context')); });
+  });
+
+  function showTeaser(entry) {
+    currentResult = entry;
+    resultCard.classList.add('hidden');
+    teaserLine.textContent = TEASER[entry.bucket];
+    teaserEl.className = 'gre-teaser reveal-' + entry.bucket;
+    teaserEl.classList.remove('hidden');
+  }
+
+  function showFullResult() {
+    if (!currentResult) return;
+    const e = currentResult;
+    teaserEl.classList.add('hidden');
+    resultBadge.textContent = e.bucket.charAt(0).toUpperCase() + e.bucket.slice(1);
+    resultBadge.className = 'gre-result-badge ' + e.bucket;
+    resultTitle.textContent = e.title;
+    resultFlavor.textContent = e.flavor;
+    resultRationale.textContent = 'Why this fits: ' + e.rationale;
+    if (e.complication) {
+      resultComplication.textContent = 'Complication: ' + e.complication;
+      resultComplication.classList.remove('hidden');
+    } else {
+      resultComplication.classList.add('hidden');
+    }
+    resultCard.classList.remove('hidden');
+    resultCard.classList.add('animate-in');
+    setTimeout(function () { resultCard.classList.remove('animate-in'); }, 600);
+  }
+
+  function toNotionMarkdown(e) {
+    let out = '**' + (e.bucket.charAt(0).toUpperCase() + e.bucket.slice(1)) + ' — ' + e.title + '**\n\n' + e.flavor + '\n\n_Why this fits: ' + e.rationale + '._';
+    if (e.complication) out += '\n\n_Complication: ' + e.complication + '_';
+    return out;
+  }
+
+  function renderSaved() {
+    if (!saved.length) {
+      savedSection.style.display = 'none';
+      return;
+    }
+    savedSection.style.display = 'block';
+    savedList.innerHTML = saved.map(function (item, i) {
+      const label = item.bucket.charAt(0).toUpperCase() + item.bucket.slice(1);
+      return '<li><span class="gre-badge-small ' + item.bucket + '">' + label + '</span> ' + escapeHtml(item.title) + ' <button type="button" class="gre-remove" data-i="' + i + '" aria-label="Remove">remove</button></li>';
+    }).join('');
+    savedList.querySelectorAll('.gre-remove').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        saved.splice(parseInt(btn.getAttribute('data-i'), 10), 1);
+        renderSaved();
+      });
+    });
+  }
+
+  function escapeHtml(s) {
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  endBtn.addEventListener('click', function () {
+    const vibe = getSelected(vibePills, 'data-vibe') || 'street';
+    const strength = getSelected(strengthPills, 'data-strength') || 'standard';
+    const context = getSelected(contextPills, 'data-context') || 'rising';
+    endBtn.disabled = true;
+    endBtn.textContent = '…';
+    setTimeout(function () {
+      const entry = weightedPick(POOL, vibe, strength, context);
+      showTeaser(entry);
+      endBtn.disabled = false;
+      endBtn.textContent = 'End the Session';
+    }, 300);
+  });
+
+  revealBtn.addEventListener('click', showFullResult);
+
+  rerollBtn.addEventListener('click', function () {
+    const vibe = getSelected(vibePills, 'data-vibe') || 'street';
+    const strength = getSelected(strengthPills, 'data-strength') || 'standard';
+    const context = getSelected(contextPills, 'data-context') || 'rising';
+    currentResult = weightedPick(POOL, vibe, strength, context);
+    showTeaser(currentResult);
+  });
+
+  copyBtn.addEventListener('click', function () {
+    if (!currentResult) return;
+    const text = toNotionMarkdown(currentResult);
+    navigator.clipboard.writeText(text).then(function () {
+      copyBtn.textContent = 'Copied';
+      setTimeout(function () { copyBtn.textContent = 'Copy for Notion'; }, 1500);
+    });
+  });
+
+  saveBtn.addEventListener('click', function () {
+    if (!currentResult) return;
+    saved.push({ bucket: currentResult.bucket, title: currentResult.title, flavor: currentResult.flavor, rationale: currentResult.rationale, complication: currentResult.complication });
+    renderSaved();
+  });
+
+  renderSaved();
+
+  document.getElementById('theme-toggle').addEventListener('click', function () {
+    document.body.classList.toggle('dark-mode');
+  });
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.body.classList.add('dark-mode');
+  }
+})();
+</script>
+</body>
+</html>
