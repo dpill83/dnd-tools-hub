@@ -148,3 +148,10 @@ a:focus-visible {
 .tools-hub-footer a:hover {
     text-decoration: underline;
 }
+
+.tools-hub-footer-legal {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    opacity: 0.9;
+}
