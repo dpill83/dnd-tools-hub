@@ -15,7 +15,7 @@ This folder contains all of the **editable data** that powers the Party Loot Led
   - Used by: tier badges, value range display, leverage calculator, and loot roller displays.
 
 - **`market-conditions.json`**
-  - Master list of **market conditions** used in the Market tab and the “View all conditions” reference modal.
+  - Master list of **market conditions** used in the Market tab and the "View all conditions" reference modal.
   - Each entry has:
     - `name`: condition name (e.g. `"City Under Siege"`)
     - `effect`: descriptive text shown to the DM/players
@@ -23,7 +23,7 @@ This folder contains all of the **editable data** that powers the Party Loot Led
   - The **Randomize Conditions** button picks from this array.
 
 - **`loot-tables.json`**
-  - All **standard 5e CR-based loot tables** used when the Loot Roller is set to “Standard 5e (CR-based)”.
+  - All **standard 5e CR-based loot tables** used when the Loot Roller is set to "Standard 5e (CR-based)".
   - Top-level keys are encounter bands: `"low"`, `"mid"`, `"high"`, `"deadly"`.
   - Each band has four arrays:
     - `individual`: individual monster loot
@@ -35,10 +35,10 @@ This folder contains all of the **editable data** that powers the Party Loot Led
     - `tier`: 0–5, matching the tiers in `tier-info.json`
     - `val`: base gp value (number)
     - `note`: short descriptive note / usage hint
-  - Used by: standard Loot Roller and “View current table” reference when tier system = `"standard"`.
+  - Used by: standard Loot Roller and "View current table" reference when tier system = `"standard"`.
 
 - **`custom-loot-tables.json`**
-  - All **custom leverage/trade loot tables** used when the Loot Roller is set to “Custom (leverage / trade tiers)”.
+  - All **custom leverage/trade loot tables** used when the Loot Roller is set to "Custom (leverage / trade tiers)".
   - Top-level keys are **tier strings**: `"0"` through `"5"` (T0–T5).
   - For each tier, there are context arrays:
     - `open`: open market
@@ -47,12 +47,12 @@ This folder contains all of the **editable data** that powers the Party Loot Led
     - `black`: black market / fence
     - `political`: political / holding / leverage
   - Each item object has the same shape as in `loot-tables.json` (`name`, `tier`, `val`, `note`), but the notes are written with **leverage, faction demand, fence tax, and legal context** in mind.
-  - Used by: custom Loot Roller and “View current table” reference when tier system = `"custom"`.
+  - Used by: custom Loot Roller and "View current table" reference when tier system = `"custom"`.
 
-- **`magic-items.json`**
-  - **Magic Item Master Table** by rarity, used when the Loot Roller tier system is set to “Magic items (rarity table)”.
-  - Source: generated from `Magic Item Master Table.csv` (in the tool folder). Regenerate with: `node tools/party-loot-ledger/scripts/csv-to-magic-items.js` from the repo root.
-  - Top-level keys are rarities: `"common"`, `"uncommon"`, `"rare"`, `"veryRare"`, `"legendary"`. Each value is an array of item objects with the same shape as other loot (`name`, `tier`, `val`, `note`). The `note` field holds the source code (e.g. DMG, VoM, TCE). Rarity maps to tier (Common→T2, Uncommon/Rare→T3, Very Rare→T4, Legendary→T5); `val` is a default gp per tier.
+- **`hansi-loot.json`**
+  - **Hansi Loot Table** item list used when the Loot Roller tier system is set to "Hansi Loot Table".
+  - Source: generated from `Hansi Loot Table - Items.csv` in this folder. Regenerate with: `node tools/party-loot-ledger/scripts/csv-to-hansi-loot.js` from the repo root.
+  - Structure: `items` (array of item objects) and `categories` (array of category strings for the filter dropdown). Each item has `name`, `tier` (0–5), `val` (gp number), `note` (description and source), and `category`. Used by the Hansi Loot Roller mode; filter by tier and category, then roll 2–6 random items.
 
 - **`default-factions.json`**
   - Default **faction list** shown in the Factions tab before you add custom factions.
@@ -68,5 +68,4 @@ This folder contains all of the **editable data** that powers the Party Loot Led
 
 - Keep the JSON **valid** (matching quotes, commas, and brackets) or the page will fall back to minimal built-in data.
 - When adding new entries, prefer reusing existing shapes and keys so the UI can render them without changes.
-- Avoid changing type/shape of existing fields (e.g. don’t change `val` from a number to a string) unless you also update the JS logic.
-
+- Avoid changing type/shape of existing fields (e.g. don't change `val` from a number to a string) unless you also update the JS logic.

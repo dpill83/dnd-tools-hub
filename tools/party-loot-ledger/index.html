@@ -564,7 +564,7 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
         <select id="rollTierSystem" aria-label="Tier system" onchange="toggleRollerOptions()">
           <option value="standard" selected>Standard 5e (CR-based encounter tiers)</option>
           <option value="custom">Custom (leverage / trade tiers)</option>
-          <option value="magic">Magic items (rarity table)</option>
+          <option value="hansi">Hansi Loot Table</option>
         </select>
       </div>
       <div id="rollerStandardOptions" class="roller-options">
@@ -614,18 +614,23 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
           </div>
         </div>
       </div>
-      <div id="rollerMagicOptions" class="roller-options" style="display:none">
-        <p style="font-size:0.8125rem;color:var(--ll-item-note);margin:0">Roll d100 for rarity (50% Common, 25% Uncommon, 15% Rare, 9% Very Rare, 1% Legendary), then one random item from that table. Or choose a rarity below to force that tier.</p>
-        <div class="form-row" style="margin-top:8px">
+      <div id="rollerHansiOptions" class="roller-options" style="display:none">
+        <div class="form-row">
           <div class="form-field">
-            <label for="rollMagicRarity">Rarity</label>
-            <select id="rollMagicRarity" aria-label="Magic item rarity">
-              <option value="">Roll d100 for rarity</option>
-              <option value="common">Common</option>
-              <option value="uncommon">Uncommon</option>
-              <option value="rare">Rare</option>
-              <option value="veryRare">Very Rare</option>
-              <option value="legendary">Legendary</option>
+            <label for="rollHansiTier">Tier</label>
+            <select id="rollHansiTier" aria-label="Hansi tier">
+              <option value="0">T0 — Mundane</option>
+              <option value="1">T1 — Trade Goods</option>
+              <option value="2">T2 — Masterwork</option>
+              <option value="3">T3 — Minor Magic</option>
+              <option value="4">T4 — Significant Magic</option>
+              <option value="5">T5 — Legendary</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="rollHansiCategory">Category</label>
+            <select id="rollHansiCategory" aria-label="Hansi category">
+              <option value="">Any</option>
             </select>
           </div>
         </div>
@@ -724,7 +729,7 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
 
 <script>
 // ── DATA (loaded from external JSON in tools/party-loot-ledger/) ─────────────────
-var TIER_INFO, LOOT_TABLES, CUSTOM_LOOT_TABLES, MAGIC_ITEM_TABLES, MARKET_CONDITIONS, DEFAULT_FACTIONS;
+var TIER_INFO, LOOT_TABLES, CUSTOM_LOOT_TABLES, HANSI_LOOT, MARKET_CONDITIONS, DEFAULT_FACTIONS;
 
 async function loadData() {
   try {
@@ -736,14 +741,15 @@ async function loadData() {
     var r3 = await fetch(prefix + 'loot-tables.json');
     var r4 = await fetch(prefix + 'custom-loot-tables.json');
     var r5 = await fetch(prefix + 'default-factions.json');
-    var r6 = await fetch(prefix + 'magic-items.json');
+    var r6 = await fetch(prefix + 'hansi-loot.json');
     if (!r1.ok || !r2.ok || !r3.ok || !r4.ok || !r5.ok) throw new Error('Data fetch failed');
     TIER_INFO = await r1.json();
     MARKET_CONDITIONS = await r2.json();
     LOOT_TABLES = await r3.json();
     CUSTOM_LOOT_TABLES = await r4.json();
     DEFAULT_FACTIONS = await r5.json();
-    MAGIC_ITEM_TABLES = r6.ok ? await r6.json() : { common: [{ name: 'Potion of Healing', tier: 3, val: 50, note: 'DMG' }] };
+    HANSI_LOOT = r6.ok ? await r6.json() : { items: [{ name: 'Potion of Healing', tier: 3, val: 50, note: 'Source: PHB', category: 'Potion' }], categories: ['Potion'] };
+    if (HANSI_LOOT && HANSI_LOOT.categories && HANSI_LOOT.categories.length) populateHansiCategorySelect();
     return true;
   } catch (e) {
     console.error('Party Loot Ledger: failed to load data from JSON files. Serve the tool from a server (e.g. http) or check that the JSON files exist.', e);
@@ -751,10 +757,22 @@ async function loadData() {
     MARKET_CONDITIONS = [{ name: 'Peaceful Prosperity', effect: 'Standard prices', border: '#1e3a1e' }];
     LOOT_TABLES = { mid: { hoard: [{ name: 'Gold coins', tier: 0, val: 100, note: 'Fallback' }] } };
     CUSTOM_LOOT_TABLES = { '3': { open: [{ name: 'Potion of Healing', tier: 3, val: 50, note: 'Fallback' }] } };
-    MAGIC_ITEM_TABLES = { common: [{ name: 'Potion of Healing', tier: 3, val: 50, note: 'DMG' }] };
+    HANSI_LOOT = { items: [{ name: 'Potion of Healing', tier: 3, val: 50, note: 'Source: PHB', category: 'Potion' }], categories: ['Potion'] };
     DEFAULT_FACTIONS = [{ name: 'Harpers', align: 'ally', wants: 'Information', color: '#b8cce8', textColor: '#0d2a50' }];
     return false;
   }
+}
+
+function populateHansiCategorySelect() {
+  var sel = document.getElementById('rollHansiCategory');
+  if (!sel || !HANSI_LOOT || !HANSI_LOOT.categories) return;
+  sel.innerHTML = '<option value="">Any</option>';
+  HANSI_LOOT.categories.forEach(function(cat) {
+    var o = document.createElement('option');
+    o.value = cat;
+    o.textContent = cat;
+    sel.appendChild(o);
+  });
 }
 
 // ── STATE (factions filled from DEFAULT_FACTIONS after loadData()) ──────────────
@@ -938,39 +956,40 @@ function toggleRollerOptions() {
   var system = document.getElementById('rollTierSystem');
   var standardOpts = document.getElementById('rollerStandardOptions');
   var customOpts = document.getElementById('rollerCustomOptions');
-  var magicOpts = document.getElementById('rollerMagicOptions');
+  var hansiOpts = document.getElementById('rollerHansiOptions');
   if (!system || !standardOpts || !customOpts) return;
   standardOpts.style.display = system.value === 'standard' ? 'block' : 'none';
   customOpts.style.display = system.value === 'custom' ? 'block' : 'none';
-  if (magicOpts) magicOpts.style.display = system.value === 'magic' ? 'block' : 'none';
+  if (hansiOpts) hansiOpts.style.display = system.value === 'hansi' ? 'block' : 'none';
+}
+
+function getHansiPool() {
+  if (!HANSI_LOOT || !HANSI_LOOT.items || !HANSI_LOOT.items.length) return [];
+  var tierEl = document.getElementById('rollHansiTier');
+  var catEl = document.getElementById('rollHansiCategory');
+  var tier = tierEl ? parseInt(tierEl.value, 10) : 0;
+  var category = catEl ? (catEl.value || '') : '';
+  return HANSI_LOOT.items.filter(function(i) {
+    if (i.tier !== tier) return false;
+    if (category && i.category !== category) return false;
+    return true;
+  });
 }
 
 function rollLoot() {
   var tierSystem = document.getElementById('rollTierSystem').value;
-  if (tierSystem === 'magic') {
-    if (!MAGIC_ITEM_TABLES) {
-      document.getElementById('rollItems').innerHTML = '<div class="empty">Data still loading. Try again in a moment.</div>';
+  if (tierSystem === 'hansi') {
+    var pool = getHansiPool();
+    if (!pool.length) {
+      document.getElementById('rollItems').innerHTML = '<div class="empty">No items for this tier or category.</div>';
       document.getElementById('rollOutput').classList.add('show');
       return;
     }
-    var raritySelect = document.getElementById('rollMagicRarity');
-    var rarityKey = raritySelect && raritySelect.value ? raritySelect.value : null;
-    if (!rarityKey) {
-      var d100 = 1 + Math.floor(Math.random() * 100);
-      if (d100 <= 50) rarityKey = 'common';
-      else if (d100 <= 75) rarityKey = 'uncommon';
-      else if (d100 <= 90) rarityKey = 'rare';
-      else if (d100 <= 99) rarityKey = 'veryRare';
-      else rarityKey = 'legendary';
-    }
-    var pool = MAGIC_ITEM_TABLES[rarityKey];
-    if (!pool || !pool.length) {
-      document.getElementById('rollItems').innerHTML = '<div class="empty">No items for this rarity.</div>';
-      document.getElementById('rollOutput').classList.add('show');
-      return;
-    }
-    var item = pool[Math.floor(Math.random() * pool.length)];
-    state.lastRolled = [{ name: item.name, tier: item.tier, val: item.val, note: item.note, id: Date.now() + Math.random(), qty: 1, status: 'holding' }];
+    var shuffled = [...pool].sort(function() { return Math.random() - 0.5; });
+    var count = Math.min(pool.length, 2 + Math.floor(Math.random() * 4));
+    state.lastRolled = shuffled.slice(0, count).map(function(i) {
+      return { name: i.name, tier: i.tier, val: i.val, note: i.note, id: Date.now() + Math.random(), qty: 1, status: 'holding' };
+    });
     document.getElementById('rollSeed').textContent = 'Roll #' + (Math.floor(Math.random() * 9000) + 1000);
     renderRollOutput();
     document.getElementById('rollOutput').classList.add('show');
@@ -1010,10 +1029,11 @@ function rollLoot() {
 function renderRollOutput() {
   document.getElementById('rollItems').innerHTML = state.lastRolled.map((item,i) => {
     const t = TIER_INFO[item.tier];
+    const noteDisplay = (item.note && item.note.length > 120) ? item.note.slice(0, 120) + '…' : (item.note || '');
     return `<div class="roll-item">
       <div style="flex:1">
         <span class="item-name">${item.name}</span>
-        <span class="item-note" style="margin-left:8px">${item.note}</span>
+        <span class="item-note" style="margin-left:8px">${noteDisplay}</span>
       </div>
       <span class="tier-badge ${t.color}" style="margin:0 8px">${t.label}</span>
       <span class="value-gp">${item.val > 0 ? item.val+'gp' : 'Priceless'}</span>
@@ -1197,15 +1217,14 @@ function conditionsRefEscape(e) { if (e.key === 'Escape') closeConditionsRef(); 
 
 function getCurrentLootPool() {
   var tierSystem = document.getElementById('rollTierSystem').value;
-  if (tierSystem === 'magic') {
-    var magicCounts = MAGIC_ITEM_TABLES ? {
-      common: (MAGIC_ITEM_TABLES.common || []).length,
-      uncommon: (MAGIC_ITEM_TABLES.uncommon || []).length,
-      rare: (MAGIC_ITEM_TABLES.rare || []).length,
-      veryRare: (MAGIC_ITEM_TABLES.veryRare || []).length,
-      legendary: (MAGIC_ITEM_TABLES.legendary || []).length
-    } : null;
-    return { pool: [], title: 'Magic items (rarity table)', magicCounts: magicCounts };
+  if (tierSystem === 'hansi') {
+    var pool = getHansiPool();
+    var tierEl = document.getElementById('rollHansiTier');
+    var catEl = document.getElementById('rollHansiCategory');
+    var tier = tierEl ? parseInt(tierEl.value, 10) : 0;
+    var tierLabel = TIER_INFO && TIER_INFO[tier] ? TIER_INFO[tier].label + ' ' + TIER_INFO[tier].name : 'T' + tier;
+    var catLabel = (catEl && catEl.value) ? catEl.value : 'Any';
+    return { pool: pool, title: 'Hansi Loot Table · ' + tierLabel + ' · ' + catLabel };
   }
   if (!LOOT_TABLES || !CUSTOM_LOOT_TABLES) return { pool: [], title: 'Data loading…' };
   var pool, title;
@@ -1235,14 +1254,7 @@ function openLootTableRef() {
   var modal = document.getElementById('lootTableRefModal');
   if (!body || !titleEl || !modal) return;
   titleEl.textContent = 'Current loot table: ' + result.title;
-  if (result.magicCounts) {
-    body.innerHTML = '<p style="margin-bottom:12px;font-size:0.8125rem;color:var(--ll-ink)">Magic Item Master Table by rarity. Roll d100 for rarity (50% Common, 25% Uncommon, 15% Rare, 9% Very Rare, 1% Legendary), then one random item from that table.</p>' +
-      '<div class="ref-loot-item"><div><span class="ref-loot-name">Common</span></div><span class="value-gp">' + result.magicCounts.common + ' items</span></div>' +
-      '<div class="ref-loot-item"><div><span class="ref-loot-name">Uncommon</span></div><span class="value-gp">' + result.magicCounts.uncommon + ' items</span></div>' +
-      '<div class="ref-loot-item"><div><span class="ref-loot-name">Rare</span></div><span class="value-gp">' + result.magicCounts.rare + ' items</span></div>' +
-      '<div class="ref-loot-item"><div><span class="ref-loot-name">Very Rare</span></div><span class="value-gp">' + result.magicCounts.veryRare + ' items</span></div>' +
-      '<div class="ref-loot-item"><div><span class="ref-loot-name">Legendary</span></div><span class="value-gp">' + result.magicCounts.legendary + ' items</span></div>';
-  } else if (!result.pool.length) {
+  if (!result.pool.length) {
     body.innerHTML = '<p class="empty">No table for this selection.</p>';
   } else {
     body.innerHTML = result.pool.map(function(i) {
