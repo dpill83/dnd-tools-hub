@@ -390,7 +390,9 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
 .loot-ledger-container .roll-item:last-child { border-bottom: none; }
 .loot-ledger-container .roll-item.roll-item-clickable { cursor: pointer; }
 .loot-ledger-container .roll-item.roll-item-clickable:hover { background: var(--ll-table-row-hover); }
-.roll-item-detail-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.roll-item-detail-grid { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; margin-bottom: 12px; font-size: 0.8125rem; align-items: baseline; }
+.roll-item-detail-grid .roll-item-detail-label { color: var(--ll-rust2); font-weight: 600; }
+.roll-item-detail-note-label { font-size: 0.75rem; font-weight: 600; color: var(--ll-rust2); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
 .roll-item-detail-note { font-size: 0.875rem; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
 
 .loot-ledger-container .table-wrap { overflow-x: auto; }
@@ -487,7 +489,8 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
                 <button type="button" class="ledger-help-close" id="rollItemDetailClose" aria-label="Close">&times;</button>
             </div>
             <div class="ledger-help-body" id="rollItemDetailBody">
-                <div class="roll-item-detail-meta" id="rollItemDetailMeta"></div>
+                <div class="roll-item-detail-grid" id="rollItemDetailMeta"></div>
+                <div class="roll-item-detail-note-label" id="rollItemDetailNoteLabel">Description</div>
                 <div class="roll-item-detail-note" id="rollItemDetailNote"></div>
             </div>
         </div>
@@ -1006,7 +1009,13 @@ function rollLoot() {
     var shuffled = [...pool].sort(function() { return Math.random() - 0.5; });
     var count = Math.min(pool.length, 2 + Math.floor(Math.random() * 4));
     state.lastRolled = shuffled.slice(0, count).map(function(i) {
-      return { name: i.name, tier: i.tier, val: i.val, note: i.note, id: Date.now() + Math.random(), qty: 1, status: 'holding' };
+      var base = { name: i.name, tier: i.tier, val: i.val, note: i.note, id: Date.now() + Math.random(), qty: 1, status: 'holding' };
+      if (i.category != null) base.category = i.category;
+      if (i.rarity != null) base.rarity = i.rarity;
+      if (i.weight != null) base.weight = i.weight;
+      if (i.requirements != null) base.requirements = i.requirements;
+      if (i.author != null) base.author = i.author;
+      return base;
     });
     document.getElementById('rollSeed').textContent = 'Roll #' + (Math.floor(Math.random() * 9000) + 1000);
     renderRollOutput();
@@ -1074,13 +1083,27 @@ function openRollItemDetail(index) {
   if (!item) return;
   var titleEl = document.getElementById('rollItemDetailTitle');
   var metaEl = document.getElementById('rollItemDetailMeta');
+  var noteLabelEl = document.getElementById('rollItemDetailNoteLabel');
   var noteEl = document.getElementById('rollItemDetailNote');
   var modal = document.getElementById('rollItemDetailModal');
   if (!titleEl || !metaEl || !noteEl || !modal) return;
   var t = TIER_INFO[item.tier];
   titleEl.textContent = item.name;
-  metaEl.innerHTML = '<span class="tier-badge ' + (t ? t.color : 't0') + '">' + (t ? t.label : 'T' + item.tier) + '</span><span class="value-gp">' + (item.val > 0 ? item.val + 'gp' : 'Priceless') + '</span>';
-  noteEl.textContent = item.note || 'No description.';
+  var rows = [];
+  function row(label, value) {
+    if (value == null || value === '') return;
+    rows.push('<span class="roll-item-detail-label">' + escapeHtml(label) + '</span><span>' + escapeHtml(String(value)) + '</span>');
+  }
+  row('Est. Value', item.val != null ? (item.val > 0 ? item.val + ' gp' : 'Priceless') : '—');
+  row('Tier', t ? t.label + ' — ' + t.name : 'T' + item.tier);
+  row('Rarity', item.rarity);
+  row('Weight', item.weight);
+  row('Category', item.category);
+  row('Requirements', item.requirements);
+  row('Source', item.author);
+  metaEl.innerHTML = rows.join('');
+  if (noteLabelEl) noteLabelEl.style.display = (item.note && item.note.trim()) ? '' : 'none';
+  noteEl.textContent = (item.note && item.note.trim()) ? item.note : 'No description.';
   modal.removeAttribute('hidden');
   document.addEventListener('keydown', rollItemDetailEscape);
 }

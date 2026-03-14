@@ -87,8 +87,10 @@ function main() {
   const rarityIdx = header.indexOf('Rarity');
   const categoryIdx = header.indexOf('Category');
   const propertiesIdx = header.indexOf('Properties');
+  const requirementsIdx = header.indexOf('Requirements');
   const rarityNumIdx = header.indexOf('Rarity Number');
   const authorIdx = header.indexOf('Author');
+  const weightIdx = header.indexOf('Weight');
 
   const items = [];
   for (let r = 1; r < rows.length; r++) {
@@ -100,13 +102,16 @@ function main() {
     const val = parseValue(row[valueIdx]);
     const category = (row[categoryIdx] || '').trim() || 'Treasure';
     const tier = rarityToTier(row[rarityNumIdx], row[rarityIdx]);
+    const rarity = (row[rarityIdx] || '').trim();
+    const weight = (row[weightIdx] || '').trim();
+    const requirements = (row[requirementsIdx] || '').trim();
     const author = (row[authorIdx] || '').trim();
     let note = '';
     if (description && properties) note = description + ' | ' + properties;
     else if (description) note = description;
     else if (properties) note = properties;
     if (author) note = note ? note + ' (Source: ' + author + ')' : 'Source: ' + author;
-    items.push({ name, tier, val, note, category });
+    items.push({ name, tier, val, note, category, rarity, weight, requirements, author });
   }
 
   const categories = [...new Set(items.map(i => i.category).filter(Boolean))].sort();
