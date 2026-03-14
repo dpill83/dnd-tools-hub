@@ -388,6 +388,10 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
 .loot-ledger-container .roll-output.show { display: block; animation: ll-pop 0.3s ease-out; }
 .loot-ledger-container .roll-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--ll-table-row-border); gap: 8px; }
 .loot-ledger-container .roll-item:last-child { border-bottom: none; }
+.loot-ledger-container .roll-item.roll-item-clickable { cursor: pointer; }
+.loot-ledger-container .roll-item.roll-item-clickable:hover { background: var(--ll-table-row-hover); }
+.roll-item-detail-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.roll-item-detail-note { font-size: 0.875rem; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
 
 .loot-ledger-container .table-wrap { overflow-x: auto; }
 
@@ -472,6 +476,20 @@ body.loot-ledger-parchment .loot-ledger-container .condition-name { font-family:
                 <button type="button" class="ledger-help-close" id="lootTableRefClose" aria-label="Close">&times;</button>
             </div>
             <div class="ledger-help-body" id="lootTableRefBody"></div>
+        </div>
+    </div>
+
+    <div id="rollItemDetailModal" class="ledger-help-modal" role="dialog" aria-labelledby="rollItemDetailTitle" aria-modal="true" hidden>
+        <div class="ledger-help-overlay" id="rollItemDetailOverlay"></div>
+        <div class="ledger-help-content ledger-help-content-wide">
+            <div class="ledger-help-header">
+                <h2 id="rollItemDetailTitle">Item</h2>
+                <button type="button" class="ledger-help-close" id="rollItemDetailClose" aria-label="Close">&times;</button>
+            </div>
+            <div class="ledger-help-body" id="rollItemDetailBody">
+                <div class="roll-item-detail-meta" id="rollItemDetailMeta"></div>
+                <div class="roll-item-detail-note" id="rollItemDetailNote"></div>
+            </div>
         </div>
     </div>
 
@@ -1030,16 +1048,49 @@ function renderRollOutput() {
   document.getElementById('rollItems').innerHTML = state.lastRolled.map((item,i) => {
     const t = TIER_INFO[item.tier];
     const noteDisplay = (item.note && item.note.length > 120) ? item.note.slice(0, 120) + '…' : (item.note || '');
-    return `<div class="roll-item">
+    return `<div class="roll-item roll-item-clickable" data-roll-index="${i}" onclick="openRollItemDetail(${i})" role="button" tabindex="0">
       <div style="flex:1">
-        <span class="item-name">${item.name}</span>
-        <span class="item-note" style="margin-left:8px">${noteDisplay}</span>
+        <span class="item-name">${escapeHtml(item.name)}</span>
+        <span class="item-note" style="margin-left:8px">${escapeHtml(noteDisplay)}</span>
       </div>
       <span class="tier-badge ${t.color}" style="margin:0 8px">${t.label}</span>
       <span class="value-gp">${item.val > 0 ? item.val+'gp' : 'Priceless'}</span>
     </div>`;
   }).join('');
+  document.querySelectorAll('#rollItems .roll-item-clickable').forEach(function(el) {
+    el.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openRollItemDetail(parseInt(el.getAttribute('data-roll-index'), 10)); } });
+  });
 }
+
+function escapeHtml(s) {
+  if (!s) return '';
+  var div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+function openRollItemDetail(index) {
+  var item = state.lastRolled && state.lastRolled[index];
+  if (!item) return;
+  var titleEl = document.getElementById('rollItemDetailTitle');
+  var metaEl = document.getElementById('rollItemDetailMeta');
+  var noteEl = document.getElementById('rollItemDetailNote');
+  var modal = document.getElementById('rollItemDetailModal');
+  if (!titleEl || !metaEl || !noteEl || !modal) return;
+  var t = TIER_INFO[item.tier];
+  titleEl.textContent = item.name;
+  metaEl.innerHTML = '<span class="tier-badge ' + (t ? t.color : 't0') + '">' + (t ? t.label : 'T' + item.tier) + '</span><span class="value-gp">' + (item.val > 0 ? item.val + 'gp' : 'Priceless') + '</span>';
+  noteEl.textContent = item.note || 'No description.';
+  modal.removeAttribute('hidden');
+  document.addEventListener('keydown', rollItemDetailEscape);
+}
+
+function closeRollItemDetail() {
+  var modal = document.getElementById('rollItemDetailModal');
+  if (modal) modal.setAttribute('hidden', '');
+  document.removeEventListener('keydown', rollItemDetailEscape);
+}
+function rollItemDetailEscape(e) { if (e.key === 'Escape') closeRollItemDetail(); }
 
 function addAllToLedger(evt) {
   state.lastRolled.forEach(item => {
@@ -1292,6 +1343,11 @@ function initRefModals() {
   if (viewLootTableBtn) viewLootTableBtn.addEventListener('click', openLootTableRef);
   if (lootTableOverlay) lootTableOverlay.addEventListener('click', closeLootTableRef);
   if (lootTableClose) lootTableClose.addEventListener('click', closeLootTableRef);
+
+  var rollItemDetailOverlay = document.getElementById('rollItemDetailOverlay');
+  var rollItemDetailClose = document.getElementById('rollItemDetailClose');
+  if (rollItemDetailOverlay) rollItemDetailOverlay.addEventListener('click', closeRollItemDetail);
+  if (rollItemDetailClose) rollItemDetailClose.addEventListener('click', closeRollItemDetail);
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────

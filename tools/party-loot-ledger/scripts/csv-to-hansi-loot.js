@@ -86,6 +86,7 @@ function main() {
   const valueIdx = header.indexOf('Est. Value');
   const rarityIdx = header.indexOf('Rarity');
   const categoryIdx = header.indexOf('Category');
+  const propertiesIdx = header.indexOf('Properties');
   const rarityNumIdx = header.indexOf('Rarity Number');
   const authorIdx = header.indexOf('Author');
 
@@ -95,11 +96,15 @@ function main() {
     const name = (row[itemIdx] || '').trim();
     if (!name) continue;
     const description = (row[descIdx] || '').trim();
+    const properties = (row[propertiesIdx] || '').trim();
     const val = parseValue(row[valueIdx]);
     const category = (row[categoryIdx] || '').trim() || 'Treasure';
     const tier = rarityToTier(row[rarityNumIdx], row[rarityIdx]);
     const author = (row[authorIdx] || '').trim();
-    let note = description;
+    let note = '';
+    if (description && properties) note = description + ' | ' + properties;
+    else if (description) note = description;
+    else if (properties) note = properties;
     if (author) note = note ? note + ' (Source: ' + author + ')' : 'Source: ' + author;
     items.push({ name, tier, val, note, category });
   }
