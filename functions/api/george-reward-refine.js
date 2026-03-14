@@ -55,14 +55,18 @@ export async function onRequestPost(context) {
     return jsonResponse({ error: 'Invalid JSON body' }, 400);
   }
 
+  if (!body || typeof body !== 'object') {
+    return jsonResponse({ error: 'Body must be a JSON object' }, 400);
+  }
+
   const sessionVibe = typeof body.sessionVibe === 'string' ? body.sessionVibe.trim() : '';
   const rewardStrength = typeof body.rewardStrength === 'string' ? body.rewardStrength.trim() : '';
   const georgeContext = typeof body.georgeContext === 'string' ? body.georgeContext.trim() : '';
   const visibleStance = typeof body.visibleStance === 'string' ? body.visibleStance.trim() : '';
-  const baseTitle = typeof body.baseTitle === 'string' ? body.baseTitle.trim() : '';
-  const baseBody = typeof body.baseBody === 'string' ? body.baseBody.trim() : '';
-  const baseRiskLine = typeof body.baseRiskLine === 'string' ? body.baseRiskLine.trim() : '';
-  const sessionNote = typeof body.sessionNote === 'string' ? body.sessionNote.trim() : '';
+  const baseTitle = (typeof body.baseTitle === 'string' ? body.baseTitle : body.base_title != null ? String(body.base_title) : '').trim();
+  const baseBody = (typeof body.baseBody === 'string' ? body.baseBody : body.base_body != null ? String(body.base_body) : '').trim();
+  const baseRiskLine = (typeof body.baseRiskLine === 'string' ? body.baseRiskLine : body.base_risk_line != null ? String(body.base_risk_line) : '').trim();
+  const sessionNote = (typeof body.sessionNote === 'string' ? body.sessionNote : body.session_note != null ? String(body.session_note) : '').trim();
 
   if (!baseTitle || !baseBody) {
     return jsonResponse({ error: 'baseTitle and baseBody are required' }, 400);

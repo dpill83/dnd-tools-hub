@@ -816,14 +816,20 @@ body {
     var display = getEffectiveDisplay();
     if (!display) return;
 
+    var baseTitle = (display.title != null && display.title !== '') ? String(display.title) : '';
+    var baseBody = (display.flavor != null ? String(display.flavor) : '') + (display.aside ? '\n\n' + display.aside : '');
+    if (!baseTitle || !baseBody.trim()) {
+      showToast("Couldn't connect the session \u2014 the result above is unchanged.");
+      return;
+    }
     var payload = {
       sessionVibe: getSelected(vibePills, 'data-vibe') || 'street',
       rewardStrength: getSelected(strengthPills, 'data-strength') || 'standard',
       georgeContext: getSelected(contextPills, 'data-context') || 'rising',
       visibleStance: STANCE[currentResult.bucket],
-      baseTitle: display.title,
-      baseBody: display.flavor + (display.aside ? '\n\n' + display.aside : ''),
-      baseRiskLine: display.condition || '',
+      baseTitle: baseTitle,
+      baseBody: baseBody.trim(),
+      baseRiskLine: display.condition ? String(display.condition) : '',
       sessionNote: sessionNote,
     };
 
@@ -841,7 +847,13 @@ body {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
-      .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+      .then(function (res) {
+        return res.text().then(function (text) {
+          var data;
+          try { data = text ? JSON.parse(text) : {}; } catch (_) { data = {}; }
+          return { ok: res.ok, status: res.status, data: data };
+        });
+      })
       .then(function (result) {
         if (result.ok && result.data && typeof result.data.title === 'string' && typeof result.data.body === 'string') {
           refinedResult = {
@@ -852,7 +864,8 @@ body {
           };
           renderResultCard();
         } else {
-          showToast("Couldn't connect the session \u2014 the result above is unchanged.");
+          var msg = result.data && result.data.error ? result.data.error : "Couldn't connect the session \u2014 the result above is unchanged.";
+          showToast(msg);
         }
       })
       .catch(function () {
