@@ -247,6 +247,39 @@ body {
 }
 .gre-condition.hidden { display: none; }
 
+/* ── Session note (optional) ── */
+.gre-session-note {
+  margin-bottom: 1.1rem;
+}
+.gre-session-note > span {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-light, #666);
+  margin-bottom: 0.4rem;
+  opacity: 0.85;
+}
+.gre-session-note textarea {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.6rem;
+  font-family: inherit;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 6px;
+  background: var(--surface, #fff);
+  color: var(--text, #333);
+  resize: vertical;
+  transition: border-color 0.18s;
+}
+.gre-session-note textarea::placeholder { color: var(--text-light, #999); }
+.gre-session-note textarea:focus {
+  outline: none;
+  border-color: var(--primary-color, #1a472a);
+}
+
 /* ── Actions ── */
 .gre-actions {
   display: flex;
@@ -268,6 +301,17 @@ body {
   transition: border-color 0.18s, color 0.18s;
 }
 .gre-actions button:hover { border-color: var(--primary-color, #1a472a); color: var(--primary-color, #1a472a); }
+.gre-actions button:disabled { opacity: 0.6; cursor: wait; }
+.gre-result.is-loading .gre-flavor { opacity: 0.7; }
+.gre-notion-prompt {
+  font-size: 0.8rem;
+  color: var(--text-light, #666);
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border, #ddd);
+  font-style: italic;
+}
+.gre-notion-prompt.hidden { display: none; }
 
 /* ── Toast ── */
 .gre-toast {
@@ -352,6 +396,11 @@ body {
     </div>
   </div>
 
+  <div class="gre-session-note">
+    <span>What happened this session?</span>
+    <textarea id="session-note" rows="2" placeholder="e.g. George investigated a funeral, noticed something wrong with the mourners, and left with more questions than answers." aria-label="Optional short session summary"></textarea>
+  </div>
+
   <button type="button" id="end-session" class="gre-end-btn">End the Session</button>
 
   <!-- Teaser -->
@@ -369,7 +418,9 @@ body {
     <p class="gre-flavor" id="result-flavor"></p>
     <p class="gre-aside" id="result-aside"></p>
     <p class="gre-condition hidden" id="result-condition"></p>
+    <p class="gre-notion-prompt hidden" id="result-notion-prompt"></p>
     <div class="gre-actions">
+      <button type="button" id="spin-btn">Spin it through the session</button>
       <button type="button" id="reroll-btn">Try another</button>
       <button type="button" id="copy-btn">Copy for Notion</button>
       <button type="button" id="save-btn">Remember this</button>
@@ -632,42 +683,77 @@ body {
     setTimeout(function () { el.classList.remove('show'); }, 2200);
   }
 
-  function toNotionMarkdown(e) {
-    var stance = STANCE[e.bucket];
-    var out = '**' + stance + ' \u2014 ' + e.title + '**\n\n' + e.flavor + '\n\n_' + e.aside + '_';
-    if (e.condition) out += '\n\n_' + e.condition + '_';
+  function getEffectiveDisplay() {
+    if (refinedResult && currentResult) {
+      return {
+        title: refinedResult.title,
+        flavor: refinedResult.body,
+        aside: '',
+        condition: refinedResult.risk_line || null,
+        notion_prompt: refinedResult.notion_prompt || null,
+        bucket: currentResult.bucket,
+      };
+    }
+    if (!currentResult) return null;
+    return {
+      title: currentResult.title,
+      flavor: currentResult.flavor,
+      aside: currentResult.aside,
+      condition: currentResult.condition || null,
+      notion_prompt: null,
+      bucket: currentResult.bucket,
+    };
+  }
+
+  function toNotionMarkdown(display) {
+    if (!display) return '';
+    var stance = STANCE[display.bucket];
+    var out = '**' + stance + ' \u2014 ' + display.title + '**\n\n' + display.flavor;
+    if (display.aside) out += '\n\n_' + display.aside + '_';
+    if (display.condition) out += '\n\n_' + display.condition + '_';
+    if (display.notion_prompt) out += '\n\n_Notion: ' + display.notion_prompt + '_';
     return out;
   }
 
-  function saveToStorage(e) {
+  function saveToStorage(display) {
+    if (!display) return;
     try {
       var existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      existing.push({ bucket: e.bucket, title: e.title, flavor: e.flavor, aside: e.aside, condition: e.condition || null, savedAt: Date.now() });
+      existing.push({ bucket: display.bucket, title: display.title, flavor: display.flavor, aside: display.aside || null, condition: display.condition || null, savedAt: Date.now() });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
     } catch (_) {}
   }
 
+  function getApiBase() {
+    if (typeof window === 'undefined' || !window.location) return '';
+    return window.location.origin;
+  }
+
   /* ── State ── */
   var currentResult = null;
+  var refinedResult = null;
 
   /* ── Elements ── */
-  var vibePills     = document.getElementById('vibe-pills');
-  var strengthPills = document.getElementById('strength-pills');
-  var contextPills  = document.getElementById('context-pills');
-  var endBtn        = document.getElementById('end-session');
-  var teaserEl      = document.getElementById('teaser');
-  var teaserPhrase  = document.getElementById('teaser-phrase');
-  var teaserSub     = document.getElementById('teaser-sub');
-  var revealBtn     = document.getElementById('reveal-btn');
-  var resultCard    = document.getElementById('result-card');
-  var resultStance  = document.getElementById('result-stance');
-  var resultTitle   = document.getElementById('result-title');
-  var resultFlavor  = document.getElementById('result-flavor');
-  var resultAside   = document.getElementById('result-aside');
-  var resultCond    = document.getElementById('result-condition');
-  var rerollBtn     = document.getElementById('reroll-btn');
-  var copyBtn       = document.getElementById('copy-btn');
-  var saveBtn       = document.getElementById('save-btn');
+  var vibePills       = document.getElementById('vibe-pills');
+  var strengthPills   = document.getElementById('strength-pills');
+  var contextPills    = document.getElementById('context-pills');
+  var sessionNoteEl   = document.getElementById('session-note');
+  var endBtn          = document.getElementById('end-session');
+  var teaserEl        = document.getElementById('teaser');
+  var teaserPhrase    = document.getElementById('teaser-phrase');
+  var teaserSub       = document.getElementById('teaser-sub');
+  var revealBtn       = document.getElementById('reveal-btn');
+  var resultCard      = document.getElementById('result-card');
+  var resultStance    = document.getElementById('result-stance');
+  var resultTitle     = document.getElementById('result-title');
+  var resultFlavor    = document.getElementById('result-flavor');
+  var resultAside     = document.getElementById('result-aside');
+  var resultCond      = document.getElementById('result-condition');
+  var resultNotionEl  = document.getElementById('result-notion-prompt');
+  var spinBtn         = document.getElementById('spin-btn');
+  var rerollBtn       = document.getElementById('reroll-btn');
+  var copyBtn         = document.getElementById('copy-btn');
+  var saveBtn         = document.getElementById('save-btn');
 
   /* ── Pill interactions ── */
   vibePills.querySelectorAll('.gre-pill').forEach(function (btn) {
@@ -683,6 +769,7 @@ body {
   /* ── Show teaser ── */
   function showTeaser(entry) {
     currentResult = entry;
+    refinedResult = null;
     resultCard.classList.add('hidden');
     var t = TEASER[entry.bucket];
     teaserPhrase.textContent = t.phrase;
@@ -690,25 +777,94 @@ body {
     teaserEl.className = 'gre-teaser is-' + entry.bucket;
   }
 
-  /* ── Show full result ── */
-  function showFullResult() {
-    if (!currentResult) return;
-    var e = currentResult;
-    teaserEl.classList.add('hidden');
-    resultStance.textContent = STANCE[e.bucket];
-    resultStance.className   = 'gre-stance ' + e.bucket;
-    resultTitle.textContent  = e.title;
-    resultFlavor.textContent = e.flavor;
-    resultAside.textContent  = e.aside;
-    if (e.condition) {
-      resultCond.textContent = e.condition;
+  function renderResultCard() {
+    var display = getEffectiveDisplay();
+    if (!display || !currentResult) return;
+    resultStance.textContent = STANCE[currentResult.bucket];
+    resultStance.className   = 'gre-stance ' + currentResult.bucket;
+    resultTitle.textContent  = display.title;
+    resultFlavor.textContent = display.flavor;
+    resultAside.textContent  = display.aside || '';
+    resultAside.style.display = display.aside ? '' : 'none';
+    if (display.condition) {
+      resultCond.textContent = display.condition;
       resultCond.classList.remove('hidden');
     } else {
       resultCond.classList.add('hidden');
     }
+    if (display.notion_prompt) {
+      resultNotionEl.textContent = display.notion_prompt;
+      resultNotionEl.classList.remove('hidden');
+    } else {
+      resultNotionEl.classList.add('hidden');
+    }
+  }
+
+  /* ── Show full result ── */
+  function showFullResult() {
+    if (!currentResult) return;
+    teaserEl.classList.add('hidden');
+    renderResultCard();
     resultCard.classList.remove('hidden');
-    /* re-trigger animation */
     void resultCard.offsetWidth;
+  }
+
+  /* ── Spin through session (AI refinement) ── */
+  function spinRefine() {
+    if (!currentResult) return;
+    var sessionNote = sessionNoteEl ? sessionNoteEl.value.trim() : '';
+    var display = getEffectiveDisplay();
+    if (!display) return;
+
+    var payload = {
+      sessionVibe: getSelected(vibePills, 'data-vibe') || 'street',
+      rewardStrength: getSelected(strengthPills, 'data-strength') || 'standard',
+      georgeContext: getSelected(contextPills, 'data-context') || 'rising',
+      visibleStance: STANCE[currentResult.bucket],
+      baseTitle: display.title,
+      baseBody: display.flavor + (display.aside ? '\n\n' + display.aside : ''),
+      baseRiskLine: display.condition || '',
+      sessionNote: sessionNote,
+    };
+
+    spinBtn.disabled = true;
+    rerollBtn.disabled = true;
+    copyBtn.disabled = true;
+    saveBtn.disabled = true;
+    resultCard.classList.add('is-loading');
+
+    var base = getApiBase();
+    var url = (base ? base : '') + '/api/george-reward-refine';
+
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+      .then(function (result) {
+        if (result.ok && result.data && typeof result.data.title === 'string' && typeof result.data.body === 'string') {
+          refinedResult = {
+            title: result.data.title,
+            body: result.data.body,
+            risk_line: typeof result.data.risk_line === 'string' ? result.data.risk_line : '',
+            notion_prompt: typeof result.data.notion_prompt === 'string' ? result.data.notion_prompt : '',
+          };
+          renderResultCard();
+        } else {
+          showToast("Couldn't connect the session \u2014 the result above is unchanged.");
+        }
+      })
+      .catch(function () {
+        showToast("Couldn't connect the session \u2014 the result above is unchanged.");
+      })
+      .then(function () {
+        spinBtn.disabled = false;
+        rerollBtn.disabled = false;
+        copyBtn.disabled = false;
+        saveBtn.disabled = false;
+        resultCard.classList.remove('is-loading');
+      });
   }
 
   /* ── End session ── */
@@ -738,10 +894,14 @@ body {
     showTeaser(entry);
   });
 
+  /* ── Spin ── */
+  spinBtn.addEventListener('click', spinRefine);
+
   /* ── Copy ── */
   copyBtn.addEventListener('click', function () {
-    if (!currentResult) return;
-    var text = toNotionMarkdown(currentResult);
+    var display = getEffectiveDisplay();
+    if (!display) return;
+    var text = toNotionMarkdown(display);
     navigator.clipboard.writeText(text).then(function () {
       showToast('Copied to clipboard.');
     }).catch(function () {
@@ -751,8 +911,9 @@ body {
 
   /* ── Remember ── */
   saveBtn.addEventListener('click', function () {
-    if (!currentResult) return;
-    saveToStorage(currentResult);
+    var display = getEffectiveDisplay();
+    if (!display) return;
+    saveToStorage(display);
     showToast('Remembered.');
   });
 
