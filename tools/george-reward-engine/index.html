@@ -4,532 +4,638 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>George Reward Engine</title>
-  <link rel="stylesheet" href="../../global.css">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-/* ── Variables ── */
-.gre {
-  --gre-found:       #2d5a3d;
-  --gre-opportunity: #8b6340;
-  --gre-hook:        #4a5568;
-  --gre-found-faint:       rgba(45, 90, 61, 0.12);
-  --gre-opportunity-faint: rgba(139, 99, 64, 0.12);
-  --gre-hook-faint:        rgba(74, 85, 104, 0.12);
+:root {
+  --ink: #1a1410;
+  --parchment: #f2e8d5;
+  --gold: #c9a84c;
+  --gold-light: #e8c96a;
+  --smoke: #6b6258;
+  --panel-bg: rgba(18,12,6,0.92);
+  --text-main: #f0e8d8;
+  --text-dim: #a89880;
+  --found: #4a9b5f;
+  --opportunity: #c4956a;
+  --hook: #9b8ab5;
+  --found-bg: rgba(74,155,95,0.1);
+  --opportunity-bg: rgba(196,149,106,0.1);
+  --hook-bg: rgba(155,138,181,0.1);
 }
-.dark-mode .gre {
-  --gre-found:       #4a9b5f;
-  --gre-opportunity: #c4956a;
-  --gre-hook:        #718096;
-  --gre-found-faint:       rgba(74, 155, 95, 0.14);
-  --gre-opportunity-faint: rgba(196, 149, 106, 0.14);
-  --gre-hook-faint:        rgba(113, 128, 150, 0.14);
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-*, *::before, *::after { box-sizing: border-box; }
-
-body.gre {
+body {
   font-family: 'Crimson Text', Georgia, serif;
-  color: var(--text, #333);
-  background: var(--background, #f5f5f5);
+  color: var(--text-main);
+  background: #080503;
   min-height: 100vh;
-  margin: 0;
-  transition: background-color 0.3s, color 0.3s;
+  overflow-x: hidden;
 }
 
-/* ── Chrome: minimal, out of the way ── */
-.gre-chrome {
+/* ── Atmospheric BG ── */
+#scene-bg {
   position: fixed;
-  bottom: 0.75rem;
-  right: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 0.7rem;
-  opacity: 0.35;
-  transition: opacity 0.2s;
-  z-index: 10;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 30%, #1c1208 0%, #080503 70%);
+  transition: background 1.6s ease;
 }
-.gre-chrome:hover { opacity: 0.7; }
-.gre-chrome a {
-  color: var(--text-light, #666);
-  text-decoration: none;
-}
-.gre-chrome a:hover { color: var(--text, #333); }
-.gre-theme-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.2rem;
-  font-size: 1rem;
-  color: var(--text-light, #666);
-  line-height: 1;
-}
+body.vibe-dungeon  #scene-bg { background: radial-gradient(ellipse 80% 70% at 40% 40%, #241810 0%, #100905 70%); }
+body.vibe-intrigue #scene-bg { background: radial-gradient(ellipse 70% 60% at 60% 35%, #1c1018 0%, #0e0810 70%); }
+body.vibe-undead   #scene-bg { background: radial-gradient(ellipse 80% 60% at 50% 40%, #0c1812 0%, #080e0b 70%); }
+body.vibe-faction  #scene-bg { background: radial-gradient(ellipse 75% 65% at 45% 35%, #10101c 0%, #0a0a14 70%); }
+body.vibe-street   #scene-bg { background: radial-gradient(ellipse 70% 60% at 50% 45%, #1a1410 0%, #0e0b08 70%); }
+body.vibe-temple   #scene-bg { background: radial-gradient(ellipse 80% 65% at 50% 30%, #1e1c0e 0%, #120f06 70%); }
+body.vibe-noble    #scene-bg { background: radial-gradient(ellipse 75% 60% at 55% 35%, #18141c 0%, #0e0a12 70%); }
+body.vibe-criminal #scene-bg { background: radial-gradient(ellipse 70% 65% at 45% 40%, #1e0c0c 0%, #100606 70%); }
 
-/* ── One stage: centered panel ── */
-.gre-stage {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 1rem;
-}
-
-.gre-panel {
-  position: relative;
-  width: 100%;
-  max-width: 26rem;
-  min-height: 22rem;
-}
-
-/* ── Views: only one active at a time ── */
-.gre-view {
+/* noise overlay */
+#scene-bg::after {
+  content: '';
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  opacity: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
   pointer-events: none;
-  transition: opacity 0.45s ease;
-}
-.gre-view.gre-active {
-  opacity: 1;
-  pointer-events: auto;
 }
 
-/* ── Setup: atmosphere ── */
-.gre-view-setup {
-  border-radius: 12px;
-  padding: 0 0.25rem;
-  transition: background 0.6s ease, box-shadow 0.6s ease;
+/* ── Ember particles ── */
+#embers {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 1; overflow: hidden;
 }
+.ember {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffd080 0%, #ff9030 60%, transparent 80%);
+  pointer-events: none;
+  animation: ember-rise linear infinite;
+  opacity: 0;
+}
+@keyframes ember-rise {
+  0%   { opacity: 0; transform: translateY(0) translateX(0) scale(1) rotate(0deg); }
+  15%  { opacity: 0.8; }
+  85%  { opacity: 0.2; }
+  100% { opacity: 0; transform: translateY(-110vh) translateX(var(--drift)) scale(0.2) rotate(360deg); }
+}
+
+/* ── Stage ── */
+.gre-stage {
+  position: relative; z-index: 2;
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 2.5rem 1.25rem;
+}
+.gre-panel {
+  position: relative;
+  width: 100%; max-width: 27rem;
+  min-height: 24rem;
+}
+
+/* ── Views ── */
+.gre-view {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+.gre-view.gre-active { opacity: 1; pointer-events: auto; }
+
+/* ── Setup card ── */
+.gre-view-setup {
+  background: var(--panel-bg);
+  border-radius: 3px;
+  padding: 1.9rem 1.7rem 1.6rem;
+  border: 1px solid rgba(201,168,76,0.22);
+  box-shadow:
+    0 0 0 1px rgba(201,168,76,0.07) inset,
+    0 24px 64px rgba(0,0,0,0.75),
+    0 0 120px rgba(201,168,76,0.04);
+  position: relative; overflow: hidden;
+}
+/* corner ornaments */
 .gre-view-setup::before {
   content: '';
   position: absolute;
-  inset: -8%;
-  border-radius: 20px;
+  top: 0; left: 0; right: 0; bottom: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse 90% 80% at 50% 50%, transparent 40%, rgba(0,0,0,0.04) 100%);
-  z-index: -1;
+  background:
+    radial-gradient(circle 60px at 0% 0%, rgba(201,168,76,0.06), transparent),
+    radial-gradient(circle 60px at 100% 0%, rgba(201,168,76,0.04), transparent),
+    radial-gradient(circle 80px at 50% 100%, rgba(201,168,76,0.03), transparent);
 }
-.dark-mode .gre-view-setup::before {
-  background: radial-gradient(ellipse 90% 80% at 50% 50%, transparent 35%, rgba(0,0,0,0.2) 100%);
-}
-.gre-view-setup::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 12px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  z-index: -1;
-}
-.gre-view-setup.gre-vibe-dungeon::after  { background: radial-gradient(ellipse 100% 70% at 50% 30%, rgba(139,119,101,0.08) 0%, transparent 60%); opacity: 1; }
-.gre-view-setup.gre-vibe-intrigue::after { background: radial-gradient(ellipse 100% 70% at 50% 30%, rgba(100,70,80,0.09) 0%, transparent 60%); opacity: 1; }
-.gre-view-setup.gre-vibe-undead::after  { background: radial-gradient(ellipse 100% 70% at 50% 30%, rgba(80,100,90,0.07) 0%, transparent 60%); opacity: 1; }
-.gre-view-setup.gre-vibe-faction::after { background: radial-gradient(ellipse 100% 70% at 50% 30%, rgba(90,85,110,0.07) 0%, transparent 60%); opacity: 1; }
-.gre-view-setup.gre-vibe-street::after  { background: radial-gradient(ellipse 100% 70% at 50% 30%, rgba(100,95,85,0.06) 0%, transparent 60%); opacity: 1; }
-.gre-view-setup.gre-vibe-temple::after  { background: radial-gradient(ellipse 100% 70% at 50% 30%, rgba(180,170,140,0.06) 0%, transparent 60%); opacity: 1; }
-.gre-view-setup.gre-vibe-noble::after   { background: radial-gradient(ellipse 100% 70% at 50% 30%, rgba(120,110,130,0.07) 0%, transparent 60%); opacity: 1; }
-.gre-view-setup.gre-vibe-criminal::after { background: radial-gradient(ellipse 100% 70% at 50% 30%, rgba(80,50,55,0.08) 0%, transparent 60%); opacity: 1; }
 
-/* ── Setup: hierarchy (vibe = strongest, weight = secondary, context = intimate) ── */
-.gre-view-setup .gre-heading {
+/* ── Heading ── */
+.gre-heading {
+  text-align: center;
   margin-bottom: 1.5rem;
+  padding-bottom: 1.1rem;
+  position: relative;
 }
-.gre-view-setup .gre-heading h1 {
-  font-family: 'Cinzel', serif;
-  font-weight: 600;
-  font-size: 1.4rem;
-  color: var(--text, #333);
-  margin: 0 0 0.25rem 0;
-  letter-spacing: 0.02em;
+.gre-heading::after {
+  content: '✦ ——— ✦ ——— ✦';
+  display: block;
+  font-size: 0.45rem;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  opacity: 0.45;
+  margin-top: 0.7rem;
 }
-.gre-view-setup .gre-heading p {
-  font-size: 0.9rem;
-  color: var(--text-light, #666);
-  font-style: italic;
-  margin: 0;
-}
-.gre-view-setup .gre-input-group {
-  margin-bottom: 1.1rem;
-}
-.gre-view-setup .gre-input-group.gre-input-vibe {
-  margin-bottom: 1.35rem;
-}
-.gre-view-setup .gre-input-group.gre-input-vibe > span {
-  font-family: 'Cinzel', serif;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--text, #333);
-  margin-bottom: 0.5rem;
-  text-transform: none;
-}
-.dark-mode .gre-view-setup .gre-input-group.gre-input-vibe > span {
-  color: var(--text, #e0e0e0);
-}
-.gre-view-setup .gre-input-group.gre-input-weight {
-  margin-bottom: 1rem;
-}
-.gre-view-setup .gre-input-group.gre-input-weight > span {
-  font-size: 0.72rem;
+.gre-heading h1 {
+  font-family: 'Cinzel Decorative', serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--gold-light);
   letter-spacing: 0.06em;
-  color: var(--text-light, #555);
-  margin-bottom: 0.4rem;
+  line-height: 1.4;
+  text-shadow: 0 0 30px rgba(201,168,76,0.35), 0 2px 4px rgba(0,0,0,0.5);
+  margin-bottom: 0.3rem;
 }
-.gre-view-setup .gre-input-group.gre-input-context {
-  margin-bottom: 1rem;
-}
-.gre-view-setup .gre-input-group.gre-input-context > span {
-  font-size: 0.7rem;
-  letter-spacing: 0.05em;
-  color: var(--text-light, #666);
-  margin-bottom: 0.38rem;
-  opacity: 0.92;
+.gre-heading p {
+  font-size: 0.88rem;
+  color: var(--text-dim);
   font-style: italic;
 }
+
+/* ── Input groups ── */
+.gre-input-group { margin-bottom: 1.2rem; }
 .gre-input-group > span {
   display: block;
   text-transform: uppercase;
-  color: var(--text-light, #666);
+  font-family: 'Cinzel', serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: rgba(201,168,76,0.7);
+  margin-bottom: 0.55rem;
 }
-.gre-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
+
+/* ── Pills ── */
+.gre-pills { display: flex; flex-wrap: wrap; gap: 0.38rem; }
+
 .gre-pill {
-  padding: 0.38rem 0.7rem;
-  border: 1px solid var(--border, #ccc);
-  border-radius: 999px;
-  background: var(--surface, #fff);
-  color: var(--text, #333);
-  font-family: inherit;
-  font-size: 0.85rem;
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.28rem 0.6rem 0.28rem 0.38rem;
+  border: 1px solid rgba(201,168,76,0.18);
+  border-radius: 2px;
+  background: rgba(255,255,255,0.03);
+  color: rgba(168,152,128,0.9);
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.025em;
   cursor: pointer;
-  transition: border-color 0.22s, background 0.22s, color 0.22s, box-shadow 0.22s;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-}
-.dark-mode .gre-pill {
-  border-color: var(--border, #404040);
-  background: var(--surface, #2d2d2d);
-  color: var(--text, #e0e0e0);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: all 0.22s ease;
+  position: relative;
+  user-select: none;
 }
 .gre-pill:hover {
-  border-color: var(--primary-color, #1a472a);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-}
-.dark-mode .gre-pill:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  border-color: rgba(201,168,76,0.45);
+  color: var(--gold-light);
+  background: rgba(201,168,76,0.07);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.3);
 }
 .gre-pill.active {
-  border-color: var(--primary-color, #1a472a);
-  background: var(--primary-color, #1a472a);
-  color: #fff;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.15) inset, 0 2px 8px rgba(26,71,42,0.25);
+  color: #f0ead8;
+  border-color: rgba(201,168,76,0.7);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 14px rgba(0,0,0,0.4), 0 0 8px rgba(201,168,76,0.15);
 }
-.dark-mode .gre-pill.active {
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.08) inset, 0 2px 10px rgba(0,0,0,0.35);
+
+/* vibe pill active colors */
+.gre-pill[data-vibe="dungeon"].active  { background: linear-gradient(150deg, #8b7765 0%, #5a4830 100%); }
+.gre-pill[data-vibe="intrigue"].active { background: linear-gradient(150deg, #704860 0%, #4a2840 100%); }
+.gre-pill[data-vibe="undead"].active   { background: linear-gradient(150deg, #3a6450 0%, #1a4030 100%); }
+.gre-pill[data-vibe="faction"].active  { background: linear-gradient(150deg, #504888 0%, #302860 100%); }
+.gre-pill[data-vibe="street"].active   { background: linear-gradient(150deg, #706040 0%, #504028 100%); }
+.gre-pill[data-vibe="temple"].active   { background: linear-gradient(150deg, #988060 0%, #706040 100%); }
+.gre-pill[data-vibe="noble"].active    { background: linear-gradient(150deg, #605080 0%, #403060 100%); }
+.gre-pill[data-vibe="criminal"].active { background: linear-gradient(150deg, #783040 0%, #501828 100%); }
+
+.gre-pill[data-strength="minor"].active    { background: linear-gradient(150deg, #3a4a38, #283828); }
+.gre-pill[data-strength="standard"].active { background: linear-gradient(150deg, #b8902a, #806010); color: #f5ead0; }
+.gre-pill[data-strength="major"].active    { background: linear-gradient(150deg, #882828, #601010); }
+
+.gre-pill[data-context="broke"].active    { background: linear-gradient(150deg, #504030, #302818); }
+.gre-pill[data-context="favored"].active  { background: linear-gradient(150deg, #3a5a3a, #203820); }
+.gre-pill[data-context="indebted"].active { background: linear-gradient(150deg, #604830, #403018); }
+.gre-pill[data-context="hunted"].active   { background: linear-gradient(150deg, #782828, #500810); }
+.gre-pill[data-context="rising"].active   { background: linear-gradient(150deg, #b8902a, #806010); color: #f5ead0; }
+.gre-pill[data-context="watched"].active  { background: linear-gradient(150deg, #485068, #283040); }
+
+/* pill icons */
+.pill-icon {
+  width: 14px; height: 14px; flex-shrink: 0;
+  opacity: 0.6; transition: opacity 0.2s, transform 0.25s;
 }
-/* Vibe pills: subtle thematic tint (very faint) */
-#vibe-pills .gre-pill[data-vibe="dungeon"]  { border-color: rgba(139,119,101,0.5); }
-#vibe-pills .gre-pill[data-vibe="intrigue"] { border-color: rgba(100,70,80,0.45); }
-#vibe-pills .gre-pill[data-vibe="undead"]   { border-color: rgba(90,110,100,0.4); }
-#vibe-pills .gre-pill[data-vibe="faction"]  { border-color: rgba(90,85,120,0.45); }
-#vibe-pills .gre-pill[data-vibe="street"]   { border-color: rgba(100,95,85,0.4); }
-#vibe-pills .gre-pill[data-vibe="temple"]   { border-color: rgba(180,165,130,0.45); }
-#vibe-pills .gre-pill[data-vibe="noble"]    { border-color: rgba(110,100,130,0.45); }
-#vibe-pills .gre-pill[data-vibe="criminal"] { border-color: rgba(90,55,60,0.5); }
-#vibe-pills .gre-pill[data-vibe="dungeon"]:hover,
-#vibe-pills .gre-pill[data-vibe="dungeon"].active  { border-color: #8b7765; }
-#vibe-pills .gre-pill[data-vibe="intrigue"]:hover,
-#vibe-pills .gre-pill[data-vibe="intrigue"].active { border-color: #7a5560; }
-#vibe-pills .gre-pill[data-vibe="undead"]:hover,
-#vibe-pills .gre-pill[data-vibe="undead"].active  { border-color: #5a7a6a; }
-#vibe-pills .gre-pill[data-vibe="faction"]:hover,
-#vibe-pills .gre-pill[data-vibe="faction"].active { border-color: #6a6580; }
-#vibe-pills .gre-pill[data-vibe="street"]:hover,
-#vibe-pills .gre-pill[data-vibe="street"].active  { border-color: #6a6555; }
-#vibe-pills .gre-pill[data-vibe="temple"]:hover,
-#vibe-pills .gre-pill[data-vibe="temple"].active { border-color: #b4a582; }
-#vibe-pills .gre-pill[data-vibe="noble"]:hover,
-#vibe-pills .gre-pill[data-vibe="noble"].active  { border-color: #6e6482; }
-#vibe-pills .gre-pill[data-vibe="criminal"]:hover,
-#vibe-pills .gre-pill[data-vibe="criminal"].active { border-color: #6a3840; }
-#vibe-pills .gre-pill[data-vibe="dungeon"].active  { background: linear-gradient(180deg, #7a6a5a 0%, #6a5a4a 100%); color: #f0ebe0; box-shadow: 0 0 0 1px rgba(255,255,255,0.1) inset, 0 2px 8px rgba(0,0,0,0.2); }
-#vibe-pills .gre-pill[data-vibe="intrigue"].active { background: linear-gradient(180deg, #6a5060 0%, #5a4050 100%); color: #f0e8ec; box-shadow: 0 0 0 1px rgba(255,255,255,0.08) inset, 0 2px 8px rgba(0,0,0,0.2); }
-#vibe-pills .gre-pill[data-vibe="undead"].active  { background: linear-gradient(180deg, #4a6a5a 0%, #3a5a4a 100%); color: #e8f0ec; box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset, 0 2px 8px rgba(0,0,0,0.2); }
-#vibe-pills .gre-pill[data-vibe="faction"].active  { background: linear-gradient(180deg, #5a5580 0%, #4a4570 100%); color: #e8eaf0; box-shadow: 0 0 0 1px rgba(255,255,255,0.08) inset, 0 2px 8px rgba(0,0,0,0.2); }
-#vibe-pills .gre-pill[data-vibe="street"].active  { background: linear-gradient(180deg, #5a5550 0%, #4a4540 100%); color: #f0eeea; box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset, 0 2px 8px rgba(0,0,0,0.2); }
-#vibe-pills .gre-pill[data-vibe="temple"].active  { background: linear-gradient(180deg, #a09070 0%, #8a7a5a 100%); color: #1a1812; box-shadow: 0 0 0 1px rgba(255,255,255,0.2) inset, 0 2px 8px rgba(0,0,0,0.15); }
-#vibe-pills .gre-pill[data-vibe="noble"].active   { background: linear-gradient(180deg, #5a5270 0%, #4a4260 100%); color: #eae8f0; box-shadow: 0 0 0 1px rgba(255,255,255,0.08) inset, 0 2px 8px rgba(0,0,0,0.2); }
-#vibe-pills .gre-pill[data-vibe="criminal"].active { background: linear-gradient(180deg, #5a3540 0%, #4a2530 100%); color: #f0e8ea; box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset, 0 2px 8px rgba(0,0,0,0.25); }
+.gre-pill:hover .pill-icon { opacity: 0.85; }
+.gre-pill.active .pill-icon { opacity: 1; transform: scale(1.15); filter: drop-shadow(0 0 2px rgba(255,220,120,0.5)); }
+
+/* ── Textarea ── */
 .gre-session-note {
   margin-bottom: 0.9rem;
-  margin-top: 0.5rem;
   padding-top: 1rem;
-  border-top: 1px solid rgba(0,0,0,0.06);
-}
-.dark-mode .gre-session-note {
-  border-top-color: rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(201,168,76,0.1);
 }
 .gre-session-note > span {
   display: block;
-  font-size: 0.68rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.6rem;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-light, #666);
-  margin-bottom: 0.35rem;
-  opacity: 0.9;
+  letter-spacing: 0.14em;
+  color: rgba(201,168,76,0.7);
+  margin-bottom: 0.5rem;
 }
 .gre-session-note textarea {
   width: 100%;
-  min-height: 2.2rem;
-  padding: 0.5rem 0.6rem;
-  font-family: inherit;
-  font-size: 0.85rem;
-  line-height: 1.45;
-  border: 1px solid var(--border, #ddd);
-  border-radius: 8px;
-  background: var(--surface, #fff);
-  color: var(--text, #333);
+  min-height: 4rem;
+  padding: 0.55rem 0.7rem;
+  font-family: 'Crimson Text', Georgia, serif;
+  font-size: 0.93rem;
+  line-height: 1.5;
+  border: 1px solid rgba(201,168,76,0.18);
+  border-radius: 2px;
+  background: rgba(0,0,0,0.45);
+  color: var(--text-main);
   resize: vertical;
   transition: border-color 0.2s, box-shadow 0.2s;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03) inset;
 }
-.dark-mode .gre-session-note textarea {
-  border-color: var(--border, #404040);
-  background: var(--input-bg, #353535);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2) inset;
-}
-.gre-session-note textarea::placeholder { color: var(--text-light, #999); }
+.gre-session-note textarea::placeholder { color: rgba(168,152,128,0.4); font-style: italic; }
 .gre-session-note textarea:focus {
   outline: none;
-  border-color: var(--primary-color, #1a472a);
-  box-shadow: 0 0 0 2px rgba(26,71,42,0.12);
+  border-color: rgba(201,168,76,0.4);
+  box-shadow: 0 0 0 2px rgba(201,168,76,0.07);
 }
+
+/* ── End button ── */
 .gre-end-btn {
-  width: 100%;
-  margin-top: 1.15rem;
-  padding: 0.75rem 1rem;
+  width: 100%; margin-top: 1.1rem;
+  padding: 0.82rem 1rem;
   font-family: 'Cinzel', serif;
-  font-weight: 600;
-  font-size: 0.98rem;
-  border: 2px solid var(--primary-color, #1a472a);
-  border-radius: 8px;
-  background: var(--primary-color, #1a472a);
-  color: #fff;
+  font-weight: 700; font-size: 0.82rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  border: 1px solid rgba(201,168,76,0.5);
+  border-radius: 2px;
+  background: linear-gradient(150deg, rgba(201,168,76,0.16) 0%, rgba(201,168,76,0.06) 100%);
+  color: var(--gold-light);
   cursor: pointer;
-  letter-spacing: 0.02em;
-  transition: opacity 0.2s, transform 0.12s, box-shadow 0.2s;
-  box-shadow: 0 2px 6px rgba(26,71,42,0.2);
+  position: relative; overflow: hidden;
+  transition: all 0.3s ease;
+  text-shadow: 0 0 12px rgba(201,168,76,0.3);
 }
-.gre-end-btn:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,71,42,0.25); }
-.gre-end-btn:disabled { opacity: 0.6; cursor: wait; transform: none; box-shadow: none; }
+.gre-end-btn::before {
+  content: '';
+  position: absolute; top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent);
+  transition: left 0.55s ease;
+}
+.gre-end-btn:hover {
+  background: linear-gradient(150deg, rgba(201,168,76,0.28) 0%, rgba(201,168,76,0.12) 100%);
+  box-shadow: 0 0 24px rgba(201,168,76,0.18), 0 0 0 1px rgba(201,168,76,0.15) inset;
+  transform: translateY(-1px);
+}
+.gre-end-btn:hover::before { left: 100%; }
+.gre-end-btn:disabled { opacity: 0.45; cursor: wait; transform: none; }
+
+/* ornament */
+.gre-ornament {
+  text-align: center; color: var(--gold); opacity: 0.25;
+  font-size: 0.55rem; letter-spacing: 0.2em;
+  margin: 0.2rem 0 0.85rem; display: block;
+}
 
 /* ── Teaser ── */
 .gre-view-teaser {
-  text-align: center;
-  align-items: center;
+  text-align: center; align-items: center;
+  background: var(--panel-bg);
+  border-radius: 3px;
+  padding: 3rem 2rem;
+  border: 1px solid rgba(201,168,76,0.22);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.75), 0 0 120px rgba(201,168,76,0.04);
+}
+.gre-teaser-symbol {
+  font-size: 2.8rem; margin-bottom: 1.1rem; display: block;
+  animation: breathe 3.5s ease-in-out infinite;
+  color: var(--gold-light);
+  text-shadow: 0 0 20px rgba(201,168,76,0.5), 0 0 60px rgba(201,168,76,0.2);
+}
+.gre-view-teaser.is-found .gre-teaser-symbol      { color: #6dca85; text-shadow: 0 0 20px rgba(74,155,95,0.6), 0 0 60px rgba(74,155,95,0.2); }
+.gre-view-teaser.is-opportunity .gre-teaser-symbol { color: #e0a870; text-shadow: 0 0 20px rgba(196,149,106,0.6), 0 0 60px rgba(196,149,106,0.2); }
+.gre-view-teaser.is-hook .gre-teaser-symbol        { color: #c0b0e0; text-shadow: 0 0 20px rgba(155,138,181,0.6), 0 0 60px rgba(155,138,181,0.2); }
+@keyframes breathe {
+  0%,100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+  50% { transform: scale(1.08) rotate(2deg); opacity: 1; }
 }
 .gre-teaser-phrase {
   font-family: 'Cinzel', serif;
-  font-size: 1.35rem;
-  font-style: italic;
-  color: var(--text, #333);
-  margin: 0 0 0.5rem 0;
-  transition: color 0.3s;
+  font-size: 1.25rem; font-style: italic;
+  color: var(--gold-light); margin-bottom: 0.55rem;
 }
-.gre-view-teaser.is-found       .gre-teaser-phrase { color: var(--gre-found); }
-.gre-view-teaser.is-opportunity .gre-teaser-phrase { color: var(--gre-opportunity); }
-.gre-view-teaser.is-hook        .gre-teaser-phrase { color: var(--gre-hook); }
+.gre-view-teaser.is-found       .gre-teaser-phrase { color: #6dca85; }
+.gre-view-teaser.is-opportunity .gre-teaser-phrase { color: #e0a870; }
+.gre-view-teaser.is-hook        .gre-teaser-phrase { color: #c0b0e0; }
 .gre-teaser-sub {
-  font-size: 0.92rem;
-  color: var(--text-light, #666);
-  margin: 0 0 2rem 0;
-  font-style: italic;
+  font-size: 0.93rem; color: var(--text-dim);
+  margin-bottom: 2.25rem; font-style: italic;
 }
 .gre-open-btn {
-  padding: 1rem 2.25rem;
-  font-family: 'Cinzel', serif;
-  font-weight: 600;
-  font-size: 1.05rem;
-  letter-spacing: 0.06em;
-  border: 2px solid var(--text, #333);
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text, #333);
-  cursor: pointer;
-  transition: border-color 0.25s, color 0.25s, background 0.25s;
+  padding: 0.8rem 2.5rem;
+  font-family: 'Cinzel', serif; font-weight: 600;
+  font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase;
+  border: 1px solid rgba(201,168,76,0.4);
+  border-radius: 2px; background: transparent;
+  color: var(--gold-light); cursor: pointer;
+  transition: all 0.3s ease;
 }
 .gre-open-btn:hover {
-  border-color: var(--primary-color, #1a472a);
-  color: var(--primary-color, #1a472a);
-  background: rgba(26, 71, 42, 0.04);
-}
-.dark-mode .gre-open-btn {
-  border-color: var(--text, #e0e0e0);
-  color: var(--text, #e0e0e0);
-}
-.dark-mode .gre-open-btn:hover {
-  border-color: var(--primary-color, #4a9b5f);
-  color: var(--primary-color, #4a9b5f);
-  background: rgba(74, 155, 95, 0.08);
+  border-color: var(--gold);
+  background: rgba(201,168,76,0.1);
+  box-shadow: 0 0 20px rgba(201,168,76,0.15);
 }
 
 /* ── Reveal ── */
 .gre-view-reveal {
-  justify-content: center;
+  justify-content: flex-start;
+  background: var(--panel-bg);
+  border-radius: 3px; padding: 1.75rem;
+  border: 1px solid rgba(201,168,76,0.22);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.75);
 }
-.gre-reveal-content {
-  transition: opacity 0.35s ease;
-}
-.gre-reveal-content.gre-just-refined {
-  opacity: 0.7;
-}
+.gre-reveal-content.gre-just-refined { opacity: 0.5; }
 .gre-stance {
-  display: inline-block;
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 0.2rem 0.5rem;
-  border-radius: 3px;
+  display: inline-flex; align-items: center;
+  font-family: 'Cinzel', serif; font-size: 0.58rem;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  padding: 0.18rem 0.55rem; border-radius: 2px;
   margin-bottom: 0.7rem;
-  font-family: 'Cinzel', serif;
 }
-.gre-stance.found       { background: var(--gre-found-faint);       color: var(--gre-found);       border: 1px solid var(--gre-found); }
-.gre-stance.opportunity { background: var(--gre-opportunity-faint); color: var(--gre-opportunity); border: 1px solid var(--gre-opportunity); }
-.gre-stance.hook        { background: var(--gre-hook-faint);        color: var(--gre-hook);        border: 1px solid var(--gre-hook); }
+.gre-stance.found       { background: var(--found-bg);       color: var(--found);       border: 1px solid rgba(74,155,95,0.4); }
+.gre-stance.opportunity { background: var(--opportunity-bg); color: var(--opportunity); border: 1px solid rgba(196,149,106,0.4); }
+.gre-stance.hook        { background: var(--hook-bg);        color: var(--hook);        border: 1px solid rgba(155,138,181,0.4); }
 .gre-reveal-title {
-  font-family: 'Cinzel', serif;
-  font-weight: 600;
-  font-size: 1.18rem;
-  color: var(--text, #333);
-  margin: 0 0 0.65rem 0;
-  line-height: 1.35;
+  font-family: 'Cinzel', serif; font-weight: 700;
+  font-size: 1.18rem; color: var(--gold-light);
+  margin-bottom: 0.7rem; line-height: 1.35;
+  text-shadow: 0 0 12px rgba(201,168,76,0.15);
 }
 .gre-reveal-flavor {
-  font-size: 0.98rem;
-  line-height: 1.65;
-  color: var(--text, #333);
-  margin: 0 0 0.6rem 0;
+  font-size: 0.98rem; line-height: 1.7;
+  color: var(--text-main); margin-bottom: 0.6rem;
 }
 .gre-reveal-aside {
-  font-size: 0.86rem;
-  line-height: 1.5;
-  font-style: italic;
-  color: var(--text-light, #666);
-  margin: 0 0 0.4rem 0;
+  font-size: 0.87rem; line-height: 1.5;
+  font-style: italic; color: var(--text-dim); margin-bottom: 0.4rem;
 }
 .gre-reveal-aside[hidden] { display: none; }
 .gre-reveal-condition {
-  font-size: 0.8rem;
-  color: var(--text-light, #666);
-  margin-top: 0.6rem;
-  padding-top: 0.6rem;
-  border-top: 1px solid var(--border, #ddd);
-  opacity: 0.9;
+  font-size: 0.8rem; color: var(--text-dim);
+  margin-top: 0.7rem; padding-top: 0.7rem;
+  border-top: 1px solid rgba(201,168,76,0.1); font-style: italic;
 }
 .gre-reveal-condition[hidden] { display: none; }
 .gre-reveal-notion {
-  font-size: 0.78rem;
-  color: var(--text-light, #666);
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--border, #ddd);
-  font-style: italic;
+  font-size: 0.76rem; color: var(--text-dim);
+  margin-top: 0.5rem; padding-top: 0.5rem;
+  border-top: 1px solid rgba(201,168,76,0.08); font-style: italic;
 }
 .gre-reveal-notion[hidden] { display: none; }
 .gre-reveal-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-top: 1.25rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border, #ddd);
+  display: flex; gap: 0.5rem;
+  margin-top: 1.4rem; padding-top: 0.9rem;
+  border-top: 1px solid rgba(201,168,76,0.12);
 }
 .gre-reveal-actions button {
-  padding: 0.36rem 0.75rem;
-  font-size: 0.84rem;
-  border: 1px solid var(--border, #ddd);
-  border-radius: 5px;
-  background: transparent;
-  color: var(--text, #333);
-  font-family: inherit;
-  cursor: pointer;
-  transition: border-color 0.18s, color 0.18s;
+  flex: 1;
+  padding: 0.48rem 0.7rem;
+  font-family: 'Cinzel', serif; font-size: 0.67rem;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  border: 1px solid rgba(201,168,76,0.22); border-radius: 2px;
+  background: transparent; color: var(--text-dim);
+  cursor: pointer; transition: all 0.2s ease;
 }
-.gre-reveal-actions button:hover { border-color: var(--primary-color, #1a472a); color: var(--primary-color, #1a472a); }
+.gre-reveal-actions button:hover {
+  border-color: var(--gold); color: var(--gold-light);
+  background: rgba(201,168,76,0.07);
+}
+
+/* ── Chrome ── */
+.gre-chrome {
+  position: fixed; bottom: 0.75rem; right: 0.75rem;
+  display: flex; align-items: center; gap: 0.7rem;
+  font-family: 'Cinzel', serif; font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  opacity: 0.25; transition: opacity 0.2s; z-index: 10;
+}
+.gre-chrome:hover { opacity: 0.65; }
+.gre-chrome a { color: var(--text-dim); text-decoration: none; }
+.gre-chrome a:hover { color: var(--gold-light); }
+.gre-theme-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 0.95rem; color: var(--text-dim); padding: 0.2rem;
+}
 
 /* ── Toast ── */
 .gre-toast {
-  position: fixed;
-  bottom: 1.5rem;
-  left: 50%;
+  position: fixed; bottom: 1.5rem; left: 50%;
   transform: translateX(-50%) translateY(0.5rem);
-  background: var(--text, #333);
-  color: var(--background, #f5f5f5);
-  font-size: 0.82rem;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  opacity: 0;
-  pointer-events: none;
+  background: rgba(18,12,6,0.97);
+  color: var(--gold-light);
+  border: 1px solid rgba(201,168,76,0.3);
+  font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.06em;
+  padding: 0.45rem 1.25rem; border-radius: 2px;
+  opacity: 0; pointer-events: none;
   transition: opacity 0.25s, transform 0.25s;
-  white-space: nowrap;
-  z-index: 20;
+  z-index: 20; white-space: nowrap;
 }
-.gre-toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
+.gre-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
-<body class="gre">
+<body class="vibe-street">
+
+<div id="scene-bg"></div>
+<div id="embers"></div>
 
 <div class="gre-stage">
   <div class="gre-panel">
 
     <!-- Setup -->
-    <div class="gre-view gre-view-setup gre-active gre-vibe-street" id="view-setup">
+    <div class="gre-view gre-view-setup gre-active" id="view-setup">
       <div class="gre-heading">
         <h1>George Reward Engine</h1>
         <p>Every session leaves something behind.</p>
       </div>
-      <div class="gre-input-group gre-input-vibe">
+
+      <div class="gre-input-group">
         <span>What kind of night was it?</span>
         <div class="gre-pills" id="vibe-pills" role="group" aria-label="Session vibe">
-          <button type="button" class="gre-pill" data-vibe="dungeon">Dungeon</button>
-          <button type="button" class="gre-pill" data-vibe="intrigue">Intrigue</button>
-          <button type="button" class="gre-pill" data-vibe="undead">Undead</button>
-          <button type="button" class="gre-pill" data-vibe="faction">Faction</button>
-          <button type="button" class="gre-pill active" data-vibe="street">Street</button>
-          <button type="button" class="gre-pill" data-vibe="temple">Temple</button>
-          <button type="button" class="gre-pill" data-vibe="noble">Noble</button>
-          <button type="button" class="gre-pill" data-vibe="criminal">Criminal</button>
+
+          <button type="button" class="gre-pill" data-vibe="dungeon">
+            <svg class="pill-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="8" cy="7" rx="4.5" ry="4" stroke="currentColor" stroke-width="1.2"/>
+              <rect x="5.8" y="10.5" width="1.8" height="2.2" rx="0.4" fill="currentColor"/>
+              <rect x="8.4" y="10.5" width="1.8" height="2.2" rx="0.4" fill="currentColor"/>
+              <circle cx="6.5" cy="6.5" r="0.9" fill="currentColor"/>
+              <circle cx="9.5" cy="6.5" r="0.9" fill="currentColor"/>
+              <path d="M5.5 8.5 Q8 9.5 10.5 8.5" stroke="currentColor" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+            </svg>
+            Dungeon
+          </button>
+
+          <button type="button" class="gre-pill" data-vibe="intrigue">
+            <svg class="pill-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 8 C4 5, 12 5, 14 8 C12 11, 4 11, 2 8Z" stroke="currentColor" stroke-width="1.2" fill="none"/>
+              <circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1"/>
+              <circle cx="8" cy="8" r="0.8" fill="currentColor"/>
+              <line x1="2.5" y1="4" x2="5" y2="5.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+              <line x1="13.5" y1="4" x2="11" y2="5.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+            </svg>
+            Intrigue
+          </button>
+
+          <button type="button" class="gre-pill" data-vibe="undead">
+            <svg class="pill-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 14 Q5 8, 12 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M9.5 2.5 Q14 3.5, 13.5 8.5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+              <path d="M4 14 L6 12.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              <path d="M4 14 L3 12" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+            </svg>
+            Undead
+          </button>
+
+          <button type="button" class="gre-pill" data-vibe="faction">
+            <svg class="pill-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 1.5 L13.5 4.5 V9.5 Q13.5 13 8 14.5 Q2.5 13 2.5 9.5 V4.5 Z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
+              <line x1="8" y1="1.5" x2="8" y2="14.5" stroke="currentColor" stroke-width="0.7" opacity="0.4"/>
+              <line x1="2.5" y1="8" x2="13.5" y2="8" stroke="currentColor" stroke-width="0.7" opacity="0.4"/>
+            </svg>
+            Faction
+          </button>
+
+          <button type="button" class="gre-pill active" data-vibe="street">
+            <svg class="pill-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 2 Q5 0.5 8 0.5 Q11 0.5 11 2 L11 5 Q11 8, 8 8 Q5 8, 5 5 Z" stroke="currentColor" stroke-width="1.2" fill="none"/>
+              <path d="M6.5 8 L5 14 L8 12.5 L11 14 L9.5 8" stroke="currentColor" stroke-width="1" stroke-linejoin="round" fill="none"/>
+              <line x1="5" y1="5.5" x2="11" y2="5.5" stroke="currentColor" stroke-width="0.8" opacity="0.5"/>
+            </svg>
+            Street
+          </button>
+
+          <button type="button" class="gre-pill" data-vibe="temple">
+            <svg class="pill-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4.5 3 L11.5 3 L10 8 Q9.5 10.5 8 10.5 Q6.5 10.5 6 8 Z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
+              <line x1="8" y1="10.5" x2="8" y2="13.5" stroke="currentColor" stroke-width="1.3"/>
+              <line x1="5.5" y1="13.5" x2="10.5" y2="13.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              <line x1="5" y1="5.5" x2="11" y2="5.5" stroke="currentColor" stroke-width="0.8" opacity="0.5"/>
+              <path d="M7 1.5 L8 0 L9 1.5" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            Temple
+          </button>
+
+          <button type="button" class="gre-pill" data-vibe="noble">
+            <svg class="pill-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2.5 11.5 L2.5 7 L5.5 9.5 L8 3.5 L10.5 9.5 L13.5 7 L13.5 11.5 Z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
+              <line x1="2.5" y1="11.5" x2="13.5" y2="11.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              <circle cx="8" cy="3.5" r="0.8" fill="currentColor"/>
+              <circle cx="2.5" cy="7" r="0.7" fill="currentColor"/>
+              <circle cx="13.5" cy="7" r="0.7" fill="currentColor"/>
+            </svg>
+            Noble
+          </button>
+
+          <button type="button" class="gre-pill" data-vibe="criminal">
+            <svg class="pill-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9.5 1.5 L13 5 L6.5 11.5 L3.5 14.5 L4.5 12 L3 11 Z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
+              <line x1="11" y1="3" x2="13" y2="5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/>
+              <path d="M6.5 11.5 L3.5 11 L4.5 8.5" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            Criminal
+          </button>
+
         </div>
       </div>
-      <div class="gre-input-group gre-input-weight">
+
+      <span class="gre-ornament">· · ✦ · ·</span>
+
+      <div class="gre-input-group">
         <span>How heavy did it land?</span>
-        <div class="gre-pills" id="strength-pills" role="group" aria-label="Weight of the session">
-          <button type="button" class="gre-pill" data-strength="minor">Light</button>
-          <button type="button" class="gre-pill active" data-strength="standard">Solid</button>
-          <button type="button" class="gre-pill" data-strength="major">Heavy</button>
+        <div class="gre-pills" id="strength-pills" role="group" aria-label="Weight">
+          <button type="button" class="gre-pill" data-strength="minor">
+            <svg class="pill-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M3 11 Q8 4, 13 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+            </svg>
+            Light
+          </button>
+          <button type="button" class="gre-pill active" data-strength="standard">
+            <svg class="pill-icon" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="4.5" stroke="currentColor" stroke-width="1.3"/>
+              <circle cx="8" cy="8" r="1.8" fill="currentColor" opacity="0.7"/>
+            </svg>
+            Solid
+          </button>
+          <button type="button" class="gre-pill" data-strength="major">
+            <svg class="pill-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M8 1.5 L9.8 6.5 L15 6.5 L10.7 9.5 L12.5 14.5 L8 11.5 L3.5 14.5 L5.3 9.5 L1 6.5 L6.2 6.5 Z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
+            </svg>
+            Heavy
+          </button>
         </div>
       </div>
-      <div class="gre-input-group gre-input-context">
+
+      <div class="gre-input-group">
         <span>Where does George stand now?</span>
-        <div class="gre-pills" id="context-pills" role="group" aria-label="Where George stands">
-          <button type="button" class="gre-pill" data-context="broke">Broke</button>
-          <button type="button" class="gre-pill" data-context="favored">Favored</button>
-          <button type="button" class="gre-pill" data-context="indebted">Indebted</button>
-          <button type="button" class="gre-pill" data-context="hunted">Hunted</button>
-          <button type="button" class="gre-pill active" data-context="rising">Rising</button>
-          <button type="button" class="gre-pill" data-context="watched">Watched</button>
+        <div class="gre-pills" id="context-pills" role="group" aria-label="George's status">
+          <button type="button" class="gre-pill" data-context="broke">
+            <svg class="pill-icon" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="5" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M6 6 Q8 4.5, 10 6" stroke="currentColor" stroke-width="1" stroke-linecap="round" fill="none"/>
+              <line x1="5" y1="10.5" x2="11" y2="10.5" stroke="currentColor" stroke-width="1" opacity="0.5" stroke-linecap="round"/>
+              <line x1="8" y1="4" x2="8" y2="5.5" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
+              <line x1="8" y1="10.5" x2="8" y2="12" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
+            </svg>
+            Broke
+          </button>
+          <button type="button" class="gre-pill" data-context="favored">
+            <svg class="pill-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M8 2.5 L9.2 6.2 L13 6.2 L10.1 8.5 L11.3 12.2 L8 10 L4.7 12.2 L5.9 8.5 L3 6.2 L6.8 6.2 Z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
+            </svg>
+            Favored
+          </button>
+          <button type="button" class="gre-pill" data-context="indebted">
+            <svg class="pill-icon" viewBox="0 0 16 16" fill="none">
+              <rect x="3" y="4" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M7 7.5 Q8 6.5, 9 7.5 Q10 8.5, 9 9.5 L8 10.5 L7 9.5 Q6 8.5, 7 7.5Z" stroke="currentColor" stroke-width="0.9" fill="none"/>
+            </svg>
+            Indebted
+          </button>
+          <button type="button" class="gre-pill" data-context="hunted">
+            <svg class="pill-icon" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="4.5" stroke="currentColor" stroke-width="1.2"/>
+              <line x1="8" y1="1.5" x2="8" y2="3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="8" y1="12.5" x2="8" y2="14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="1.5" y1="8" x2="3.5" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="12.5" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="8" cy="8" r="1.3" fill="currentColor"/>
+            </svg>
+            Hunted
+          </button>
+          <button type="button" class="gre-pill active" data-context="rising">
+            <svg class="pill-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M3 13 L8 3.5 L13 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              <line x1="5.5" y1="9.5" x2="10.5" y2="9.5" stroke="currentColor" stroke-width="1" opacity="0.45" stroke-linecap="round"/>
+              <path d="M6.5 2.5 L8 0.5 L9.5 2.5" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.6"/>
+            </svg>
+            Rising
+          </button>
+          <button type="button" class="gre-pill" data-context="watched">
+            <svg class="pill-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M2 8 C4 5, 12 5, 14 8 C12 11, 4 11, 2 8Z" stroke="currentColor" stroke-width="1.2" fill="none"/>
+              <circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1"/>
+              <circle cx="8" cy="8" r="0.8" fill="currentColor"/>
+            </svg>
+            Watched
+          </button>
         </div>
       </div>
+
       <div class="gre-session-note">
         <span>What happened this session?</span>
         <textarea id="session-note" rows="2" placeholder="e.g. George investigated a funeral, noticed something wrong with the mourners, and left with more questions than answers." aria-label="Optional short session summary"></textarea>
@@ -539,6 +645,7 @@ body.gre {
 
     <!-- Teaser -->
     <div class="gre-view gre-view-teaser" id="view-teaser">
+      <span class="gre-teaser-symbol" id="teaser-symbol">⊕</span>
       <p class="gre-teaser-phrase" id="teaser-phrase"></p>
       <p class="gre-teaser-sub" id="teaser-sub"></p>
       <button type="button" id="open-btn" class="gre-open-btn">Open it</button>
@@ -565,20 +672,45 @@ body.gre {
 
 <div class="gre-chrome">
   <a href="../../index.html">Hub</a>
-  <button type="button" id="theme-toggle" class="gre-theme-btn" aria-label="Toggle dark mode">☽</button>
+  <button type="button" id="theme-toggle" class="gre-theme-btn" aria-label="Toggle theme">☽</button>
 </div>
 
 <div class="gre-toast" id="toast" aria-live="polite"></div>
 
 <script>
 (function () {
+  /* ── Embers ── */
+  var embers = document.getElementById('embers');
+  function spawnEmber() {
+    if (!embers) return;
+    var e = document.createElement('div');
+    e.className = 'ember';
+    var size = 1.5 + Math.random() * 3;
+    var x = 15 + Math.random() * 70;
+    var dur = 7 + Math.random() * 9;
+    var drift = (Math.random() - 0.5) * 100;
+    e.style.cssText = 'width:' + size + 'px;height:' + size + 'px;left:' + x + '%;bottom:-8px;--drift:' + drift + 'px;animation-duration:' + dur + 's;animation-delay:' + (Math.random() * -dur) + 's';
+    embers.appendChild(e);
+    setTimeout(function () { if (e.parentNode) e.parentNode.removeChild(e); }, (dur + 2) * 1000);
+  }
+  for (var i = 0; i < 10; i++) spawnEmber();
+  setInterval(spawnEmber, 900);
+
+  /* ── Vibe body class ── */
+  function setVibeClass(vibe) {
+    var b = document.body;
+    b.className = b.className.replace(/vibe-\w+/g, '').trim();
+    b.classList.add('vibe-' + vibe);
+  }
+
+  /* ── Data ── */
+  var TEASER_SYMBOLS = { found: '⊕', opportunity: '◈', hook: '⟁' };
   var TEASER = {
     found:       { phrase: 'Something came with you.',    sub: 'Not everything from tonight stays behind.' },
     opportunity: { phrase: 'A door is open.',             sub: 'The question is what you do with it.' },
     hook:        { phrase: 'You heard something.',        sub: 'You weren\u2019t meant to.' }
   };
   var STANCE = { found: 'Already yours', opportunity: 'Within reach', hook: 'Not yet, but real' };
-
   var POOL = [
     { id: 'f1', bucket: 'found', title: "A Clerk's Sealed Writ", flavor: "A tax clerk who crossed the wrong people left a partially-signed writ of passage in his coat. It names no one yet. George found it.", aside: "The session left paperwork and loose ends; this one slipped into his hands.", vibes: ['street', 'intrigue', 'noble'], strengths: ['minor'], contexts: ['broke', 'rising'], base: 1 },
     { id: 'f2', bucket: 'found', title: "A Sending Stone, Unclaimed", flavor: "One of a matched pair. The other side answered once — a woman's voice, then silence. One charge remains.", aside: "Something was left behind in the chaos; the stone chose no one.", vibes: ['dungeon', 'intrigue', 'street'], strengths: ['standard'], contexts: [], base: 1 },
@@ -618,6 +750,7 @@ body.gre {
     { id: 'h12', bucket: 'hook', title: "The Child with the Copper", flavor: "A child found George near the end of the session. She said \"the quiet man\" had told her to find him and hand him something — a worn copper piece with a scratch across the face. She didn't know what it meant. She ran before he could ask.", aside: "The session put George in someone's plans. Now the plan is moving.", vibes: ['street', 'intrigue'], strengths: ['minor'], contexts: ['watched', 'rising'], base: 2 }
   ];
 
+  /* ── Helpers ── */
   function getSelected(container, attr) {
     var btn = container && container.querySelector('.gre-pill.active');
     return btn ? btn.getAttribute(attr) : null;
@@ -631,10 +764,8 @@ body.gre {
   function scoreEntry(entry, vibe, strength, context) {
     if (!entry.strengths.includes(strength)) return 0;
     var s = entry.base;
-    if (entry.vibes.length) s += entry.vibes.includes(vibe) ? 3 : 0;
-    else s += 1;
-    if (entry.contexts.length) s += entry.contexts.includes(context) ? 2 : 0;
-    else s += 1;
+    if (entry.vibes.length) s += entry.vibes.includes(vibe) ? 3 : 0; else s += 1;
+    if (entry.contexts.length) s += entry.contexts.includes(context) ? 2 : 0; else s += 1;
     return s;
   }
   function weightedPick(pool, vibe, strength, context) {
@@ -642,10 +773,7 @@ body.gre {
     if (!scored.length) return pool[Math.floor(Math.random() * pool.length)];
     var total = scored.reduce(function (sum, x) { return sum + x.score; }, 0);
     var r = Math.random() * total;
-    for (var i = 0; i < scored.length; i++) {
-      r -= scored[i].score;
-      if (r <= 0) return scored[i].entry;
-    }
+    for (var i = 0; i < scored.length; i++) { r -= scored[i].score; if (r <= 0) return scored[i].entry; }
     return scored[scored.length - 1].entry;
   }
   function showToast(msg) {
@@ -670,34 +798,33 @@ body.gre {
     if (display.notion_prompt) out += '\n\n_Notion: ' + display.notion_prompt + '_';
     return out;
   }
-  function getApiBase() {
-    try { return window.location.origin || ''; } catch (_) { return ''; }
-  }
+  function getApiBase() { try { return window.location.origin || ''; } catch (_) { return ''; } }
 
   var currentResult = null;
   var refinedResult = null;
   var aiRequestPending = false;
 
-  var viewSetup = document.getElementById('view-setup');
-  var viewTeaser = document.getElementById('view-teaser');
-  var viewReveal = document.getElementById('view-reveal');
-  var vibePills = document.getElementById('vibe-pills');
-  var strengthPills = document.getElementById('strength-pills');
+  var viewSetup    = document.getElementById('view-setup');
+  var viewTeaser   = document.getElementById('view-teaser');
+  var viewReveal   = document.getElementById('view-reveal');
+  var vibePills    = document.getElementById('vibe-pills');
+  var strengthPills= document.getElementById('strength-pills');
   var contextPills = document.getElementById('context-pills');
-  var sessionNoteEl = document.getElementById('session-note');
-  var endBtn = document.getElementById('end-session');
+  var sessionNoteEl= document.getElementById('session-note');
+  var endBtn       = document.getElementById('end-session');
   var teaserPhrase = document.getElementById('teaser-phrase');
-  var teaserSub = document.getElementById('teaser-sub');
-  var openBtn = document.getElementById('open-btn');
-  var revealContent = document.getElementById('reveal-content');
+  var teaserSub    = document.getElementById('teaser-sub');
+  var teaserSymbol = document.getElementById('teaser-symbol');
+  var openBtn      = document.getElementById('open-btn');
+  var revealContent= document.getElementById('reveal-content');
   var resultStance = document.getElementById('result-stance');
-  var resultTitle = document.getElementById('result-title');
+  var resultTitle  = document.getElementById('result-title');
   var resultFlavor = document.getElementById('result-flavor');
-  var resultAside = document.getElementById('result-aside');
-  var resultCond = document.getElementById('result-condition');
-  var resultNotionEl = document.getElementById('result-notion-prompt');
-  var rerollBtn = document.getElementById('reroll-btn');
-  var copyBtn = document.getElementById('copy-btn');
+  var resultAside  = document.getElementById('result-aside');
+  var resultCond   = document.getElementById('result-condition');
+  var resultNotionEl=document.getElementById('result-notion-prompt');
+  var rerollBtn    = document.getElementById('reroll-btn');
+  var copyBtn      = document.getElementById('copy-btn');
 
   function setState(state) {
     viewSetup.classList.toggle('gre-active', state === 'setup');
@@ -708,6 +835,7 @@ body.gre {
       var t = TEASER[currentResult.bucket];
       teaserPhrase.textContent = t.phrase;
       teaserSub.textContent = t.sub;
+      teaserSymbol.textContent = TEASER_SYMBOLS[currentResult.bucket] || '⊕';
     }
   }
 
@@ -735,7 +863,6 @@ body.gre {
     var baseTitle = (display.title != null && display.title !== '') ? String(display.title) : '';
     var baseBody = (display.flavor != null ? String(display.flavor) : '') + (display.aside ? '\n\n' + display.aside : '');
     if (!baseTitle || !baseBody.trim()) return;
-
     aiRequestPending = true;
     var payload = {
       sessionVibe: getSelected(vibePills, 'data-vibe') || 'street',
@@ -753,10 +880,9 @@ body.gre {
       .then(function (result) {
         if (result.ok && result.data && typeof result.data.title === 'string' && typeof result.data.body === 'string') {
           refinedResult = {
-            title: result.data.title,
-            body: result.data.body,
+            title: result.data.title, body: result.data.body,
             risk_line: typeof result.data.risk_line === 'string' ? result.data.risk_line : '',
-            notion_prompt: typeof result.data.notion_prompt === 'string' ? result.data.notion_prompt : '',
+            notion_prompt: typeof result.data.notion_prompt === 'string' ? result.data.notion_prompt : ''
           };
           if (viewReveal.classList.contains('gre-active')) {
             revealContent.classList.add('gre-just-refined');
@@ -773,10 +899,7 @@ body.gre {
     btn.addEventListener('click', function () {
       var vibe = btn.getAttribute('data-vibe');
       setPills(vibePills, 'data-vibe', vibe);
-      if (viewSetup) {
-        viewSetup.classList.remove('gre-vibe-dungeon', 'gre-vibe-intrigue', 'gre-vibe-undead', 'gre-vibe-faction', 'gre-vibe-street', 'gre-vibe-temple', 'gre-vibe-noble', 'gre-vibe-criminal');
-        viewSetup.classList.add('gre-vibe-' + (vibe || 'street'));
-      }
+      setVibeClass(vibe);
     });
   });
   strengthPills.querySelectorAll('.gre-pill').forEach(function (btn) {
@@ -787,14 +910,13 @@ body.gre {
   });
 
   endBtn.addEventListener('click', function () {
-    var vibe = getSelected(vibePills, 'data-vibe') || 'street';
+    var vibe     = getSelected(vibePills, 'data-vibe') || 'street';
     var strength = getSelected(strengthPills, 'data-strength') || 'standard';
-    var context = getSelected(contextPills, 'data-context') || 'rising';
+    var context  = getSelected(contextPills, 'data-context') || 'rising';
     endBtn.disabled = true;
     endBtn.textContent = '\u2026';
     var entry = weightedPick(POOL, vibe, strength, context);
-    currentResult = entry;
-    refinedResult = null;
+    currentResult = entry; refinedResult = null;
     requestRefine();
     setTimeout(function () {
       setState('teaser');
@@ -803,17 +925,8 @@ body.gre {
     }, 380);
   });
 
-  openBtn.addEventListener('click', function () {
-    renderRevealContent();
-    setState('reveal');
-  });
-
-  rerollBtn.addEventListener('click', function () {
-    currentResult = null;
-    refinedResult = null;
-    setState('setup');
-  });
-
+  openBtn.addEventListener('click', function () { renderRevealContent(); setState('reveal'); });
+  rerollBtn.addEventListener('click', function () { currentResult = null; refinedResult = null; setState('setup'); });
   copyBtn.addEventListener('click', function () {
     var display = getEffectiveDisplay();
     if (!display) return;
@@ -822,11 +935,8 @@ body.gre {
   });
 
   document.getElementById('theme-toggle').addEventListener('click', function () {
-    document.body.classList.toggle('dark-mode');
+    document.body.classList.toggle('vibe-light');
   });
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.body.classList.add('dark-mode');
-  }
 })();
 </script>
 </body>
