@@ -95,6 +95,8 @@
   flex-shrink: 0;
 }
 
+/* Top spacer before rarity now handled with <br> tags in HTML */
+
 .card-modal-name {
   font-family: 'Cinzel Decorative', serif;
   font-weight: 700;
@@ -135,10 +137,16 @@
   text-align: center;
   width: 100%;
   line-height: 1.5;
-  flex-shrink: 0;
-  overflow: hidden;
+  flex-shrink: 1;
+  overflow-y: auto;
+  max-height: 100%;
   padding: 0.35rem 0.75rem 0.25rem;
   box-sizing: border-box;
+  scrollbar-width: none; /* Firefox: hide scrollbar but keep scroll */
+}
+
+.card-modal-desc::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Edge: hide scrollbar but keep scroll */
 }
 
 .card-modal-req {
