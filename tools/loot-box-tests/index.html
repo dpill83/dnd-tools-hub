@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>You Found A Thing</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/loot-card-modal.css">
 <style>
 :root {
   --gold: #c9a84c;
@@ -200,8 +201,8 @@ body {
 /* ── CHEST ── */
 #chest-wrap {
   position: relative;
-  width: clamp(140px, 22vw, 280px);
-  height: clamp(110px, 17vw, 220px);
+  width: clamp(200px, 32vw, 380px);
+  height: clamp(160px, 25vw, 300px);
   cursor: pointer;
   flex-shrink: 0;
   animation: chest-float 3.2s ease-in-out infinite;
@@ -215,6 +216,39 @@ body {
   50%       { transform: translateY(-10px); }
 }
 
+/* Shake and jiggle: snappy left-right build from small to violent (lock breaks, contents burst) */
+@keyframes chest-shake {
+  0%       { transform: translateY(0) translateX(0) rotate(0deg); }
+  3%       { transform: translateY(0) translateX(2px) rotate(0.5deg); }
+  6%       { transform: translateY(0) translateX(-2px) rotate(-0.5deg); }
+  9%       { transform: translateY(0) translateX(1px) rotate(0.3deg); }
+  12%      { transform: translateY(0) translateX(-1px) rotate(-0.3deg); }
+  16%      { transform: translateY(0) translateX(4px) rotate(1deg); }
+  20%      { transform: translateY(0) translateX(-4px) rotate(-1deg); }
+  24%      { transform: translateY(0) translateX(3px) rotate(0.8deg); }
+  28%      { transform: translateY(0) translateX(-3px) rotate(-0.8deg); }
+  33%      { transform: translateY(-1px) translateX(7px) rotate(1.8deg); }
+  37%      { transform: translateY(1px) translateX(-7px) rotate(-1.8deg); }
+  41%      { transform: translateY(0) translateX(6px) rotate(1.5deg); }
+  45%      { transform: translateY(0) translateX(-6px) rotate(-1.5deg); }
+  50%      { transform: translateY(-2px) translateX(11px) rotate(3deg); }
+  54%      { transform: translateY(1px) translateX(-11px) rotate(-3deg); }
+  58%      { transform: translateY(0) translateX(10px) rotate(2.5deg); }
+  62%      { transform: translateY(-1px) translateX(-10px) rotate(-2.5deg); }
+  66%      { transform: translateY(1px) translateX(15px) rotate(4deg); }
+  70%      { transform: translateY(-2px) translateX(-15px) rotate(-4deg); }
+  74%      { transform: translateY(0) translateX(14px) rotate(3.5deg); }
+  78%      { transform: translateY(-1px) translateX(-14px) rotate(-3.5deg); }
+  82%      { transform: translateY(2px) translateX(20px) rotate(6deg); }
+  86%      { transform: translateY(-2px) translateX(-20px) rotate(-6deg); }
+  90%      { transform: translateY(0) translateX(22px) rotate(7deg); }
+  94%      { transform: translateY(-1px) translateX(-22px) rotate(-7deg); }
+  98%      { transform: translateY(0) translateX(4px) rotate(1deg); }
+  100%     { transform: translateY(0) translateX(0) rotate(0deg); }
+}
+#chest-wrap.chest-shake {
+  animation: chest-shake 2.6s linear;
+}
 
 /* PNG chest images */
 #chest-img-closed,
@@ -312,14 +346,14 @@ body {
 /* ── ITEM SLOTS ROW ── */
 #slots-row {
   display: flex;
-  gap: clamp(0.4rem, 1.5vw, 1rem);
+  gap: clamp(0.6rem, 2vw, 1.25rem);
   align-items: flex-end;
-  min-height: clamp(80px, 14vw, 160px);
+  min-height: clamp(130px, 22vw, 260px);
 }
 
 .item-slot {
-  width: clamp(88px, 14vw, 170px);
-  height: clamp(120px, 18vw, 220px);
+  width: clamp(130px, 20vw, 250px);
+  height: clamp(178px, 27vw, 340px);
   border: none;
   border-radius: 4px;
   background: transparent;
@@ -366,7 +400,7 @@ body {
 }
 
 .slot-icon {
-  font-size: clamp(1.4rem, 3.5vw, 3rem);
+  font-size: clamp(1.6rem, 3.8vw, 3.4rem);
   line-height: 1;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
   flex-shrink: 0;
@@ -378,24 +412,29 @@ body {
 /* Icon size inside .slot; leave room for wrapped name */
 .card-front-face .slot .slot-icon img {
   width: 100% !important;
-  max-width: 3.5rem !important;
+  max-width: 4.2rem !important;
   height: auto !important;
   object-fit: contain;
 }
 
 .slot-name {
   font-family: 'Cinzel', serif;
-  font-size: clamp(0.42rem, 1vw, 0.65rem);
+  font-size: clamp(0.46rem, 1.2vw, 0.78rem);
   color: rgba(240,208,112,0.85);
   text-align: center;
-  line-height: 1.2;
-  letter-spacing: 0.03em;
-  flex-shrink: 0;
-  min-height: 1.2em;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+
   white-space: normal;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  padding: 0;
 }
 
 /* Value only in modal; hidden on in-slot card */
@@ -703,6 +742,39 @@ body {
   background: rgba(201,168,76,0.06);
 }
 
+#loot-table-btn {
+  position: fixed;
+  bottom: clamp(0.5rem, 1.5vh, 1rem);
+  right: clamp(0.5rem, 1.5vw, 1.5rem);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: rgba(201,168,76,0.6);
+  background: transparent;
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+#loot-table-btn:hover {
+  color: var(--gold-light);
+  border-color: rgba(201,168,76,0.5);
+  background: rgba(201,168,76,0.06);
+  transform: scale(1.05);
+}
+#loot-table-btn img {
+  width: 1.5rem;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
 /* ── SCREEN FLASH ── */
 #flash {
   position: fixed;
@@ -809,7 +881,10 @@ body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0.45rem 0.5rem 0.75rem;
+  padding: 16% 18% 22%;
+  text-align: center;
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
   background-size: 100% 100%, cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -822,10 +897,18 @@ body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.2rem;
+  justify-content: flex-start;
+  gap: 0.45rem;
   width: 100%;
+  max-width: 100%;
   min-width: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.card-front-face .slot .slot-icon {
+  margin-top: 0;
+  margin-bottom: 0.1rem;
 }
 
 .card-back-face .back-question {
@@ -834,172 +917,6 @@ body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
   opacity: 0.5;
   line-height: 1;
 }
-
-.card-detail-extra {
-  display: none;
-  width: 100%;
-  margin-top: 0.3rem;
-  padding-top: 0.3rem;
-  border-top: 1px solid rgba(255,213,79,0.2);
-  font-family: 'Crimson Text', serif;
-  font-size: clamp(0.38rem, 0.9vw, 0.6rem);
-  font-style: italic;
-  color: rgba(200,180,140,0.85);
-  text-align: center;
-  line-height: 1.45;
-}
-/* ── CARD MODAL (backdrop + panel) ── */
-#zoom-dim {
-  position: fixed;
-  inset: 0;
-  z-index: 34;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  background: rgba(0,0,0,0);
-  pointer-events: none;
-}
-#zoom-dim.active {
-  background: rgba(0,0,0,0.65);
-  pointer-events: auto;
-}
-
-#card-modal {
-  display: none;
-  position: relative;
-  height: min(65vh, 1536px);
-  width: auto;
-  aspect-ratio: 1024 / 1536;
-  max-width: min(90vw, 1024px);
-  overflow: hidden;
-  border-radius: 8px;
-  border: 2px solid rgba(255,213,79,0.4);
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-  box-shadow: 0 0 40px rgba(0,0,0,0.6);
-  cursor: pointer;
-  box-sizing: border-box;
-}
-#zoom-dim.active #card-modal {
-  display: block;
-}
-
-/* Content sits in frame safe zone: top/bottom/left/right % are of modal height/width */
-.card-modal-content {
-  position: absolute;
-  top: 22%;
-  right: 18%;
-  bottom: 26%;
-  left: 18%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  overflow: hidden;
-}
-
-.card-modal-rarity {
-  font-family: 'Cinzel', serif;
-  font-size: clamp(0.55rem, 1.4vw, 0.75rem);
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  text-align: center;
-  width: 100%;
-  margin-bottom: 0.5rem;
-  opacity: 0.75;
-  flex-shrink: 0;
-}
-
-.card-modal-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  font-size: clamp(3rem, 9vw, 5rem);
-  margin: 0.4rem 0 0.7rem;
-  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.8));
-  flex-shrink: 0;
-}
-.card-modal-icon img {
-  width: clamp(3rem, 9vw, 5rem);
-  height: clamp(3rem, 9vw, 5rem);
-  object-fit: contain;
-  display: block;
-}
-.card-modal-icon span {
-  display: block;
-  line-height: 1;
-}
-
-.card-modal-divider {
-  width: 70%;
-  height: 1px;
-  background: linear-gradient(to right, transparent, rgba(255,213,79,0.5), transparent);
-  margin: 0.3rem auto 0.5rem;
-  flex-shrink: 0;
-}
-
-.card-modal-name {
-  font-family: 'Cinzel Decorative', serif;
-  font-weight: 700;
-  font-size: clamp(1rem, 2.8vw, 1.5rem);
-  color: var(--gold-light);
-  text-align: center;
-  width: 100%;
-  line-height: 1.2;
-  margin-bottom: 0.25rem;
-  text-shadow: 0 0 18px rgba(255,213,79,0.4);
-  flex-shrink: 0;
-}
-
-.card-modal-value {
-  font-family: 'Cinzel', serif;
-  font-size: clamp(0.55rem, 1.2vw, 0.7rem);
-  color: rgba(255,213,79,0.7);
-  letter-spacing: 0.1em;
-  text-align: center;
-  width: 100%;
-  margin-bottom: 0.5rem;
-  flex-shrink: 0;
-}
-
-.card-modal-desc-divider {
-  width: 55%;
-  height: 1px;
-  background: linear-gradient(to right, transparent, rgba(255,213,79,0.3), transparent);
-  margin: 0 auto 0.5rem;
-  flex-shrink: 0;
-}
-
-.card-modal-desc {
-  font-family: 'Crimson Text', serif;
-  font-size: clamp(0.6rem, 1.3vw, 0.78rem);
-  font-style: italic;
-  color: rgba(200,180,140,0.9);
-  text-align: center;
-  width: 100%;
-  line-height: 1.5;
-  flex-shrink: 0;
-  overflow: hidden;
-  padding: 0.35rem 0.75rem 0.25rem;
-  box-sizing: border-box;
-}
-
-.card-modal-req {
-  font-family: 'Crimson Text', serif;
-  font-size: clamp(0.5rem, 1vw, 0.6rem);
-  font-style: italic;
-  color: rgba(179,157,219,0.85);
-  text-align: center;
-  width: 100%;
-  margin-top: 0.4rem;
-  padding-top: 0.4rem;
-  border-top: 1px solid rgba(179,157,219,0.2);
-  flex-shrink: 0;
-}
-
 /* ── RESPONSIVE ── */
 @media (max-width: 480px) {
   .torch-left { left: 1%; }
@@ -1117,7 +1034,12 @@ body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
 
 <!-- Reset -->
 <button id="reset-btn">✦ Open Another ✦</button>
+<a href="loot-table.html" id="loot-table-btn" title="Loot Table" aria-label="Loot Table"><img src="assets/images/chest-closed.png" alt=""></a>
 
+<script src="assets/js/loot-constants.js"></script>
+<script src="assets/js/loot-display.js"></script>
+<script src="assets/js/loot-audio.js"></script>
+<script src="assets/js/loot-animation.js"></script>
 <script>
 (function() {
 
@@ -1135,42 +1057,6 @@ body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
     items.forEach((item, i) => { item._idx = i; });
     return { items, by_tier };
   }
-
-  // Category → asset image path (falls back to emoji)
-  const CAT_IMG = {
-    'Adventuring Gear': 'assets/images/item-pack.png',
-    'Armor':            'assets/images/item-shield.png',
-    'Book':             'assets/images/item-scroll.png',
-    'Potion':           'assets/images/item-potion.png',
-    'Quest Hook':       'assets/images/item-scroll.png',
-    'Ring':             null,
-    'Treasure':         'assets/images/item-gold.png',
-    'Weapon':           'assets/images/item-sword.png',
-    'Wondrous Item':    null,
-  };
-  const CAT_EMOJI = {
-    'Adventuring Gear': '🎒',
-    'Armor':            '🛡️',
-    'Book':             '📖',
-    'Potion':           '🧪',
-    'Quest Hook':       '📜',
-    'Ring':             '💍',
-    'Treasure':         '💎',
-    'Weapon':           '⚔️',
-    'Wondrous Item':    '✨',
-  };
-
-  // Rarity → CSS class, color, glow, and frame image for card
-  const FRAMES = 'assets/images/';
-  const RARITY_META = {
-    'Unknown':   { cls: 'is-common',    color: '#6b7280', glow: 'rgba(107,114,128,0.5)', frame: FRAMES + 'frame-0-unknown.png' },
-    'Mundane':   { cls: 'is-common',    color: '#9aa0a6', glow: 'rgba(154,160,166,0.5)', frame: FRAMES + 'frame-1-mundane.png' },
-    'Common':    { cls: 'is-common',    color: '#9aa0a6', glow: 'rgba(154,160,166,0.5)', frame: FRAMES + 'frame-2-common.png' },
-    'Uncommon':  { cls: 'is-uncommon',  color: '#4fc3f7', glow: 'rgba(79,195,247,0.5)',  frame: FRAMES + 'frame-3-uncommon.png' },
-    'Rare':      { cls: 'is-rare',      color: '#b39ddb', glow: 'rgba(179,157,219,0.6)', frame: FRAMES + 'frame-4-rare.png' },
-    'Very Rare': { cls: 'is-very-rare', color: '#ff8a65', glow: 'rgba(255,138,101,0.6)', frame: FRAMES + 'frame-5-very-rare.png' },
-    'Legendary': { cls: 'is-legendary', color: '#ffd54f', glow: 'rgba(255,213,79,0.8)',  frame: FRAMES + 'frame-6-legendary.png' },
-  };
 
   // Pick a random item from a given tier (or array of tiers)
   function pickFromTier(tiers) {
@@ -1193,6 +1079,16 @@ body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
       const item = pickFromTier([0, 1]); // Mundane + Common
       if (item) mundane.push(item);
     }
+    // Card before the last (last mundane slot) has 50% chance of being uncommon
+    if (mundane.length > 0 && Math.random() < 0.5) {
+      let uncommonItem = pickFromTier(2);
+      if (uncommonItem) {
+        mundane[mundane.length - 1] = uncommonItem;
+      } else {
+        const last = mundane[mundane.length - 1];
+        mundane[mundane.length - 1] = Object.assign({}, last, { rarity: 'Uncommon' });
+      }
+    }
     // Reveal item: pick from revealTier, fall back up if empty
     let reveal = null;
     for (let t = revealTier; t >= 2 && !reveal; t--) {
@@ -1204,221 +1100,6 @@ body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
 
   // Current chest roll
   let currentRoll = null;
-
-  // ── AUDIO ──
-  let audioCtx = null;
-
-  function getAudioCtx() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    return audioCtx;
-  }
-
-  function playCreak() {
-    try {
-      const ctx = getAudioCtx();
-      const t = ctx.currentTime;
-      // Low rumble + creak
-      const osc1 = ctx.createOscillator();
-      const osc2 = ctx.createOscillator();
-      const gain1 = ctx.createGain();
-      const gain2 = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-
-      filter.type = 'lowpass';
-      filter.frequency.value = 600;
-
-      osc1.type = 'sawtooth';
-      osc1.frequency.setValueAtTime(80, t);
-      osc1.frequency.linearRampToValueAtTime(55, t + 0.6);
-      gain1.gain.setValueAtTime(0, t);
-      gain1.gain.linearRampToValueAtTime(0.18, t + 0.05);
-      gain1.gain.linearRampToValueAtTime(0, t + 0.7);
-
-      osc2.type = 'sawtooth';
-      osc2.frequency.setValueAtTime(220, t + 0.1);
-      osc2.frequency.linearRampToValueAtTime(140, t + 0.5);
-      gain2.gain.setValueAtTime(0, t + 0.1);
-      gain2.gain.linearRampToValueAtTime(0.08, t + 0.2);
-      gain2.gain.linearRampToValueAtTime(0, t + 0.6);
-
-      osc1.connect(gain1); gain1.connect(filter);
-      osc2.connect(gain2); gain2.connect(filter);
-      filter.connect(ctx.destination);
-
-      osc1.start(t); osc1.stop(t + 0.8);
-      osc2.start(t + 0.1); osc2.stop(t + 0.7);
-    } catch(e) {}
-  }
-
-  function playPop(pitch) {
-    try {
-      const ctx = getAudioCtx();
-      const t = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-
-      filter.type = 'bandpass';
-      filter.frequency.value = pitch || 800;
-      filter.Q.value = 0.5;
-
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime((pitch || 800) * 1.2, t);
-      osc.frequency.exponentialRampToValueAtTime((pitch || 800) * 0.5, t + 0.15);
-
-      gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(0.22, t + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
-
-      osc.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
-      osc.start(t); osc.stop(t + 0.2);
-    } catch(e) {}
-  }
-
-  function playFlipSound() {
-    try {
-      const ctx = getAudioCtx();
-      const t = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(1200, t);
-      filter.frequency.linearRampToValueAtTime(400, t + 0.25);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(400, t);
-      osc.frequency.linearRampToValueAtTime(200, t + 0.25);
-      gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(0.08, t + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
-      osc.connect(gain); gain.connect(filter); filter.connect(ctx.destination);
-      osc.start(t); osc.stop(t + 0.32);
-    } catch(e) {}
-  }
-
-  function playSting() {
-    try {
-      const ctx = getAudioCtx();
-      const t = ctx.currentTime;
-
-      // Triumphant 4-note fanfare
-      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5 E5 G5 C6
-      const times = [0, 0.12, 0.24, 0.4];
-      const durations = [0.18, 0.18, 0.18, 0.6];
-
-      notes.forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const osc2 = ctx.createOscillator();
-        const gain = ctx.createGain();
-        const gainNode = ctx.createGain();
-
-        osc.type = 'square';
-        osc2.type = 'sawtooth';
-        osc.frequency.value = freq;
-        osc2.frequency.value = freq * 1.005; // slight detune for richness
-
-        gain.gain.value = 0.3;
-        gainNode.gain.setValueAtTime(0, t + times[i]);
-        gainNode.gain.linearRampToValueAtTime(0.25, t + times[i] + 0.02);
-        gainNode.gain.linearRampToValueAtTime(0.18, t + times[i] + 0.05);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, t + times[i] + durations[i]);
-
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.value = 2000;
-
-        osc.connect(gain); osc2.connect(gain);
-        gain.connect(filter); filter.connect(gainNode);
-        gainNode.connect(ctx.destination);
-
-        osc.start(t + times[i]); osc.stop(t + times[i] + durations[i] + 0.05);
-        osc2.start(t + times[i]); osc2.stop(t + times[i] + durations[i] + 0.05);
-      });
-
-      // Low boom underneath
-      const boom = ctx.createOscillator();
-      const boomGain = ctx.createGain();
-      boom.type = 'sine';
-      boom.frequency.setValueAtTime(80, t + 0.38);
-      boom.frequency.exponentialRampToValueAtTime(40, t + 1.2);
-      boomGain.gain.setValueAtTime(0, t + 0.38);
-      boomGain.gain.linearRampToValueAtTime(0.35, t + 0.42);
-      boomGain.gain.exponentialRampToValueAtTime(0.001, t + 1.3);
-      boom.connect(boomGain); boomGain.connect(ctx.destination);
-      boom.start(t + 0.38); boom.stop(t + 1.4);
-
-    } catch(e) {}
-  }
-
-  function playRumble() {
-    try {
-      const ctx = getAudioCtx();
-      const t = ctx.currentTime;
-      // Low building drone
-      const osc1 = ctx.createOscillator();
-      const osc2 = ctx.createOscillator();
-      const lfo  = ctx.createOscillator();
-      const lfoGain = ctx.createGain();
-      const gain1 = ctx.createGain();
-      const gain2 = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(200, t);
-      filter.frequency.linearRampToValueAtTime(800, t + 1.8);
-
-      osc1.type = 'sawtooth';
-      osc1.frequency.setValueAtTime(40, t);
-      osc1.frequency.linearRampToValueAtTime(55, t + 1.8);
-
-      osc2.type = 'sine';
-      osc2.frequency.setValueAtTime(38, t);
-      osc2.frequency.linearRampToValueAtTime(52, t + 1.8);
-
-      // LFO tremolo for menace
-      lfo.type = 'sine';
-      lfo.frequency.setValueAtTime(6, t);
-      lfo.frequency.linearRampToValueAtTime(14, t + 1.8);
-      lfoGain.gain.value = 0.08;
-      lfo.connect(lfoGain);
-
-      gain1.gain.setValueAtTime(0, t);
-      gain1.gain.linearRampToValueAtTime(0.28, t + 0.4);
-      gain1.gain.linearRampToValueAtTime(0.35, t + 1.6);
-      gain1.gain.linearRampToValueAtTime(0, t + 2.1);
-
-      gain2.gain.setValueAtTime(0, t);
-      gain2.gain.linearRampToValueAtTime(0.15, t + 0.6);
-      gain2.gain.linearRampToValueAtTime(0, t + 2.0);
-
-      lfoGain.connect(osc1.frequency);
-      osc1.connect(gain1); gain1.connect(filter);
-      osc2.connect(gain2); gain2.connect(filter);
-      filter.connect(ctx.destination);
-
-      osc1.start(t); osc1.stop(t + 2.2);
-      osc2.start(t); osc2.stop(t + 2.1);
-      lfo.start(t);  lfo.stop(t + 2.2);
-    } catch(e) {}
-  }
-
-  // ── PARTICLES ──
-  function spawnSparks(count) {
-    const container = document.getElementById('particles');
-    for (let i = 0; i < count; i++) {
-      const spark = document.createElement('div');
-      spark.className = 'spark';
-      const x = 30 + Math.random() * 40;
-      const startY = 40 + Math.random() * 20;
-      const drift = (Math.random() - 0.5) * 60;
-      const dur = 0.8 + Math.random() * 1.2;
-      const delay = Math.random() * 0.4;
-      spark.style.cssText = `left:${x}%;top:${startY}%;--sx:${drift}px;animation-duration:${dur}s;animation-delay:${delay}s`;
-      container.appendChild(spark);
-      setTimeout(() => spark.remove(), (dur + delay) * 1000 + 100);
-    }
-  }
 
   // ── STATE ──
   let state = 'idle';
@@ -1438,80 +1119,9 @@ body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
   const zoomDim    = document.getElementById('zoom-dim');
 
   const cardModal = document.getElementById('card-modal');
+  const particlesContainer = document.getElementById('particles');
 
   function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-  function itemIconHTML(item, size) {
-    if (!item) return '<span style="font-size:2rem">📦</span>';
-    const imgPath = CAT_IMG[item.category];
-    const sz = size || 'clamp(2.8rem, 6vw, 5rem)';
-    if (imgPath) {
-      return `<img src="${imgPath}" alt="${item.category}" style="width:${sz};height:${sz};object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.7));-webkit-user-drag:none;" draggable="false">`;
-    }
-    const emoji = CAT_EMOJI[item.category] || '✨';
-    return `<span style="font-size:${sz};line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.8))">${emoji}</span>`;
-  }
-
-  function itemValueStr(item) {
-    if (!item) return '';
-    if (item.value_raw) return item.value_raw;
-    if (item.value) return item.value + ' gp';
-    return '— gp';
-  }
-
-  function createSlot(item, isMystery) {
-    const slot = document.createElement('div');
-    slot.className = 'item-slot';
-    slot._item = isMystery ? (currentRoll && currentRoll.reveal) || null : item;
-    slot._isMystery = isMystery;
-
-    const rm = isMystery
-      ? (currentRoll && currentRoll.reveal ? RARITY_META[currentRoll.reveal.rarity] : RARITY_META['Rare'])
-      : (RARITY_META[item.rarity] || RARITY_META['Common']);
-
-    if (rm) {
-      if (isMystery) {
-        slot.classList.add('is-mystery');
-        slot.style.setProperty('--mystery-color', rm.color);
-      } else {
-        slot.classList.add(rm.cls);
-      }
-    }
-
-    const frameBg = rm && rm.frame ? `url('${rm.frame}'), linear-gradient(135deg, #1a0e08 0%, #0d0805 100%)` : '';
-    const backFaceStyle = frameBg ? `background-image:${frameBg};` : '';
-
-    const backQuestion = '<span class="back-question" style="color:' + (rm ? rm.color : '#9aa0a6') + '">?</span>';
-    /* No mystery label — frame shows rarity */
-
-    let frontFaceContent = '';
-    const displayItem = isMystery ? (currentRoll && currentRoll.reveal) : item;
-    if (displayItem) {
-      const desc = displayItem.properties || displayItem.description || '';
-      const detailExtra = (desc || (displayItem.requirements ? displayItem.requirements : ''))
-        ? '<div class="card-detail-extra">' + (desc ? desc.replace(/</g, '&lt;').replace(/\n/g, '<br>') : '') + (displayItem.requirements ? (desc ? '<br>' : '') + displayItem.requirements : '') + '</div>'
-        : '';
-      frontFaceContent = `
-        <div class="slot">
-          <div class="slot-icon">${itemIconHTML(displayItem, 'clamp(2.2rem,5vw,4rem)')}</div>
-          <div class="slot-name">${displayItem.name}</div>
-        </div>
-        <div class="slot-value">${itemValueStr(displayItem)}</div>
-        ${detailExtra}
-      `;
-    }
-
-    const frontFrameBg = rm && rm.frame ? `url('${rm.frame}'), linear-gradient(160deg, #1c1200 0%, #0d0900 100%)` : '';
-    const frontFaceStyle = frontFrameBg ? `background-image:${frontFrameBg};` : '';
-
-    slot.innerHTML = `
-      <div class="card-inner">
-        <div class="card-back-face" style="${backFaceStyle}">${backQuestion}</div>
-        <div class="card-front-face" style="${frontFaceStyle}">${frontFaceContent}</div>
-      </div>
-    `;
-    return slot;
-  }
 
   function flipSlotFaceUp(slot) {
     const inner = slot.querySelector('.card-inner');
@@ -1554,30 +1164,6 @@ body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
     cardModal.innerHTML = '';
   }
 
-  function buildCardFront(item) {
-    if (!item) return;
-    const rm = RARITY_META[item.rarity] || RARITY_META['Rare'];
-    const frameUrl = rm.frame ? `url('${rm.frame}')` : '';
-    cardFront.style.backgroundImage = frameUrl ? `${frameUrl}, linear-gradient(160deg, #1c1200 0%, #0d0900 100%)` : '';
-    cardFront.style.borderColor = rm.color;
-    cardFront.style.boxShadow = `0 0 40px ${rm.glow}, 0 0 100px ${rm.glow.replace('0.8','0.3')}, inset 0 0 40px ${rm.glow.replace('0.8','0.08')}`;
-    // Fill content
-    const desc = item.properties || item.description || '';
-    const truncDesc = desc.length > 140 ? desc.slice(0, 137) + '…' : desc;
-    const descBlock = truncDesc
-      ? `<div class="card-desc-divider"></div><div class="card-item-desc">${truncDesc.replace(/\n/g,'<br>')}</div>`
-      : '';
-    cardFront.innerHTML = `
-      <div class="card-rarity-badge" style="color:${rm.color}">${item.rarity}</div>
-      <div class="card-icon">${itemIconHTML(item, 'clamp(3rem,9vw,5rem)')}</div>
-      <div class="card-divider"></div>
-      <div class="card-item-name">${item.name}</div>
-      <div class="card-item-value">${itemValueStr(item)}</div>
-      ${descBlock}
-      ${item.requirements ? `<div class="card-item-req">${item.requirements}</div>` : ''}
-    `;
-  }
-
   function buildCardBack(revealItem) {
     const rm = revealItem ? (RARITY_META[revealItem.rarity] || RARITY_META['Rare']) : RARITY_META['Rare'];
     const frameUrl = rm.frame ? `url('${rm.frame}')` : '';
@@ -1586,71 +1172,6 @@ body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
     cardBack.style.boxShadow = `0 0 30px ${rm.glow}, 0 0 80px ${rm.glow.replace('0.8','0.3')}, inset 0 0 30px ${rm.glow.replace('0.8','0.1')}`;
     const labelEl = cardBack.querySelector('.card-back-label');
     if (labelEl) labelEl.textContent = (revealItem ? revealItem.rarity : 'Rare') + '…';
-  }
-
-  // Fly an item from chest position to its slot using WAAPI
-  function flyItemToSlot(item, slotEl) {
-    return new Promise(resolve => {
-      // Get positions
-      const chestRect = chestWrap.getBoundingClientRect();
-      const slotRect  = slotEl.getBoundingClientRect();
-
-      // Start: above the chest opening
-      const startX = chestRect.left + chestRect.width / 2;
-      const startY = chestRect.top + chestRect.height * 0.25;
-
-      // End: center of the slot
-      const endX = slotRect.left + slotRect.width / 2;
-      const endY = slotRect.top  + slotRect.height / 2;
-
-      // Arc peak — rises above then curves to slot
-      const peakY = Math.min(startY, endY) - window.innerHeight * 0.18;
-
-      // Create flying element — show as face-down "?" since cards land face-down
-      const flyRm = RARITY_META[item.rarity] || RARITY_META['Common'];
-      const flyer = document.createElement('div');
-      flyer.className = 'flying-item';
-      flyer.style.filter = `drop-shadow(0 0 14px ${flyRm.glow || 'rgba(154,160,166,0.6)'})`;
-      flyer.innerHTML = `<span style="font-family:'Cinzel Decorative',serif;font-size:clamp(2rem,4.5vw,3.5rem);color:${flyRm.color};opacity:0.85">?</span>`;
-      flyer.style.left = startX + 'px';
-      flyer.style.top  = startY + 'px';
-      flyer.style.transform = 'translate(-50%, -50%) scale(1.3)';
-      document.body.appendChild(flyer);
-
-      // Duration
-      const dur = 680;
-      const steps = 60;
-      let frame = 0;
-
-      const tick = () => {
-        frame++;
-        const t = frame / steps;
-        const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t; // ease in-out quad
-
-        // Quadratic bezier arc
-        const bx = startX + (endX - startX) * t;
-        // Y arc: goes up to peak then down to end
-        const by = (1-t)*(1-t)*startY + 2*(1-t)*t*peakY + t*t*endY;
-
-        // Scale: big at start, normal at end
-        const scale = 1.3 - 0.35 * ease;
-        // Slight rotation for feel
-        const rot = Math.sin(t * Math.PI) * 12;
-
-        flyer.style.left = bx + 'px';
-        flyer.style.top  = by + 'px';
-        flyer.style.transform = `translate(-50%, -50%) scale(${scale}) rotate(${rot}deg)`;
-        flyer.style.opacity = t > 0.85 ? (1 - (t - 0.85) / 0.15).toString() : '1';
-
-        if (frame < steps) {
-          requestAnimationFrame(tick);
-        } else {
-          flyer.remove();
-          resolve();
-        }
-      };
-      requestAnimationFrame(tick);
-    });
   }
 
   async function runReveal() {
@@ -1687,6 +1208,11 @@ body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
 
     state = 'opening';
 
+    // Shake the chest on click, then continue
+    chestWrap.classList.add('chest-shake');
+    await wait(2600);
+    chestWrap.classList.remove('chest-shake');
+
     getAudioCtx();
 
     // Hide hint — fade out first, then stop the pulse animation once invisible
@@ -1701,7 +1227,7 @@ body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
     // ── STAGE 1: Lid creaks open slightly ──
     playCreak();
     chestWrap.classList.add('lid-creak');
-    spawnSparks(6);
+    spawnSparks(6, particlesContainer);
 
     // Quickly show the partial-open frame
     await wait(300);
@@ -1715,7 +1241,7 @@ body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
     chestWrap.classList.add('lid-open');
     if (imgPartial) imgPartial.style.opacity = '0';
     if (imgOpen)    imgOpen.style.opacity    = '1';
-    spawnSparks(18);
+    spawnSparks(18, particlesContainer);
     await wait(300);
 
     // Brief beat — chest is open, light is pouring out, silence
@@ -1728,14 +1254,14 @@ body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
     // Pre-create all slots so we know their positions
     // Slots are invisible until the item lands
     for (let i = 0; i < mundaneItems.length; i++) {
-      const slot = createSlot(mundaneItems[i], false);
+      const slot = createSlot(mundaneItems[i], false, currentRoll);
       slot.style.opacity = '0';
       slot.style.transform = 'scale(0.8)';
       slotsRow.appendChild(slot);
     }
 
     // Mystery slot too
-    const mysterySlot = createSlot(null, true);
+    const mysterySlot = createSlot(null, true, currentRoll);
     mysterySlot.style.opacity = '0';
     mysterySlot.style.transform = 'scale(0.8)';
     slotsRow.appendChild(mysterySlot);
@@ -1750,11 +1276,11 @@ body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
       const slot = allSlots[i];
 
       // Fly the item
-      await flyItemToSlot(mundaneItems[i], slot);
+      await flyItemToSlot(mundaneItems[i], slot, chestWrap);
 
       // Item lands — slot pops in (face-down; user clicks to flip)
       playPop(pitches[i]);
-      spawnSparks(5);
+      spawnSparks(5, particlesContainer);
       slot.style.transition = 'opacity 0.12s ease, transform 0.35s cubic-bezier(0.34,1.56,0.64,1)';
       slot.style.opacity = '1';
       slot.style.transform = 'scale(1)';
@@ -1814,7 +1340,7 @@ body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
 
     // Mystery slot lands — same as other cards: face-down, click to flip, click to zoom
     playPop(1040);
-    spawnSparks(8);
+    spawnSparks(8, particlesContainer);
     mysterySlot.style.transition = 'opacity 0.12s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1)';
     mysterySlot.style.opacity = '1';
     mysterySlot.style.transform = 'scale(1)';
@@ -1879,7 +1405,7 @@ body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
 
   // Ambient sparks from torches
   setInterval(() => {
-    if (Math.random() > 0.6) spawnSparks(1);
+    if (Math.random() > 0.6) spawnSparks(1, particlesContainer);
   }, 800);
 
 })();

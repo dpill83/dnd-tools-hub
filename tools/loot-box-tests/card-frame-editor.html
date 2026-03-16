@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Card Frame Layout Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #c9a84c;
+  --gold-light: #f0d070;
+  --bg: #0c0a06;
+  --panel: #13110c;
+  --panel2: #1a1710;
+  --border: rgba(201,168,76,0.18);
+  --border-hi: rgba(201,168,76,0.45);
+  --text: #c8b888;
+  --text-dim: rgba(200,184,136,0.5);
+  --accent: #c9a84c;
+  --track: rgba(201,168,76,0.12);
+  --thumb: #c9a84c;
+  --code-bg: #0d0b07;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Crimson Text', Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  grid-template-rows: 48px 1fr;
+  overflow: hidden;
+}
+
+/* ── HEADER ── */
+header {
+  grid-column: 1/-1;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0 1.25rem;
+  z-index: 10;
+}
+header h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  white-space: nowrap;
+}
+.header-sep { flex: 1; }
+.header-pill {
+  font-family: 'Cinzel', serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(201,168,76,0.45);
+  border: 1px solid var(--border);
+  padding: 0.2rem 0.65rem;
+  border-radius: 2px;
+}
+
+/* ── SIDEBAR CONTROLS ── */
+#sidebar {
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-track { background: transparent; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.section {
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid var(--border);
+}
+.section-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(201,168,76,0.5);
+  margin-bottom: 0.75rem;
+}
+
+/* Rarity switcher */
+.rarity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+}
+.rarity-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 0.45rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.rarity-btn:hover { border-color: var(--border-hi); color: var(--gold); }
+.rarity-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.08); }
+
+/* View mode */
+.view-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.35rem;
+}
+.view-tab {
+  font-family: 'Cinzel', serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 0.45rem 0.3rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.view-tab:hover { border-color: var(--border-hi); color: var(--gold); }
+.view-tab.active { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.08); }
+
+/* Sliders */
+.control-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.control-row:last-child { margin-bottom: 0; }
+.control-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+.control-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--gold);
+  min-width: 2.8rem;
+  text-align: right;
+}
+.slider-wrap {
+  grid-column: 1/-1;
+  margin-top: -0.4rem;
+}
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 3px;
+  background: var(--track);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--thumb);
+  border: 2px solid rgba(201,168,76,0.3);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.3); }
+
+/* Copy button */
+#copy-css-btn, #copy-html-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--border-hi);
+  color: var(--gold);
+  padding: 0.55rem 1rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+#copy-css-btn:last-child, #copy-html-btn:last-child { margin-bottom: 0; }
+#copy-css-btn:hover, #copy-html-btn:hover {
+  background: rgba(201,168,76,0.08);
+  border-color: var(--gold);
+}
+#copy-css-btn.copied, #copy-html-btn.copied {
+  background: rgba(201,168,76,0.12);
+  border-color: var(--gold);
+  color: #8bca84;
+  border-color: #8bca84;
+}
+
+/* Item text fields */
+.field-row {
+  margin-bottom: 0.6rem;
+}
+.field-row label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--text-dim);
+  display: block;
+  margin-bottom: 0.25rem;
+  letter-spacing: 0.04em;
+}
+.field-row input, .field-row textarea {
+  width: 100%;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Crimson Text', serif;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 3px;
+  outline: none;
+  transition: border-color 0.2s;
+  resize: none;
+}
+.field-row input:focus, .field-row textarea:focus {
+  border-color: var(--border-hi);
+}
+
+/* ── MAIN PREVIEW AREA ── */
+#preview-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 2rem;
+  overflow: hidden;
+  position: relative;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 50%, rgba(50,35,10,0.25) 0%, transparent 70%),
+    radial-gradient(ellipse 100% 100% at 50% 100%, rgba(20,12,4,0.6) 0%, transparent 60%),
+    #090706;
+}
+
+/* Grid overlay */
+#preview-area::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(201,168,76,0.035) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(201,168,76,0.035) 40px);
+  pointer-events: none;
+}
+
+/* ── CARD PREVIEW ── */
+.card-preview-scene {
+  position: relative;
+  display: flex;
+  gap: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* The main card being edited */
+.card-main {
+  position: relative;
+  width: 240px;
+  height: 360px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid rgba(255,213,79,0.4);
+  background: #1c1200;
+  box-shadow: 0 0 40px rgba(255,213,79,0.15), 0 20px 60px rgba(0,0,0,0.8);
+  cursor: default;
+  flex-shrink: 0;
+}
+
+/* Frame image overlay */
+.card-frame-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  z-index: 2;
+  display: block;
+}
+.card-frame-img.hidden { display: none; }
+
+/* Content zone */
+.card-content-zone {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+  /* defaults; overridden by JS */
+  top: 22%;
+  right: 13%;
+  bottom: 26%;
+  left: 13%;
+}
+
+/* Content elements */
+.c-rarity {
+  font-family: 'Cinzel', serif;
+  font-size: 0.52rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 0.4rem;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+.c-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-size: 2.2rem;
+  margin: 0.3rem 0 0.5rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8));
+}
+.c-divider {
+  width: 70%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, currentColor, transparent);
+  margin: 0.2rem auto 0.4rem;
+  flex-shrink: 0;
+  opacity: 0.4;
+}
+.c-name {
+  font-family: 'Cinzel Decorative', serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-align: center;
+  width: 100%;
+  line-height: 1.2;
+  margin-bottom: 0.2rem;
+  flex-shrink: 0;
+}
+.c-value {
+  font-family: 'Cinzel', serif;
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 0.4rem;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+.c-desc-divider {
+  width: 55%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, currentColor, transparent);
+  margin: 0 auto 0.4rem;
+  flex-shrink: 0;
+  opacity: 0.3;
+}
+.c-desc {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.6rem;
+  font-style: italic;
+  text-align: center;
+  width: 100%;
+  line-height: 1.5;
+  flex-shrink: 0;
+  overflow: hidden;
+  opacity: 0.88;
+}
+
+/* Safe-zone overlay (toggle) */
+.safe-zone-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  display: none;
+}
+.safe-zone-overlay.visible { display: block; }
+.sz-dim-top, .sz-dim-bottom, .sz-dim-left, .sz-dim-right {
+  position: absolute;
+  background: rgba(179,157,219,0.18);
+}
+.sz-outline {
+  position: absolute;
+  border: 1px dashed rgba(179,157,219,0.7);
+  box-sizing: border-box;
+}
+.sz-label {
+  position: absolute;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.42rem;
+  color: rgba(179,157,219,0.85);
+  white-space: nowrap;
+  background: rgba(0,0,0,0.5);
+  padding: 0 2px;
+  letter-spacing: 0.04em;
+}
+
+/* Ruler ticks */
+.ruler-h, .ruler-v {
+  position: absolute;
+  pointer-events: none;
+  z-index: 4;
+}
+.ruler-h { top: 0; left: 0; right: 0; height: 10px; }
+.ruler-v { top: 0; left: 0; bottom: 0; width: 10px; }
+
+/* Smaller "slot card" preview (the mini card) */
+.card-slot-preview {
+  position: relative;
+  width: 100px;
+  height: 136px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(255,213,79,0.25);
+  background: #1c1200;
+  box-shadow: 0 0 20px rgba(255,213,79,0.08), 0 8px 30px rgba(0,0,0,0.7);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.card-slot-frame-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  z-index: 2;
+}
+.card-slot-content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.4rem 0.5rem 0.6rem;
+  width: 100%;
+  height: 100%;
+}
+.slot-c-icon { font-size: 1.5rem; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8)); }
+.slot-c-name { font-family: 'Cinzel', serif; font-size: 0.42rem; text-align: center; line-height: 1.2; letter-spacing: 0.03em; width: 100%; color: rgba(240,208,112,0.85); }
+
+/* CSS output panel */
+#css-output {
+  width: 100%;
+  max-width: 600px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.85rem 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: rgba(200,180,130,0.7);
+  line-height: 1.7;
+  white-space: pre;
+  overflow-x: auto;
+  pointer-events: none;
+  max-height: 140px;
+  overflow-y: auto;
+}
+.css-k { color: #9cdcfe; }
+.css-v { color: #ce9178; }
+.css-p { color: rgba(200,180,130,0.45); }
+
+/* Preview labels */
+.preview-label {
+  position: absolute;
+  bottom: -1.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Cinzel', serif;
+  font-size: 0.52rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(201,168,76,0.4);
+  white-space: nowrap;
+}
+
+/* Toggle overlay btn */
+.toggle-row {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.toggle-row:last-child { margin-bottom: 0; }
+.toggle-label { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--text-dim); flex: 1; }
+.toggle-switch {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--track);
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  transition: 0.2s;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  left: 2px;
+  top: 2px;
+  background: rgba(201,168,76,0.4);
+  border-radius: 50%;
+  transition: 0.2s;
+}
+.toggle-switch input:checked + .toggle-slider { background: rgba(201,168,76,0.15); border-color: var(--gold); }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(14px); background: var(--gold); }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>✦ Card Frame Layout Editor</h1>
+  <div class="header-sep"></div>
+  <div class="header-pill">loot-box v1</div>
+</header>
+
+<!-- ── SIDEBAR ── -->
+<div id="sidebar">
+
+  <!-- Rarity -->
+  <div class="section">
+    <div class="section-label">Rarity / Frame</div>
+    <div class="rarity-grid">
+      <button class="rarity-btn" data-rarity="Common">Common</button>
+      <button class="rarity-btn" data-rarity="Uncommon">Uncommon</button>
+      <button class="rarity-btn" data-rarity="Rare">Rare</button>
+      <button class="rarity-btn" data-rarity="Very Rare">Very Rare</button>
+      <button class="rarity-btn active" data-rarity="Legendary">Legendary</button>
+      <button class="rarity-btn" data-rarity="Mundane">Mundane</button>
+    </div>
+  </div>
+
+  <!-- View mode -->
+  <div class="section">
+    <div class="section-label">Preview Mode</div>
+    <div class="view-tabs">
+      <button class="view-tab active" data-view="modal">Modal</button>
+      <button class="view-tab" data-view="flip">Flip Card</button>
+      <button class="view-tab" data-view="slot">Slot</button>
+    </div>
+  </div>
+
+  <!-- Content zone insets — MODAL -->
+  <div class="section" id="modal-controls">
+    <div class="section-label">Modal Content Zone (% of card)</div>
+    <div class="control-row">
+      <span class="control-label">top</span>
+      <span class="control-val" id="val-modal-top">22%</span>
+    </div>
+    <div class="slider-wrap">
+      <input
+        type="range"
+        id="sl-modal-top"
+        min="5"
+        max="45"
+        value="22"
+        aria-label="Modal content top offset"
+        title="Modal content top offset">
+    </div>
+
+    <div class="control-row" style="margin-top:0.55rem">
+      <span class="control-label">bottom</span>
+      <span class="control-val" id="val-modal-bottom">26%</span>
+    </div>
+    <div class="slider-wrap">
+      <input
+        type="range"
+        id="sl-modal-bottom"
+        min="5"
+        max="45"
+        value="26"
+        aria-label="Modal content bottom offset"
+        title="Modal content bottom offset">
+    </div>
+
+    <div class="control-row" style="margin-top:0.55rem">
+      <span class="control-label">left / right</span>
+      <span class="control-val" id="val-modal-lr">18%</span>
+    </div>
+    <div class="slider-wrap">
+      <input
+        type="range"
+        id="sl-modal-lr"
+        min="2"
+        max="40"
+        value="18"
+        aria-label="Modal content left/right inset"
+        title="Modal content left/right inset">
+    </div>
+  </div>
+
+  <!-- Content zone — FLIP CARD -->
+  <div class="section" id="flip-controls" style="display:none">
+    <div class="section-label">Flip Card Padding (% of card)</div>
+    <div class="control-row">
+      <span class="control-label">top %</span>
+      <span class="control-val" id="val-flip-top">22%</span>
+    </div>
+    <div class="slider-wrap">
+      <input
+        type="range"
+        id="sl-flip-top"
+        min="5"
+        max="45"
+        value="22"
+        aria-label="Flip card top padding"
+        title="Flip card top padding">
+    </div>
+
+    <div class="control-row" style="margin-top:0.55rem">
+      <span class="control-label">bottom %</span>
+      <span class="control-val" id="val-flip-bottom">26%</span>
+    </div>
+    <div class="slider-wrap">
+      <input
+        type="range"
+        id="sl-flip-bottom"
+        min="5"
+        max="45"
+        value="26"
+        aria-label="Flip card bottom padding"
+        title="Flip card bottom padding">
+    </div>
+
+    <div class="control-row" style="margin-top:0.55rem">
+      <span class="control-label">left/right %</span>
+      <span class="control-val" id="val-flip-lr">13%</span>
+    </div>
+    <div class="slider-wrap">
+      <input type="range" id="sl-flip-lr" min="2" max="40" value="13">
+    </div>
+  </div>
+
+  <!-- Slot card controls -->
+  <div class="section" id="slot-controls" style="display:none">
+    <div class="section-label">Slot Card Padding</div>
+    <div class="control-row">
+      <span class="control-label">padding (rem)</span>
+      <span class="control-val" id="val-slot-pad">0.45rem</span>
+    </div>
+    <div class="slider-wrap">
+      <input type="range" id="sl-slot-pad" min="1" max="20" value="7">
+    </div>
+    <div class="control-row" style="margin-top:0.55rem">
+      <span class="control-label">bottom pad (rem)</span>
+      <span class="control-val" id="val-slot-padb">0.75rem</span>
+    </div>
+    <div class="slider-wrap">
+      <input type="range" id="sl-slot-padb" min="1" max="30" value="11">
+    </div>
+  </div>
+
+  <!-- Sample item text -->
+  <div class="section">
+    <div class="section-label">Sample Item</div>
+    <div class="field-row">
+      <label for="item-name">name</label>
+      <input type="text" id="item-name" value="Cloak of Elvenkind">
+    </div>
+    <div class="field-row">
+      <label for="item-value">value</label>
+      <input type="text" id="item-value" value="2,500 gp">
+    </div>
+    <div class="field-row">
+      <label for="item-desc">description</label>
+      <textarea id="item-desc" rows="3">While wearing this cloak, Stealth checks are made with advantage.</textarea>
+    </div>
+    <div class="field-row">
+      <label for="item-req">requirements</label>
+      <input type="text" id="item-req" value="Requires attunement">
+    </div>
+  </div>
+
+  <!-- Overlays -->
+  <div class="section">
+    <div class="section-label">Display</div>
+    <div class="toggle-row">
+      <label class="toggle-label" for="tog-safezone">Safe zone overlay</label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="tog-safezone" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="toggle-row">
+      <label class="toggle-label" for="tog-frame">Show frame image</label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="tog-frame" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Export -->
+  <div class="section">
+    <div class="section-label">Export</div>
+    <button id="copy-css-btn">⧉ Copy CSS Values</button>
+    <button id="copy-html-btn">⧉ Copy HTML Snippet</button>
+  </div>
+
+</div><!-- /sidebar -->
+
+<!-- ── PREVIEW ── -->
+<div id="preview-area">
+
+  <!-- Cards scene -->
+  <div class="card-preview-scene" id="card-scene">
+
+    <!-- Main card (modal / flip card view) -->
+    <div id="main-card-wrap" style="position:relative; display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
+      <div class="card-main" id="card-main">
+        <!-- Frame image -->
+        <img class="card-frame-img" id="card-frame-img" src="" alt="" onerror="this.style.display='none'">
+
+        <!-- Content zone -->
+        <div class="card-content-zone" id="card-content-zone">
+          <div class="c-rarity" id="c-rarity">Legendary</div>
+          <div class="c-icon" id="c-icon">✨</div>
+          <div class="c-divider" id="c-divider"></div>
+          <div class="c-name" id="c-name">Cloak of Elvenkind</div>
+          <div class="c-value" id="c-value">2,500 gp</div>
+          <div class="c-desc-divider" id="c-desc-divider"></div>
+          <div class="c-desc" id="c-desc">While wearing this cloak, Stealth checks are made with advantage.</div>
+          <div class="c-req" id="c-req" style="font-family:'Crimson Text',serif;font-size:0.5rem;font-style:italic;color:rgba(179,157,219,0.85);text-align:center;width:100%;margin-top:0.35rem;padding-top:0.35rem;border-top:1px solid rgba(179,157,219,0.2);flex-shrink:0;">Requires attunement</div>
+        </div>
+
+        <!-- Safe zone overlay -->
+        <div class="safe-zone-overlay visible" id="safe-zone-overlay">
+          <div class="sz-dim-top" id="sz-top"></div>
+          <div class="sz-dim-bottom" id="sz-bottom"></div>
+          <div class="sz-dim-left" id="sz-left"></div>
+          <div class="sz-dim-right" id="sz-right"></div>
+          <div class="sz-outline" id="sz-outline"></div>
+          <div class="sz-label" id="sz-label-top" style="top:0;left:50%;transform:translateX(-50%)"></div>
+          <div class="sz-label" id="sz-label-lr" style="top:50%;right:2px;transform:translateY(-50%)"></div>
+        </div>
+      </div>
+      <div class="preview-label" id="preview-label">Modal Card</div>
+    </div>
+
+    <!-- Slot preview (small) -->
+    <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:0.5rem;" id="slot-preview-wrap">
+      <div class="card-slot-preview" id="slot-card">
+        <img class="card-slot-frame-img" id="slot-frame-img" src="" alt="" onerror="this.style.display='none'">
+        <div class="card-slot-content" id="slot-content" style="padding:0.45rem 0.5rem 0.75rem;">
+          <div class="slot-c-icon">✨</div>
+          <div class="slot-c-name" id="slot-c-name">Cloak of Elvenkind</div>
+        </div>
+      </div>
+      <div class="preview-label">Slot Card</div>
+    </div>
+
+  </div>
+
+  <!-- CSS output -->
+  <div id="css-output"></div>
+
+</div><!-- /preview-area -->
+
+<script>
+// ── DATA ──
+const FRAMES_PATH = 'assets/images/';
+const RARITY_META = {
+  'Mundane':   { color: '#9aa0a6', glow: 'rgba(154,160,166,0.5)', frame: 'frame-1-mundane.png',    bg1: '#1a0e08', bg2: '#0d0805', icon: '🪙' },
+  'Common':    { color: '#9aa0a6', glow: 'rgba(154,160,166,0.5)', frame: 'frame-2-common.png',     bg1: '#1a0e08', bg2: '#0d0805', icon: '🗡️' },
+  'Uncommon':  { color: '#4fc3f7', glow: 'rgba(79,195,247,0.5)',  frame: 'frame-3-uncommon.png',   bg1: '#021a1a', bg2: '#010d0d', icon: '🧪' },
+  'Rare':      { color: '#b39ddb', glow: 'rgba(179,157,219,0.6)', frame: 'frame-4-rare.png',       bg1: '#0a0618', bg2: '#06030f', icon: '💍' },
+  'Very Rare': { color: '#ff8a65', glow: 'rgba(255,138,101,0.6)', frame: 'frame-5-very-rare.png',  bg1: '#1a0800', bg2: '#0d0400', icon: '🏹' },
+  'Legendary': { color: '#ffd54f', glow: 'rgba(255,213,79,0.8)',  frame: 'frame-6-legendary.png',  bg1: '#1c1200', bg2: '#0d0900', icon: '✨' },
+};
+
+// ── STATE ──
+const state = {
+  rarity: 'Legendary',
+  view: 'modal',
+  modal: { top: 22, bottom: 26, lr: 18 },
+  flip:  { top: 22, bottom: 26, lr: 13 },
+  slot:  { pad: 7, padb: 11 },
+  showSafeZone: true,
+  showFrame: true,
+};
+
+// ── ELEMENTS ──
+const cardMain = document.getElementById('card-main');
+const cardFrameImg = document.getElementById('card-frame-img');
+const cardContentZone = document.getElementById('card-content-zone');
+const safeZoneOverlay = document.getElementById('safe-zone-overlay');
+const slotCard = document.getElementById('slot-card');
+const slotFrameImg = document.getElementById('slot-frame-img');
+const slotContent = document.getElementById('slot-content');
+const slotCName = document.getElementById('slot-c-name');
+const slotPreviewWrap = document.getElementById('slot-preview-wrap');
+const mainCardWrap = document.getElementById('main-card-wrap');
+const cssOutput = document.getElementById('css-output');
+const previewLabel = document.getElementById('preview-label');
+
+function pct(n) { return n / 100; }
+
+function slPad(v) {
+  // map 1-20 -> 0.1rem to 2.0rem
+  return (v * 0.1).toFixed(2) + 'rem';
+}
+
+function updateCard() {
+  const rm = RARITY_META[state.rarity];
+  const color = rm.color;
+
+  // Frame image
+  const frameSrc = FRAMES_PATH + rm.frame;
+  cardFrameImg.src = state.showFrame ? frameSrc : '';
+  cardFrameImg.style.display = state.showFrame ? 'block' : 'none';
+  slotFrameImg.src = state.showFrame ? frameSrc : '';
+  slotFrameImg.style.display = state.showFrame ? 'block' : 'none';
+
+  // Card bg + border
+  cardMain.style.background = `linear-gradient(160deg, ${rm.bg1} 0%, ${rm.bg2} 100%)`;
+  cardMain.style.borderColor = color;
+  cardMain.style.boxShadow = `0 0 30px ${rm.glow}, 0 20px 60px rgba(0,0,0,0.8)`;
+
+  // Content zone
+  let top, bottom, left, right;
+  if (state.view === 'flip') {
+    top = state.flip.top; bottom = state.flip.bottom; left = state.flip.lr; right = state.flip.lr;
+  } else {
+    top = state.modal.top; bottom = state.modal.bottom; left = state.modal.lr; right = state.modal.lr;
+  }
+  cardContentZone.style.top = top + '%';
+  cardContentZone.style.bottom = bottom + '%';
+  cardContentZone.style.left = left + '%';
+  cardContentZone.style.right = right + '%';
+
+  // Colors
+  document.getElementById('c-rarity').style.color = color;
+  document.getElementById('c-icon').textContent = rm.icon;
+  document.getElementById('c-name').style.color = '#f0d070';
+  document.getElementById('c-name').style.textShadow = `0 0 12px ${rm.glow}`;
+  document.getElementById('c-value').style.color = color;
+  document.getElementById('c-divider').style.color = color;
+  document.getElementById('c-desc-divider').style.color = color;
+
+  // Item text
+  document.getElementById('c-rarity').textContent = state.rarity;
+  document.getElementById('c-name').textContent = document.getElementById('item-name').value;
+  document.getElementById('c-value').textContent = document.getElementById('item-value').value;
+  document.getElementById('c-desc').textContent = document.getElementById('item-desc').value;
+  const reqEl = document.getElementById('c-req');
+  const reqVal = document.getElementById('item-req').value;
+  reqEl.textContent = reqVal;
+  reqEl.style.display = reqVal ? '' : 'none';
+
+  // Safe zone overlay
+  updateSafeZone(top, bottom, left, right);
+
+  // Slot card
+  slotContent.style.padding = `${slPad(state.slot.pad)} 0.5rem ${slPad(state.slot.padb)}`;
+  slotCard.style.borderColor = color;
+  slotCard.style.background = `linear-gradient(160deg, ${rm.bg1} 0%, ${rm.bg2} 100%)`;
+  const icon = document.querySelector('.slot-c-icon');
+  if (icon) icon.textContent = rm.icon;
+  slotCName.textContent = document.getElementById('item-name').value;
+
+  // Show/hide views
+  if (state.view === 'slot') {
+    mainCardWrap.style.display = 'none';
+    slotPreviewWrap.style.display = 'flex';
+    previewLabel.textContent = 'Slot Card';
+  } else {
+    mainCardWrap.style.display = 'flex';
+    cardMain.style.display = 'block';
+    if (state.view === 'flip') {
+      slotPreviewWrap.style.display = 'none';
+      previewLabel.textContent = 'Flip Card (.card-face)';
+    } else {
+      slotPreviewWrap.style.display = 'flex';
+      previewLabel.textContent = 'Modal Card';
+    }
+  }
+
+  updateCSS();
+}
+
+function updateSafeZone(top, bottom, lr_left, lr_right) {
+  const overlay = document.getElementById('safe-zone-overlay');
+  overlay.classList.toggle('visible', state.showSafeZone);
+
+  const h = 360; // card px height
+  const w = 240; // card px width
+
+  const t = top / 100;
+  const b = bottom / 100;
+  const l = lr_left / 100;
+  const r = lr_right / 100;
+
+  document.getElementById('sz-top').style.cssText = `top:0;left:0;right:0;height:${t*100}%;`;
+  document.getElementById('sz-bottom').style.cssText = `bottom:0;left:0;right:0;height:${b*100}%;`;
+  document.getElementById('sz-left').style.cssText = `top:${t*100}%;bottom:${b*100}%;left:0;width:${l*100}%;`;
+  document.getElementById('sz-right').style.cssText = `top:${t*100}%;bottom:${b*100}%;right:0;width:${r*100}%;`;
+  document.getElementById('sz-outline').style.cssText = `top:${t*100}%;bottom:${b*100}%;left:${l*100}%;right:${r*100}%;`;
+  document.getElementById('sz-label-top').textContent = `top ${top}%`;
+  document.getElementById('sz-label-lr').textContent = `${lr_right}%`;
+}
+
+function updateCSS() {
+  const v = state.view;
+  let txt = '';
+  if (v === 'modal') {
+    const m = state.modal;
+    txt = `.card-modal-content {\n  top: ${m.top}%;\n  right: ${m.lr}%;\n  bottom: ${m.bottom}%;\n  left: ${m.lr}%;\n}`;
+  } else if (v === 'flip') {
+    const f = state.flip;
+    txt = `.card-face {\n  padding: ${f.top}% ${f.lr}% ${f.bottom}%;\n}`;
+  } else {
+    const p = slPad(state.slot.pad);
+    const pb = slPad(state.slot.padb);
+    txt = `.card-front-face {\n  padding: ${p} 0.5rem ${pb};\n}`;
+  }
+
+  // Syntax-coloured output
+  const hl = txt
+    .replace(/(\.[\w-]+)/g, '<span style="color:#569cd6">$1</span>')
+    .replace(/(\w[\w-]*)(?=:)/g, '<span style="color:#9cdcfe">$1</span>')
+    .replace(/(?<=:\s)([\w.%]+);/g, '<span style="color:#ce9178">$1</span>;');
+
+  cssOutput.innerHTML = hl;
+}
+
+// ── RARITY BUTTONS ──
+document.querySelectorAll('.rarity-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.rarity-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.rarity = btn.dataset.rarity;
+    updateCard();
+  });
+});
+
+// ── VIEW TABS ──
+document.querySelectorAll('.view-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    state.view = tab.dataset.view;
+    document.getElementById('modal-controls').style.display = state.view === 'modal' ? '' : 'none';
+    document.getElementById('flip-controls').style.display = state.view === 'flip' ? '' : 'none';
+    document.getElementById('slot-controls').style.display = state.view === 'slot' ? '' : 'none';
+    updateCard();
+  });
+});
+
+// ── SLIDERS ──
+function wireSlider(sliderId, valSpanId, onInput) {
+  const sl = document.getElementById(sliderId);
+  const vl = document.getElementById(valSpanId);
+  if (!sl || !vl) return;
+  sl.addEventListener('input', () => {
+    const v = parseFloat(sl.value);
+    onInput(v);
+    updateCard();
+  });
+}
+
+wireSlider('sl-modal-top', 'val-modal-top', v => {
+  state.modal.top = v;
+  document.getElementById('val-modal-top').textContent = v + '%';
+});
+wireSlider('sl-modal-bottom', 'val-modal-bottom', v => {
+  state.modal.bottom = v;
+  document.getElementById('val-modal-bottom').textContent = v + '%';
+});
+wireSlider('sl-modal-lr', 'val-modal-lr', v => {
+  state.modal.lr = v;
+  document.getElementById('val-modal-lr').textContent = v + '%';
+});
+wireSlider('sl-flip-top', 'val-flip-top', v => {
+  state.flip.top = v;
+  document.getElementById('val-flip-top').textContent = v + '%';
+});
+wireSlider('sl-flip-bottom', 'val-flip-bottom', v => {
+  state.flip.bottom = v;
+  document.getElementById('val-flip-bottom').textContent = v + '%';
+});
+wireSlider('sl-flip-lr', 'val-flip-lr', v => {
+  state.flip.lr = v;
+  document.getElementById('val-flip-lr').textContent = v + '%';
+});
+wireSlider('sl-slot-pad', 'val-slot-pad', v => {
+  state.slot.pad = v;
+  document.getElementById('val-slot-pad').textContent = slPad(v);
+});
+wireSlider('sl-slot-padb', 'val-slot-padb', v => {
+  state.slot.padb = v;
+  document.getElementById('val-slot-padb').textContent = slPad(v);
+});
+
+// ── TEXT FIELDS ──
+['item-name','item-value','item-desc','item-req'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateCard);
+});
+
+// ── TOGGLES ──
+document.getElementById('tog-safezone').addEventListener('change', function() {
+  state.showSafeZone = this.checked;
+  updateCard();
+});
+document.getElementById('tog-frame').addEventListener('change', function() {
+  state.showFrame = this.checked;
+  updateCard();
+});
+
+// ── COPY ──
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = btn.id === 'copy-css-btn' ? '⧉ Copy CSS Values' : '⧉ Copy HTML Snippet';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+document.getElementById('copy-css-btn').addEventListener('click', function() {
+  const v = state.view;
+  let txt = '';
+  if (v === 'modal') {
+    const m = state.modal;
+    txt = `.card-modal-content {\n  top: ${m.top}%;\n  right: ${m.lr}%;\n  bottom: ${m.bottom}%;\n  left: ${m.lr}%;\n}`;
+  } else if (v === 'flip') {
+    const f = state.flip;
+    txt = `.card-face {\n  padding: ${f.top}% ${f.lr}% ${f.bottom}%;\n}`;
+  } else {
+    txt = `.card-front-face {\n  padding: ${slPad(state.slot.pad)} 0.5rem ${slPad(state.slot.padb)};\n}`;
+  }
+  copyText(txt, this);
+});
+
+document.getElementById('copy-html-btn').addEventListener('click', function() {
+  const name = document.getElementById('item-name').value;
+  const val  = document.getElementById('item-value').value;
+  const desc = document.getElementById('item-desc').value;
+  const req  = document.getElementById('item-req').value;
+  const rm = RARITY_META[state.rarity];
+  const m = state.modal;
+
+  const snippet = `<!-- Card Modal Content (${state.rarity}) -->
+<div id="card-modal" style="border-color:${rm.color};box-shadow:0 0 30px ${rm.glow};">
+  <div class="card-modal-content">
+    <div class="card-modal-rarity" style="color:${rm.color}">${state.rarity}</div>
+    <div class="card-modal-icon"><!-- item icon --></div>
+    <div class="card-modal-divider"></div>
+    <div class="card-modal-name">${name}</div>
+    <div class="card-modal-value">${val}</div>
+    <div class="card-modal-desc-divider"></div>
+    <div class="card-modal-desc">${desc}</div>
+    ${req ? `<div class="card-modal-req">${req}</div>` : ''}
+  </div>
+</div>
+
+/* CSS */
+.card-modal-content {
+  top: ${m.top}%;
+  right: ${m.lr}%;
+  bottom: ${m.bottom}%;
+  left: ${m.lr}%;
+}`;
+  copyText(snippet, this);
+});
+
+// ── INIT: sync state from DOM so value displays match sliders ──
+function syncStateFromDOM() {
+  const sl = (id) => document.getElementById(id);
+  const v = (id) => parseFloat(sl(id)?.value);
+  if (sl('sl-modal-top')) {
+    state.modal.top = v('sl-modal-top');
+    state.modal.bottom = v('sl-modal-bottom');
+    state.modal.lr = v('sl-modal-lr');
+  }
+  if (sl('sl-flip-top')) {
+    state.flip.top = v('sl-flip-top');
+    state.flip.bottom = v('sl-flip-bottom');
+    state.flip.lr = v('sl-flip-lr');
+  }
+  if (sl('sl-slot-pad')) {
+    state.slot.pad = v('sl-slot-pad');
+    state.slot.padb = v('sl-slot-padb');
+  }
+  document.getElementById('val-modal-top').textContent = state.modal.top + '%';
+  document.getElementById('val-modal-bottom').textContent = state.modal.bottom + '%';
+  document.getElementById('val-modal-lr').textContent = state.modal.lr + '%';
+  document.getElementById('val-flip-top').textContent = state.flip.top + '%';
+  document.getElementById('val-flip-bottom').textContent = state.flip.bottom + '%';
+  document.getElementById('val-flip-lr').textContent = state.flip.lr + '%';
+  document.getElementById('val-slot-pad').textContent = slPad(state.slot.pad);
+  document.getElementById('val-slot-padb').textContent = slPad(state.slot.padb);
+}
+
+syncStateFromDOM();
+updateCard();
+</script>
+</body>
+</html>

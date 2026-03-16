@@ -1,0 +1,156 @@
+/* Shared card modal backdrop + frame styles for index.html and loot-table.html */
+
+#zoom-dim {
+  position: fixed;
+  inset: 0;
+  z-index: 34;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(0,0,0,0);
+  pointer-events: none;
+}
+
+#zoom-dim.active {
+  background: rgba(0,0,0,0.65);
+  pointer-events: auto;
+}
+
+#card-modal {
+  display: none;
+  position: relative;
+  height: min(65vh, 1536px);
+  width: auto;
+  aspect-ratio: 1024 / 1536;
+  max-width: min(90vw, 1024px);
+  overflow: hidden;
+  border-radius: 8px;
+  border: 2px solid rgba(255,213,79,0.4);
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+#zoom-dim.active #card-modal {
+  display: block;
+}
+
+ .card-modal-content {
+  position: absolute;
+  top: 15%;
+  right: 18%;
+  bottom: 28%;
+  left: 18%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.card-modal-rarity {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.55rem, 1.4vw, 0.75rem);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  opacity: 0.75;
+  flex-shrink: 0;
+}
+
+.card-modal-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-size: clamp(3rem, 9vw, 5rem);
+  margin: 0.4rem 0 0.7rem;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.8));
+  flex-shrink: 0;
+}
+
+.card-modal-icon img {
+  width: clamp(3rem, 9vw, 5rem);
+  height: clamp(3rem, 9vw, 5rem);
+  object-fit: contain;
+  display: block;
+}
+
+.card-modal-icon span {
+  display: block;
+  line-height: 1;
+}
+
+.card-modal-divider {
+  width: 70%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255,213,79,0.5), transparent);
+  margin: 0.3rem auto 0.5rem;
+  flex-shrink: 0;
+}
+
+.card-modal-name {
+  font-family: 'Cinzel Decorative', serif;
+  font-weight: 700;
+  font-size: clamp(1rem, 2.8vw, 1.5rem);
+  color: var(--gold-light);
+  text-align: center;
+  width: 100%;
+  line-height: 1.2;
+  margin-bottom: 0.25rem;
+  text-shadow: 0 0 18px rgba(255,213,79,0.4);
+  flex-shrink: 0;
+}
+
+.card-modal-value {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.55rem, 1.2vw, 0.7rem);
+  color: rgba(255,213,79,0.7);
+  letter-spacing: 0.1em;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  flex-shrink: 0;
+}
+
+.card-modal-desc-divider {
+  width: 55%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255,213,79,0.3), transparent);
+  margin: 0 auto 0.5rem;
+  flex-shrink: 0;
+}
+
+.card-modal-desc {
+  font-family: 'Crimson Text', serif;
+  font-size: clamp(0.6rem, 1.3vw, 0.78rem);
+  font-style: italic;
+  color: rgba(200,180,140,0.9);
+  text-align: center;
+  width: 100%;
+  line-height: 1.5;
+  flex-shrink: 0;
+  overflow: hidden;
+  padding: 0.35rem 0.75rem 0.25rem;
+  box-sizing: border-box;
+}
+
+.card-modal-req {
+  font-family: 'Crimson Text', serif;
+  font-size: clamp(0.5rem, 1vw, 0.6rem);
+  font-style: italic;
+  color: rgba(179,157,219,0.85);
+  text-align: center;
+  width: 100%;
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(179,157,219,0.2);
+  flex-shrink: 0;
+}
+

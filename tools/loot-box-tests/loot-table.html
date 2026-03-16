@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loot Table</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/loot-card-modal.css">
+<style>
+:root {
+  --gold: #c9a84c;
+  --gold-light: #f0d070;
+  --gold-glow: rgba(201,168,76,0.6);
+  --common: #9aa0a6;
+  --uncommon: #4fc3f7;
+  --rare: #b39ddb;
+  --very-rare: #ff8a65;
+  --legendary: #ffd54f;
+  --legendary-glow: rgba(255,213,79,0.8);
+  --loot-card-max-width: 170px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Crimson Text', Georgia, serif;
+  background: #050300;
+  min-height: 100vh;
+  color: rgba(240,208,112,0.9);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#page-wrap {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem;
+  background: rgba(0,0,0,0.4);
+  border-radius: 6px;
+  border: 1px solid rgba(201,168,76,0.2);
+}
+
+.toolbar label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--gold-light);
+  margin-right: 0.35rem;
+}
+
+.toolbar select {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.6rem;
+  background: rgba(26,14,8,0.9);
+  color: var(--gold-light);
+  border: 1px solid rgba(201,168,76,0.35);
+  border-radius: 4px;
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.toolbar select:hover,
+.toolbar select:focus {
+  border-color: var(--gold);
+  outline: none;
+}
+
+.toolbar input[type="range"] {
+  width: 140px;
+}
+
+/* Card grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(clamp(100px, 14vw, 160px), 1fr));
+  gap: 1rem;
+  flex: 1;
+  align-content: start;
+}
+
+.loot-card {
+  width: 100%;
+  aspect-ratio: 88 / 120;
+  max-width: var(--loot-card-max-width);
+  max-height: 220px;
+  border-radius: 4px;
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.10rem 0.5rem 0.00rem;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.loot-card:hover {
+  transform: scale(1.03);
+}
+
+.loot-card .slot-icon {
+  font-size: clamp(1.4rem, 3.5vw, 3rem);
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+  flex-shrink: 0;
+}
+
+.loot-card .slot-icon img {
+  display: block;
+  width: clamp(2rem, 4vw, 3.5rem);
+  height: auto;
+  max-height: 3.5rem;
+  object-fit: contain;
+}
+
+.loot-card .slot-name {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.42rem, 1vw, 0.65rem);
+  color: rgba(240,208,112,0.85);
+  text-align: center;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+
+  width: 100%;
+  max-width: 75%;
+  min-width: 0;
+  box-sizing: border-box;
+
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  padding: 0 0.35rem;
+  margin: 0 auto;
+}
+
+.loot-card.is-legendary { box-shadow: 0 0 20px rgba(255,213,79,0.4), 0 0 60px rgba(255,213,79,0.15), inset 0 0 20px rgba(255,213,79,0.05); }
+.loot-card.is-rare { box-shadow: 0 0 15px rgba(179,157,219,0.4), inset 0 0 15px rgba(179,157,219,0.05); }
+.loot-card.is-very-rare { box-shadow: 0 0 15px rgba(255,138,101,0.4), inset 0 0 15px rgba(255,138,101,0.05); }
+.loot-card.is-uncommon { box-shadow: 0 0 10px rgba(79,195,247,0.3); }
+
+.loading {
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  padding: 2rem;
+  color: var(--gold);
+}
+
+#card-grid.hidden {
+  display: none;
+}
+</style>
+</head>
+<body>
+
+<div id="page-wrap">
+  <header class="toolbar">
+    <div>
+      <label for="filter-rarity">Rarity</label>
+      <select id="filter-rarity" aria-label="Filter by rarity">
+        <option value="">All</option>
+      </select>
+    </div>
+    <div>
+      <label for="filter-category">Category</label>
+      <select id="filter-category" aria-label="Filter by category">
+        <option value="">All</option>
+      </select>
+    </div>
+    <div>
+      <label for="sort-by">Sort by</label>
+      <select id="sort-by" aria-label="Sort by">
+        <option value="name-asc">Name A–Z</option>
+        <option value="name-desc">Name Z–A</option>
+        <option value="rarity">Rarity</option>
+        <option value="category">Category</option>
+        <option value="value-asc">Value (low–high)</option>
+        <option value="value-desc">Value (high–low)</option>
+      </select>
+    </div>
+    <div>
+      <label for="card-size">Card size</label>
+      <input id="card-size" type="range" min="80" max="160" value="100" aria-label="Card size">
+    </div>
+  </header>
+
+  <div id="grid-container">
+    <p id="loading-msg" class="loading">Loading loot table…</p>
+    <div id="card-grid" class="card-grid hidden"></div>
+  </div>
+</div>
+
+<div id="zoom-dim">
+  <div id="card-modal"></div>
+</div>
+
+<script src="assets/js/loot-constants.js"></script>
+<script>
+(function() {
+  const RARITY_ORDER = ['Unknown', 'Mundane', 'Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary'];
+
+  let LOOT = null;
+  let allItems = [];
+
+  function getEmbeddedLoot() {
+    const items = [
+      { id: 0, name: '42 Gold', rarity: 'Common', tier: 1, category: 'Treasure' },
+      { id: 1, name: 'Healing Potion', rarity: 'Common', tier: 1, category: 'Potion' },
+      { id: 2, name: 'Shortsword', rarity: 'Common', tier: 1, category: 'Weapon' },
+      { id: 3, name: 'Cloak of Elvenkind', rarity: 'Legendary', tier: 5, category: 'Wondrous Item', description: 'While wearing this cloak, Stealth checks made to hide are made with advantage.' },
+    ];
+    return { items };
+  }
+
+  function itemIconHTML(item, size) {
+    if (!item) return '<span style="font-size:2rem">📦</span>';
+    const imgPath = CAT_IMG[item.category];
+    const sz = size || 'clamp(2.8rem, 6vw, 5rem)';
+    if (imgPath) {
+      return `<img src="${imgPath}" alt="${item.category}" style="width:${sz};height:${sz};object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.7));-webkit-user-drag:none;" draggable="false">`;
+    }
+    const emoji = CAT_EMOJI[item.category] || '✨';
+    return `<span style="font-size:${sz};line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.8))">${emoji}</span>`;
+  }
+
+  function itemValueStr(item) {
+    if (!item) return '';
+    if (item.value_raw) return item.value_raw;
+    if (item.value != null) return item.value + ' gp';
+    return '— gp';
+  }
+
+  function rarityRank(r) {
+    const i = RARITY_ORDER.indexOf(r);
+    return i >= 0 ? i : 999;
+  }
+
+  function getFilteredSortedItems() {
+    const rarityVal = document.getElementById('filter-rarity').value;
+    const categoryVal = document.getElementById('filter-category').value;
+    const sortVal = document.getElementById('sort-by').value;
+
+    let list = allItems.slice();
+    if (rarityVal) list = list.filter(item => item.rarity === rarityVal);
+    if (categoryVal) list = list.filter(item => item.category === categoryVal);
+
+    list.sort((a, b) => {
+      switch (sortVal) {
+        case 'name-asc':
+          return (a.name || '').localeCompare(b.name || '');
+        case 'name-desc':
+          return (b.name || '').localeCompare(a.name || '');
+        case 'rarity':
+          return rarityRank(a.rarity) - rarityRank(b.rarity) || (a.name || '').localeCompare(b.name || '');
+        case 'category':
+          return (a.category || '').localeCompare(b.category || '') || (a.name || '').localeCompare(b.name || '');
+        case 'value-asc':
+          return (a.value ?? 0) - (b.value ?? 0) || (a.name || '').localeCompare(b.name || '');
+        case 'value-desc':
+          return (b.value ?? 0) - (a.value ?? 0) || (a.name || '').localeCompare(b.name || '');
+        default:
+          return (a.name || '').localeCompare(b.name || '');
+      }
+    });
+    return list;
+  }
+
+  function createCard(item) {
+    const rm = RARITY_META[item.rarity] || RARITY_META['Common'];
+    const frameBg = rm.frame ? `url('${rm.frame}'), linear-gradient(160deg, #1c1200 0%, #0d0900 100%)` : '';
+    const card = document.createElement('div');
+    card.className = 'loot-card ' + (rm.cls || '');
+    card.style.backgroundImage = frameBg || '';
+    card._item = item;
+    card.innerHTML = `
+      <div class="slot-icon">${itemIconHTML(item, 'clamp(2rem, 4vw, 3.5rem)')}</div>
+      <div class="slot-name">${(item.name || '').replace(/</g, '&lt;')}</div>
+    `;
+    return card;
+  }
+
+  function renderCards() {
+    const grid = document.getElementById('card-grid');
+    const list = getFilteredSortedItems();
+    grid.innerHTML = '';
+    list.forEach(item => {
+      const card = createCard(item);
+      card.addEventListener('click', () => openCardModal(card));
+      grid.appendChild(card);
+    });
+    grid.classList.remove('hidden');
+  }
+
+  const zoomDim = document.getElementById('zoom-dim');
+  const cardModal = document.getElementById('card-modal');
+
+  function openCardModal(cardEl) {
+    const item = cardEl._item;
+    if (!item) return;
+    const rm = RARITY_META[item.rarity] || RARITY_META['Common'];
+    const frameBg = rm.frame ? `url('${rm.frame}'), linear-gradient(160deg, #1c1200 0%, #0d0900 100%)` : '';
+    cardModal.style.backgroundImage = frameBg || '';
+    cardModal.style.borderColor = rm.color;
+    cardModal.style.boxShadow = `0 0 30px ${rm.glow}, 0 0 60px rgba(0,0,0,0.4)`;
+
+    const desc = (item.properties || item.description || '').replace(/</g, '&lt;').replace(/\n/g, '<br>');
+    const descBlock = desc
+      ? `<div class="card-modal-desc-divider"></div><div class="card-modal-desc">${desc}</div>`
+      : '';
+    const reqHtml = item.requirements ? `<div class="card-modal-req">${item.requirements}</div>` : '';
+
+    cardModal.innerHTML = `
+      <div class="card-modal-content">
+        <div class="card-modal-rarity" style="color:${rm.color}">${item.rarity}</div>
+        <div class="card-modal-icon">${itemIconHTML(item, 'clamp(3rem,9vw,5rem)')}</div>
+        <div class="card-modal-divider"></div>
+        <div class="card-modal-name">${(item.name || '').replace(/</g, '&lt;')}</div>
+        <div class="card-modal-value">${itemValueStr(item)}</div>
+        ${descBlock}
+        ${reqHtml}
+      </div>
+    `;
+    zoomDim.classList.add('active');
+  }
+
+  function closeCardModal() {
+    zoomDim.classList.remove('active');
+    cardModal.innerHTML = '';
+  }
+
+  function populateFilters() {
+    const rarities = [...new Set(allItems.map(i => i.rarity).filter(Boolean))].sort(
+      (a, b) => rarityRank(a) - rarityRank(b)
+    );
+    const categories = [...new Set(allItems.map(i => i.category).filter(Boolean))].sort();
+
+    const raritySelect = document.getElementById('filter-rarity');
+    rarities.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r;
+      opt.textContent = r;
+      raritySelect.appendChild(opt);
+    });
+
+    const categorySelect = document.getElementById('filter-category');
+    categories.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c;
+      categorySelect.appendChild(opt);
+    });
+  }
+
+  async function init() {
+    const loadingMsg = document.getElementById('loading-msg');
+    const isFileProtocol = window.location.protocol === 'file:';
+    if (isFileProtocol) {
+      LOOT = getEmbeddedLoot();
+    } else {
+      try {
+        const res = await fetch('loot-table.json');
+        if (!res.ok) throw new Error(res.statusText);
+        LOOT = await res.json();
+      } catch (e) {
+        console.warn('Could not load loot-table.json, using fallback');
+        LOOT = getEmbeddedLoot();
+      }
+    }
+    allItems = LOOT.items || [];
+    loadingMsg.style.display = 'none';
+    populateFilters();
+    renderCards();
+
+    document.getElementById('filter-rarity').addEventListener('change', renderCards);
+    document.getElementById('filter-category').addEventListener('change', renderCards);
+    document.getElementById('sort-by').addEventListener('change', renderCards);
+    zoomDim.addEventListener('click', () => closeCardModal());
+
+    const cardSizeInput = document.getElementById('card-size');
+    if (cardSizeInput) {
+      const updateCardSize = (val) => {
+        const pct = Number(val) || 100;
+        const base = 170; // px
+        const clamped = Math.max(80, Math.min(160, pct));
+        const px = (base * clamped) / 100;
+        document.documentElement.style.setProperty('--loot-card-max-width', px + 'px');
+      };
+      updateCardSize(cardSizeInput.value);
+      cardSizeInput.addEventListener('input', (e) => updateCardSize(e.target.value));
+    }
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
