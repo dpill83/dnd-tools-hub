@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>D&D Loot Chest Reveal Prototype</title>
+  <style>
+    :root {
+      --bg: #09070b;
+      --text: #f4ead2;
+      --muted: #c8b995;
+      --gold: #f7d46f;
+      --gold-soft: rgba(247, 212, 111, 0.35);
+      --panel: rgba(14, 10, 16, 0.72);
+      --panel-border: rgba(255, 232, 182, 0.18);
+      --shadow: 0 1.2rem 2.8rem rgba(0,0,0,0.45);
+      --title-size: clamp(1.4rem, 2.1vw + 0.9rem, 3.8rem);
+      --body-size: clamp(0.95rem, 0.45vw + 0.85rem, 1.4rem);
+      --small-size: clamp(0.8rem, 0.25vw + 0.78rem, 1rem);
+      --button-size: clamp(0.95rem, 0.5vw + 0.85rem, 1.3rem);
+      --slot-size: clamp(5rem, 11vw, 10rem);
+      --card-width: clamp(6.75rem, 14vw, 12rem);
+      --card-height: clamp(9.25rem, 20vw, 17rem);
+      --stage-max: min(96vw, 118rem);
+      --safe-bottom: max(1rem, env(safe-area-inset-bottom));
+      --safe-top: max(1rem, env(safe-area-inset-top));
+      --legendary: #f0cf67;
+      --very-rare: #f29f4b;
+      --rare: #9d66ff;
+      --uncommon: #4ba6ff;
+      --common: #c9b48c;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Georgia, "Times New Roman", serif;
+      overflow: hidden;
+    }
+
+    body {
+      min-height: 100dvh;
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+    }
+
+    .app {
+      position: relative;
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      contain: layout paint style;
+      isolation: isolate;
+      background: #000;
+    }
+
+    .background {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: saturate(1.03) brightness(0.72);
+      transform: scale(1.02);
+    }
+
+    .vignette,
+    .ambient-glow,
+    .floor-glow {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .vignette {
+      background:
+        radial-gradient(circle at center, transparent 28%, rgba(0,0,0,0.35) 68%, rgba(0,0,0,0.8) 100%),
+        linear-gradient(to top, rgba(0,0,0,0.55), transparent 45%);
+      z-index: 1;
+    }
+
+    .ambient-glow {
+      background: radial-gradient(circle at 50% 62%, rgba(244, 194, 80, 0.14), transparent 26%);
+      opacity: 0;
+      transition: opacity 500ms ease;
+      z-index: 1;
+    }
+
+    .floor-glow {
+      background: radial-gradient(ellipse at center, rgba(247, 212, 111, 0.25), rgba(247, 212, 111, 0.05) 35%, transparent 58%);
+      inset: auto 10% 4%;
+      height: 24%;
+      filter: blur(20px);
+      opacity: 0.35;
+      z-index: 1;
+    }
+
+    .stage {
+      position: relative;
+      z-index: 2;
+      width: var(--stage-max);
+      min-height: 100dvh;
+      padding:
+        calc(var(--safe-top) + 1rem)
+        clamp(0.9rem, 2vw, 2rem)
+        calc(var(--safe-bottom) + 1.2rem);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: clamp(0.8rem, 1.8vh, 1.5rem);
+      align-items: center;
+    }
+
+    .headline-wrap {
+      text-align: center;
+      min-height: clamp(3rem, 8vh, 6rem);
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+    }
+
+    .headline {
+      margin: 0;
+      font-size: var(--title-size);
+      line-height: 0.95;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #fff3c2;
+      text-shadow: 0 0.2rem 0.6rem rgba(0,0,0,0.65), 0 0 1.3rem rgba(246, 205, 101, 0.28);
+      opacity: 0;
+      transform: translateY(0.8rem) scale(0.98);
+      transition: opacity 450ms ease, transform 450ms ease;
+    }
+
+    .headline.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .chest-zone {
+      position: relative;
+      min-height: clamp(18rem, 38vh, 30rem);
+      display: grid;
+      place-items: center;
+    }
+
+    .light-burst {
+      position: absolute;
+      width: min(48vw, 34rem);
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, rgba(255, 237, 161, 0.94) 0%, rgba(255, 213, 104, 0.5) 30%, rgba(255, 179, 55, 0.18) 55%, transparent 72%);
+      filter: blur(18px);
+      opacity: 0;
+      transform: scale(0.62);
+      pointer-events: none;
+      transition: opacity 350ms ease, transform 650ms ease;
+      will-change: transform, opacity;
+    }
+
+    .light-burst.open {
+      opacity: 1;
+      transform: scale(1.18);
+    }
+
+    .chest-button {
+      position: relative;
+      border: 0;
+      background: none;
+      padding: 0;
+      cursor: pointer;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 180ms ease, filter 180ms ease;
+      filter: drop-shadow(0 1rem 1.8rem rgba(0,0,0,0.55));
+    }
+
+    .chest-button:hover {
+      transform: translateY(-0.2rem) scale(1.02);
+      filter: drop-shadow(0 1.25rem 2rem rgba(0,0,0,0.62));
+    }
+
+    .chest-button:active {
+      transform: scale(0.985);
+    }
+
+    .chest-button[disabled] {
+      cursor: default;
+    }
+
+    @media (hover: none) {
+      .chest-button:hover {
+        transform: none;
+        filter: drop-shadow(0 1rem 1.8rem rgba(0,0,0,0.55));
+      }
+    }
+
+    .chest-image {
+      width: min(52vw, 30rem);
+      max-width: 100%;
+      display: block;
+    }
+
+    .chest-open {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: scale(0.97) translateY(0.4rem);
+    }
+
+    .chest-button.opened .chest-closed {
+      opacity: 0;
+    }
+
+    .chest-button.opened .chest-open {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+
+    .hover-hint {
+      position: absolute;
+      left: 50%;
+      bottom: -1.4rem;
+      transform: translateX(-50%);
+      padding: 0.45rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(13, 10, 15, 0.78);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: var(--small-size);
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      text-transform: uppercase;
+      backdrop-filter: blur(10px);
+      opacity: 0.85;
+      transition: opacity 180ms ease, transform 180ms ease;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .chest-button:hover .hover-hint {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-0.12rem);
+    }
+
+    .chest-button.opened .hover-hint,
+    .chest-button[disabled] .hover-hint {
+      opacity: 0;
+    }
+
+    .loot-panel {
+      display: grid;
+      gap: clamp(0.8rem, 1.7vh, 1.4rem);
+      align-self: end;
+    }
+
+    .loot-row {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: clamp(0.55rem, 1vw, 1rem);
+      align-items: end;
+    }
+
+    .slot {
+      position: relative;
+      min-height: calc(var(--slot-size) + clamp(2.5rem, 5vw, 4rem));
+      display: grid;
+      justify-items: center;
+      align-content: start;
+      gap: 0.5rem;
+    }
+
+    .item-card,
+    .rarity-card {
+      position: relative;
+      width: 100%;
+      max-width: var(--card-width);
+      aspect-ratio: 0.72 / 1;
+      border-radius: clamp(0.8rem, 1.2vw, 1.4rem);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(2rem) scale(0.88);
+      transition: opacity 260ms ease, transform 360ms cubic-bezier(.22,.88,.32,1.08);
+      backdrop-filter: blur(8px);
+    }
+
+    .item-card.revealed,
+    .rarity-card.revealed,
+    .rarity-card.faceup {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .item-card::before,
+    .rarity-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent 28%);
+      pointer-events: none;
+    }
+
+    .item-inner,
+    .card-face {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      align-items: center;
+      justify-items: center;
+      padding: clamp(0.55rem, 0.9vw, 0.9rem);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform-style: preserve-3d;
+    }
+
+    .item-icon,
+    .final-icon {
+      width: 58%;
+      max-height: 56%;
+      object-fit: contain;
+      filter: drop-shadow(0 0.45rem 0.7rem rgba(0,0,0,0.35));
+    }
+
+    .item-name,
+    .final-name {
+      width: 100%;
+      text-align: center;
+      font-size: clamp(0.72rem, 0.35vw + 0.72rem, 0.98rem);
+      line-height: 1.15;
+      color: #f4ead2;
+      text-shadow: 0 0.1rem 0.3rem rgba(0,0,0,0.55);
+    }
+
+    .slot-label {
+      text-align: center;
+      font-size: var(--small-size);
+      line-height: 1.15;
+      color: var(--muted);
+      opacity: 0;
+      transform: translateY(0.4rem);
+      transition: opacity 260ms ease, transform 260ms ease;
+      min-height: 2.2em;
+      max-width: 12ch;
+    }
+
+    .slot-label.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .rarity-card {
+      max-width: var(--card-width);
+      transform-style: preserve-3d;
+      perspective: 1200px;
+      border-color: rgba(255,255,255,0.12);
+      overflow: visible;
+    }
+
+    .rarity-card.glow::after {
+      content: "";
+      position: absolute;
+      inset: -0.25rem;
+      border-radius: inherit;
+      border: 2px solid var(--rarity-color, var(--rare));
+      box-shadow:
+        0 0 0.8rem color-mix(in srgb, var(--rarity-color, var(--rare)) 55%, transparent),
+        0 0 1.8rem color-mix(in srgb, var(--rarity-color, var(--rare)) 40%, transparent),
+        0 0 3.1rem color-mix(in srgb, var(--rarity-color, var(--rare)) 25%, transparent);
+      animation: pulseGlow 1400ms ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .rarity-card .card-face {
+      border-radius: inherit;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: transform 850ms cubic-bezier(.2,.75,.15,1);
+      transform-style: preserve-3d;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .rarity-card .card-back {
+      background-image: var(--frame-url);
+      background-size: cover;
+      background-position: center;
+      transform: rotateY(0deg);
+    }
+
+    .rarity-card .card-back .mystery {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-size: clamp(2.2rem, 4vw, 4rem);
+      color: rgba(255,255,255,0.86);
+      text-shadow: 0 0 0.9rem rgba(255,255,255,0.24);
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,0.12), transparent 45%),
+        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.18));
+    }
+
+    .rarity-card .card-front {
+      background-image: var(--frame-url);
+      background-size: cover;
+      background-position: center;
+      transform: rotateY(180deg);
+    }
+
+    .rarity-card.faceup .card-back {
+      transform: rotateY(-180deg);
+    }
+
+    .rarity-card.faceup .card-front {
+      transform: rotateY(0deg);
+    }
+
+    .final-meta {
+      width: 100%;
+      padding: 0.4rem 0.15rem 0;
+      display: grid;
+      gap: 0.35rem;
+      align-content: end;
+      text-align: center;
+    }
+
+    .rarity-chip {
+      justify-self: center;
+      padding: 0.22rem 0.55rem;
+      border-radius: 999px;
+      font-size: clamp(0.62rem, 0.18vw + 0.65rem, 0.78rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #1d1204;
+      background: var(--rarity-color, var(--legendary));
+      font-weight: 700;
+      box-shadow: 0 0.2rem 0.8rem rgba(0,0,0,0.28);
+    }
+
+    .details {
+      min-height: clamp(7rem, 17vh, 10rem);
+      display: grid;
+      place-items: center;
+    }
+
+    .details-card {
+      width: min(100%, 52rem);
+      padding: clamp(0.9rem, 1.6vw, 1.35rem);
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: clamp(1rem, 1.4vw, 1.4rem);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      opacity: 0;
+      transform: translateY(0.8rem);
+      transition: opacity 350ms ease, transform 350ms ease;
+      text-align: center;
+    }
+
+    .details-card.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .details-card p {
+      margin: 0;
+      font-size: var(--body-size);
+      line-height: 1.35;
+      color: var(--text);
+    }
+
+    .details-card .sub {
+      margin-top: 0.45rem;
+      color: var(--muted);
+      font-size: clamp(0.9rem, 0.4vw + 0.85rem, 1.05rem);
+    }
+
+    .action-row {
+      margin-top: 0.9rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .take-btn {
+      border: 1px solid rgba(255, 231, 174, 0.25);
+      background: linear-gradient(180deg, rgba(99, 72, 18, 0.92), rgba(68, 48, 10, 0.98));
+      color: #fff4cf;
+      font-size: var(--button-size);
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      border-radius: 999px;
+      padding: 0.95rem 1.35rem;
+      box-shadow: 0 0.6rem 1.4rem rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    .take-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    .take-btn:active {
+      transform: translateY(0);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .status-text {
+      position: absolute;
+      top: calc(var(--safe-top) + 0.75rem);
+      right: clamp(0.75rem, 2vw, 1.5rem);
+      z-index: 3;
+      font-size: var(--small-size);
+      color: rgba(255,255,255,0.62);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: rgba(8,8,12,0.42);
+      padding: 0.45rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(8px);
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(0.985); opacity: 0.72; }
+      50% { transform: scale(1.02); opacity: 1; }
+    }
+
+    @media (max-width: 820px) {
+      .stage {
+        grid-template-rows: auto auto 1fr;
+        align-content: start;
+      }
+
+      .chest-zone {
+        min-height: clamp(14rem, 32vh, 20rem);
+      }
+
+      .chest-image {
+        width: min(64vw, 22rem);
+      }
+
+      .loot-row {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        justify-items: center;
+      }
+
+      .slot:nth-child(4),
+      .slot:nth-child(5) {
+        grid-column: span 1;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .stage {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+      }
+
+      .loot-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .slot:last-child {
+        grid-column: 1 / -1;
+      }
+
+      .slot {
+        min-height: calc(var(--card-height) * 0.7 + 2.6rem);
+      }
+
+      .hover-hint {
+        bottom: -1.15rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+
+      .rarity-card.glow::after {
+        animation: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <img class="background" id="background" src="assets/images/bg-dungeon.png" alt="Dungeon background" />
+    <div class="vignette"></div>
+    <div class="ambient-glow" id="ambientGlow"></div>
+    <div class="floor-glow"></div>
+
+    <div class="status-text" id="statusText">Awaiting Click</div>
+
+    <main class="stage" aria-live="polite">
+      <div class="headline-wrap">
+        <h1 class="headline" id="headline">YOU FOUND A THING</h1>
+      </div>
+
+      <section class="chest-zone" aria-label="Treasure chest reveal stage">
+        <div class="light-burst" id="lightBurst"></div>
+
+        <button class="chest-button" id="chestButton" aria-label="Open treasure chest">
+          <img class="chest-image chest-closed" src="assets/images/chest-closed.png" alt="Closed treasure chest" />
+          <img class="chest-image chest-open" src="assets/images/chest-open.png" alt="Open treasure chest with golden light" />
+          <span class="hover-hint">Tap to Open</span>
+        </button>
+      </section>
+
+      <section class="loot-panel">
+        <div class="loot-row" id="lootRow"></div>
+        <div class="details">
+          <div class="details-card" id="detailsCard">
+            <p id="detailsText">A hush falls over the table. The chest waits.</p>
+            <p class="sub" id="detailsSub">Click the chest to begin the reveal.</p>
+            <div class="action-row" id="actionRow" hidden>
+              <button class="take-btn" type="button" id="takeBtn">Take This Item</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="sr-only" aria-live="polite" id="announcer"></div>
+  </div>
+
+  <script>
+    const chestData = {
+      mundane: [
+        {
+          name: '124 Gold Pieces',
+          label: 'Gold',
+          icon: 'assets/images/item-gold.png',
+          description: 'A heavy spill of coins tumbles out first, bright and familiar.'
+        },
+        {
+          name: 'Potion of Healing',
+          label: 'Potion',
+          icon: 'assets/images/item-potion.png',
+          description: 'A red glass vial catches the torchlight and settles with a soft clink.'
+        },
+        {
+          name: 'Moon-Touched Sword',
+          label: 'Sword',
+          icon: 'assets/images/item-sword.png',
+          description: 'A simple blade rises from the glow, carrying a faint silver sheen.'
+        },
+        {
+          name: 'Spell Scroll',
+          label: 'Scroll',
+          icon: 'assets/images/item-scroll.png',
+          description: 'A sealed scroll unfurls just enough to hint at a waiting secret.'
+        }
+      ],
+      final: {
+        name: 'Cloak of Elvenkind',
+        label: 'Legendary',
+        rarity: 'legendary',
+        icon: 'assets/images/item-shield.png',
+        description: 'This soft, shadow-dyed cloak shimmers at the edge of sight, as though the dungeon itself wants to lose track of whoever wears it.',
+        frame: 'linear-gradient(135deg, rgba(240,207,103,0.5), rgba(30,20,10,0.95))'
+      }
+    };
+
+    const rarityColors = {
+      common: 'var(--common)',
+      uncommon: 'var(--uncommon)',
+      rare: 'var(--rare)',
+      'very-rare': 'var(--very-rare)',
+      legendary: 'var(--legendary)'
+    };
+
+    const motionReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const timeScale = motionReduced ? 0.22 : 1;
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms * timeScale));
+
+    const app = document.getElementById('app');
+    const chestButton = document.getElementById('chestButton');
+    const lightBurst = document.getElementById('lightBurst');
+    const ambientGlow = document.getElementById('ambientGlow');
+    const lootRow = document.getElementById('lootRow');
+    const headline = document.getElementById('headline');
+    const detailsCard = document.getElementById('detailsCard');
+    const detailsText = document.getElementById('detailsText');
+    const detailsSub = document.getElementById('detailsSub');
+    const actionRow = document.getElementById('actionRow');
+    const takeBtn = document.getElementById('takeBtn');
+    const announcer = document.getElementById('announcer');
+    const statusText = document.getElementById('statusText');
+
+    let hasStarted = false;
+    let audioCtx = null;
+    const audioBuffers = new Map();
+
+    const sounds = {
+      creak: 'assets/audio/chest-creak.mp3',
+      pop: 'assets/audio/item-pop.mp3',
+      sting: 'assets/audio/legendary-sting.mp3'
+    };
+
+    function setStatus(text) {
+      statusText.textContent = text;
+    }
+
+    function setAnnouncement(text) {
+      announcer.textContent = text;
+    }
+
+    async function initAudio() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        audioCtx = new AudioContextClass({ latencyHint: 'interactive' });
+      }
+
+      if (audioCtx.state === 'suspended') {
+        await audioCtx.resume();
+      }
+
+      const missing = Object.entries(sounds).filter(([key]) => !audioBuffers.has(key));
+      await Promise.all(missing.map(async ([key, url]) => {
+        try {
+          const response = await fetch(url);
+          const data = await response.arrayBuffer();
+          const buffer = await audioCtx.decodeAudioData(data.slice(0));
+          audioBuffers.set(key, buffer);
+        } catch (error) {
+          console.warn(`Audio failed for ${key}:`, error);
+        }
+      }));
+    }
+
+    function playSound(name, options = {}) {
+      if (!audioCtx) return;
+      const buffer = audioBuffers.get(name);
+      if (!buffer) return;
+
+      const source = audioCtx.createBufferSource();
+      const gain = audioCtx.createGain();
+      source.buffer = buffer;
+      source.connect(gain);
+      gain.connect(audioCtx.destination);
+      gain.gain.value = options.volume ?? 1;
+
+      if (options.playbackRate) source.playbackRate.value = options.playbackRate;
+
+      const when = options.when ?? audioCtx.currentTime;
+      source.start(when);
+      return source;
+    }
+
+    function buildLootSlots() {
+      lootRow.innerHTML = '';
+
+      chestData.mundane.forEach((item, index) => {
+        const slot = document.createElement('div');
+        slot.className = 'slot';
+        slot.dataset.type = 'mundane';
+        slot.dataset.index = index;
+        slot.innerHTML = `
+          <div class="item-card" id="item-${index}">
+            <div class="item-inner">
+              <img class="item-icon" src="${item.icon}" alt="${item.name}" />
+              <div class="item-name">${item.name}</div>
+            </div>
+          </div>
+          <div class="slot-label" id="label-${index}">${item.label}</div>
+        `;
+        lootRow.appendChild(slot);
+      });
+
+      const finalSlot = document.createElement('div');
+      finalSlot.className = 'slot';
+      finalSlot.dataset.type = 'final';
+      const frameCss = chestData.final.frame.startsWith('linear-gradient') ? chestData.final.frame : `url('${chestData.final.frame}')`;
+      finalSlot.innerHTML = `
+        <div class="rarity-card" id="finalCard" style="--frame-url: ${frameCss}; --rarity-color: ${rarityColors[chestData.final.rarity]};">
+          <div class="card-face card-back">
+            <div class="mystery">?</div>
+          </div>
+          <div class="card-face card-front">
+            <div class="final-meta">
+              <div class="rarity-chip">${chestData.final.label}</div>
+              <img class="final-icon" src="${chestData.final.icon}" alt="${chestData.final.name}" />
+              <div class="final-name">${chestData.final.name}</div>
+            </div>
+          </div>
+        </div>
+        <div class="slot-label" id="label-final">???</div>
+      `;
+      lootRow.appendChild(finalSlot);
+    }
+
+    async function animateIn(element, keyframes, options) {
+      if (motionReduced || !element.animate) {
+        Object.assign(element.style, options.fill === 'forwards' ? {
+          opacity: keyframes[keyframes.length - 1].opacity ?? '',
+          transform: keyframes[keyframes.length - 1].transform ?? ''
+        } : {});
+        return delay(options.duration || 0);
+      }
+      const animation = element.animate(keyframes, options);
+      return animation.finished;
+    }
+
+    async function openChest() {
+      setStatus('Opening Chest');
+      chestButton.classList.add('opened');
+      ambientGlow.style.opacity = '1';
+      lightBurst.classList.add('open');
+      playSound('creak', { volume: 0.85 });
+      setAnnouncement('The treasure chest creaks open.');
+
+      await animateIn(chestButton, [
+        { transform: 'scale(1)' },
+        { transform: 'scale(1.035) translateY(-4px)', offset: 0.4 },
+        { transform: 'scale(1)' }
+      ], {
+        duration: 700 * timeScale,
+        easing: 'cubic-bezier(.22,.88,.32,1)',
+        fill: 'forwards'
+      });
+
+      await delay(180);
+    }
+
+    async function revealMundaneItems() {
+      for (let i = 0; i < chestData.mundane.length; i++) {
+        const item = chestData.mundane[i];
+        const card = document.getElementById(`item-${i}`);
+        const label = document.getElementById(`label-${i}`);
+
+        card.classList.add('revealed');
+        label.classList.add('show');
+        playSound('pop', { volume: 0.52, playbackRate: 1 + i * 0.04 });
+        setAnnouncement(`${item.name} revealed.`);
+        detailsText.textContent = item.description;
+        detailsSub.textContent = item.name;
+        detailsCard.classList.add('show');
+
+        await animateIn(card, [
+          { opacity: 0, transform: 'translateY(1.7rem) scale(0.86)' },
+          { opacity: 1, transform: 'translateY(-0.25rem) scale(1.03)', offset: 0.72 },
+          { opacity: 1, transform: 'translateY(0) scale(1)' }
+        ], {
+          duration: 420 * timeScale,
+          easing: 'cubic-bezier(.2,.85,.25,1.15)',
+          fill: 'forwards'
+        });
+
+        await delay(220);
+      }
+    }
+
+    async function revealFinalCard() {
+      setStatus('Rare Reveal');
+      const card = document.getElementById('finalCard');
+      const label = document.getElementById('label-final');
+
+      card.classList.add('revealed', 'glow');
+      label.classList.add('show');
+      label.textContent = chestData.final.label.toUpperCase();
+      detailsText.textContent = 'The last slot lingers. A radiant card rises face-down, its border burning with promise.';
+      detailsSub.textContent = 'Something rare is about to be revealed.';
+      setAnnouncement('A glowing legendary card appears.');
+
+      await animateIn(card, [
+        { opacity: 0, transform: 'translateY(2rem) scale(0.88)' },
+        { opacity: 1, transform: 'translateY(-0.35rem) scale(1.04)', offset: 0.78 },
+        { opacity: 1, transform: 'translateY(0) scale(1)' }
+      ], {
+        duration: 620 * timeScale,
+        easing: 'cubic-bezier(.18,.82,.22,1.14)',
+        fill: 'forwards'
+      });
+
+      await delay(motionReduced ? 180 : 1350);
+
+      card.classList.add('faceup');
+      card.classList.remove('glow');
+      headline.classList.add('show');
+      playSound('sting', { volume: 0.95 });
+      setAnnouncement(`You found ${chestData.final.name}.`);
+      setStatus('Legendary Found');
+
+      detailsText.textContent = chestData.final.description;
+      detailsSub.textContent = chestData.final.name;
+      actionRow.hidden = false;
+
+      await delay(220);
+    }
+
+    async function startSequence() {
+      if (hasStarted) return;
+      hasStarted = true;
+      chestButton.disabled = true;
+      chestButton.setAttribute('aria-disabled', 'true');
+      setStatus('Loading Audio');
+
+      try {
+        await initAudio();
+      } catch (error) {
+        console.warn('Audio init failed:', error);
+      }
+
+      await openChest();
+      await revealMundaneItems();
+      await delay(260);
+      await revealFinalCard();
+    }
+
+    takeBtn.addEventListener('click', () => {
+      detailsText.textContent = `${chestData.final.name} has been claimed. The table erupts.`;
+      detailsSub.textContent = 'Treasure secured.';
+      setAnnouncement(`${chestData.final.name} taken.`);
+      takeBtn.textContent = 'Claimed';
+      takeBtn.disabled = true;
+      setStatus('Complete');
+    });
+
+    chestButton.addEventListener('pointerdown', (event) => {
+      if (event.pointerType === 'mouse') return;
+      chestButton.style.transform = 'scale(0.985)';
+    });
+
+    chestButton.addEventListener('pointerup', () => {
+      chestButton.style.transform = '';
+    });
+
+    chestButton.addEventListener('pointercancel', () => {
+      chestButton.style.transform = '';
+    });
+
+    chestButton.addEventListener('click', startSequence, { once: true });
+
+    buildLootSlots();
+    detailsCard.classList.add('show');
+  </script>
+</body>
+</html>

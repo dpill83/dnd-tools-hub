@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>You Found A Thing</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #c9a84c;
+  --gold-light: #f0d070;
+  --gold-glow: rgba(201,168,76,0.6);
+  --common: #9aa0a6;
+  --uncommon: #4fc3f7;
+  --rare: #b39ddb;
+  --very-rare: #ff8a65;
+  --legendary: #ffd54f;
+  --legendary-glow: rgba(255,213,79,0.8);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Crimson Text', Georgia, serif;
+  background: #050300;
+  min-height: 100vh;
+  overflow: hidden;
+  cursor: default;
+  user-select: none;
+}
+
+/* Scale entire scene up 25% */
+#scale-wrap {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: scale(1.25);
+  transform-origin: center center;
+}
+
+/* ── DUNGEON BACKGROUND ── */
+#dungeon-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    url("assets/images/bg-dungeon.png") center/cover no-repeat,
+    radial-gradient(ellipse 60% 40% at 20% 50%, rgba(180,90,20,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 50%, rgba(180,90,20,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 60% at 50% 100%, rgba(100,50,10,0.4) 0%, transparent 50%),
+    radial-gradient(ellipse 80% 80% at 50% 50%, #1a0e04 0%, #050300 100%);
+}
+
+/* Stone texture overlay */
+#dungeon-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,0,0,0.03) 40px, rgba(0,0,0,0.03) 41px),
+    repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(0,0,0,0.02) 60px, rgba(0,0,0,0.02) 61px);
+  pointer-events: none;
+}
+
+/* Noise grain */
+#dungeon-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* ── TORCHES ── */
+.torch {
+  position: fixed;
+  top: 15%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+.torch-left { left: 5%; }
+.torch-right { right: 5%; }
+
+.torch-wall-bracket {
+  width: 4px;
+  height: 40px;
+  background: linear-gradient(to bottom, #8b7355, #5a4a35);
+  border-radius: 2px;
+  position: relative;
+}
+.torch-wall-bracket::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 8px;
+  background: #6b5a3e;
+  border-radius: 2px 2px 0 0;
+}
+
+.torch-head {
+  width: 10px;
+  height: 16px;
+  background: linear-gradient(to bottom, #8b6914, #5a4010);
+  border-radius: 2px 2px 4px 4px;
+  position: relative;
+  margin-top: -2px;
+}
+
+.torch-flame {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 26px;
+  animation: flicker 0.15s ease-in-out infinite alternate;
+}
+
+.torch-flame::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 26px;
+  background: radial-gradient(ellipse 50% 80% at 50% 90%, #ff6600 0%, #ff9900 40%, #ffcc00 70%, transparent 100%);
+  border-radius: 50% 50% 30% 30%;
+  filter: blur(1px);
+}
+
+.torch-flame::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 18px;
+  background: radial-gradient(ellipse 50% 80% at 50% 90%, #fff 0%, #ffff00 40%, transparent 100%);
+  border-radius: 50% 50% 30% 30%;
+}
+
+.torch-glow {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(255,140,0,0.25) 0%, transparent 70%);
+  pointer-events: none;
+  animation: glow-pulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes flicker {
+  0% { transform: translateX(-50%) scaleX(1) scaleY(1) rotate(-1deg); }
+  100% { transform: translateX(-50%) scaleX(0.88) scaleY(1.06) rotate(1deg); }
+}
+@keyframes glow-pulse {
+  0% { opacity: 0.7; transform: translateX(-50%) scale(1); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1.15); }
+}
+
+/* ── PARTICLES ── */
+#particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
+}
+.spark {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffd080, #ff6600);
+  animation: spark-float linear forwards;
+  opacity: 0;
+}
+@keyframes spark-float {
+  0% { opacity: 0; transform: translateY(0) translateX(0) scale(1); }
+  10% { opacity: 1; }
+  80% { opacity: 0.6; }
+  100% { opacity: 0; transform: translateY(-80px) translateX(var(--sx)) scale(0.2); }
+}
+
+/* ── MAIN STAGE ── */
+#stage {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1rem, 3vh, 2.5rem);
+  padding: clamp(1rem, 3vw, 3rem);
+}
+
+/* ── CHEST ── */
+#chest-wrap {
+  position: relative;
+  width: clamp(140px, 22vw, 280px);
+  height: clamp(110px, 17vw, 220px);
+  cursor: pointer;
+  flex-shrink: 0;
+  animation: chest-float 3.2s ease-in-out infinite;
+}
+#chest-wrap.lid-creak,
+#chest-wrap.lid-open {
+  animation: none;
+}
+@keyframes chest-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+
+
+/* PNG chest images */
+#chest-img-closed,
+#chest-img-partial,
+#chest-img-open {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px rgba(201,168,76,0.15));
+  transition: filter 0.4s ease, opacity 0.12s ease;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+#chest-img-partial { opacity: 0; }
+#chest-img-open    { opacity: 0; }
+#chest-wrap:hover #chest-img-closed {
+  filter: drop-shadow(0 0 30px rgba(201,168,76,0.5));
+}
+#chest-wrap.lid-creak #chest-img-closed {
+  filter: drop-shadow(0 0 20px rgba(255,140,0,0.35));
+}
+#chest-wrap.lid-open #chest-img-closed { opacity: 0; }
+#chest-wrap.lid-open #chest-img-open {
+  opacity: 1;
+  filter: drop-shadow(0 0 50px rgba(255,180,30,1)) drop-shadow(0 0 100px rgba(255,140,0,0.6));
+}
+
+/* ── FLYING ITEM ── */
+.flying-item {
+  position: fixed;
+  z-index: 25;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+  filter: drop-shadow(0 0 14px rgba(255,200,80,0.9));
+  will-change: transform, opacity;
+  transform-origin: center center;
+}
+.flying-item-label {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.35rem, 0.8vw, 0.52rem);
+  color: var(--gold-light);
+  white-space: nowrap;
+  text-shadow: 0 0 8px rgba(255,200,80,0.8);
+  letter-spacing: 0.04em;
+}
+
+/* Chest glow when open */
+#chest-glow {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 60%;
+  background: radial-gradient(ellipse, rgba(255,200,50,0.9) 0%, rgba(255,140,0,0.4) 40%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  filter: blur(4px);
+  transition: opacity 1.2s ease;
+}
+#chest-wrap.lid-creak #chest-glow { opacity: 0.25; }
+#chest-wrap.lid-open #chest-glow { opacity: 1; transition: opacity 0.5s ease; }
+
+/* Click hint */
+#chest-hint {
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.5rem, 1.2vw, 0.65rem);
+  letter-spacing: 0.2em;
+  color: rgba(201,168,76,0.5);
+  white-space: nowrap;
+  animation: hint-pulse 2s ease-in-out infinite, hint-counter-float 3.2s ease-in-out infinite;
+  transition: opacity 0.6s ease;
+}
+@keyframes hint-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.9; }
+}
+@keyframes hint-counter-float {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%       { transform: translateX(-50%) translateY(10px); }
+}
+
+/* ── ITEM SLOTS ROW ── */
+#slots-row {
+  display: flex;
+  gap: clamp(0.4rem, 1.5vw, 1rem);
+  align-items: flex-end;
+  min-height: clamp(80px, 14vw, 160px);
+}
+
+.item-slot {
+  width: clamp(56px, 9vw, 110px);
+  height: clamp(72px, 11.5vw, 140px);
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.4rem;
+  position: relative;
+  opacity: 0;
+  transform: translateY(30px) scale(0.85);
+  transition: none;
+  perspective: 600px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.item-slot.revealed {
+  animation: slot-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.item-slot.is-legendary {
+  box-shadow: 0 0 20px rgba(255,213,79,0.4), 0 0 60px rgba(255,213,79,0.15), inset 0 0 20px rgba(255,213,79,0.05);
+}
+.item-slot.is-rare {
+  box-shadow: 0 0 15px rgba(179,157,219,0.4), inset 0 0 15px rgba(179,157,219,0.05);
+}
+.item-slot.is-very-rare {
+  box-shadow: 0 0 15px rgba(255,138,101,0.4), inset 0 0 15px rgba(255,138,101,0.05);
+}
+.item-slot.is-uncommon {
+  box-shadow: 0 0 10px rgba(79,195,247,0.3);
+}
+
+@keyframes slot-pop {
+  0% { opacity: 0; transform: translateY(30px) scale(0.75); }
+  60% { transform: translateY(-6px) scale(1.06); }
+  80% { transform: translateY(2px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.slot-icon {
+  font-size: clamp(1.4rem, 3.5vw, 3rem);
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+}
+
+.slot-name {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.38rem, 0.9vw, 0.58rem);
+  color: rgba(240,208,112,0.85);
+  text-align: center;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+}
+
+.slot-value {
+  font-family: 'Crimson Text', serif;
+  font-size: clamp(0.35rem, 0.8vw, 0.52rem);
+  color: rgba(168,152,128,0.7);
+  font-style: italic;
+}
+
+/* ── MYSTERY SLOT (last card) ── */
+.item-slot.is-mystery {
+  border: none;
+  cursor: default;
+  --mystery-color: rgba(179,157,219,0.4);
+}
+
+.mystery-question {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(1.2rem, 3vw, 2.5rem);
+  color: rgba(179,157,219,0.7);
+}
+
+.item-slot.is-mystery.awaiting-click {
+  cursor: pointer;
+}
+.item-slot.is-mystery.awaiting-click:hover {
+  transform: scale(1.04);
+  transition: transform 0.2s ease;
+}
+
+/* ── CARD FLIP (legendary reveal) ── */
+#card-flip-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1rem, 3vh, 2rem);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s;
+  background: radial-gradient(ellipse 80% 80% at 50% 50%, rgba(5,3,0,0.7) 0%, rgba(5,3,0,0.95) 100%);
+}
+#card-flip-wrap.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Light rays */
+#light-rays {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+#light-rays.burst {
+  animation: rays-burst 1.2s ease-out forwards;
+}
+@keyframes rays-burst {
+  0% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+  20% { opacity: 1; }
+  60% { opacity: 0.6; transform: scale(1.5) rotate(15deg); }
+  100% { opacity: 0; transform: scale(2) rotate(30deg); }
+}
+
+.ray {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50vmax;
+  height: 3px;
+  transform-origin: left center;
+  background: linear-gradient(to right, rgba(255,213,79,0.6), transparent);
+}
+
+/* The card itself — same 1024×1536 layout as #card-modal */
+#flip-card-scene {
+  perspective: 1000px;
+  height: min(65vh, 1536px);
+  width: auto;
+  aspect-ratio: 1024 / 1536;
+  max-width: min(90vw, 1024px);
+}
+
+#flip-card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+#flip-card.flipped { transform: rotateY(180deg); }
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 22% 13% 26%;
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-sizing: border-box;
+}
+
+/* Card back — frame + dark fill set from JS by rarity */
+.card-back {
+  background-image: linear-gradient(135deg, #1a0830 0%, #0d0520 100%);
+  border: 2px solid var(--rare);
+  box-shadow: 0 0 30px rgba(179,157,219,0.5), 0 0 80px rgba(179,157,219,0.2), inset 0 0 30px rgba(179,157,219,0.1);
+  animation: card-back-pulse 1s ease-in-out infinite alternate;
+  background-size: 100% 100%;
+}
+@keyframes card-back-pulse {
+  0% { box-shadow: 0 0 30px rgba(179,157,219,0.5), 0 0 80px rgba(179,157,219,0.2); }
+  100% { box-shadow: 0 0 50px rgba(179,157,219,0.8), 0 0 120px rgba(179,157,219,0.35), 0 0 200px rgba(179,157,219,0.1); }
+}
+
+.card-back-symbol {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  color: rgba(179,157,219,0.4);
+  animation: symbol-spin 8s linear infinite;
+}
+@keyframes symbol-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.card-back-label {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.55rem, 1.4vw, 0.75rem);
+  letter-spacing: 0.32em;
+  color: rgba(179,157,219,0.5);
+  margin-top: 0.5rem;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+/* Card front — frame + dark fill set from JS; layout matches modal */
+.card-front {
+  transform: rotateY(180deg);
+  background-image: linear-gradient(160deg, #1c1200 0%, #0d0900 100%);
+  border: 2px solid var(--legendary);
+  box-shadow: 0 0 40px rgba(255,213,79,0.6), 0 0 100px rgba(255,213,79,0.3), inset 0 0 40px rgba(255,213,79,0.08);
+  background-size: 100% 100%;
+}
+
+.card-rarity-badge {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.55rem, 1.4vw, 0.75rem);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  opacity: 0.75;
+  flex-shrink: 0;
+}
+
+.card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-size: clamp(3rem, 9vw, 5rem);
+  margin: 0.4rem 0 0.7rem;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.8));
+  flex-shrink: 0;
+  animation: card-icon-float 3s ease-in-out infinite alternate;
+}
+.card-icon img {
+  width: clamp(3rem, 9vw, 5rem);
+  height: clamp(3rem, 9vw, 5rem);
+  object-fit: contain;
+  display: block;
+}
+.card-icon span {
+  display: block;
+  line-height: 1;
+}
+@keyframes card-icon-float {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-6px); }
+}
+
+.card-divider {
+  width: 70%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255,213,79,0.5), transparent);
+  margin: 0.3rem auto 0.5rem;
+  flex-shrink: 0;
+}
+
+.card-desc-divider {
+  width: 55%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255,213,79,0.3), transparent);
+  margin: 0 auto 0.5rem;
+  flex-shrink: 0;
+}
+
+.card-item-name {
+  font-family: 'Cinzel Decorative', serif;
+  font-weight: 700;
+  font-size: clamp(1rem, 2.8vw, 1.5rem);
+  color: var(--gold-light);
+  text-align: center;
+  width: 100%;
+  line-height: 1.2;
+  margin-bottom: 0.25rem;
+  text-shadow: 0 0 18px rgba(255,213,79,0.4);
+  flex-shrink: 0;
+}
+
+.card-item-value {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.55rem, 1.2vw, 0.7rem);
+  color: rgba(255,213,79,0.7);
+  letter-spacing: 0.1em;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  flex-shrink: 0;
+}
+
+.card-item-desc {
+  font-family: 'Crimson Text', serif;
+  font-size: clamp(0.6rem, 1.3vw, 0.78rem);
+  font-style: italic;
+  color: rgba(200,180,140,0.9);
+  text-align: center;
+  width: 100%;
+  line-height: 1.5;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.card-item-req {
+  font-family: 'Crimson Text', serif;
+  font-size: clamp(0.5rem, 1vw, 0.6rem);
+  font-style: italic;
+  color: rgba(179,157,219,0.85);
+  text-align: center;
+  width: 100%;
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(179,157,219,0.2);
+  flex-shrink: 0;
+}
+
+/* ── YOU FOUND A THING ── */
+#found-text {
+  font-family: 'Cinzel Decorative', serif;
+  font-weight: 900;
+  font-size: clamp(1.2rem, 4vw, 3rem);
+  color: var(--gold-light);
+  text-align: center;
+  letter-spacing: 0.05em;
+  text-shadow:
+    0 0 20px rgba(255,213,79,0.8),
+    0 0 60px rgba(255,180,30,0.4),
+    0 4px 8px rgba(0,0,0,0.8);
+  opacity: 0;
+  transform: scale(0.7) translateY(20px);
+}
+#found-text.appear {
+  animation: found-appear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards;
+}
+@keyframes found-appear {
+  0% { opacity: 0; transform: scale(0.7) translateY(20px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── RESET BUTTON ── */
+#reset-btn {
+  position: fixed;
+  bottom: clamp(1rem, 3vh, 2rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.55rem, 1.2vw, 0.72rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(201,168,76,0.6);
+  background: transparent;
+  border: 1px solid rgba(201,168,76,0.2);
+  padding: 0.5rem 1.4rem;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.3s;
+  opacity: 0;
+  pointer-events: none;
+}
+#reset-btn.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+#reset-btn:hover {
+  color: var(--gold-light);
+  border-color: rgba(201,168,76,0.5);
+  background: rgba(201,168,76,0.06);
+}
+
+/* ── SCREEN FLASH ── */
+#flash {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: radial-gradient(ellipse at center, rgba(255,220,80,0.95) 0%, rgba(255,140,0,0.7) 40%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+}
+#flash.bang {
+  animation: flash-bang 0.6s ease-out forwards;
+}
+@keyframes flash-bang {
+  0% { opacity: 0; }
+  8% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+
+/* ── DIM OVERLAY ── */
+#dim-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  background: rgba(0,0,0,0);
+  pointer-events: none;
+  transition: background 1.2s ease;
+}
+#dim-overlay.active {
+  background: rgba(0,0,0,0.65);
+}
+
+/* ── MYSTERY SLOT GLOW (activated after all items land) ── */
+.item-slot.is-mystery.activated {
+  box-shadow: 0 0 30px rgba(179,157,219,0.6), 0 0 80px rgba(179,157,219,0.25), inset 0 0 20px rgba(179,157,219,0.1);
+  animation: mystery-slot-throb 1s ease-in-out infinite alternate;
+}
+@keyframes mystery-slot-throb {
+  0%  { box-shadow: 0 0 20px rgba(179,157,219,0.4), 0 0 50px rgba(179,157,219,0.15); transform: scale(1); }
+  100%{ box-shadow: 0 0 50px rgba(179,157,219,0.8), 0 0 120px rgba(179,157,219,0.35), 0 0 200px rgba(179,157,219,0.1); transform: scale(1.04); }
+}
+
+/* ── SCREEN SHAKE ── */
+@keyframes screen-shake {
+  0%   { transform: translate(0,0) rotate(0deg); }
+  10%  { transform: translate(-4px, -2px) rotate(-0.3deg); }
+  20%  { transform: translate(4px, 2px) rotate(0.3deg); }
+  30%  { transform: translate(-3px, 3px) rotate(-0.2deg); }
+  40%  { transform: translate(3px, -3px) rotate(0.2deg); }
+  50%  { transform: translate(-2px, 2px) rotate(-0.1deg); }
+  60%  { transform: translate(2px, -1px) rotate(0.1deg); }
+  70%  { transform: translate(-1px, 1px) rotate(0deg); }
+  80%  { transform: translate(1px, 0px) rotate(0deg); }
+  100% { transform: translate(0,0) rotate(0deg); }
+}
+body.shaking #stage { animation: screen-shake 0.5s ease-out forwards; }
+
+/* ── HOVER ITEM ANIMATIONS ── */
+@keyframes hover-float {
+  0%   { transform: translateY(0px) rotate(-1deg); }
+  100% { transform: translateY(-14px) rotate(1deg); }
+}
+@keyframes hover-sway {
+  0%   { transform: translate(-50%, -50%) scale(1.15) translateY(0px) rotate(-1.5deg); }
+  25%  { transform: translate(-50%, -50%) scale(1.15) translateY(-10px) rotate(0.5deg); }
+  50%  { transform: translate(-50%, -50%) scale(1.15) translateY(-18px) rotate(1.5deg); }
+  75%  { transform: translate(-50%, -50%) scale(1.15) translateY(-8px) rotate(-0.5deg); }
+  100% { transform: translate(-50%, -50%) scale(1.15) translateY(0px) rotate(-1.5deg); }
+}
+
+/* ── CARD INNER (3D flip) ── */
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.card-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-back-face,
+.card-front-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.4rem;
+  background-size: 100% 100%, cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 4px;
+}
+
+.card-front-face {
+  transform: rotateY(180deg);
+}
+
+.card-back-face .back-question {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(1.2rem, 2.5vw, 2rem);
+  opacity: 0.5;
+  line-height: 1;
+}
+
+.card-detail-extra {
+  display: none;
+  width: 100%;
+  margin-top: 0.3rem;
+  padding-top: 0.3rem;
+  border-top: 1px solid rgba(255,213,79,0.2);
+  font-family: 'Crimson Text', serif;
+  font-size: clamp(0.38rem, 0.9vw, 0.6rem);
+  font-style: italic;
+  color: rgba(200,180,140,0.85);
+  text-align: center;
+  line-height: 1.45;
+}
+/* ── REVEAL IT BUTTON (mystery ceremony) ── */
+#reveal-it-btn {
+  position: fixed;
+  bottom: clamp(18%, 22vh, 28%);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 32;
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.6rem, 1.4vw, 0.9rem);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  background: rgba(201,168,76,0.15);
+  border: 1px solid rgba(201,168,76,0.5);
+  padding: 0.6rem 1.6rem;
+  cursor: pointer;
+  border-radius: 2px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.2s ease;
+}
+#reveal-it-btn.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+#reveal-it-btn:hover {
+  background: rgba(201,168,76,0.25);
+  border-color: rgba(201,168,76,0.7);
+  transform: translateX(-50%) scale(1.05);
+}
+
+/* ── CARD MODAL (backdrop + panel) ── */
+#zoom-dim {
+  position: fixed;
+  inset: 0;
+  z-index: 34;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(0,0,0,0);
+  pointer-events: none;
+}
+#zoom-dim.active {
+  background: rgba(0,0,0,0.65);
+  pointer-events: auto;
+}
+
+#card-modal {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: min(65vh, 1536px);
+  width: auto;
+  aspect-ratio: 1024 / 1536;
+  max-width: min(90vw, 1024px);
+  overflow: hidden;
+  border-radius: 8px;
+  border: 2px solid rgba(255,213,79,0.4);
+  /* Push content down past demon-head header (~22%), in from sides (~13%), clear footer (~26%) */
+  padding: 22% 13% 26%;
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  cursor: pointer;
+  box-sizing: border-box;
+  position: relative;
+}
+#zoom-dim.active #card-modal {
+  display: flex;
+}
+
+.card-modal-rarity {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.55rem, 1.4vw, 0.75rem);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  opacity: 0.75;
+  flex-shrink: 0;
+}
+
+.card-modal-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-size: clamp(3rem, 9vw, 5rem);
+  margin: 0.4rem 0 0.7rem;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.8));
+  flex-shrink: 0;
+}
+.card-modal-icon img {
+  width: clamp(3rem, 9vw, 5rem);
+  height: clamp(3rem, 9vw, 5rem);
+  object-fit: contain;
+  display: block;
+}
+.card-modal-icon span {
+  display: block;
+  line-height: 1;
+}
+
+.card-modal-divider {
+  width: 70%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255,213,79,0.5), transparent);
+  margin: 0.3rem auto 0.5rem;
+  flex-shrink: 0;
+}
+
+.card-modal-name {
+  font-family: 'Cinzel Decorative', serif;
+  font-weight: 700;
+  font-size: clamp(1rem, 2.8vw, 1.5rem);
+  color: var(--gold-light);
+  text-align: center;
+  width: 100%;
+  line-height: 1.2;
+  margin-bottom: 0.25rem;
+  text-shadow: 0 0 18px rgba(255,213,79,0.4);
+  flex-shrink: 0;
+}
+
+.card-modal-value {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.55rem, 1.2vw, 0.7rem);
+  color: rgba(255,213,79,0.7);
+  letter-spacing: 0.1em;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  flex-shrink: 0;
+}
+
+.card-modal-desc-divider {
+  width: 55%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255,213,79,0.3), transparent);
+  margin: 0 auto 0.5rem;
+  flex-shrink: 0;
+}
+
+.card-modal-desc {
+  font-family: 'Crimson Text', serif;
+  font-size: clamp(0.6rem, 1.3vw, 0.78rem);
+  font-style: italic;
+  color: rgba(200,180,140,0.9);
+  text-align: center;
+  width: 100%;
+  line-height: 1.5;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.card-modal-req {
+  font-family: 'Crimson Text', serif;
+  font-size: clamp(0.5rem, 1vw, 0.6rem);
+  font-style: italic;
+  color: rgba(179,157,219,0.85);
+  text-align: center;
+  width: 100%;
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(179,157,219,0.2);
+  flex-shrink: 0;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 480px) {
+  .torch-left { left: 1%; }
+  .torch-right { right: 1%; }
+  .torch-glow { width: 80px; height: 80px; }
+}
+@media (min-width: 1200px) {
+  .torch-left { left: 8%; }
+  .torch-right { right: 8%; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+<div id="scale-wrap">
+<!-- Atmospheric BG -->
+<div id="dungeon-bg"></div>
+
+<!-- Torches -->
+<div class="torch torch-left">
+  <div class="torch-glow"></div>
+  <div class="torch-wall-bracket"></div>
+  <div class="torch-head">
+    <div class="torch-flame"></div>
+  </div>
+</div>
+<div class="torch torch-right">
+  <div class="torch-glow"></div>
+  <div class="torch-wall-bracket"></div>
+  <div class="torch-head">
+    <div class="torch-flame"></div>
+  </div>
+</div>
+
+<!-- Particles -->
+<div id="particles"></div>
+
+<!-- Screen flash -->
+<div id="flash"></div>
+
+<!-- Dim overlay -->
+<div id="dim-overlay"></div>
+
+<!-- Card detail modal -->
+<div id="zoom-dim">
+  <div id="card-modal"></div>
+</div>
+
+<!-- Reveal It (mystery ceremony) -->
+<button type="button" id="reveal-it-btn">Reveal It</button>
+
+<!-- Main Stage -->
+<div id="stage">
+
+  <!-- Chest -->
+  <div id="chest-wrap">
+    <div id="chest-glow"></div>
+    <img id="chest-img-closed"  src="assets/images/chest-closed.png"  alt="Closed chest"  draggable="false"/>
+    <img id="chest-img-partial" src="assets/images/chest-partial.png" alt="Opening chest" draggable="false"/>
+    <img id="chest-img-open"    src="assets/images/chest-open.png"    alt="Open chest"    draggable="false"/>
+    <div id="chest-hint">✦ CLICK TO OPEN ✦</div>
+  </div>
+
+  <!-- Item slots -->
+  <div id="slots-row"></div>
+
+</div>
+
+<!-- Card flip overlay -->
+<div id="card-flip-wrap">
+  <!-- Light rays SVG -->
+  <svg id="light-rays" viewBox="0 0 100 100" style="position:absolute;inset:0;width:100%;height:100%">
+    <g transform="translate(50,50)">
+      <rect class="ray" x="0" y="-1.5" width="80" height="3" transform="rotate(0)" style="transform-origin:0 0"/>
+      <rect class="ray" x="0" y="-1.5" width="80" height="3" transform="rotate(22.5)" style="transform-origin:0 0"/>
+      <rect class="ray" x="0" y="-1.5" width="80" height="3" transform="rotate(45)" style="transform-origin:0 0"/>
+      <rect class="ray" x="0" y="-1.5" width="80" height="3" transform="rotate(67.5)" style="transform-origin:0 0"/>
+      <rect class="ray" x="0" y="-1.5" width="80" height="3" transform="rotate(90)" style="transform-origin:0 0"/>
+      <rect class="ray" x="0" y="-1.5" width="80" height="3" transform="rotate(112.5)" style="transform-origin:0 0"/>
+      <rect class="ray" x="0" y="-1.5" width="80" height="3" transform="rotate(135)" style="transform-origin:0 0"/>
+      <rect class="ray" x="0" y="-1.5" width="80" height="3" transform="rotate(157.5)" style="transform-origin:0 0"/>
+      <rect class="ray" x="0" y="-1.5" width="80" height="3" transform="rotate(180)" style="transform-origin:0 0"/>
+      <rect class="ray" x="0" y="-1.5" width="80" height="3" transform="rotate(202.5)" style="transform-origin:0 0"/>
+      <rect class="ray" x="0" y="-1.5" width="80" height="3" transform="rotate(225)" style="transform-origin:0 0"/>
+      <rect class="ray" x="0" y="-1.5" width="80" height="3" transform="rotate(247.5)" style="transform-origin:0 0"/>
+      <rect class="ray" x="0" y="-1.5" width="80" height="3" transform="rotate(270)" style="transform-origin:0 0"/>
+      <rect class="ray" x="0" y="-1.5" width="80" height="3" transform="rotate(292.5)" style="transform-origin:0 0"/>
+      <rect class="ray" x="0" y="-1.5" width="80" height="3" transform="rotate(315)" style="transform-origin:0 0"/>
+      <rect class="ray" x="0" y="-1.5" width="80" height="3" transform="rotate(337.5)" style="transform-origin:0 0"/>
+    </g>
+  </svg>
+
+  <div id="flip-card-scene">
+    <div id="flip-card">
+      <!-- Back -->
+      <div class="card-face card-back">
+        <div class="card-back-symbol">✦</div>
+        <div class="card-back-label">Rare...</div>
+      </div>
+      <!-- Front (legendary item) -->
+      <div class="card-face card-front">
+        <div class="card-rarity-badge">Legendary</div>
+        <div class="card-icon">🗡️</div>
+        <div class="card-divider"></div>
+        <div class="card-item-name">Cloak of Elvenkind</div>
+        <div class="card-item-value">— gp</div>
+        <div class="card-desc-divider"></div>
+        <div class="card-item-desc">Once per long rest:<br>Turn invisible</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="found-text">YOU FOUND A THING!</div>
+</div>
+
+<!-- Reset -->
+<button id="reset-btn">✦ Open Another ✦</button>
+</div><!-- #scale-wrap -->
+
+<script>
+(function() {
+
+  // ── LOOT TABLE ──
+  let LOOT = null; // loaded from loot-table.json or embedded when opened via file://
+
+  function getEmbeddedLoot() {
+    const items = [
+      {id:0,name:'42 Gold',rarity:'Common',tier:1,category:'Treasure'},
+      {id:1,name:'Healing Potion',rarity:'Common',tier:1,category:'Potion'},
+      {id:2,name:'Shortsword',rarity:'Common',tier:1,category:'Weapon'},
+      {id:3,name:'Cloak of Elvenkind',rarity:'Legendary',tier:5,category:'Wondrous Item',description:'While wearing this cloak, Stealth checks made to hide are made with advantage.'},
+    ];
+    const by_tier = { '0': [0], '1': [0,1,2], '5': [3] };
+    items.forEach((item, i) => { item._idx = i; });
+    return { items, by_tier };
+  }
+
+  // Category → asset image path (falls back to emoji)
+  const CAT_IMG = {
+    'Adventuring Gear': null,
+    'Armor':            'assets/images/item-shield.png',
+    'Book':             'assets/images/item-scroll.png',
+    'Potion':           'assets/images/item-potion.png',
+    'Quest Hook':       'assets/images/item-scroll.png',
+    'Ring':             null,
+    'Treasure':         'assets/images/item-gold.png',
+    'Weapon':           'assets/images/item-sword.png',
+    'Wondrous Item':    null,
+  };
+  const CAT_EMOJI = {
+    'Adventuring Gear': '🎒',
+    'Armor':            '🛡️',
+    'Book':             '📖',
+    'Potion':           '🧪',
+    'Quest Hook':       '📜',
+    'Ring':             '💍',
+    'Treasure':         '💎',
+    'Weapon':           '⚔️',
+    'Wondrous Item':    '✨',
+  };
+
+  // Rarity → CSS class, color, glow, and frame image for card
+  const FRAMES = 'assets/images/';
+  const RARITY_META = {
+    'Unknown':   { cls: 'is-common',    color: '#6b7280', glow: 'rgba(107,114,128,0.5)', frame: FRAMES + 'frame-0-unknown.png' },
+    'Mundane':   { cls: 'is-common',    color: '#9aa0a6', glow: 'rgba(154,160,166,0.5)', frame: FRAMES + 'frame-1-mundane.png' },
+    'Common':    { cls: 'is-common',    color: '#9aa0a6', glow: 'rgba(154,160,166,0.5)', frame: FRAMES + 'frame-2-common.png' },
+    'Uncommon':  { cls: 'is-uncommon',  color: '#4fc3f7', glow: 'rgba(79,195,247,0.5)',  frame: FRAMES + 'frame-3-uncommon.png' },
+    'Rare':      { cls: 'is-rare',      color: '#b39ddb', glow: 'rgba(179,157,219,0.6)', frame: FRAMES + 'frame-4-rare.png' },
+    'Very Rare': { cls: 'is-very-rare', color: '#ff8a65', glow: 'rgba(255,138,101,0.6)', frame: FRAMES + 'frame-5-very-rare.png' },
+    'Legendary': { cls: 'is-legendary', color: '#ffd54f', glow: 'rgba(255,213,79,0.8)',  frame: FRAMES + 'frame-6-legendary.png' },
+  };
+
+  // Pick a random item from a given tier (or array of tiers)
+  function pickFromTier(tiers) {
+    if (!LOOT) return null;
+    const tierArr = Array.isArray(tiers) ? tiers : [tiers];
+    let pool = [];
+    tierArr.forEach(t => {
+      const ids = LOOT.by_tier[String(t)] || [];
+      ids.forEach(id => pool.push(LOOT.items[id]));
+    });
+    if (!pool.length) return null;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  // Build a chest roll: 3-4 mundane/common items + 1 reveal item at a given tier
+  function rollChest(revealTier) {
+    const mundaneCount = 3 + Math.floor(Math.random() * 2); // 3 or 4
+    const mundane = [];
+    for (let i = 0; i < mundaneCount; i++) {
+      const item = pickFromTier([0, 1]); // Mundane + Common
+      if (item) mundane.push(item);
+    }
+    // Reveal item: pick from revealTier, fall back up if empty
+    let reveal = null;
+    for (let t = revealTier; t >= 2 && !reveal; t--) {
+      reveal = pickFromTier(t);
+    }
+    if (!reveal) reveal = pickFromTier([2,3,4,5]);
+    return { mundane, reveal };
+  }
+
+  // Current chest roll
+  let currentRoll = null;
+
+  // ── AUDIO ──
+  let audioCtx = null;
+
+  function getAudioCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  function playCreak() {
+    try {
+      const ctx = getAudioCtx();
+      const t = ctx.currentTime;
+      // Low rumble + creak
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      const gain2 = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+
+      filter.type = 'lowpass';
+      filter.frequency.value = 600;
+
+      osc1.type = 'sawtooth';
+      osc1.frequency.setValueAtTime(80, t);
+      osc1.frequency.linearRampToValueAtTime(55, t + 0.6);
+      gain1.gain.setValueAtTime(0, t);
+      gain1.gain.linearRampToValueAtTime(0.18, t + 0.05);
+      gain1.gain.linearRampToValueAtTime(0, t + 0.7);
+
+      osc2.type = 'sawtooth';
+      osc2.frequency.setValueAtTime(220, t + 0.1);
+      osc2.frequency.linearRampToValueAtTime(140, t + 0.5);
+      gain2.gain.setValueAtTime(0, t + 0.1);
+      gain2.gain.linearRampToValueAtTime(0.08, t + 0.2);
+      gain2.gain.linearRampToValueAtTime(0, t + 0.6);
+
+      osc1.connect(gain1); gain1.connect(filter);
+      osc2.connect(gain2); gain2.connect(filter);
+      filter.connect(ctx.destination);
+
+      osc1.start(t); osc1.stop(t + 0.8);
+      osc2.start(t + 0.1); osc2.stop(t + 0.7);
+    } catch(e) {}
+  }
+
+  function playPop(pitch) {
+    try {
+      const ctx = getAudioCtx();
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+
+      filter.type = 'bandpass';
+      filter.frequency.value = pitch || 800;
+      filter.Q.value = 0.5;
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime((pitch || 800) * 1.2, t);
+      osc.frequency.exponentialRampToValueAtTime((pitch || 800) * 0.5, t + 0.15);
+
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.22, t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+
+      osc.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+      osc.start(t); osc.stop(t + 0.2);
+    } catch(e) {}
+  }
+
+  function playFlipSound() {
+    try {
+      const ctx = getAudioCtx();
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(1200, t);
+      filter.frequency.linearRampToValueAtTime(400, t + 0.25);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(400, t);
+      osc.frequency.linearRampToValueAtTime(200, t + 0.25);
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.08, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      osc.connect(gain); gain.connect(filter); filter.connect(ctx.destination);
+      osc.start(t); osc.stop(t + 0.32);
+    } catch(e) {}
+  }
+
+  function playSting() {
+    try {
+      const ctx = getAudioCtx();
+      const t = ctx.currentTime;
+
+      // Triumphant 4-note fanfare
+      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5 E5 G5 C6
+      const times = [0, 0.12, 0.24, 0.4];
+      const durations = [0.18, 0.18, 0.18, 0.6];
+
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const gainNode = ctx.createGain();
+
+        osc.type = 'square';
+        osc2.type = 'sawtooth';
+        osc.frequency.value = freq;
+        osc2.frequency.value = freq * 1.005; // slight detune for richness
+
+        gain.gain.value = 0.3;
+        gainNode.gain.setValueAtTime(0, t + times[i]);
+        gainNode.gain.linearRampToValueAtTime(0.25, t + times[i] + 0.02);
+        gainNode.gain.linearRampToValueAtTime(0.18, t + times[i] + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, t + times[i] + durations[i]);
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 2000;
+
+        osc.connect(gain); osc2.connect(gain);
+        gain.connect(filter); filter.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        osc.start(t + times[i]); osc.stop(t + times[i] + durations[i] + 0.05);
+        osc2.start(t + times[i]); osc2.stop(t + times[i] + durations[i] + 0.05);
+      });
+
+      // Low boom underneath
+      const boom = ctx.createOscillator();
+      const boomGain = ctx.createGain();
+      boom.type = 'sine';
+      boom.frequency.setValueAtTime(80, t + 0.38);
+      boom.frequency.exponentialRampToValueAtTime(40, t + 1.2);
+      boomGain.gain.setValueAtTime(0, t + 0.38);
+      boomGain.gain.linearRampToValueAtTime(0.35, t + 0.42);
+      boomGain.gain.exponentialRampToValueAtTime(0.001, t + 1.3);
+      boom.connect(boomGain); boomGain.connect(ctx.destination);
+      boom.start(t + 0.38); boom.stop(t + 1.4);
+
+    } catch(e) {}
+  }
+
+  function playRumble() {
+    try {
+      const ctx = getAudioCtx();
+      const t = ctx.currentTime;
+      // Low building drone
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const lfo  = ctx.createOscillator();
+      const lfoGain = ctx.createGain();
+      const gain1 = ctx.createGain();
+      const gain2 = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(200, t);
+      filter.frequency.linearRampToValueAtTime(800, t + 1.8);
+
+      osc1.type = 'sawtooth';
+      osc1.frequency.setValueAtTime(40, t);
+      osc1.frequency.linearRampToValueAtTime(55, t + 1.8);
+
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(38, t);
+      osc2.frequency.linearRampToValueAtTime(52, t + 1.8);
+
+      // LFO tremolo for menace
+      lfo.type = 'sine';
+      lfo.frequency.setValueAtTime(6, t);
+      lfo.frequency.linearRampToValueAtTime(14, t + 1.8);
+      lfoGain.gain.value = 0.08;
+      lfo.connect(lfoGain);
+
+      gain1.gain.setValueAtTime(0, t);
+      gain1.gain.linearRampToValueAtTime(0.28, t + 0.4);
+      gain1.gain.linearRampToValueAtTime(0.35, t + 1.6);
+      gain1.gain.linearRampToValueAtTime(0, t + 2.1);
+
+      gain2.gain.setValueAtTime(0, t);
+      gain2.gain.linearRampToValueAtTime(0.15, t + 0.6);
+      gain2.gain.linearRampToValueAtTime(0, t + 2.0);
+
+      lfoGain.connect(osc1.frequency);
+      osc1.connect(gain1); gain1.connect(filter);
+      osc2.connect(gain2); gain2.connect(filter);
+      filter.connect(ctx.destination);
+
+      osc1.start(t); osc1.stop(t + 2.2);
+      osc2.start(t); osc2.stop(t + 2.1);
+      lfo.start(t);  lfo.stop(t + 2.2);
+    } catch(e) {}
+  }
+
+  // ── PARTICLES ──
+  function spawnSparks(count) {
+    const container = document.getElementById('particles');
+    for (let i = 0; i < count; i++) {
+      const spark = document.createElement('div');
+      spark.className = 'spark';
+      const x = 30 + Math.random() * 40;
+      const startY = 40 + Math.random() * 20;
+      const drift = (Math.random() - 0.5) * 60;
+      const dur = 0.8 + Math.random() * 1.2;
+      const delay = Math.random() * 0.4;
+      spark.style.cssText = `left:${x}%;top:${startY}%;--sx:${drift}px;animation-duration:${dur}s;animation-delay:${delay}s`;
+      container.appendChild(spark);
+      setTimeout(() => spark.remove(), (dur + delay) * 1000 + 100);
+    }
+  }
+
+  // ── STATE ──
+  let state = 'idle';
+
+  const chestWrap  = document.getElementById('chest-wrap');
+  const chestHint  = document.getElementById('chest-hint');
+  const slotsRow   = document.getElementById('slots-row');
+  const cardWrap   = document.getElementById('card-flip-wrap');
+  const flipCard   = document.getElementById('flip-card');
+  const cardFront  = flipCard.querySelector('.card-front');
+  const cardBack   = flipCard.querySelector('.card-back');
+  const foundText  = document.getElementById('found-text');
+  const lightRays  = document.getElementById('light-rays');
+  const flashEl    = document.getElementById('flash');
+  const resetBtn   = document.getElementById('reset-btn');
+  const dimOverlay = document.getElementById('dim-overlay');
+  const zoomDim    = document.getElementById('zoom-dim');
+  const revealItBtn = document.getElementById('reveal-it-btn');
+
+  const cardModal = document.getElementById('card-modal');
+
+  function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function itemIconHTML(item, size) {
+    if (!item) return '<span style="font-size:2rem">📦</span>';
+    const imgPath = CAT_IMG[item.category];
+    const sz = size || 'clamp(2.8rem, 6vw, 5rem)';
+    if (imgPath) {
+      return `<img src="${imgPath}" alt="${item.category}" style="width:${sz};height:${sz};object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.7));-webkit-user-drag:none;" draggable="false">`;
+    }
+    const emoji = CAT_EMOJI[item.category] || '✨';
+    return `<span style="font-size:${sz};line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.8))">${emoji}</span>`;
+  }
+
+  function itemValueStr(item) {
+    if (!item) return '';
+    if (item.value_raw) return item.value_raw;
+    if (item.value) return item.value + ' gp';
+    return '— gp';
+  }
+
+  function createSlot(item, isMystery) {
+    const slot = document.createElement('div');
+    slot.className = 'item-slot';
+    slot._item = isMystery ? (currentRoll && currentRoll.reveal) || null : item;
+    slot._isMystery = isMystery;
+
+    const rm = isMystery
+      ? (currentRoll && currentRoll.reveal ? RARITY_META[currentRoll.reveal.rarity] : RARITY_META['Rare'])
+      : (RARITY_META[item.rarity] || RARITY_META['Common']);
+
+    if (rm) {
+      if (isMystery) {
+        slot.classList.add('is-mystery');
+        slot.style.setProperty('--mystery-color', rm.color);
+      } else {
+        slot.classList.add(rm.cls);
+      }
+    }
+
+    const frameBg = rm && rm.frame ? `url('${rm.frame}'), linear-gradient(135deg, #1a0e08 0%, #0d0805 100%)` : '';
+    const backFaceStyle = frameBg ? `background-image:${frameBg};` : '';
+
+    const backQuestion = '<span class="back-question" style="color:' + (rm ? rm.color : '#9aa0a6') + '">?</span>';
+
+    let frontFaceContent = '';
+    if (!isMystery && item) {
+      const desc = item.properties || item.description || '';
+      const detailExtra = (desc || (item.requirements ? item.requirements : ''))
+        ? '<div class="card-detail-extra">' + (desc ? desc.replace(/</g, '&lt;').replace(/\n/g, '<br>') : '') + (item.requirements ? (desc ? '<br>' : '') + item.requirements : '') + '</div>'
+        : '';
+      frontFaceContent = `
+        <div class="slot-icon">${itemIconHTML(item, 'clamp(2.2rem,5vw,4rem)')}</div>
+        <div class="slot-name">${item.name}</div>
+        <div class="slot-value">${itemValueStr(item)}</div>
+        ${detailExtra}
+      `;
+    }
+
+    const frontFrameBg = rm && rm.frame ? `url('${rm.frame}'), linear-gradient(160deg, #1c1200 0%, #0d0900 100%)` : '';
+    const frontFaceStyle = frontFrameBg ? `background-image:${frontFrameBg};` : '';
+
+    slot.innerHTML = `
+      <div class="card-inner">
+        <div class="card-back-face" style="${backFaceStyle}">${backQuestion}${mysteryLabel}</div>
+        <div class="card-front-face" style="${frontFaceStyle}">${frontFaceContent}</div>
+      </div>
+    `;
+    return slot;
+  }
+
+  function flipSlotFaceUp(slot) {
+    const inner = slot.querySelector('.card-inner');
+    if (!inner || inner.classList.contains('flipped')) return;
+    playFlipSound();
+    inner.classList.add('flipped');
+  }
+
+  function openCardModal(slot) {
+    const item = slot._item;
+    if (!item) return;
+    const rm = RARITY_META[item.rarity] || RARITY_META['Common'];
+    const frameBg = rm.frame ? `url('${rm.frame}'), linear-gradient(160deg, #1c1200 0%, #0d0900 100%)` : '';
+    cardModal.style.backgroundImage = frameBg || '';
+    cardModal.style.borderColor = rm.color;
+    cardModal.style.boxShadow = `0 0 30px ${rm.glow}, 0 0 60px rgba(0,0,0,0.4)`;
+
+    const desc = (item.properties || item.description || '').replace(/</g, '&lt;').replace(/\n/g, '<br>');
+    const descBlock = desc
+      ? `<div class="card-modal-desc-divider"></div><div class="card-modal-desc">${desc}</div>`
+      : '';
+    const reqHtml = item.requirements ? `<div class="card-modal-req">${item.requirements}</div>` : '';
+
+    cardModal.innerHTML = `
+      <div class="card-modal-rarity" style="color:${rm.color}">${item.rarity}</div>
+      <div class="card-modal-icon">${itemIconHTML(item, 'clamp(3rem,9vw,5rem)')}</div>
+      <div class="card-modal-divider"></div>
+      <div class="card-modal-name">${item.name}</div>
+      <div class="card-modal-value">${itemValueStr(item)}</div>
+      ${descBlock}
+      ${reqHtml}
+    `;
+    zoomDim.classList.add('active');
+  }
+
+  function closeCardModal() {
+    zoomDim.classList.remove('active');
+    cardModal.innerHTML = '';
+  }
+
+  function buildCardFront(item) {
+    if (!item) return;
+    const rm = RARITY_META[item.rarity] || RARITY_META['Rare'];
+    const frameUrl = rm.frame ? `url('${rm.frame}')` : '';
+    cardFront.style.backgroundImage = frameUrl ? `${frameUrl}, linear-gradient(160deg, #1c1200 0%, #0d0900 100%)` : '';
+    cardFront.style.borderColor = rm.color;
+    cardFront.style.boxShadow = `0 0 40px ${rm.glow}, 0 0 100px ${rm.glow.replace('0.8','0.3')}, inset 0 0 40px ${rm.glow.replace('0.8','0.08')}`;
+    // Fill content
+    const desc = item.properties || item.description || '';
+    const truncDesc = desc.length > 140 ? desc.slice(0, 137) + '…' : desc;
+    const descBlock = truncDesc
+      ? `<div class="card-desc-divider"></div><div class="card-item-desc">${truncDesc.replace(/\n/g,'<br>')}</div>`
+      : '';
+    cardFront.innerHTML = `
+      <div class="card-rarity-badge" style="color:${rm.color}">${item.rarity}</div>
+      <div class="card-icon">${itemIconHTML(item, 'clamp(3rem,9vw,5rem)')}</div>
+      <div class="card-divider"></div>
+      <div class="card-item-name">${item.name}</div>
+      <div class="card-item-value">${itemValueStr(item)}</div>
+      ${descBlock}
+      ${item.requirements ? `<div class="card-item-req">${item.requirements}</div>` : ''}
+    `;
+  }
+
+  function buildCardBack(revealItem) {
+    const rm = revealItem ? (RARITY_META[revealItem.rarity] || RARITY_META['Rare']) : RARITY_META['Rare'];
+    const frameUrl = rm.frame ? `url('${rm.frame}')` : '';
+    cardBack.style.backgroundImage = frameUrl ? `${frameUrl}, linear-gradient(135deg, #1a0830 0%, #0d0520 100%)` : '';
+    cardBack.style.borderColor = rm.color;
+    cardBack.style.boxShadow = `0 0 30px ${rm.glow}, 0 0 80px ${rm.glow.replace('0.8','0.3')}, inset 0 0 30px ${rm.glow.replace('0.8','0.1')}`;
+    const labelEl = cardBack.querySelector('.card-back-label');
+    if (labelEl) labelEl.textContent = (revealItem ? revealItem.rarity : 'Rare') + '…';
+  }
+
+  // Fly an item from chest position to its slot using WAAPI
+  function flyItemToSlot(item, slotEl) {
+    return new Promise(resolve => {
+      // Get positions
+      const chestRect = chestWrap.getBoundingClientRect();
+      const slotRect  = slotEl.getBoundingClientRect();
+
+      // Start: above the chest opening
+      const startX = chestRect.left + chestRect.width / 2;
+      const startY = chestRect.top + chestRect.height * 0.25;
+
+      // End: center of the slot
+      const endX = slotRect.left + slotRect.width / 2;
+      const endY = slotRect.top  + slotRect.height / 2;
+
+      // Arc peak — rises above then curves to slot
+      const peakY = Math.min(startY, endY) - window.innerHeight * 0.18;
+
+      // Create flying element — show as face-down "?" since cards land face-down
+      const flyRm = RARITY_META[item.rarity] || RARITY_META['Common'];
+      const flyer = document.createElement('div');
+      flyer.className = 'flying-item';
+      flyer.style.filter = `drop-shadow(0 0 14px ${flyRm.glow || 'rgba(154,160,166,0.6)'})`;
+      flyer.innerHTML = `<span style="font-family:'Cinzel Decorative',serif;font-size:clamp(2rem,4.5vw,3.5rem);color:${flyRm.color};opacity:0.85">?</span>`;
+      flyer.style.left = startX + 'px';
+      flyer.style.top  = startY + 'px';
+      flyer.style.transform = 'translate(-50%, -50%) scale(1.3)';
+      document.body.appendChild(flyer);
+
+      // Duration
+      const dur = 680;
+      const steps = 60;
+      let frame = 0;
+
+      const tick = () => {
+        frame++;
+        const t = frame / steps;
+        const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t; // ease in-out quad
+
+        // Quadratic bezier arc
+        const bx = startX + (endX - startX) * t;
+        // Y arc: goes up to peak then down to end
+        const by = (1-t)*(1-t)*startY + 2*(1-t)*t*peakY + t*t*endY;
+
+        // Scale: big at start, normal at end
+        const scale = 1.3 - 0.35 * ease;
+        // Slight rotation for feel
+        const rot = Math.sin(t * Math.PI) * 12;
+
+        flyer.style.left = bx + 'px';
+        flyer.style.top  = by + 'px';
+        flyer.style.transform = `translate(-50%, -50%) scale(${scale}) rotate(${rot}deg)`;
+        flyer.style.opacity = t > 0.85 ? (1 - (t - 0.85) / 0.15).toString() : '1';
+
+        if (frame < steps) {
+          requestAnimationFrame(tick);
+        } else {
+          flyer.remove();
+          resolve();
+        }
+      };
+      requestAnimationFrame(tick);
+    });
+  }
+
+  async function runReveal() {
+    if (state !== 'idle') return;
+    if (!LOOT) {
+      chestHint.textContent = '⟳ Loading…';
+      const isFileProtocol = window.location.protocol === 'file:';
+      if (isFileProtocol) {
+        // Avoid CORS when opening from file:// — use fallback so no fetch is attempted
+        LOOT = getEmbeddedLoot();
+        chestHint.textContent = '✦ CLICK TO OPEN ✦';
+      } else {
+        try {
+          const res = await fetch('loot-table.json');
+          if (!res.ok) throw new Error(res.statusText);
+          LOOT = await res.json();
+          const indexed = {};
+          LOOT.items.forEach((item, i) => { item._idx = i; indexed[item.id] = i; });
+          Object.keys(LOOT.by_tier).forEach(t => {
+            LOOT.by_tier[t] = LOOT.by_tier[t].map(id => indexed[id]);
+          });
+          chestHint.textContent = '✦ CLICK TO OPEN ✦';
+        } catch(e) {
+          chestHint.textContent = '✦ CLICK TO OPEN ✦';
+          console.warn('Could not load loot-table.json, using fallback');
+          LOOT = getEmbeddedLoot();
+        }
+      }
+    }
+
+    // Roll this chest: 4 mundane + 1 reveal at tier 3-5
+    const revealTier = 3 + Math.floor(Math.random() * 3); // 3, 4, or 5
+    currentRoll = rollChest(revealTier);
+
+    state = 'opening';
+
+    getAudioCtx();
+
+    // Hide hint — fade out first, then stop the pulse animation once invisible
+    chestHint.style.opacity = '0';
+    chestWrap.style.cursor = 'default';
+    setTimeout(() => { chestHint.style.animation = 'none'; }, 650);
+
+    const imgClosed  = document.getElementById('chest-img-closed');
+    const imgPartial = document.getElementById('chest-img-partial');
+    const imgOpen    = document.getElementById('chest-img-open');
+
+    // ── STAGE 1: Lid creaks open slightly ──
+    playCreak();
+    chestWrap.classList.add('lid-creak');
+    spawnSparks(6);
+
+    // Quickly show the partial-open frame
+    await wait(300);
+    if (imgClosed)  imgClosed.style.opacity  = '0';
+    if (imgPartial) imgPartial.style.opacity = '1';
+
+    // Brief hold on partial
+    await wait(250);
+
+    // ── STAGE 2: Lid flings fully open ──
+    chestWrap.classList.add('lid-open');
+    if (imgPartial) imgPartial.style.opacity = '0';
+    if (imgOpen)    imgOpen.style.opacity    = '1';
+    spawnSparks(18);
+    await wait(300);
+
+    // Brief beat — chest is open, light is pouring out, silence
+    await wait(900);
+
+    // ── STAGE 3: Items fly out one by one ──
+    const pitches = [700, 820, 940, 1060];
+    const mundaneItems = currentRoll ? currentRoll.mundane : [];
+
+    // Pre-create all slots so we know their positions
+    // Slots are invisible until the item lands
+    for (let i = 0; i < mundaneItems.length; i++) {
+      const slot = createSlot(mundaneItems[i], false);
+      slot.style.opacity = '0';
+      slot.style.transform = 'scale(0.8)';
+      slotsRow.appendChild(slot);
+    }
+
+    // Mystery slot too
+    const mysterySlot = createSlot(null, true);
+    mysterySlot.style.opacity = '0';
+    mysterySlot.style.transform = 'scale(0.8)';
+    slotsRow.appendChild(mysterySlot);
+
+    // Force layout so slots have real positions
+    slotsRow.offsetHeight;
+
+    // Now fly each item
+    const allSlots = slotsRow.querySelectorAll('.item-slot');
+
+    for (let i = 0; i < mundaneItems.length; i++) {
+      const slot = allSlots[i];
+
+      // Fly the item
+      await flyItemToSlot(mundaneItems[i], slot);
+
+      // Item lands — slot pops in (face-down; user clicks to flip)
+      playPop(pitches[i]);
+      spawnSparks(5);
+      slot.style.transition = 'opacity 0.12s ease, transform 0.35s cubic-bezier(0.34,1.56,0.64,1)';
+      slot.style.opacity = '1';
+      slot.style.transform = 'scale(1)';
+      slot.classList.add('revealed');
+
+      slot.addEventListener('click', function slotClick() {
+        const inner = slot.querySelector('.card-inner');
+        if (!inner) return;
+        if (!inner.classList.contains('flipped')) {
+          flipSlotFaceUp(slot);
+        } else {
+          openCardModal(slot);
+        }
+      });
+
+      await wait(480);
+    }
+
+    // Mystery slot flies out last — slower, more ominous
+    await wait(300);
+    const mystItem = { icon: '?', name: 'Unknown' };
+
+    // Custom fly for mystery — slower
+    await new Promise(resolve => {
+      const chestRect = chestWrap.getBoundingClientRect();
+      const slotRect  = mysterySlot.getBoundingClientRect();
+      const startX = chestRect.left + chestRect.width / 2;
+      const startY = chestRect.top + chestRect.height * 0.2;
+      const endX   = slotRect.left + slotRect.width / 2;
+      const endY   = slotRect.top  + slotRect.height / 2;
+      const peakY  = Math.min(startY, endY) - window.innerHeight * 0.22;
+
+      const flyer = document.createElement('div');
+      flyer.className = 'flying-item';
+      flyer.style.cssText = `left:${startX}px;top:${startY}px;transform:translate(-50%,-50%) scale(1.4);font-size:clamp(2rem,4.5vw,3.5rem);filter:drop-shadow(0 0 20px rgba(179,157,219,0.9))`;
+      flyer.innerHTML = `<span style="color:rgba(179,157,219,0.8);font-family:'Cinzel Decorative',serif;animation:mystery-pulse 0.4s ease-in-out infinite alternate">?</span>`;
+      document.body.appendChild(flyer);
+
+      const steps = 80; // slower
+      let frame = 0;
+      const tick = () => {
+        frame++;
+        const t = frame / steps;
+        const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+        const bx = startX + (endX - startX) * t;
+        const by = (1-t)*(1-t)*startY + 2*(1-t)*t*peakY + t*t*endY;
+        const scale = 1.4 - 0.45 * ease;
+        flyer.style.left = bx + 'px';
+        flyer.style.top  = by + 'px';
+        flyer.style.transform = `translate(-50%,-50%) scale(${scale})`;
+        flyer.style.opacity = t > 0.8 ? (1 - (t-0.8)/0.2).toString() : '1';
+        if (frame < steps) requestAnimationFrame(tick);
+        else { flyer.remove(); resolve(); }
+      };
+      requestAnimationFrame(tick);
+    });
+
+    // Mystery slot lands — higher note for the special card
+    playPop(1040);
+    spawnSparks(8);
+    mysterySlot.style.transition = 'opacity 0.12s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1)';
+    mysterySlot.style.opacity = '1';
+    mysterySlot.style.transform = 'scale(1)';
+    mysterySlot.classList.add('revealed');
+
+    state = 'revealing';
+
+    // Brief settle after mystery lands, then wait for the user to click it
+    await wait(400);
+    mysterySlot.classList.add('awaiting-click');
+    await new Promise(resolve => {
+      mysterySlot.addEventListener('click', resolve, { once: true });
+    });
+    mysterySlot.classList.remove('awaiting-click');
+
+    // ── STAGE 4: Item rises from slot and floats to center ──
+    dimOverlay.classList.add('active');
+    await wait(350);
+
+    // Get the reveal item for this chest
+    const revealItem = currentRoll ? currentRoll.reveal : null;
+    const rm = revealItem ? (RARITY_META[revealItem.rarity] || RARITY_META['Rare']) : RARITY_META['Rare'];
+
+    // Create the hovering item element
+    const hoverItem = document.createElement('div');
+    hoverItem.id = 'hover-item';
+    hoverItem.style.cssText = `
+      position: fixed;
+      z-index: 30;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.6);
+      transition: none;
+      left: 0; top: 0;
+    `;
+    const iconHTML = revealItem ? itemIconHTML(revealItem, 'clamp(5rem, 14vw, 11rem)') : `<span style="font-size:clamp(5rem,14vw,11rem);color:rgba(179,157,219,0.8);font-family:'Cinzel Decorative',serif">?</span>`;
+    const rarityColor = rm.color;
+    hoverItem.innerHTML = `
+      <div style="
+        filter: drop-shadow(0 0 30px ${rarityColor}) drop-shadow(0 0 60px ${rarityColor.replace('0.8','0.4')}) drop-shadow(0 0 2px rgba(0,0,0,1));
+        animation: hover-float 3s ease-in-out infinite alternate;
+      ">${iconHTML}</div>
+      <div style="
+        font-family: 'Cinzel', serif;
+        font-size: clamp(0.55rem, 1.3vw, 0.85rem);
+        letter-spacing: 0.22em;
+        color: ${rarityColor};
+        text-transform: uppercase;
+        text-shadow: 0 0 12px ${rarityColor};
+        opacity: 0.85;
+      ">${revealItem ? revealItem.rarity : 'Unknown'}…</div>
+    `;
+    document.body.appendChild(hoverItem);
+
+    // Start position: center of mystery slot
+    const slotRect = mysterySlot.getBoundingClientRect();
+    const fromX = slotRect.left + slotRect.width / 2;
+    const fromY = slotRect.top + slotRect.height / 2;
+
+    // End position: upper-center of screen
+    const toX = window.innerWidth / 2;
+    const toY = window.innerHeight * 0.38;
+
+    // Animate from slot to center
+    hoverItem.style.left = fromX + 'px';
+    hoverItem.style.top  = fromY + 'px';
+    hoverItem.style.opacity = '0';
+
+    await wait(20); // force paint
+
+    await new Promise(resolve => {
+      const steps = 70;
+      let frame = 0;
+      const tick = () => {
+        frame++;
+        const t = frame / steps;
+        // Ease out cubic
+        const e = 1 - Math.pow(1 - t, 3);
+        const x = fromX + (toX - fromX) * e;
+        const y = fromY + (toY - fromY) * e;
+        const scale = 0.6 + 0.55 * e; // 0.6 → 1.15
+        hoverItem.style.left = x + 'px';
+        hoverItem.style.top  = y + 'px';
+        hoverItem.style.opacity = Math.min(1, t * 4).toString();
+        hoverItem.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        if (frame < steps) requestAnimationFrame(tick);
+        else resolve();
+      };
+      requestAnimationFrame(tick);
+    });
+
+    // Slot fades away now that item has risen
+    mysterySlot.style.transition = 'opacity 0.4s ease';
+    mysterySlot.style.opacity = '0.15';
+
+    // Item is now hovering center — add the sway CSS animation
+    hoverItem.style.transition = 'none';
+    hoverItem.style.left = toX + 'px';
+    hoverItem.style.top  = toY + 'px';
+    hoverItem.style.transform = 'translate(-50%, -50%) scale(1.15)';
+    hoverItem.style.animation = 'hover-sway 4s ease-in-out infinite';
+
+    // Pulsing rarity glow on the background behind it
+    dimOverlay.style.transition = 'background 1s ease';
+    dimOverlay.style.background = `radial-gradient(ellipse 40% 50% at 50% 38%, ${rarityColor.replace('0.8','0.12')} 0%, rgba(0,0,0,0.7) 70%)`;
+
+    spawnSparks(10);
+    await wait(800);
+
+    // Show "Reveal It" button; wait for user to click before buildup
+    revealItBtn.classList.add('visible');
+    await new Promise(resolve => {
+      revealItBtn.addEventListener('click', () => {
+        revealItBtn.classList.remove('visible');
+        resolve();
+      }, { once: true });
+    });
+
+    // Item pulses before buildup
+    hoverItem.style.animation = 'none';
+    hoverItem.style.transition = 'transform 0.15s ease, opacity 0.3s ease';
+    hoverItem.style.transform = 'translate(-50%, -50%) scale(1.35)';
+    await wait(150);
+    hoverItem.style.transform = 'translate(-50%, -50%) scale(1.1)';
+
+    // ── STAGE 5: BUILDUP ──
+
+    // Screen shakes
+    document.body.classList.add('shaking');
+    await wait(500);
+    document.body.classList.remove('shaking');
+
+    // Purple light flood — hover item pulses with it
+    dimOverlay.style.transition = 'background 0.8s ease';
+    dimOverlay.style.background = 'rgba(30,0,50,0.82)';
+    spawnSparks(20);
+    await wait(400);
+
+    // Second shake — bigger
+    document.body.classList.add('shaking');
+    await wait(500);
+    document.body.classList.remove('shaking');
+    spawnSparks(25);
+
+    // Hover item zooms up and fades as card takes over
+    const hi = document.getElementById('hover-item');
+    if (hi) {
+      hi.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+      hi.style.transform = 'translate(-50%, -50%) scale(2.5)';
+      hi.style.opacity = '0';
+    }
+    await wait(300);
+
+    // Show card overlay — fades in over the dim
+    dimOverlay.style.background = 'rgba(0,0,0,0)';
+    dimOverlay.classList.remove('active');
+    cardWrap.classList.add('visible');
+    // Card back shows mystery rarity frame and label; front is built below
+    buildCardBack(currentRoll && currentRoll.reveal ? currentRoll.reveal : null);
+    await wait(900);
+
+    // Build card front from real item data
+    if (currentRoll && currentRoll.reveal) buildCardFront(currentRoll.reveal);
+
+    // Flip — slow, deliberate
+    flipCard.classList.add('flipped');
+    await wait(600);
+
+    // BANG
+    flashEl.classList.add('bang');
+    lightRays.classList.add('burst');
+    playSting();
+    spawnSparks(40);
+
+    await wait(300);
+    foundText.classList.add('appear');
+
+    state = 'done';
+    await wait(2000);
+    resetBtn.classList.add('visible');
+  }
+
+  chestWrap.addEventListener('click', runReveal);
+
+  zoomDim.addEventListener('click', () => closeCardModal());
+
+  // Reset
+  resetBtn.addEventListener('click', async () => {
+    cardWrap.style.transition = 'opacity 0.4s';
+    cardWrap.style.opacity = '0';
+    await wait(400);
+
+    cardWrap.classList.remove('visible');
+    cardWrap.style.opacity = '';
+    flipCard.classList.remove('flipped');
+    foundText.classList.remove('appear');
+    foundText.style.opacity = '0';
+    lightRays.classList.remove('burst');
+    flashEl.classList.remove('bang');
+    chestWrap.classList.remove('lid-creak', 'lid-open');
+    const imgC = document.getElementById('chest-img-closed');
+    const imgP = document.getElementById('chest-img-partial');
+    const imgO = document.getElementById('chest-img-open');
+    if (imgC) { imgC.style.opacity = '1'; imgC.style.transition = 'none'; }
+    if (imgP) { imgP.style.opacity = '0'; imgP.style.transition = 'none'; }
+    if (imgO) { imgO.style.opacity = '0'; imgO.style.transition = 'none'; }
+    requestAnimationFrame(() => {
+      if (imgC) imgC.style.transition = '';
+      if (imgP) imgP.style.transition = '';
+      if (imgO) imgO.style.transition = '';
+    });
+    chestWrap.style.cursor = 'pointer';
+    chestHint.style.animation = '';
+    chestHint.style.opacity   = '';
+    chestHint.style.transition = '';
+    revealItBtn.classList.remove('visible');
+    closeCardModal();
+    slotsRow.innerHTML = '';
+    resetBtn.classList.remove('visible');
+    dimOverlay.classList.remove('active');
+    dimOverlay.style.background = '';
+    dimOverlay.style.transition = '';
+    const oldHover = document.getElementById('hover-item');
+    if (oldHover) oldHover.remove();
+    state = 'idle';
+  });
+
+  // Ambient sparks from torches
+  setInterval(() => {
+    if (Math.random() > 0.6) spawnSparks(1);
+  }, 800);
+
+})();
+</script>
+</body>
+</html>

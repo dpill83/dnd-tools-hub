@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D&D Loot Chest</title>
+<style>
+    :root { --chest-size: clamp(280px, 65vmin, 520px); }
+    body {
+        margin:0; height:100vh; overflow:hidden; font-family:Georgia,serif; color:#f4d9a8;
+        background:#0a0503; display:flex; align-items:center; justify-content:center;
+    }
+    #dungeon-bg {
+        position:fixed; inset:0; background:url('assets/images/bg-dungeon.png') center/cover no-repeat;
+        z-index:1; filter:brightness(0.85);
+    }
+    .scene { position:relative; z-index:2; width:100%; max-width:960px; text-align:center; padding:20px; }
+    #chest-container {
+        width:var(--chest-size); height:calc(var(--chest-size)*0.82); margin:0 auto 40px;
+        position:relative; cursor:pointer;
+    }
+    #chest-container:hover { transform:scale(1.04); }
+    .chest {
+        position:absolute; inset:0; width:100%; height:100%; object-fit:contain;
+        transition:opacity .9s ease-out; filter:drop-shadow(0 25px 45px rgba(255,215,0,.45));
+    }
+    #open-chest { opacity:0; pointer-events:none; }
+    #golden-spill {
+        position:absolute; inset:0;
+        background:radial-gradient(circle at 50% 65%, rgba(255,235,59,.75) 20%, transparent 70%);
+        opacity:0; transition:opacity 1.4s; pointer-events:none;
+    }
+    #mundane-row {
+        display:flex; gap:28px; justify-content:center; flex-wrap:wrap;
+    }
+    .mundane-item {
+        width:92px; text-align:center; opacity:0;
+        transform:scale(.3) translateY(50px);
+        transition:all .5s cubic-bezier(.34,1.56,.64,1);
+    }
+    .mundane-item.show { opacity:1; transform:scale(1) translateY(0); }
+    .mundane-item img { width:78px; height:78px; object-fit:contain; }
+    #rarity-card-container {
+        perspective:1100px; width:210px; height:300px; margin:30px auto; display:none;
+    }
+    #rarity-card {
+        position:relative; width:100%; height:100%;
+        transform-style:preserve-3d; transition:transform 1.15s cubic-bezier(.25,.8,.25,1);
+    }
+    #rarity-card.flipped { transform:rotateY(180deg); }
+    .card-face {
+        position:absolute; inset:0; backface-visibility:hidden;
+        border-radius:16px; box-shadow:0 20px 50px rgba(0,0,0,.75);
+    }
+    .card-back {
+        background:linear-gradient(145deg, #1a0f0a 0%, #2d1810 50%, #1a0f0a 100%);
+        border:3px solid #b8860b;
+        display:flex; align-items:center; justify-content:center; font-size:4.5rem; color:#ffeb3b;
+        animation:glow 1.8s infinite alternate;
+    }
+    .card-front {
+        background:linear-gradient(165deg, #2d1810 0%, #4a2c1a 30%, #3d2515 70%, #2d1810 100%);
+        border:3px solid #ffd700;
+        transform:rotateY(180deg); padding:20px; display:flex; flex-direction:column;
+        align-items:center; justify-content:center; text-align:center;
+    }
+    @keyframes glow { from{box-shadow:0 0 25px #ffd700;} to{box-shadow:0 0 85px #ffeb3b;} }
+    #result-text {
+        font-size:2.8rem; font-weight:bold; text-shadow:0 0 35px #ffd700;
+        opacity:0; transition:all .8s ease; margin-top:10px;
+    }
+    #result-text.show { opacity:1; transform:scale(1.08); }
+</style>
+</head>
+<body>
+
+<div id="dungeon-bg"></div>
+
+<div class="scene">
+    <h1 style="margin-bottom:20px;font-size:2.1rem;text-shadow:0 0 25px gold;letter-spacing:3px;">THE TREASURE AWAITS...</h1>
+    
+    <div id="chest-container">
+        <img id="closed-chest" class="chest" src="assets/images/chest-closed.png" alt="Closed">
+        <img id="open-chest" class="chest" src="assets/images/chest-open.png" alt="Open">
+        <div id="golden-spill"></div>
+    </div>
+    
+    <div id="mundane-row"></div>
+    
+    <div id="rarity-card-container">
+        <div id="rarity-card">
+            <div class="card-face card-back">✨</div>
+            <div class="card-face card-front">
+                <img id="legendary-icon" src="assets/images/item-scroll.png" style="width:120px;margin-bottom:12px;" alt="">
+                <h2 id="legendary-name" style="margin:8px 0 6px;font-size:1.65rem;color:#ffd700;">Scroll of Fireball</h2>
+                <p id="legendary-desc" style="margin:0;max-width:180px;line-height:1.35;">8d6 fire damage in a 20-foot radius.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="result-text">YOU FOUND A THING!</div>
+</div>
+
+<script>
+// Web Audio (self-contained — matches research report recommendation)
+const ctx = new (window.AudioContext||window.webkitAudioContext)();
+function playCreak(){/* same synth creak as before */ const o=ctx.createOscillator(),g=ctx.createGain();o.type="sawtooth";o.frequency.value=92;o.connect(g);g.connect(ctx.destination);g.gain.value=0.45;o.start();o.frequency.exponentialRampToValueAtTime(22,ctx.currentTime+1.35);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+1.65);o.stop(ctx.currentTime+1.7);}
+function playPop(){/* same pop */ const o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=1050;o.connect(g);g.connect(ctx.destination);g.gain.value=0.35;o.start();g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.22);o.stop(ctx.currentTime+0.25);}
+function playTriumph(){/* same sting */ let t=ctx.currentTime;const notes=[820,1040,1310,1650];notes.forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=f;o.connect(g);g.connect(ctx.destination);g.gain.value=0.32;o.start(t+i*0.085);g.gain.exponentialRampToValueAtTime(0.001,t+i*0.085+0.48);o.stop(t+i*0.085+0.55);});}
+
+const closed = document.getElementById('closed-chest');
+const openC = document.getElementById('open-chest');
+const spill = document.getElementById('golden-spill');
+const mundaneRow = document.getElementById('mundane-row');
+const cardCont = document.getElementById('rarity-card-container');
+const theCard = document.getElementById('rarity-card');
+const result = document.getElementById('result-text');
+
+let opened = false;
+
+document.getElementById('chest-container').addEventListener('click', () => {
+    if(opened) return; opened = true;
+    playCreak();
+    closed.style.opacity = '0';
+    setTimeout(() => { openC.style.opacity = '1'; spill.style.opacity = '0.85'; }, 280);
+    setTimeout(revealMundane, 950);
+});
+
+function revealMundane() {
+    const items = [
+        {src:'assets/images/item-gold.png', name:'50 Gold Pieces'},
+        {src:'assets/images/item-potion.png', name:'Potion of Healing'},
+        {src:'assets/images/item-sword.png', name:'Longsword'},
+        {src:'assets/images/item-shield.png', name:'Steel Shield'}
+    ];
+    mundaneRow.innerHTML = '';
+    items.forEach((it,i) => {
+        const d = document.createElement('div');
+        d.className = 'mundane-item';
+        d.innerHTML = `<img src="${it.src}"><div style="font-size:1.05rem">${it.name}</div>`;
+        mundaneRow.appendChild(d);
+        setTimeout(() => {
+            d.classList.add('show');
+            playPop();
+            if(i===3) setTimeout(()=>{ cardCont.style.display='block'; setTimeout(flipCard,1350); },650);
+        }, i*420);
+    });
+}
+
+function flipCard() {
+    theCard.classList.add('flipped');
+    playTriumph();
+    result.classList.add('show');
+}
+
+// R key resets
+document.addEventListener('keydown', e => { if(e.key.toLowerCase()==='r') location.reload(); });
+</script>
+</body>
+</html>

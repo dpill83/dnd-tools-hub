@@ -3,6 +3,7 @@
 
     const STORAGE_KEY = 'dnd-hub-starred';
     const SORT_STORAGE_KEY = 'dnd-hub-sort';
+    // Order for "default" and for "oldest"/"newest" when DOM order is used (see buildAddOrder).
     const DEFAULT_ORDER = [
         'tools/ai-dm-prompt-builder/',
         'tools/adventure-packet-builder/',
@@ -23,6 +24,18 @@
         'tools/tetra-dnd/dnd-magic-items.html',
         'tools/tetra-dnd/dnd-statblock.html'
     ];
+
+    // Build once: order tools were added (from initial HTML). Last in list = newest.
+    function buildAddOrder(grid) {
+        if (!grid || grid._addOrder) return grid._addOrder;
+        const order = [];
+        grid.querySelectorAll('.tool-card').forEach(function (card) {
+            const href = card.getAttribute('data-tool-href') || card.getAttribute('href') || '';
+            if (href) order.push(href);
+        });
+        grid._addOrder = order;
+        return order;
+    }
 
     function getStarred() {
         try {
@@ -63,6 +76,7 @@
         const starred = getStarred();
         const sortBy = getSort();
         const cards = Array.from(grid.querySelectorAll('.tool-card'));
+        const addOrder = buildAddOrder(grid);
 
         const starredList = [];
         const unstarredList = [];
@@ -79,15 +93,22 @@
         });
 
         unstarredList.sort(function (a, b) {
-            if (sortBy === 'default' || sortBy === 'oldest') {
-                const iA = DEFAULT_ORDER.indexOf(a.getAttribute('data-tool-href') || a.getAttribute('href') || '');
-                const iB = DEFAULT_ORDER.indexOf(b.getAttribute('data-tool-href') || b.getAttribute('href') || '');
+            const hrefA = a.getAttribute('data-tool-href') || a.getAttribute('href') || '';
+            const hrefB = b.getAttribute('data-tool-href') || b.getAttribute('href') || '';
+            if (sortBy === 'default') {
+                const iA = DEFAULT_ORDER.indexOf(hrefA);
+                const iB = DEFAULT_ORDER.indexOf(hrefB);
+                return (iA < 0 ? 999 : iA) - (iB < 0 ? 999 : iB);
+            }
+            if (sortBy === 'oldest') {
+                const iA = addOrder.indexOf(hrefA);
+                const iB = addOrder.indexOf(hrefB);
                 return (iA < 0 ? 999 : iA) - (iB < 0 ? 999 : iB);
             }
             if (sortBy === 'newest') {
-                const iA = DEFAULT_ORDER.indexOf(a.getAttribute('data-tool-href') || a.getAttribute('href') || '');
-                const iB = DEFAULT_ORDER.indexOf(b.getAttribute('data-tool-href') || b.getAttribute('href') || '');
-                return (iB < 0 ? 999 : iB) - (iA < 0 ? 999 : iA);
+                const iA = addOrder.indexOf(hrefA);
+                const iB = addOrder.indexOf(hrefB);
+                return (iB < 0 ? -1 : iB) - (iA < 0 ? -1 : iA);
             }
             if (sortBy === 'name-asc' || sortBy === 'name-desc') {
                 const ta = getCardTitle(a);
