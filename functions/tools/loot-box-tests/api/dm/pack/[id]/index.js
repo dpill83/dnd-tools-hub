@@ -1,7 +1,8 @@
 import { json } from '../../../_shared/http.js';
 
 export async function onRequestGet(context) {
-  const DB = context.env.DB;
+  const DB = context.env.LOOT_CHEST_DB;
+  if (!DB) return json({ error: 'Database not configured' }, 503);
   const id = context.params.id;
   const url = new URL(context.request.url);
   const dm_key = url.searchParams.get('dm_key');

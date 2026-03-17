@@ -1,7 +1,8 @@
 import { json } from '../_shared/http.js';
 
 export async function onRequestGet(context) {
-  const DB = context.env.DB;
+  const DB = context.env.LOOT_CHEST_DB;
+  if (!DB) return json({ error: 'Database not configured' }, 503);
   const url = new URL(context.request.url);
   const dm_key = url.searchParams.get('dm_key');
   if (!dm_key || !dm_key.trim()) return json({ error: 'dm_key query is required' }, 400);

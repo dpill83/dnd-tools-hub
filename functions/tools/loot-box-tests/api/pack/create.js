@@ -2,7 +2,8 @@ import { json, getBody } from '../_shared/http.js';
 import { generateId } from '../_shared/ids.js';
 
 export async function onRequestPost(context) {
-  const DB = context.env.DB;
+  const DB = context.env.LOOT_CHEST_DB;
+  if (!DB) return json({ error: 'Database not configured' }, 503);
   const body = await getBody(context.request);
 
   if (!body || typeof body.dm_key !== 'string' || !body.dm_key.trim()) {
