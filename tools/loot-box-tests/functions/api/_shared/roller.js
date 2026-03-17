@@ -1,4 +1,4 @@
-import LOOT from './loot-table.json';
+﻿import LOOT from './loot-table.json';
 
 function pickFromTier(tiers, categories) {
   const tierSet = new Set(Array.isArray(tiers) ? tiers : [tiers]);
@@ -41,3 +41,4 @@ export function rollItems(slot_config, guaranteed_item_id) {
 
   return { mundane, reveal };
 }
+
