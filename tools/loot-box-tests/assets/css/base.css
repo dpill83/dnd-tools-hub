@@ -1,0 +1,42 @@
+:root {
+  --gold: #c9a84c;
+  --gold-light: #f0d070;
+  --gold-glow: rgba(201,168,76,0.6);
+  --common: #9aa0a6;
+  --uncommon: #4fc3f7;
+  --rare: #b39ddb;
+  --very-rare: #ff8a65;
+  --legendary: #ffd54f;
+  --legendary-glow: rgba(255,213,79,0.8);
+
+  /* z-index scale (avoids "why is this under that") */
+  --z-bg: 0;
+  --z-decor: 1;
+  --z-particles: 2;
+  --z-stage: 3;
+  --z-overlay: 8;
+  --z-flip: 10;
+  --z-ui: 20;
+  --z-fx: 50;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Crimson Text', Georgia, serif;
+  background: #050300;
+  min-height: 100vh;
+  cursor: default;
+}
+
+/* Restrict selection and overflow to the interactive scene only */
+#stage,
+#card-flip-wrap,
+#flash,
+#dim-overlay {
+  -webkit-user-select: none;
+  user-select: none;
+}
+#stage {
+  overflow: hidden;
+}

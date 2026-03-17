@@ -1,0 +1,335 @@
+/* ── DUNGEON BACKGROUND ── */
+#dungeon-bg {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-bg);
+  background:
+    url("../images/bg-dungeon.png") center/cover no-repeat,
+    radial-gradient(ellipse 60% 40% at 20% 50%, rgba(180,90,20,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 50%, rgba(180,90,20,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 60% at 50% 100%, rgba(100,50,10,0.4) 0%, transparent 50%),
+    radial-gradient(ellipse 80% 80% at 50% 50%, #1a0e04 0%, #050300 100%);
+}
+
+/* Stone texture overlay */
+#dungeon-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,0,0,0.03) 40px, rgba(0,0,0,0.03) 41px),
+    repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(0,0,0,0.02) 60px, rgba(0,0,0,0.02) 61px);
+  pointer-events: none;
+}
+
+/* Noise grain */
+#dungeon-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* ── TORCHES ── */
+.torch {
+  position: fixed;
+  top: 15%;
+  z-index: var(--z-decor);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+.torch-left { left: 5%; }
+.torch-right { right: 5%; }
+
+.torch-wall-bracket {
+  width: 4px;
+  height: 40px;
+  background: linear-gradient(to bottom, #8b7355, #5a4a35);
+  border-radius: 2px;
+  position: relative;
+}
+.torch-wall-bracket::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 8px;
+  background: #6b5a3e;
+  border-radius: 2px 2px 0 0;
+}
+
+.torch-head {
+  width: 10px;
+  height: 16px;
+  background: linear-gradient(to bottom, #8b6914, #5a4010);
+  border-radius: 2px 2px 4px 4px;
+  position: relative;
+  margin-top: -2px;
+}
+
+.torch-flame {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 26px;
+  animation: flicker 0.15s ease-in-out infinite alternate;
+}
+
+.torch-flame::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 26px;
+  background: radial-gradient(ellipse 50% 80% at 50% 90%, #ff6600 0%, #ff9900 40%, #ffcc00 70%, transparent 100%);
+  border-radius: 50% 50% 30% 30%;
+  filter: blur(1px);
+}
+
+.torch-flame::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 18px;
+  background: radial-gradient(ellipse 50% 80% at 50% 90%, #fff 0%, #ffff00 40%, transparent 100%);
+  border-radius: 50% 50% 30% 30%;
+}
+
+.torch-glow {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(255,140,0,0.25) 0%, transparent 70%);
+  pointer-events: none;
+  animation: glow-pulse 2s ease-in-out infinite alternate;
+}
+
+/* ── PARTICLES ── */
+#particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-particles);
+  overflow: hidden;
+}
+.spark {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffd080, #ff6600);
+  animation: spark-float linear forwards;
+  opacity: 0;
+}
+
+/* ── MAIN STAGE ── */
+#stage {
+  position: relative;
+  z-index: var(--z-stage);
+  width: 100%;
+  height: 100dvh;
+  gap: clamp(1rem, 3vh, 2.5rem);
+  padding: clamp(1rem, 3vw, 3rem);
+}
+
+/* ── CHEST ── */
+#chest-wrap {
+  position: relative;
+  width: clamp(200px, 32vw, 380px);
+  height: clamp(160px, 25vw, 300px);
+  cursor: pointer;
+  flex-shrink: 0;
+  animation: chest-float 3.2s ease-in-out infinite;
+}
+#chest-wrap.lid-creak,
+#chest-wrap.lid-open {
+  animation: none;
+}
+#chest-wrap.chest-shake {
+  animation: chest-shake 2.6s linear;
+}
+
+/* PNG chest images */
+#chest-img-closed,
+#chest-img-partial,
+#chest-img-open {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px rgba(201,168,76,0.15));
+  transition: filter 0.4s ease, opacity 0.12s ease;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+#chest-img-partial { opacity: 0; }
+#chest-img-open    { opacity: 0; }
+#chest-wrap:hover #chest-img-closed {
+  filter: drop-shadow(0 0 30px rgba(201,168,76,0.5));
+}
+#chest-wrap.lid-creak #chest-img-closed {
+  filter: drop-shadow(0 0 20px rgba(255,140,0,0.35));
+}
+#chest-wrap.lid-open #chest-img-closed { opacity: 0; }
+#chest-wrap.lid-open #chest-img-open {
+  opacity: 1;
+  filter: drop-shadow(0 0 40px rgba(255,180,30,0.85));
+}
+
+/* ── FLYING ITEM ── */
+.flying-item {
+  position: fixed;
+  z-index: var(--z-fx);
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+  filter: drop-shadow(0 0 14px rgba(255,200,80,0.9));
+  will-change: transform, opacity;
+  transform-origin: center center;
+}
+.flying-item-label {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.35rem, 0.8vw, 0.52rem);
+  color: var(--gold-light);
+  white-space: nowrap;
+  text-shadow: 0 0 8px rgba(255,200,80,0.8);
+  letter-spacing: 0.04em;
+}
+
+/* Chest glow when open */
+#chest-glow {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 60%;
+  background: radial-gradient(ellipse, rgba(255,200,50,0.9) 0%, rgba(255,140,0,0.4) 40%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  filter: blur(4px);
+  transition: opacity 1.2s ease;
+}
+#chest-wrap.lid-creak #chest-glow { opacity: 0.25; }
+#chest-wrap.lid-open #chest-glow { opacity: 1; transition: opacity 0.5s ease; }
+
+/* Click hint */
+#chest-hint {
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.5rem, 1.2vw, 0.65rem);
+  letter-spacing: 0.2em;
+  color: rgba(201,168,76,0.5);
+  white-space: nowrap;
+  animation: hint-pulse 2s ease-in-out infinite, hint-counter-float 3.2s ease-in-out infinite;
+  transition: opacity 0.6s ease;
+}
+
+/* ── SCREEN FLASH ── */
+#flash {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-fx);
+  background: radial-gradient(ellipse at center, rgba(255,220,80,0.95) 0%, rgba(255,140,0,0.7) 40%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── DIM OVERLAY ── */
+#dim-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background: rgba(0,0,0,0);
+  pointer-events: none;
+  transition: background 1.2s ease;
+}
+#dim-overlay.active {
+  background: rgba(0,0,0,0.65);
+}
+
+/* ── RESET BUTTON ── */
+#reset-btn {
+  position: fixed;
+  bottom: clamp(1rem, 3vh, 2rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-ui);
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.55rem, 1.2vw, 0.72rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(201,168,76,0.6);
+  background: transparent;
+  border: 1px solid rgba(201,168,76,0.2);
+  padding: 0.5rem 1.4rem;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.3s;
+  opacity: 0;
+  pointer-events: none;
+}
+#reset-btn.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+#reset-btn:hover {
+  color: var(--gold-light);
+  border-color: rgba(201,168,76,0.5);
+  background: rgba(201,168,76,0.06);
+}
+
+#loot-table-btn {
+  position: fixed;
+  bottom: clamp(0.5rem, 1.5vh, 1rem);
+  right: clamp(0.5rem, 1.5vw, 1.5rem);
+  z-index: var(--z-ui);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: rgba(201,168,76,0.6);
+  background: transparent;
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+#loot-table-btn:hover {
+  color: var(--gold-light);
+  border-color: rgba(201,168,76,0.5);
+  background: rgba(201,168,76,0.06);
+  transform: scale(1.05);
+}
+#loot-table-btn img {
+  width: 1.5rem;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}

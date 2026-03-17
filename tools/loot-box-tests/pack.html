@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>You Found A Thing</title>
+<title>Loot Chest</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/loot-card-modal.css">
 <link rel="stylesheet" href="assets/css/base.css">
@@ -11,7 +11,29 @@
 <link rel="stylesheet" href="assets/css/cards.css">
 <link rel="stylesheet" href="assets/css/effects.css">
 <link rel="stylesheet" href="assets/css/responsive.css">
-<style>#dm-link{position:fixed;bottom:clamp(0.5rem,1.5vh,1rem);right:calc(clamp(0.5rem,1.5vw,1.5rem) + 3.5rem);z-index:var(--z-ui,100);font-family:'Cinzel',serif;font-size:0.85rem;color:rgba(201,168,76,0.6);background:transparent;border:1px solid rgba(201,168,76,0.2);border-radius:4px;padding:0.4rem 0.6rem;text-decoration:none;cursor:pointer;transition:all 0.3s}#dm-link:hover{color:var(--gold-light,#f0d070);border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.06)}</style>
+<style>
+#dm-link {
+  position: fixed;
+  bottom: clamp(0.5rem, 1.5vh, 1rem);
+  right: calc(clamp(0.5rem, 1.5vw, 1.5rem) + 3.5rem);
+  z-index: var(--z-ui, 100);
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  color: rgba(201,168,76,0.6);
+  background: transparent;
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+#dm-link:hover {
+  color: var(--gold-light, #f0d070);
+  border-color: rgba(201,168,76,0.5);
+  background: rgba(201,168,76,0.06);
+}
+</style>
 </head>
 <body>
 <!-- Atmospheric BG -->
@@ -111,10 +133,10 @@
   <div id="found-text">YOU FOUND A THING!</div>
 </div>
 
-<!-- Reset -->
-<button id="reset-btn">✦ Open Another ✦</button>
+<!-- Reset button hidden on pack page (no re-open) -->
+<button id="reset-btn" style="display:none">✦ Open Another ✦</button>
 <a href="loot-table.html" id="loot-table-btn" title="Loot Table" aria-label="Loot Table"><img src="assets/images/chest-closed.png" alt=""></a>
-<a href="dm" id="dm-link" title="DM Dashboard" aria-label="DM Dashboard">DM ↗</a>
+<a href="dm" id="dm-link" title="DM Dashboard">DM ↗</a>
 
 <script src="assets/js/loot-constants.js"></script>
 <script src="assets/js/loot-display.js"></script>
@@ -123,70 +145,16 @@
 <script>
 (function() {
 
-  // ── LOOT TABLE ──
-  let LOOT = null; // loaded from loot-table.json or embedded when opened via file://
-
-  function getEmbeddedLoot() {
-    const items = [
-      {id:0,name:'42 Gold',rarity:'Common',tier:1,category:'Treasure'},
-      {id:1,name:'Healing Potion',rarity:'Common',tier:1,category:'Potion'},
-      {id:2,name:'Shortsword',rarity:'Common',tier:1,category:'Weapon'},
-      {id:3,name:'Cloak of Elvenkind',rarity:'Legendary',tier:5,category:'Wondrous Item',description:'While wearing this cloak, Stealth checks made to hide are made with advantage.'},
-    ];
-    const by_tier = { '0': [0], '1': [0,1,2], '5': [3] };
-    items.forEach((item, i) => { item._idx = i; });
-    return { items, by_tier };
-  }
-
-  // Pick a random item from a given tier (or array of tiers)
-  function pickFromTier(tiers) {
-    if (!LOOT) return null;
-    const tierArr = Array.isArray(tiers) ? tiers : [tiers];
-    let pool = [];
-    tierArr.forEach(t => {
-      const ids = LOOT.by_tier[String(t)] || [];
-      ids.forEach(id => pool.push(LOOT.items[id]));
-    });
-    if (!pool.length) return null;
-    return pool[Math.floor(Math.random() * pool.length)];
-  }
-
-  // Build a chest roll: 3-4 mundane/common items + 1 reveal item at a given tier
-  function rollChest(revealTier) {
-    const mundaneCount = 3 + Math.floor(Math.random() * 2); // 3 or 4
-    const mundane = [];
-    for (let i = 0; i < mundaneCount; i++) {
-      const item = pickFromTier([0, 1]); // Mundane + Common
-      if (item) mundane.push(item);
-    }
-    // Card before the last (last mundane slot) has 50% chance of being uncommon
-    if (mundane.length > 0 && Math.random() < 0.5) {
-      let uncommonItem = pickFromTier(2);
-      if (uncommonItem) {
-        mundane[mundane.length - 1] = uncommonItem;
-      } else {
-        const last = mundane[mundane.length - 1];
-        mundane[mundane.length - 1] = Object.assign({}, last, { rarity: 'Uncommon' });
-      }
-    }
-    // Reveal item: pick from revealTier, fall back up if empty
-    let reveal = null;
-    for (let t = revealTier; t >= 2 && !reveal; t--) {
-      reveal = pickFromTier(t);
-    }
-    if (!reveal) reveal = pickFromTier([2,3,4,5]);
-    return { mundane, reveal };
-  }
-
-  // Current chest roll
+  const API_BASE = '/tools/loot-box-tests/api';
+  let packId = null;
+  let packReady = false;
   let currentRoll = null;
-
-  // ── STATE ──
   let state = 'idle';
 
   const chestWrap  = document.getElementById('chest-wrap');
   const chestHint  = document.getElementById('chest-hint');
   const slotsRow   = document.getElementById('slots-row');
+  const stage      = document.getElementById('stage');
   const cardWrap   = document.getElementById('card-flip-wrap');
   const flipCard   = document.getElementById('flip-card');
   const cardFront  = flipCard.querySelector('.card-front');
@@ -194,14 +162,22 @@
   const foundText  = document.getElementById('found-text');
   const lightRays  = document.getElementById('light-rays');
   const flashEl    = document.getElementById('flash');
-  const resetBtn   = document.getElementById('reset-btn');
   const dimOverlay = document.getElementById('dim-overlay');
   const zoomDim    = document.getElementById('zoom-dim');
-
   const cardModal = document.getElementById('card-modal');
   const particlesContainer = document.getElementById('particles');
 
   function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function showEmptyScreen(message) {
+    chestWrap.style.display = 'none';
+    const empty = document.createElement('div');
+    empty.className = 'flex-center-col';
+    empty.style.cssText = 'text-align:center; padding:2rem;';
+    empty.innerHTML = '<img src="assets/images/chest-closed.png" alt="" style="max-width:200px; margin-bottom:1rem; opacity:0.9;">' +
+      '<p style="font-family:\'Cinzel\',serif; color:#c9a84c; font-size:clamp(1rem,4vw,1.25rem);">' + String(message).replace(/</g, '&lt;') + '</p>';
+    stage.appendChild(empty);
+  }
 
   function flipSlotFaceUp(slot) {
     const inner = slot.querySelector('.card-inner');
@@ -256,47 +232,28 @@
   }
 
   async function runReveal() {
-    if (state !== 'idle') return;
-    if (!LOOT) {
-      chestHint.textContent = '⟳ Loading…';
-      const isFileProtocol = window.location.protocol === 'file:';
-      if (isFileProtocol) {
-        // Avoid CORS when opening from file:// — use fallback so no fetch is attempted
-        LOOT = getEmbeddedLoot();
-        chestHint.textContent = '✦ CLICK TO OPEN ✦';
-      } else {
-        try {
-          const res = await fetch('loot-table.json');
-          if (!res.ok) throw new Error(res.statusText);
-          LOOT = await res.json();
-          const indexed = {};
-          LOOT.items.forEach((item, i) => { item._idx = i; indexed[item.id] = i; });
-          Object.keys(LOOT.by_tier).forEach(t => {
-            LOOT.by_tier[t] = LOOT.by_tier[t].map(id => indexed[id]);
-          });
-          chestHint.textContent = '✦ CLICK TO OPEN ✦';
-        } catch(e) {
-          chestHint.textContent = '✦ CLICK TO OPEN ✦';
-          console.warn('Could not load loot-table.json, using fallback');
-          LOOT = getEmbeddedLoot();
-        }
-      }
-    }
+    if (state !== 'idle' || !packReady || !packId) return;
 
-    // Roll this chest: 4 mundane + 1 reveal at tier 3-5
-    const revealTier = 3 + Math.floor(Math.random() * 3); // 3, 4, or 5
-    currentRoll = rollChest(revealTier);
+    const openRes = await fetch(API_BASE + '/pack/' + packId + '/open', { method: 'POST' });
+    if (openRes.status === 410) {
+      showEmptyScreen('This chest has already been claimed.');
+      return;
+    }
+    if (!openRes.ok) {
+      showEmptyScreen('Could not open chest. Try again.');
+      return;
+    }
+    const openData = await openRes.json();
+    currentRoll = openData.items;
 
     state = 'opening';
 
-    // Shake the chest on click, then continue
     chestWrap.classList.add('chest-shake');
     await wait(2600);
     chestWrap.classList.remove('chest-shake');
 
     getAudioCtx();
 
-    // Hide hint — fade out first, then stop the pulse animation once invisible
     chestHint.style.opacity = '0';
     chestWrap.style.cursor = 'default';
     setTimeout(() => { chestHint.style.animation = 'none'; }, 650);
@@ -305,35 +262,27 @@
     const imgPartial = document.getElementById('chest-img-partial');
     const imgOpen    = document.getElementById('chest-img-open');
 
-    // ── STAGE 1: Lid creaks open slightly ──
     playCreak();
     chestWrap.classList.add('lid-creak');
     spawnSparks(6, particlesContainer);
 
-    // Quickly show the partial-open frame
     await wait(300);
     if (imgClosed)  imgClosed.style.opacity  = '0';
     if (imgPartial) imgPartial.style.opacity = '1';
 
-    // Brief hold on partial
     await wait(250);
 
-    // ── STAGE 2: Lid flings fully open ──
     chestWrap.classList.add('lid-open');
     if (imgPartial) imgPartial.style.opacity = '0';
     if (imgOpen)    imgOpen.style.opacity    = '1';
     spawnSparks(18, particlesContainer);
     await wait(300);
 
-    // Brief beat — chest is open, light is pouring out, silence
     await wait(900);
 
-    // ── STAGE 3: Items fly out one by one ──
     const pitches = [700, 820, 940, 1060];
     const mundaneItems = currentRoll ? currentRoll.mundane : [];
 
-    // Pre-create all slots so we know their positions
-    // Slots are invisible until the item lands
     for (let i = 0; i < mundaneItems.length; i++) {
       const slot = createSlot(mundaneItems[i], false, currentRoll);
       slot.style.opacity = '0';
@@ -341,25 +290,20 @@
       slotsRow.appendChild(slot);
     }
 
-    // Mystery slot too
     const mysterySlot = createSlot(null, true, currentRoll);
     mysterySlot.style.opacity = '0';
     mysterySlot.style.transform = 'scale(0.8)';
     slotsRow.appendChild(mysterySlot);
 
-    // Force layout so slots have real positions
     slotsRow.offsetHeight;
 
-    // Now fly each item
     const allSlots = slotsRow.querySelectorAll('.item-slot');
 
     for (let i = 0; i < mundaneItems.length; i++) {
       const slot = allSlots[i];
 
-      // Fly the item
       await flyItemToSlot(mundaneItems[i], slot, chestWrap);
 
-      // Item lands — slot pops in (face-down; user clicks to flip)
       playPop(pitches[i]);
       spawnSparks(5, particlesContainer);
       slot.style.transition = 'opacity 0.12s ease, transform 0.35s cubic-bezier(0.34,1.56,0.64,1)';
@@ -387,11 +331,8 @@
       await wait(480);
     }
 
-    // Mystery slot flies out last — slower, more ominous
     await wait(300);
-    const mystItem = { icon: '?', name: 'Unknown' };
 
-    // Custom fly for mystery — slower
     await new Promise(resolve => {
       const chestRect = chestWrap.getBoundingClientRect();
       const slotRect  = mysterySlot.getBoundingClientRect();
@@ -407,7 +348,7 @@
       flyer.innerHTML = `<span style="color:rgba(179,157,219,0.8);font-family:'Cinzel Decorative',serif;animation:mystery-pulse 0.4s ease-in-out infinite alternate">?</span>`;
       document.body.appendChild(flyer);
 
-      const steps = 80; // slower
+      const steps = 80;
       let frame = 0;
       const tick = () => {
         frame++;
@@ -426,7 +367,6 @@
       requestAnimationFrame(tick);
     });
 
-    // Mystery slot lands — same as other cards: face-down, click to flip, click to zoom
     playPop(1040);
     spawnSparks(8, particlesContainer);
     mysterySlot.style.transition = 'opacity 0.12s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1)';
@@ -452,9 +392,41 @@
     });
 
     state = 'done';
-    await wait(800);
-    resetBtn.classList.add('visible');
   }
+
+  // ── Init: disable chest until GET pack resolves ──
+  (async function init() {
+    packId = location.pathname.match(/\/pack\/([a-z0-9]+)/)?.[1];
+    chestWrap.style.pointerEvents = 'none';
+    chestWrap.setAttribute('aria-disabled', 'true');
+    chestHint.textContent = '⟳ Loading…';
+
+    if (!packId) {
+      showEmptyScreen('Pack not found.');
+      return;
+    }
+
+    const res = await fetch(API_BASE + '/pack/' + packId);
+    if (res.status === 404) {
+      showEmptyScreen('Pack not found.');
+      return;
+    }
+    if (res.status === 410) {
+      const data = await res.json();
+      showEmptyScreen((data.label ? data.label + ' — ' : '') + 'This chest has already been claimed.');
+      return;
+    }
+    if (!res.ok) {
+      showEmptyScreen('Could not load pack. Try again.');
+      return;
+    }
+
+    await res.json();
+    packReady = true;
+    chestWrap.style.pointerEvents = '';
+    chestWrap.removeAttribute('aria-disabled');
+    chestHint.textContent = '✦ CLICK TO OPEN ✦';
+  })();
 
   chestWrap.addEventListener('click', runReveal);
   chestWrap.addEventListener('keydown', function(e) {
@@ -466,50 +438,10 @@
 
   zoomDim.addEventListener('click', () => closeCardModal());
 
-  // Reset
-  resetBtn.addEventListener('click', async () => {
-    cardWrap.style.transition = 'opacity 0.4s';
-    cardWrap.style.opacity = '0';
-    await wait(400);
-
-    cardWrap.classList.remove('visible');
-    cardWrap.style.opacity = '';
-    flipCard.classList.remove('flipped');
-    foundText.classList.remove('appear');
-    foundText.style.opacity = '0';
-    lightRays.classList.remove('burst');
-    flashEl.classList.remove('bang');
-    chestWrap.classList.remove('lid-creak', 'lid-open');
-    const imgC = document.getElementById('chest-img-closed');
-    const imgP = document.getElementById('chest-img-partial');
-    const imgO = document.getElementById('chest-img-open');
-    if (imgC) { imgC.style.opacity = '1'; imgC.style.transition = 'none'; }
-    if (imgP) { imgP.style.opacity = '0'; imgP.style.transition = 'none'; }
-    if (imgO) { imgO.style.opacity = '0'; imgO.style.transition = 'none'; }
-    requestAnimationFrame(() => {
-      if (imgC) imgC.style.transition = '';
-      if (imgP) imgP.style.transition = '';
-      if (imgO) imgO.style.transition = '';
-    });
-    chestWrap.style.cursor = 'pointer';
-    chestHint.style.animation = '';
-    chestHint.style.opacity   = '';
-    chestHint.style.transition = '';
-    closeCardModal();
-    slotsRow.innerHTML = '';
-    resetBtn.classList.remove('visible');
-    dimOverlay.classList.remove('active');
-    dimOverlay.style.background = '';
-    dimOverlay.style.transition = '';
-    state = 'idle';
-  });
-
-  // Ambient sparks from torches
   setInterval(() => {
     if (Math.random() > 0.6) spawnSparks(1, particlesContainer);
   }, 800);
 
-  // Idle detection: pause ambient animations after 3s of no input (performance)
   var idleTimer = null;
   var idleDelay = 3000;
   function goIdle() {

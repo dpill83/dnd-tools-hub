@@ -1,0 +1,15 @@
+/* ── RESPONSIVE ── */
+@media (max-width: 480px) {
+  .torch-left { left: 1%; }
+  .torch-right { right: 1%; }
+  .torch-glow { width: 80px; height: 80px; }
+}
+@media (min-width: 1200px) {
+  .torch-left { left: 8%; }
+  .torch-right { right: 8%; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

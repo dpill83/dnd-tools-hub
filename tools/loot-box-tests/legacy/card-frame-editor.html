@@ -32,7 +32,15 @@ body {
   display: grid;
   grid-template-columns: 340px 1fr;
   grid-template-rows: 48px 1fr;
-  overflow: hidden;
+}
+
+/* Restrict selection to card preview / canvas only; sidebar and code remain selectable */
+#preview-area,
+.card-preview-scene,
+.card-main,
+.card-slot-preview {
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* ── HEADER ── */
@@ -250,7 +258,7 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.3); }
   justify-content: center;
   gap: 2rem;
   padding: 2rem;
-  overflow: hidden;
+  overflow: auto;
   position: relative;
   background:
     radial-gradient(ellipse 70% 50% at 50% 50%, rgba(50,35,10,0.25) 0%, transparent 70%),

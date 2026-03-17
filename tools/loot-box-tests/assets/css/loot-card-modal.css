@@ -1,5 +1,22 @@
 /* Shared card modal backdrop + frame styles for index.html and loot-table.html */
 
+/* Layout/background utilities (reduce duplication) */
+.bg-cover-center {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.abs-fill {
+  position: absolute;
+  inset: 0;
+}
+.flex-center-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
 #zoom-dim {
   position: fixed;
   inset: 0;

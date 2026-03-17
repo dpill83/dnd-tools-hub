@@ -44,7 +44,10 @@
   function createSlot(item, isMystery, currentRoll) {
     var RARITY_META = window.RARITY_META;
     var slot = document.createElement('div');
-    slot.className = 'item-slot';
+    slot.className = 'item-slot bg-cover-center flex-center-col';
+    slot.setAttribute('tabindex', '0');
+    slot.setAttribute('role', 'button');
+    slot.setAttribute('aria-label', isMystery ? 'Reveal mystery item' : ('View ' + (item && item.name ? item.name : 'item')));
     slot._item = isMystery ? (currentRoll && currentRoll.reveal) || null : item;
     slot._isMystery = isMystery;
 
@@ -80,8 +83,8 @@
 
     slot.innerHTML =
       '<div class="card-inner">' +
-        '<div class="card-back-face" style="' + backFaceStyle + '">' + backQuestion + '</div>' +
-        '<div class="card-front-face" style="' + frontFaceStyle + '">' + frontFaceContent + '</div>' +
+        '<div class="card-back-face abs-fill flex-center-col" style="' + backFaceStyle + '">' + backQuestion + '</div>' +
+        '<div class="card-front-face abs-fill flex-center-col" style="' + frontFaceStyle + '">' + frontFaceContent + '</div>' +
       '</div>';
     return slot;
   }

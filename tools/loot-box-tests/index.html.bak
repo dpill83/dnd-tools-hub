@@ -11,7 +11,6 @@
 <link rel="stylesheet" href="assets/css/cards.css">
 <link rel="stylesheet" href="assets/css/effects.css">
 <link rel="stylesheet" href="assets/css/responsive.css">
-<style>#dm-link{position:fixed;bottom:clamp(0.5rem,1.5vh,1rem);right:calc(clamp(0.5rem,1.5vw,1.5rem) + 3.5rem);z-index:var(--z-ui,100);font-family:'Cinzel',serif;font-size:0.85rem;color:rgba(201,168,76,0.6);background:transparent;border:1px solid rgba(201,168,76,0.2);border-radius:4px;padding:0.4rem 0.6rem;text-decoration:none;cursor:pointer;transition:all 0.3s}#dm-link:hover{color:var(--gold-light,#f0d070);border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.06)}</style>
 </head>
 <body>
 <!-- Atmospheric BG -->
@@ -114,7 +113,6 @@
 <!-- Reset -->
 <button id="reset-btn">✦ Open Another ✦</button>
 <a href="loot-table.html" id="loot-table-btn" title="Loot Table" aria-label="Loot Table"><img src="assets/images/chest-closed.png" alt=""></a>
-<a href="dm" id="dm-link" title="DM Dashboard" aria-label="DM Dashboard">DM ↗</a>
 
 <script src="assets/js/loot-constants.js"></script>
 <script src="assets/js/loot-display.js"></script>

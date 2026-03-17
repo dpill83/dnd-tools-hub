@@ -17,7 +17,6 @@
   --very-rare: #ff8a65;
   --legendary: #ffd54f;
   --legendary-glow: rgba(255,213,79,0.8);
-  --loot-card-max-width: 170px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,6 +26,12 @@ body {
   background: #050300;
   min-height: 100vh;
   color: rgba(240,208,112,0.9);
+}
+
+/* Restrict selection to interactive card grid and modal only */
+.card-grid,
+#zoom-dim,
+#card-modal {
   -webkit-user-select: none;
   user-select: none;
 }
@@ -79,10 +84,6 @@ body {
   outline: none;
 }
 
-.toolbar input[type="range"] {
-  width: 140px;
-}
-
 /* Card grid */
 .card-grid {
   display: grid;
@@ -93,18 +94,17 @@ body {
 }
 
 .loot-card {
+  --rarity-color: transparent;
+  --rarity-glow: transparent;
   width: 100%;
   aspect-ratio: 88 / 120;
-  max-width: var(--loot-card-max-width);
+  max-width: 170px;
   max-height: 220px;
   border-radius: 4px;
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  box-shadow: 0 0 15px var(--rarity-glow), inset 0 0 15px color-mix(in srgb, var(--rarity-color) 8%, transparent);
   gap: 0.3rem;
   padding: 0.10rem 0.5rem 0.00rem;
   cursor: pointer;
@@ -152,10 +152,10 @@ body {
   margin: 0 auto;
 }
 
-.loot-card.is-legendary { box-shadow: 0 0 20px rgba(255,213,79,0.4), 0 0 60px rgba(255,213,79,0.15), inset 0 0 20px rgba(255,213,79,0.05); }
-.loot-card.is-rare { box-shadow: 0 0 15px rgba(179,157,219,0.4), inset 0 0 15px rgba(179,157,219,0.05); }
-.loot-card.is-very-rare { box-shadow: 0 0 15px rgba(255,138,101,0.4), inset 0 0 15px rgba(255,138,101,0.05); }
-.loot-card.is-uncommon { box-shadow: 0 0 10px rgba(79,195,247,0.3); }
+.loot-card.is-uncommon { --rarity-color: var(--uncommon); --rarity-glow: rgba(79,195,247,0.3); }
+.loot-card.is-rare { --rarity-color: var(--rare); --rarity-glow: rgba(179,157,219,0.4); }
+.loot-card.is-very-rare { --rarity-color: var(--very-rare); --rarity-glow: rgba(255,138,101,0.4); }
+.loot-card.is-legendary { --rarity-color: var(--legendary); --rarity-glow: rgba(255,213,79,0.4); }
 
 .loading {
   text-align: center;
@@ -195,10 +195,6 @@ body {
         <option value="value-asc">Value (low–high)</option>
         <option value="value-desc">Value (high–low)</option>
       </select>
-    </div>
-    <div>
-      <label for="card-size">Card size</label>
-      <input id="card-size" type="range" min="80" max="160" value="100" aria-label="Card size">
     </div>
   </header>
 
@@ -287,7 +283,7 @@ body {
     const rm = RARITY_META[item.rarity] || RARITY_META['Common'];
     const frameBg = rm.frame ? `url('${rm.frame}'), linear-gradient(160deg, #1c1200 0%, #0d0900 100%)` : '';
     const card = document.createElement('div');
-    card.className = 'loot-card ' + (rm.cls || '');
+    card.className = 'loot-card flex-center-col ' + (rm.cls || '');
     card.style.backgroundImage = frameBg || '';
     card._item = item;
     card.innerHTML = `
@@ -393,19 +389,6 @@ body {
     document.getElementById('filter-category').addEventListener('change', renderCards);
     document.getElementById('sort-by').addEventListener('change', renderCards);
     zoomDim.addEventListener('click', () => closeCardModal());
-
-    const cardSizeInput = document.getElementById('card-size');
-    if (cardSizeInput) {
-      const updateCardSize = (val) => {
-        const pct = Number(val) || 100;
-        const base = 170; // px
-        const clamped = Math.max(80, Math.min(160, pct));
-        const px = (base * clamped) / 100;
-        document.documentElement.style.setProperty('--loot-card-max-width', px + 'px');
-      };
-      updateCardSize(cardSizeInput.value);
-      cardSizeInput.addEventListener('input', (e) => updateCardSize(e.target.value));
-    }
   }
 
   init();

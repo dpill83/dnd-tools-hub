@@ -1,0 +1,8 @@
+name = "loot-chest"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "loot-chest-db"
+database_id = "34526e64-3c3a-477b-8161-273a043aec57"
