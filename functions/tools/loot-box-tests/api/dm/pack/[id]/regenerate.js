@@ -6,7 +6,8 @@ export async function onRequestPost(context) {
   const body = await getBody(context.request);
   if (!id) return json({ error: 'Pack id required' }, 400);
 
-  const dm_key = (body?.dm_key ?? context.request.url && new URL(context.request.url).searchParams.get('dm_key'))?.trim();
+  const fromUrl = context.request.url ? new URL(context.request.url).searchParams.get('dm_key') : null;
+  const dm_key = (body?.dm_key ?? fromUrl)?.trim();
   if (!dm_key) return json({ error: 'dm_key is required' }, 400);
 
   const pack = await DB.prepare(
