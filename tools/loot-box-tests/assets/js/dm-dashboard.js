@@ -12,7 +12,7 @@
   };
   const CATEGORIES = Object.keys(window.CAT_IMG || {});
 
-  let dmKey = sessionStorage.getItem('dm_key') || '';
+  let dmKey = localStorage.getItem('dm_key') || '';
   let lootTable = null;
 
   const $ = function(id) { return document.getElementById(id); };
@@ -61,6 +61,24 @@
       if (inputWrap) inputWrap.classList.add('visible');
       if (pill) pill.style.display = 'none';
       if (changeBtn) changeBtn.style.display = 'none';
+    }
+    updateCreateAccess();
+  }
+
+  function updateCreateAccess() {
+    var createTab = document.querySelector('.tab[data-tab="create"]');
+    var createBtn = $('btn-create-pack');
+    var locked = !dmKey;
+    if (createTab) {
+      createTab.style.opacity = locked ? '0.4' : '';
+      createTab.style.cursor = locked ? 'not-allowed' : '';
+      createTab.title = locked ? 'Enter a DM key to create packs' : '';
+    }
+    if (createBtn) {
+      createBtn.disabled = locked;
+      createBtn.style.opacity = locked ? '0.4' : '';
+      createBtn.style.cursor = locked ? 'not-allowed' : '';
+      createBtn.title = locked ? 'Enter a DM key to create packs' : '';
     }
   }
 
@@ -395,21 +413,21 @@
   }
 
   function init() {
-    dmKey = sessionStorage.getItem('dm_key') || '';
+    dmKey = localStorage.getItem('dm_key') || '';
     updateKeyUI();
 
     $('dm-key-submit').addEventListener('click', function() {
       var val = ($('dm-key-field') && $('dm-key-field').value || '').trim();
       if (!val) return;
       dmKey = val;
-      sessionStorage.setItem('dm_key', dmKey);
+      localStorage.setItem('dm_key', dmKey);
       updateKeyUI();
       loadPacks();
     });
 
     $('dm-key-change').addEventListener('click', function() {
       dmKey = '';
-      sessionStorage.removeItem('dm_key');
+      localStorage.removeItem('dm_key');
       updateKeyUI();
       $('pack-list').innerHTML = '';
       $('packs-summary').textContent = 'Enter your DM key to load packs.';
@@ -418,11 +436,22 @@
     document.querySelectorAll('.tab').forEach(function(t) {
       t.addEventListener('click', function() {
         var tab = t.getAttribute('data-tab');
+        if (tab === 'create' && !dmKey) {
+          showError('pack-error', 'Enter and save your DM key before creating a pack.');
+          showTab('packs');
+          return;
+        }
         if (tab) showTab(tab);
       });
     });
 
-    $('btn-create-pack').addEventListener('click', function() { showTab('create'); });
+    $('btn-create-pack').addEventListener('click', function() {
+      if (!dmKey) {
+        showError('pack-error', 'Enter and save your DM key before creating a pack.');
+        return;
+      }
+      showTab('create');
+    });
     $('form-cancel').addEventListener('click', function() { showTab('packs'); });
     $('create-form').addEventListener('submit', submitCreate);
 

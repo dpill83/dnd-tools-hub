@@ -129,7 +129,7 @@
       {id:0,name:'42 Gold',rarity:'Common',tier:1,category:'Treasure'},
       {id:1,name:'Healing Potion',rarity:'Common',tier:1,category:'Potion'},
       {id:2,name:'Shortsword',rarity:'Common',tier:1,category:'Weapon'},
-      {id:3,name:'Cloak of Elvenkind',rarity:'Legendary',tier:5,category:'Wondrous Item',description:'While wearing this cloak, Stealth checks made to hide are made with advantage.'},
+      {id:3,name:'Cloak of Elvenkind ',rarity:'Legendary',tier:5,category:'Wondrous Item',description:'While wearing this cloak, Stealth checks made to hide are made with advantage.'},
     ];
     const by_tier = { '0': [0], '1': [0,1,2], '5': [3] };
     items.forEach((item, i) => { item._idx = i; });
