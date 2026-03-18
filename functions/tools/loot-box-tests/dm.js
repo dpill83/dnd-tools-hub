@@ -1,5 +1,5 @@
 export async function onRequest(context) {
   const url = new URL(context.request.url);
-  url.pathname = '/tools/loot-box-tests/dm.html';
+  url.pathname = '/tools/loot-box-tests/dm';
   return context.env.ASSETS.fetch(new Request(url.toString(), context.request));
 }
