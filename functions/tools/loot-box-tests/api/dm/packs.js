@@ -10,7 +10,7 @@ export async function onRequestGet(context) {
   let rows;
   try {
     rows = await DB.prepare(
-      'SELECT id, label, type, player_name, quantity, slot_config, created_at FROM packs WHERE dm_key = ? ORDER BY created_at DESC'
+      'SELECT id, label, type, player_name, quantity, opens_used, slot_config, created_at FROM packs WHERE dm_key = ? ORDER BY created_at DESC'
     ).bind(dm_key.trim()).all();
   } catch (e) {
     const msg = String(e?.message || e || '');
@@ -26,6 +26,7 @@ export async function onRequestGet(context) {
     type: row.type,
     player_name: row.player_name,
     quantity: row.quantity,
+    opens_used: row.opens_used,
     slot_config: typeof row.slot_config === 'string' ? JSON.parse(row.slot_config) : row.slot_config,
     created_at: row.created_at,
   }));

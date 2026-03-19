@@ -1463,6 +1463,7 @@ input[type=range]::-webkit-slider-thumb:hover {
             <th>Pack Label</th>
             <th>Mode</th>
             <th>Cards</th>
+            <th>Opened</th>
             <th>Status</th>
             <th>Created</th>
             <th></th>
@@ -2038,6 +2039,14 @@ async function onCreatePack() {
 
   const slot_config = {
     mundane_count: fillerCount,
+    filler_slots: Array.from({ length: fillerCount }).map((_, i) => {
+      const sr = config.slotRarities?.[i] || { min: 'mundane', max: 'common' };
+      return { min_tier: rarityToTier(sr.min), max_tier: rarityToTier(sr.max) };
+    }),
+    pinned_mundane_item_ids: Array.from({ length: fillerCount }).map((_, i) => {
+      const pinned = config.pinnedItems?.[i] || null;
+      return pinned?.id != null ? Number(pinned.id) : null;
+    }),
     reveal_tier_min: rarityToTier(revealRange.min),
     reveal_tier_max: rarityToTier(revealRange.max),
     categories: config.categories || [],
@@ -2108,12 +2117,16 @@ async function renderPackList() {
 
   const normalized = PACKS.map(p => {
     const qty = Number(p.quantity ?? 0);
+    const opened = Number(p.opens_used ?? 0);
+    const total = opened + qty;
     return {
       id: p.id,
       label: p.label,
       type: p.type,
       player_name: p.player_name,
       quantity: qty,
+      opened,
+      total,
       cards: (p.slot_config?.mundane_count ?? 0) + 1,
       created_at: p.created_at,
       status: qty > 0 ? 'active' : 'exhausted',
@@ -2141,6 +2154,7 @@ async function renderPackList() {
       <td><span class="pack-row-label">${escapeHtml(p.label)}</span></td>
       <td><span class="pack-row-mode ${p.type}">${p.type === 'personal' ? '◈ Personal' : '✦ Shared'}</span></td>
       <td>${p.cards}</td>
+      <td>${p.opened}/${p.total}</td>
       <td><span class="status-badge ${p.status}">${p.status.charAt(0).toUpperCase() + p.status.slice(1)}</span></td>
       <td>${formatDate(p.created_at)}</td>
       <td onclick="event.stopPropagation()">
