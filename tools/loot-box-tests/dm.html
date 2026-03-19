@@ -204,6 +204,15 @@ body::after {
 .dm-key-input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-glow-soft); }
 .dm-key-input::placeholder { color: var(--text-muted); }
 
+@keyframes shakeX {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+  20%, 40%, 60%, 80% { transform: translateX(6px); }
+}
+.shake {
+  animation: shakeX 380ms ease-in-out;
+}
+
 .dm-key-pill {
   font-family: var(--font-heading);
   font-size: 11px;
@@ -658,6 +667,33 @@ input[type=range]::-webkit-slider-thumb:hover {
 }
 .jackpot-result-item:last-child { border-bottom: none; }
 .jackpot-result-item:hover { background: var(--surface-3); color: var(--gold-light); }
+
+.pin-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  margin-top: 3px;
+  z-index: 100;
+  max-height: 180px;
+  overflow-y: auto;
+  display: none;
+}
+.pin-results.open { display: block; }
+.pin-result-item {
+  font-family: var(--font-body);
+  font-size: 12px;
+  padding: 7px 10px;
+  color: var(--text-dim);
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-dim);
+  transition: background 0.15s;
+}
+.pin-result-item:last-child { border-bottom: none; }
+.pin-result-item:hover { background: var(--surface-3); color: var(--gold-light); }
 
 /* ── MODE PANELS ── */
 .mode-panel { display: none; }
@@ -1292,7 +1328,7 @@ input[type=range]::-webkit-slider-thumb:hover {
             <span class="slider-label">Filler Cards</span>
             <span class="slider-value" id="slider-display">3</span>
           </div>
-          <input type="range" id="slot-slider" min="1" max="4" value="3" aria-label="Filler cards">
+          <input type="range" id="slot-slider" min="0" max="4" value="3" aria-label="Filler cards">
           <span class="slider-sub" id="slider-sub">3 filler + 1 reveal = 4 cards total</span>
         </div>
       </div>
@@ -1301,15 +1337,34 @@ input[type=range]::-webkit-slider-thumb:hover {
       <div class="panel-box">
         <div class="panel-box-title">Categories</div>
         <div class="cat-grid" id="cat-grid">
-          <button class="cat-chip">Adventuring Gear</button>
-          <button class="cat-chip">Armor</button>
-          <button class="cat-chip">Book</button>
-          <button class="cat-chip">Potion</button>
-          <button class="cat-chip">Quest Hook</button>
-          <button class="cat-chip">Ring</button>
-          <button class="cat-chip">Treasure</button>
-          <button class="cat-chip">Weapon</button>
-          <button class="cat-chip">Wondrous Item</button>
+          <button class="cat-chip on">Adventuring Gear</button>
+          <button class="cat-chip on">Armor</button>
+          <button class="cat-chip on">Book</button>
+          <button class="cat-chip on">Potion</button>
+          <button class="cat-chip on">Quest Hook</button>
+          <button class="cat-chip on">Ring</button>
+          <button class="cat-chip on">Treasure</button>
+          <button class="cat-chip on">Weapon</button>
+          <button class="cat-chip on">Wondrous Item</button>
+        </div>
+      </div>
+
+      <!-- Filler rarity preset -->
+      <div class="panel-box">
+        <div class="panel-box-title">Filler Rarity Preset</div>
+        <div class="form-group-stack">
+          <span class="mode-hint-text">Applies to filler slots only (skips pinned slots).</span>
+          <div class="form-row">
+            <div class="field-group field-group--grow">
+              <span class="field-label">Min</span>
+              <select class="field-input field-input--compact" id="filler-min" aria-label="Filler rarity min"></select>
+            </div>
+            <div class="field-group field-group--grow">
+              <span class="field-label">Max</span>
+              <select class="field-input field-input--compact" id="filler-max" aria-label="Filler rarity max"></select>
+            </div>
+            <button class="btn btn-sm" type="button" onclick="applyFillerPreset()">Apply</button>
+          </div>
         </div>
       </div>
 
@@ -1512,20 +1567,47 @@ function initSlotRarities(fillerCount) {
   slotRarities[fillerCount] = existing[fillerCount] || { min: 'rare', max: 'legendary' };
 }
 
-function raritySelectHTML(slotIndex, which, value) {
+function raritySelectHTML(slotIndex, which, value, isLocked) {
   const opts = RARITIES.map(r =>
     `<option value="${r.value}" ${r.value === value ? 'selected' : ''}>${r.label}</option>`
   ).join('');
+  const disabled = isLocked ? 'disabled' : '';
   return `<select class="rarity-select" data-slot="${slotIndex}" data-which="${which}" data-rarity="${value}"
-    onchange="onRarityChange(this)">${opts}</select>`;
+    onchange="onRarityChange(this)" ${disabled}>${opts}</select>`;
 }
 
 function onRarityChange(sel) {
   const slot = parseInt(sel.dataset.slot);
+  if (pinnedItems?.[slot]) return;
   const which = sel.dataset.which;
   const val = sel.value;
   slotRarities[slot][which] = val;
   sel.dataset.rarity = val;
+}
+
+function tierToRarityValue(tier) {
+  switch (Number(tier)) {
+    case 0: return 'mundane';
+    case 1: return 'common';
+    case 2: return 'uncommon';
+    case 3: return 'rare';
+    case 4: return 'very-rare';
+    case 5: return 'legendary';
+    default: return 'common';
+  }
+}
+
+function getLootItemById(id) {
+  const needle = Number(id);
+  if (!LOOT?.items?.length || Number.isNaN(needle)) return null;
+  return LOOT.items.find(it => Number(it?.id) === needle) || null;
+}
+
+function getPinnedRarityValue(item) {
+  const it = item?.id != null ? getLootItemById(item.id) : null;
+  if (!it) return null;
+  if (it.tier != null) return tierToRarityValue(it.tier);
+  return null;
 }
 
 function gambleExtrasHTML(slotIndex) {
@@ -1540,11 +1622,14 @@ function curatedExtrasHTML(slotIndex) {
   return `
     <button class="slot-pin-btn" onclick="togglePinArea(${slotIndex})">+ Pin Item</button>
     <div class="slot-pin-area" id="pin-area-${slotIndex}">
-      <input class="slot-pin-search" placeholder="Search item…"
-        oninput="onPinSearch(${slotIndex}, this)" autocomplete="off">
+      <div class="pos-relative">
+        <input class="slot-pin-search" placeholder="Search item…"
+          oninput="onPinSearch(${slotIndex}, this)" autocomplete="off">
+        <div class="pin-results" id="pin-results-${slotIndex}"></div>
+      </div>
     </div>
     <div class="slot-pinned ${pinned ? 'visible' : ''}" id="pinned-${slotIndex}">
-      <span class="slot-pinned-name" id="pinned-name-${slotIndex}">${pinned || ''}</span>
+      <span class="slot-pinned-name" id="pinned-name-${slotIndex}">${pinned?.name || ''}</span>
       <button class="slot-pinned-clear" onclick="clearPin(${slotIndex})">✕</button>
     </div>`;
 }
@@ -1556,7 +1641,13 @@ function buildCardRow(fillerCount) {
   let html = '';
   for (let i = 0; i < fillerCount; i++) {
     const icon = ICONS[i % ICONS.length];
+    const pinned = pinnedItems[i];
+    const pinnedRarity = pinned ? getPinnedRarityValue(pinned) : null;
     const sr = slotRarities[i];
+    const isLocked = Boolean(pinned && pinnedRarity);
+    const minVal = pinnedRarity || sr.min;
+    const maxVal = pinnedRarity || sr.max;
+    if (isLocked) slotRarities[i] = { min: minVal, max: maxVal };
     const classes = ['card-slot', jackpotSlot === i ? 'jackpot' : '', pinnedItems[i] ? 'pinned' : ''].filter(Boolean).join(' ');
     const extras = currentMode === 'gamble' ? gambleExtrasHTML(i) : curatedExtrasHTML(i);
     html += `
@@ -1567,15 +1658,21 @@ function buildCardRow(fillerCount) {
         </div>
         <span class="slot-label">Slot ${i+1}</span>
         <div class="slot-rarity">
-          ${raritySelectHTML(i, 'min', sr.min)}
+          ${raritySelectHTML(i, 'min', minVal, isLocked)}
           <div class="rarity-range-sep">to</div>
-          ${raritySelectHTML(i, 'max', sr.max)}
+          ${raritySelectHTML(i, 'max', maxVal, isLocked)}
         </div>
         ${extras}
       </div>`;
   }
 
+  const pinnedReveal = pinnedItems[fillerCount];
+  const pinnedRevealRarity = pinnedReveal ? getPinnedRarityValue(pinnedReveal) : null;
   const rr = slotRarities[fillerCount];
+  const revealLocked = Boolean(pinnedReveal && pinnedRevealRarity);
+  const revealMinVal = pinnedRevealRarity || rr.min;
+  const revealMaxVal = pinnedRevealRarity || rr.max;
+  if (revealLocked) slotRarities[fillerCount] = { min: revealMinVal, max: revealMaxVal };
   const revealClasses = ['card-slot','reveal', jackpotSlot === fillerCount ? 'jackpot' : '', pinnedItems[fillerCount] ? 'pinned' : ''].filter(Boolean).join(' ');
   const revealExtras = currentMode === 'gamble' ? gambleExtrasHTML(fillerCount) : curatedExtrasHTML(fillerCount);
   html += `
@@ -1586,9 +1683,9 @@ function buildCardRow(fillerCount) {
       </div>
       <span class="reveal-label">✦ Reveal</span>
       <div class="slot-rarity">
-        ${raritySelectHTML(fillerCount, 'min', rr.min)}
+        ${raritySelectHTML(fillerCount, 'min', revealMinVal, revealLocked)}
         <div class="rarity-range-sep">to</div>
-        ${raritySelectHTML(fillerCount, 'max', rr.max)}
+        ${raritySelectHTML(fillerCount, 'max', revealMaxVal, revealLocked)}
       </div>
       ${revealExtras}
     </div>`;
@@ -1612,9 +1709,26 @@ function togglePinArea(slotIndex) {
 
 function onPinSearch(slotIndex, input) {
   const q = input.value.trim().toLowerCase();
-  if (!q) return;
-  const match = findLootMatch(q);
-  if (match) pinItem(slotIndex, match);
+  const results = document.getElementById(`pin-results-${slotIndex}`);
+  if (!results) return;
+  if (!q) { results.classList.remove('open'); results.innerHTML = ''; return; }
+  const matches = findLootMatches(q, 8);
+  if (!matches.length) { results.classList.remove('open'); results.innerHTML = ''; return; }
+
+  results.innerHTML = matches.map(m => {
+    const safeName = escapeHtml(m.name);
+    return `<div class="pin-result-item" onclick="selectPinItem(${slotIndex}, ${Number(m.id)}, '${safeName.replace(/'/g, '&#39;')}')">${safeName}</div>`;
+  }).join('');
+  results.classList.add('open');
+}
+
+function selectPinItem(slotIndex, id, name) {
+  const areaInput = document.querySelector(`#pin-area-${slotIndex} .slot-pin-search`);
+  const results = document.getElementById(`pin-results-${slotIndex}`);
+  if (areaInput) areaInput.value = '';
+  if (results) { results.classList.remove('open'); results.innerHTML = ''; }
+  pinItem(slotIndex, { id: Number(id), name: String(name) });
+  buildCardRow(parseInt(slider.value));
 }
 
 function pinItem(slotIndex, item) {
@@ -1632,9 +1746,14 @@ function pinItem(slotIndex, item) {
 function clearPin(slotIndex) {
   delete pinnedItems[slotIndex];
   const pinned = document.getElementById(`pinned-${slotIndex}`);
+  const pname  = document.getElementById(`pinned-name-${slotIndex}`);
+  const results = document.getElementById(`pin-results-${slotIndex}`);
   const slot   = document.querySelector(`.card-slot[data-slot="${slotIndex}"]`);
   if (pinned) pinned.classList.remove('visible');
+  if (pname) pname.textContent = '';
+  if (results) { results.classList.remove('open'); results.innerHTML = ''; }
   if (slot)   slot.classList.remove('pinned');
+  buildCardRow(parseInt(slider.value));
 }
 
 function onJackpotSearch(input) {
@@ -1676,6 +1795,9 @@ document.addEventListener('click', e => {
   if (!e.target.closest('#panel-gamble')) {
     document.getElementById('jackpot-results')?.classList.remove('open');
   }
+  document.querySelectorAll('.pin-results.open').forEach(el => {
+    if (!e.target.closest('.slot-pin-area')) el.classList.remove('open');
+  });
 });
 
 // ── DM Key ──
@@ -1713,13 +1835,52 @@ function updateGambleHint() {
 
 function updateSlider() {
   const v = parseInt(slider.value);
-  const pct = ((v - 1) / (slider.max - slider.min)) * 100;
+  const min = parseInt(slider.min);
+  const max = parseInt(slider.max);
+  const pct = (max === min) ? 0 : ((v - min) / (max - min)) * 100;
   slider.style.setProperty('--pct', pct + '%');
   sliderDisp.textContent = v;
   buildCardRow(v);
 }
 
 slider.addEventListener('input', updateSlider);
+
+function buildRarityOptionsHTML(selectedValue) {
+  return RARITIES.map(r =>
+    `<option value="${r.value}" ${r.value === selectedValue ? 'selected' : ''}>${r.label}</option>`
+  ).join('');
+}
+
+function initFillerPresetUI() {
+  const minSel = document.getElementById('filler-min');
+  const maxSel = document.getElementById('filler-max');
+  if (!minSel || !maxSel) return;
+  minSel.innerHTML = buildRarityOptionsHTML('mundane');
+  maxSel.innerHTML = buildRarityOptionsHTML('common');
+}
+
+function applyFillerPreset() {
+  const minSel = document.getElementById('filler-min');
+  const maxSel = document.getElementById('filler-max');
+  if (!minSel || !maxSel) return;
+  const minV = minSel.value;
+  const maxV = maxSel.value;
+
+  // Ensure min <= max by tier.
+  const minT = rarityToTier(minV);
+  const maxT = rarityToTier(maxV);
+  const finalMin = minT <= maxT ? minV : maxV;
+  const finalMax = minT <= maxT ? maxV : minV;
+  if (finalMin !== minV) minSel.value = finalMin;
+  if (finalMax !== maxV) maxSel.value = finalMax;
+
+  const fillerCount = parseInt(slider.value) || 0;
+  for (let i = 0; i < fillerCount; i++) {
+    if (pinnedItems?.[i]) continue; // keep pinned slots locked to their item rarity
+    slotRarities[i] = { min: finalMin, max: finalMax };
+  }
+  buildCardRow(fillerCount);
+}
 
 // Mode pills
 document.querySelectorAll('.type-pill').forEach(pill => {
@@ -1740,6 +1901,7 @@ document.querySelectorAll('.cat-chip').forEach(chip => {
   chip.addEventListener('click', () => chip.classList.toggle('on'));
 });
 
+initFillerPresetUI();
 updateSlider();
 
 // ══════════════════════════════
@@ -1858,7 +2020,18 @@ function buildPackConfig() {
 
 async function onCreatePack() {
   const { config, label, player } = buildPackConfig();
-  if (!dmKey) throw new Error('DM Key is required');
+  if (!dmKey) {
+    const wrap = document.getElementById('dm-key-input-wrap');
+    const input = document.getElementById('dm-key-input');
+    if (wrap) {
+      wrap.classList.remove('shake');
+      // force reflow so the animation can restart
+      void wrap.offsetWidth;
+      wrap.classList.add('shake');
+    }
+    input?.focus();
+    return;
+  }
 
   const fillerCount = config.fillerCount;
   const revealRange = config.slotRarities?.[fillerCount] || { min: 'rare', max: 'legendary' };

@@ -245,7 +245,8 @@
       return;
     }
     const openData = await openRes.json();
-    currentRoll = openData.items;
+    // API returns { mundane, reveal }
+    currentRoll = openData;
 
     state = 'opening';
 

@@ -1,1 +1,3 @@
 .dev.vars
+.wrangler/
+serve-loot-box-tests.bat

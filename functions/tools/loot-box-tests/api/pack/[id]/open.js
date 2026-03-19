@@ -13,7 +13,7 @@ export async function onRequestPost(context) {
 
   if (!pack) return json({ error: 'Pack not found' }, 404);
   const quantity = pack.quantity ?? 1;
-  if (quantity < 1) return json({ error: 'Pack has no openings left' }, 400);
+  if (quantity < 1) return json({ label: pack.label ?? null }, 410);
 
   const slot_config = typeof pack.slot_config === 'string' ? JSON.parse(pack.slot_config) : pack.slot_config;
   const { mundane, reveal } = rollItems(slot_config, pack.guaranteed_item_id ?? undefined);

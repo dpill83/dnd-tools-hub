@@ -7,9 +7,18 @@ export async function onRequestGet(context) {
   const dm_key = url.searchParams.get('dm_key');
   if (!dm_key || !dm_key.trim()) return json({ error: 'dm_key query is required' }, 400);
 
-  const rows = await DB.prepare(
-    'SELECT id, label, type, player_name, quantity, slot_config, created_at FROM packs WHERE dm_key = ? ORDER BY created_at DESC'
-  ).bind(dm_key.trim()).all();
+  let rows;
+  try {
+    rows = await DB.prepare(
+      'SELECT id, label, type, player_name, quantity, slot_config, created_at FROM packs WHERE dm_key = ? ORDER BY created_at DESC'
+    ).bind(dm_key.trim()).all();
+  } catch (e) {
+    const msg = String(e?.message || e || '');
+    const schemaHint = msg.toLowerCase().includes('no such table')
+      ? 'D1 schema missing. Apply schema-loot-chest.sql to LOOT_CHEST_DB.'
+      : null;
+    return json({ error: 'Database query failed', details: msg, hint: schemaHint }, 503);
+  }
 
   const packs = (rows.results || []).map((row) => ({
     id: row.id,
