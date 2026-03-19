@@ -54,7 +54,11 @@ export function rollItems(slot_config, guaranteed_item_id) {
       ? tiersInclusive(slotCfg.min_tier, slotCfg.max_tier)
       : [0, 1];
 
-    const item = pickFromTier(tiers.length ? tiers : [0, 1], categories);
+    const tierList = tiers.length ? tiers : [0, 1];
+    // Try with selected categories; if empty pool, fall back to any category.
+    let item = pickFromTier(tierList, categories);
+    if (!item) item = pickFromTier(tierList, []);
+    if (!item && tierList[0] !== 0) item = pickFromTier([0, 1], []);
     if (item) mundane.push(item);
   }
 
