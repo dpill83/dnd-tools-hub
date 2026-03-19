@@ -605,34 +605,6 @@ input[type=range]::-webkit-slider-thumb:hover {
 .pack-count-label { font-family: var(--font-heading); font-size: 11px; letter-spacing: 0.06em; color: var(--text-dim); }
 .pack-count-hint  { font-size: 11px; color: var(--text-muted); font-style: italic; }
 
-/* Jackpot slot */
-.card-slot.jackpot .card-frame {
-  border-color: var(--legendary);
-  box-shadow: 0 0 20px rgba(255,213,79,0.5), inset 0 0 30px rgba(255,213,79,0.06);
-}
-.card-slot.jackpot .card-frame::after { color: var(--legendary); text-shadow: 0 0 8px rgba(255,213,79,0.8); opacity: 1; }
-
-.slot-jackpot-btn {
-  font-family: var(--font-heading);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  padding: 3px 8px;
-  border-radius: 20px;
-  border: 1px solid var(--border-dim);
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all 0.18s;
-  width: 100%;
-}
-.slot-jackpot-btn:hover { border-color: rgba(255,213,79,0.4); color: var(--legendary); }
-.card-slot.jackpot .slot-jackpot-btn {
-  border-color: rgba(255,213,79,0.6);
-  color: var(--legendary);
-  background: rgba(255,213,79,0.08);
-  text-shadow: 0 0 6px rgba(255,213,79,0.5);
-}
-
 /* Curated: per-slot pin */
 .slot-pin-btn {
   font-family: var(--font-heading);
@@ -990,7 +962,6 @@ const playerField = document.getElementById('player-field');
 
 let slotRarities = [];
 let currentMode  = 'curated';
-let jackpotSlot  = null;
 let pinnedItems  = {};
 
 function initSlotRarities(fillerCount) {
@@ -1019,13 +990,6 @@ function onRarityChange(sel) {
   sel.style.color = RARITIES.find(r => r.value === val)?.color || '';
 }
 
-function gambleExtrasHTML(slotIndex) {
-  const isJackpot = jackpotSlot === slotIndex;
-  return `<button class="slot-jackpot-btn" onclick="setJackpot(${slotIndex})">
-    ${isJackpot ? '★ Jackpot' : '☆ Set Jackpot'}
-  </button>`;
-}
-
 function curatedExtrasHTML(slotIndex) {
   const pinned = pinnedItems[slotIndex];
   return `
@@ -1048,8 +1012,8 @@ function buildCardRow(fillerCount) {
   for (let i = 0; i < fillerCount; i++) {
     const icon = ICONS[i % ICONS.length];
     const sr = slotRarities[i];
-    const classes = ['card-slot', jackpotSlot === i ? 'jackpot' : '', pinnedItems[i] ? 'pinned' : ''].filter(Boolean).join(' ');
-    const extras = currentMode === 'gamble' ? gambleExtrasHTML(i) : curatedExtrasHTML(i);
+    const classes = ['card-slot', pinnedItems[i] ? 'pinned' : ''].filter(Boolean).join(' ');
+    const extras = currentMode === 'gamble' ? '' : curatedExtrasHTML(i);
     html += `
       <div class="${classes}" data-slot="${i}" style="animation-delay:${i*0.04}s">
         <div class="card-frame">
@@ -1067,8 +1031,8 @@ function buildCardRow(fillerCount) {
   }
 
   const rr = slotRarities[fillerCount];
-  const revealClasses = ['card-slot','reveal', jackpotSlot === fillerCount ? 'jackpot' : '', pinnedItems[fillerCount] ? 'pinned' : ''].filter(Boolean).join(' ');
-  const revealExtras = currentMode === 'gamble' ? gambleExtrasHTML(fillerCount) : curatedExtrasHTML(fillerCount);
+  const revealClasses = ['card-slot','reveal', pinnedItems[fillerCount] ? 'pinned' : ''].filter(Boolean).join(' ');
+  const revealExtras = currentMode === 'gamble' ? '' : curatedExtrasHTML(fillerCount);
   html += `
     <div class="${revealClasses}" data-slot="${fillerCount}" style="animation-delay:${fillerCount*0.04}s">
       <div class="card-frame">
@@ -1087,11 +1051,6 @@ function buildCardRow(fillerCount) {
   cardRow.innerHTML = html;
   footerCount.textContent = total;
   sliderSub.textContent = `${fillerCount} filler + 1 reveal = ${total} cards total`;
-}
-
-function setJackpot(slotIndex) {
-  jackpotSlot = (jackpotSlot === slotIndex) ? null : slotIndex;
-  buildCardRow(parseInt(slider.value));
 }
 
 function togglePinArea(slotIndex) {

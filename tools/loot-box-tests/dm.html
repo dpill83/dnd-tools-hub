@@ -641,22 +641,6 @@ input[type=range]::-webkit-slider-thumb:hover {
   color: var(--reveal-color);
 }
 
-.rarity-select.rarity-updated {
-  animation: rarityCuePulse 0.5s ease-out;
-}
-
-@keyframes rarityCuePulse {
-  0% { box-shadow: 0 0 0 0 rgba(179,157,219,0.5); }
-  50% { box-shadow: 0 0 12px 2px rgba(179,157,219,0.4); }
-  100% { box-shadow: none; }
-}
-
-.slot-jackpot-label {
-  font-size: 12px;
-  color: var(--legendary);
-  font-weight: 600;
-}
-
 .jackpot-results {
   position: absolute;
   top: 100%;
@@ -742,34 +726,6 @@ input[type=range]::-webkit-slider-thumb:hover {
 
 .pack-count-label { font-family: var(--font-heading); font-size: 11px; letter-spacing: 0.06em; color: var(--text-dim); }
 .pack-count-hint  { font-size: 11px; color: var(--text-muted); font-style: italic; }
-
-/* Jackpot slot */
-.card-slot.jackpot .card-frame {
-  border-color: var(--legendary);
-  box-shadow: 0 0 20px rgba(255,213,79,0.5), inset 0 0 30px rgba(255,213,79,0.06);
-}
-.card-slot.jackpot .card-frame::after { color: var(--legendary); text-shadow: 0 0 8px rgba(255,213,79,0.8); opacity: 1; }
-
-.slot-jackpot-btn {
-  font-family: var(--font-heading);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  padding: 3px 8px;
-  border-radius: 20px;
-  border: 1px solid var(--border-dim);
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all 0.18s;
-  width: 100%;
-}
-.slot-jackpot-btn:hover { border-color: rgba(255,213,79,0.4); color: var(--legendary); }
-.card-slot.jackpot .slot-jackpot-btn {
-  border-color: rgba(255,213,79,0.6);
-  color: var(--legendary);
-  background: rgba(255,213,79,0.08);
-  text-shadow: 0 0 6px rgba(255,213,79,0.5);
-}
 
 /* Curated: per-slot pin */
 .slot-pin-btn {
@@ -1555,9 +1511,6 @@ const RARITIES = [
   { value: 'legendary', label: 'Legendary', color: '#ffd54f' },
 ];
 
-/** Duration (ms) for the rarity-updated visual cue; can be synced with pack-opening animations/sound. */
-const RARITY_CUE_DURATION_MS = 500;
-
 const API_BASE = '/tools/loot-box-tests/api';
 const DM_KEY_STORAGE_KEY = 'lootForgeDmKey';
 let LOOT = null; // loaded from tools/loot-box-tests/loot-table.json
@@ -1573,7 +1526,6 @@ const playerField = document.getElementById('player-field');
 
 let slotRarities = [];
 let currentMode  = 'curated';
-let jackpotSlot  = null;
 let pinnedItems  = {};
 let dmKey = (window.sessionStorage.getItem(DM_KEY_STORAGE_KEY) || '').trim();
 let jackpotItem = null; // { id:number, name:string } | null
@@ -1585,10 +1537,6 @@ function initSlotRarities(fillerCount) {
     slotRarities[i] = existing[i] || { min: 'mundane', max: 'common' };
   }
   slotRarities[fillerCount] = existing[fillerCount] || { min: 'rare', max: 'legendary' };
-  if (currentMode === 'gamble' && jackpotItem) {
-    const jr = getJackpotRarityValue();
-    if (jr) slotRarities[fillerCount] = { min: jr, max: jr };
-  }
 }
 
 function raritySelectHTML(slotIndex, which, value, isLocked) {
@@ -1603,8 +1551,6 @@ function raritySelectHTML(slotIndex, which, value, isLocked) {
 function onRarityChange(sel) {
   const slot = parseInt(sel.dataset.slot);
   if (pinnedItems?.[slot]) return;
-  const fillerCount = parseInt(slider.value) || 0;
-  if (currentMode === 'gamble' && jackpotItem && slot === fillerCount) return;
   const which = sel.dataset.which;
   const val = sel.value;
   slotRarities[slot][which] = val;
@@ -1636,22 +1582,6 @@ function getPinnedRarityValue(item) {
   return null;
 }
 
-function getJackpotRarityValue() {
-  if (!jackpotItem) return null;
-  return getPinnedRarityValue(jackpotItem);
-}
-
-function gambleExtrasHTML(slotIndex, fillerCount) {
-  if (currentMode === 'gamble' && jackpotItem) {
-    if (slotIndex === fillerCount) return `<span class="slot-jackpot-label">★ Jackpot</span>`;
-    return '';
-  }
-  const isJackpot = jackpotSlot === slotIndex;
-  return `<button class="slot-jackpot-btn" onclick="setJackpot(${slotIndex})">
-    ${isJackpot ? '★ Jackpot' : '☆ Set Jackpot'}
-  </button>`;
-}
-
 function curatedExtrasHTML(slotIndex) {
   const pinned = pinnedItems[slotIndex];
   return `
@@ -1670,7 +1600,6 @@ function curatedExtrasHTML(slotIndex) {
 }
 
 function buildCardRow(fillerCount) {
-  if (currentMode === 'gamble' && jackpotItem) jackpotSlot = fillerCount;
   initSlotRarities(fillerCount);
   const total = fillerCount + 1;
 
@@ -1684,8 +1613,8 @@ function buildCardRow(fillerCount) {
     const minVal = pinnedRarity || sr.min;
     const maxVal = pinnedRarity || sr.max;
     if (isLocked) slotRarities[i] = { min: minVal, max: maxVal };
-    const classes = ['card-slot', jackpotSlot === i ? 'jackpot' : '', pinnedItems[i] ? 'pinned' : ''].filter(Boolean).join(' ');
-    const extras = currentMode === 'gamble' ? gambleExtrasHTML(i, fillerCount) : curatedExtrasHTML(i);
+    const classes = ['card-slot', pinnedItems[i] ? 'pinned' : ''].filter(Boolean).join(' ');
+    const extras = currentMode === 'gamble' ? '' : curatedExtrasHTML(i);
     html += `
       <div class="${classes}" data-slot="${i}">
         <div class="card-frame">
@@ -1704,21 +1633,13 @@ function buildCardRow(fillerCount) {
 
   const pinnedReveal = pinnedItems[fillerCount];
   const pinnedRevealRarity = pinnedReveal ? getPinnedRarityValue(pinnedReveal) : null;
-  const jackpotRarity = (currentMode === 'gamble' && jackpotItem) ? getJackpotRarityValue() : null;
   const rr = slotRarities[fillerCount];
-  let revealLocked, revealMinVal, revealMaxVal;
-  if (jackpotRarity) {
-    revealLocked = true;
-    revealMinVal = revealMaxVal = jackpotRarity;
-    slotRarities[fillerCount] = { min: jackpotRarity, max: jackpotRarity };
-  } else {
-    revealLocked = Boolean(pinnedReveal && pinnedRevealRarity);
-    revealMinVal = pinnedRevealRarity || rr.min;
-    revealMaxVal = pinnedRevealRarity || rr.max;
-    if (revealLocked) slotRarities[fillerCount] = { min: revealMinVal, max: revealMaxVal };
-  }
-  const revealClasses = ['card-slot','reveal', jackpotSlot === fillerCount ? 'jackpot' : '', pinnedItems[fillerCount] ? 'pinned' : ''].filter(Boolean).join(' ');
-  const revealExtras = currentMode === 'gamble' ? gambleExtrasHTML(fillerCount, fillerCount) : curatedExtrasHTML(fillerCount);
+  const revealLocked = Boolean(pinnedReveal && pinnedRevealRarity);
+  const revealMinVal = pinnedRevealRarity || rr.min;
+  const revealMaxVal = pinnedRevealRarity || rr.max;
+  if (revealLocked) slotRarities[fillerCount] = { min: revealMinVal, max: revealMaxVal };
+  const revealClasses = ['card-slot','reveal', pinnedItems[fillerCount] ? 'pinned' : ''].filter(Boolean).join(' ');
+  const revealExtras = currentMode === 'gamble' ? '' : curatedExtrasHTML(fillerCount);
   html += `
     <div class="${revealClasses}" data-slot="${fillerCount}">
       <div class="card-frame">
@@ -1737,11 +1658,6 @@ function buildCardRow(fillerCount) {
   cardRow.innerHTML = html;
   footerCount.textContent = total;
   sliderSub.textContent = `${fillerCount} filler + 1 reveal = ${total} cards total`;
-}
-
-function setJackpot(slotIndex) {
-  jackpotSlot = (jackpotSlot === slotIndex) ? null : slotIndex;
-  buildCardRow(parseInt(slider.value));
 }
 
 function togglePinArea(slotIndex) {
@@ -1824,21 +1740,6 @@ function selectJackpotItem(id, name) {
   search.value = '';
   results.classList.remove('open');
   results.innerHTML = '';
-
-  const fillerCount = parseInt(slider.value) || 0;
-  const jackpotRarity = getJackpotRarityValue();
-  if (jackpotRarity) {
-    slotRarities[fillerCount] = { min: jackpotRarity, max: jackpotRarity };
-  }
-  buildCardRow(fillerCount);
-
-  const revealSlot = cardRow.querySelector(`.card-slot.reveal[data-slot="${fillerCount}"]`);
-  if (revealSlot) {
-    revealSlot.querySelectorAll('.rarity-select').forEach(el => {
-      el.classList.add('rarity-updated');
-      setTimeout(() => el.classList.remove('rarity-updated'), RARITY_CUE_DURATION_MS);
-    });
-  }
 }
 
 function clearJackpotItem() {
@@ -1847,11 +1748,6 @@ function clearJackpotItem() {
   pinned.classList.remove('visible');
   pinnedName.textContent = '';
   jackpotItem = null;
-
-  const fillerCount = parseInt(slider.value) || 0;
-  slotRarities[fillerCount] = { min: 'rare', max: 'legendary' };
-  if (jackpotSlot === fillerCount) jackpotSlot = null;
-  buildCardRow(fillerCount);
 }
 
 // Close jackpot results on outside click
@@ -2053,10 +1949,6 @@ function buildPackConfig() {
   const fillerCount  = parseInt(slider.value) || 0;
   const cardsPerPack = fillerCount + 1;
 
-  const jackpotPinnedNameEl = document.getElementById('jackpot-pinned-name');
-  const jackpotItemText = (jackpotPinnedNameEl?.textContent || '').trim();
-  if (currentMode === 'gamble' && jackpotItemText) jackpotSlot = fillerCount;
-
   const categories = Array.from(document.querySelectorAll('.cat-chip.on'))
     .map(c => c.textContent.trim())
     .filter(Boolean);
@@ -2066,6 +1958,9 @@ function buildPackConfig() {
   if (gambleCount < 2) gambleCount = 2;
   if (gambleCount > 20) gambleCount = 20;
 
+  const jackpotPinnedNameEl = document.getElementById('jackpot-pinned-name');
+  const jackpotItemText = (jackpotPinnedNameEl?.textContent || '').trim();
+
   const config = {
     mode: currentMode,
     label,
@@ -2074,7 +1969,6 @@ function buildPackConfig() {
     cardsPerPack,
     slotRarities: slotRarities.map(sr => ({ ...sr })),
     pinnedItems: { ...pinnedItems },
-    jackpotSlot,
     categories,
     gambleCount,
     jackpotItem: jackpotItemText || null,
