@@ -3,130 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DM Dashboard</title>
+<title>DM Dashboard — Pack Builder</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/loot-card-modal.css">
 <style>
 :root {
-  --gold: #c9a84c;
-  --gold-light: #f0d070;
-  --gold-glow: rgba(201,168,76,0.6);
-  --common: #9aa0a6;
-  --uncommon: #4fc3f7;
-  --rare: #b39ddb;
-  --very-rare: #ff8a65;
-  --legendary: #ffd54f;
-  --legendary-glow: rgba(255,213,79,0.8);
-  --font-sans: 'Crimson Text', Georgia, serif;
-  --color-text-primary: rgba(240,208,112,0.95);
-  --color-text-secondary: rgba(201,168,76,0.75);
-  --color-background-primary: rgba(26,14,8,0.95);
-  --color-background-secondary: rgba(0,0,0,0.4);
-  --color-border-primary: rgba(201,168,76,0.4);
-  --color-border-secondary: rgba(201,168,76,0.25);
-  --color-border-tertiary: rgba(201,168,76,0.15);
-  --border-radius-md: 6px;
-  --border-radius-lg: 8px;
+  --gold:            #c9a84c;
+  --gold-light:      #f0d070;
+  --gold-dim:        #8a6f30;
+  --gold-glow:       rgba(201,168,76,0.5);
+  --gold-glow-soft:  rgba(201,168,76,0.15);
+
+  --common:     #9aa0a6;
+  --uncommon:   #4fc3f7;
+  --rare:       #b39ddb;
+  --very-rare:  #ff8a65;
+  --legendary:  #ffd54f;
+
+  --bg:         #08050200;
+  --bg-deep:    #060300;
+  --surface:    rgba(20,11,4,0.92);
+  --surface-2:  rgba(30,16,6,0.80);
+  --surface-3:  rgba(40,22,8,0.60);
+
+  --border:     rgba(201,168,76,0.30);
+  --border-dim: rgba(201,168,76,0.15);
+  --border-hot: rgba(201,168,76,0.65);
+
+  --text:       rgba(240,215,140,0.95);
+  --text-dim:   rgba(201,168,76,0.65);
+  --text-muted: rgba(160,130,80,0.50);
+
+  --reveal-color: #b39ddb;
+  --reveal-glow:  rgba(179,157,219,0.55);
+
+  --font-display: 'Cinzel Decorative', serif;
+  --font-heading: 'Cinzel', serif;
+  --font-body:    'Crimson Text', Georgia, serif;
+
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 10px;
 }
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-sans); background: #050300; min-height: 100vh; color: var(--color-text-primary); }
-#page-wrap { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; padding: 1rem; }
-.dm-wrap { padding: 1.5rem 0; max-width: 860px; margin: 0 auto; }
-.dm-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--color-border-tertiary); }
-.dm-title { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 600; letter-spacing: 0.04em; color: var(--gold-light); }
-.dm-key-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.dm-key-pill { font-size: 12px; color: var(--color-text-secondary); background: var(--color-background-secondary); border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 4px 10px; }
-.dm-key-input { display: none; }
-.dm-key-input.visible { display: flex; align-items: center; gap: 8px; }
-.dm-key-input input { font-size: 14px; padding: 6px 10px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border-secondary); background: rgba(26,14,8,0.9); color: var(--color-text-primary); width: 200px; }
-.dm-key-input input:focus { outline: none; border-color: var(--gold); }
-.tab-bar { display: flex; gap: 4px; margin-bottom: 1.5rem; }
-.tab { font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 0.03em; padding: 6px 14px; border-radius: var(--border-radius-md); border: 1px solid transparent; cursor: pointer; color: var(--color-text-secondary); background: transparent; }
-.tab:hover { color: var(--color-text-primary); }
-.tab.active { background: var(--color-background-secondary); border-color: var(--color-border-secondary); color: var(--gold-light); font-weight: 600; }
-.section { display: none; }
-.section.visible { display: block; }
-.pack-grid { display: flex; flex-direction: column; gap: 10px; }
-.pack-card { background: var(--color-background-secondary); border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: start; }
-.pack-card:hover { border-color: var(--color-border-secondary); }
-.pack-label { font-size: 15px; font-weight: 600; color: var(--color-text-primary); margin-bottom: 4px; }
-.pack-meta { font-size: 12px; color: var(--color-text-secondary); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-.badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
-.badge-shared { background: rgba(79,195,247,0.2); color: var(--uncommon); border: 1px solid rgba(79,195,247,0.35); }
-.badge-personal { background: rgba(179,157,219,0.2); color: var(--rare); border: 1px solid rgba(179,157,219,0.35); }
-.badge-active { background: rgba(29,158,117,0.25); color: #7dd3a8; border: 1px solid rgba(29,158,117,0.4); }
-.badge-exhausted { background: rgba(154,160,166,0.2); color: var(--common); border: 1px solid rgba(154,160,166,0.3); }
-.pack-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-.btn-sm { font-size: 12px; padding: 4px 10px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer; font-family: var(--font-sans); }
-.btn-sm:hover { background: var(--color-background-primary); color: var(--color-text-primary); border-color: var(--gold); }
-.btn-primary { font-size: 13px; padding: 7px 16px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border-secondary); background: transparent; color: var(--color-text-primary); cursor: pointer; font-weight: 600; font-family: 'Cinzel', serif; }
-.btn-primary:hover { background: var(--color-background-primary); border-color: var(--gold); }
-.progress-bar-wrap { background: var(--color-background-primary); border-radius: 4px; height: 4px; width: 80px; overflow: hidden; }
-.progress-bar-fill { height: 100%; border-radius: 4px; background: #1D9E75; }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-group.full { grid-column: 1 / -1; }
-.form-group.hidden { display: none; }
-.form-label { font-size: 12px; color: var(--color-text-secondary); font-weight: 500; letter-spacing: 0.02em; }
-.form-group input, .form-group select { font-size: 14px; padding: 8px 10px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border-secondary); background: rgba(26,14,8,0.9); color: var(--color-text-primary); width: 100%; font-family: var(--font-sans); }
-.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-glow); }
-.radio-group { display: flex; gap: 8px; }
-.radio-pill { font-size: 13px; padding: 6px 14px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border-secondary); cursor: pointer; color: var(--color-text-secondary); background: transparent; }
-.radio-pill:hover { color: var(--color-text-primary); }
-.radio-pill.selected { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--gold); font-weight: 500; }
-.cat-grid { display: flex; flex-wrap: wrap; gap: 6px; }
-.cat-chip { font-size: 12px; padding: 3px 10px; border-radius: 20px; border: 1px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer; }
-.cat-chip:hover { color: var(--color-text-primary); }
-.cat-chip.on { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--gold); }
-.slider-row { display: flex; align-items: center; gap: 10px; }
-.slider-row input[type=range] { flex: 1; accent-color: var(--gold); }
-.slider-val { font-size: 14px; font-weight: 500; min-width: 20px; color: var(--color-text-primary); }
-.tier-suggest { font-size: 12px; color: #7dd3a8; background: rgba(29,158,117,0.2); border: 1px solid rgba(29,158,117,0.35); padding: 4px 10px; border-radius: var(--border-radius-md); display: inline-block; margin-top: 4px; }
-.search-result { background: var(--color-background-primary); border: 1px solid var(--color-border-secondary); border-radius: var(--border-radius-md); margin-top: 4px; overflow: hidden; max-height: 200px; overflow-y: auto; }
-.search-item { font-size: 13px; padding: 8px 12px; color: var(--color-text-primary); border-bottom: 1px solid var(--color-border-tertiary); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-.search-item:last-child { border-bottom: none; }
-.search-item:hover { background: var(--color-background-secondary); }
-.search-rarity { font-size: 11px; color: var(--color-text-secondary); }
-.form-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--color-border-tertiary); }
-.result-card { background: var(--color-background-secondary); border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.5rem; }
-.result-title { font-family: 'Cinzel', serif; font-size: 15px; font-weight: 600; color: var(--color-text-primary); margin-bottom: 4px; }
-.result-sub { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
-.result-body { display: grid; grid-template-columns: 1fr auto; gap: 1.5rem; align-items: start; }
-.link-box { display: flex; align-items: center; gap: 8px; background: var(--color-background-primary); border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 8px 12px; margin-bottom: 12px; }
-.link-url { font-size: 13px; color: var(--color-text-secondary); flex: 1; font-family: var(--font-sans); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pack-stats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; }
-.stat-pill { font-size: 12px; color: var(--color-text-secondary); background: var(--color-background-primary); border: 1px solid var(--color-border-tertiary); border-radius: 20px; padding: 3px 10px; }
-.result-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.result-label { margin-bottom: 6px; }
-.qr-box { width: 160px; height: 160px; background: var(--color-background-primary); border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.packs-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.packs-summary { font-size: 13px; color: var(--color-text-secondary); }
-.dm-error { font-size: 13px; color: #ff8a65; margin-top: 8px; }
-#history-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 1rem; }
-#history-modal.visible { display: flex; }
-#history-modal .history-inner { background: var(--color-background-primary); border: 1px solid var(--color-border-secondary); border-radius: var(--border-radius-lg); padding: 1.5rem; max-width: 520px; width: 100%; max-height: 85vh; overflow-y: auto; }
-.history-list { display: flex; flex-direction: column; gap: 8px; }
-.history-row { background: var(--color-background-secondary); border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 10px 14px; }
-.history-meta { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 6px; }
-.history-items { display: flex; gap: 6px; flex-wrap: wrap; }
-.history-item { font-size: 12px; padding: 2px 8px; border-radius: 20px; background: var(--color-background-primary); border: 1px solid var(--color-border-tertiary); color: var(--color-text-primary); }
-.history-item.reveal { background: rgba(255,213,79,0.2); color: var(--legendary); border-color: rgba(255,213,79,0.5); }
 
-/* Rarity badges */
-.badge { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.06em; }
-.badge-shared { background: rgba(79,195,247,0.12); color: #4fc3f7; border: 1px solid rgba(79,195,247,0.35); }
-.badge-personal { background: rgba(179,157,219,0.12); color: #b39ddb; border: 1px solid rgba(179,157,219,0.35); }
-.badge-active { background: rgba(29,158,117,0.18); color: #7dd3a8; border: 1px solid rgba(29,158,117,0.35); }
-.badge-exhausted { background: rgba(154,160,166,0.12); color: #9aa0a6; border: 1px solid rgba(154,160,166,0.30); }
-
-/* ---- DM-dashboard look overrides (appended for robustness) ---- */
 body {
-  font-family: 'Crimson Text', Georgia, serif;
-  background: #060300;
-  color: rgba(240,215,140,0.95);
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  min-height: 100vh;
+  color: var(--text);
   overflow-x: hidden;
 }
 
+/* ── Atmospheric background ── */
 body::before {
   content: '';
   position: fixed;
@@ -139,6 +68,7 @@ body::before {
   z-index: 0;
 }
 
+/* Noise texture overlay */
 body::after {
   content: '';
   position: fixed;
@@ -149,330 +79,2018 @@ body::after {
   opacity: 0.5;
 }
 
-#page-wrap { position: relative; z-index: 1; padding: 2rem 1.5rem 4rem; }
-.dm-wrap { max-width: 1100px; }
-.dm-header { border-bottom: 1px solid rgba(201,168,76,0.15); margin-bottom: 2.5rem; padding-bottom: 1rem; }
-.dm-title { font-family: 'Cinzel Decorative', serif; letter-spacing: 0.12em; color: #f0d070; text-shadow: 0 0 20px rgba(201,168,76,0.5); text-transform: uppercase; font-size: 16px; }
-
-.tab-bar { gap: 6px; margin-bottom: 2rem; }
-.tab { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.06em; padding: 7px 14px; border-radius: 6px; border: 1px solid rgba(201,168,76,0.15); color: rgba(160,130,80,0.50); background: transparent; }
-.tab:hover { border-color: rgba(201,168,76,0.65); color: rgba(240,215,140,0.95); }
-.tab.active { background: rgba(201,168,76,0.15); border-color: rgba(201,168,76,0.30); color: #f0d070; font-weight: 700; }
-
-.pack-card,
-.result-card {
-  background: rgba(20,11,4,0.92);
-  border: 1px solid rgba(201,168,76,0.15);
-  border-radius: 10px;
+#app {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
 }
 
-.btn-primary {
-  font-family: 'Cinzel', serif;
-  font-size: 12px;
+/* ══════════════════════════════
+   LAYOUT UTILITIES
+══════════════════════════════ */
+.hidden { display: none !important; }
+.visible { display: flex; }
+.visible-block { display: block; }
+
+.field-group--fill { flex: 1; min-width: 180px; }
+.field-group--grow { flex: 1; min-width: 160px; }
+.field-label-optional { color: var(--text-muted); font-size: 9px; letter-spacing: 0.05em; }
+
+.form-row { display: flex; align-items: flex-end; gap: 1.25rem; flex-wrap: wrap; }
+.form-group-stack { display: flex; flex-direction: column; gap: 4px; }
+.form-group-inline { display: flex; align-items: center; gap: 10px; }
+.pos-relative { position: relative; }
+
+.field-input--compact { font-size: 13px; padding: 7px 10px; }
+.field-input--search { font-size: 13px; padding: 6px 10px; width: 200px; }
+
+.panel-box--pad { padding: 1rem 1.25rem; }
+.mode-hint-text { font-size: 11px; color: var(--text-muted); font-style: italic; line-height: 1.6; }
+.mode-hint-accent { color: var(--gold-light); font-style: normal; }
+
+.packs-toolbar-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.packs-filters { display: flex; gap: 5px; }
+.link-cta { color: var(--gold-light); cursor: pointer; }
+
+.modal-body-col { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.modal-qr-col { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.qr-placeholder { font-size: 10px; color: var(--text-muted); }
+
+.slot-pinned--mt { margin-top: 2px; }
+
+/* ══════════════════════════════
+   HEADER
+══════════════════════════════ */
+.dm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.dm-wordmark {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dm-wordmark-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: var(--gold-light);
+  text-shadow: 0 0 20px var(--gold-glow);
+}
+
+.dm-wordmark-sub {
+  font-family: var(--font-heading);
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.dm-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-btn {
+  font-family: var(--font-heading);
+  font-size: 11px;
   letter-spacing: 0.06em;
-  padding: 8px 20px;
-  border-radius: 6px;
-  border: 1px solid rgba(201,168,76,0.30);
-  color: rgba(240,215,140,0.95);
-  background: rgba(201,168,76,0.06);
+  padding: 5px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
 }
-.btn-primary:hover { border-color: #c9a84c; }
-.btn-sm {
-  font-family: 'Cinzel', serif;
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  padding: 8px 14px;
-  border-radius: 6px;
-  border: 1px solid rgba(201,168,76,0.25);
+.header-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold-light);
+  background: var(--gold-glow-soft);
 }
 
-/* Panel/section feel */
-.section { display: none; }
-.section.visible { display: block; }
-.pack-grid { gap: 12px; }
-.pack-actions { gap: 8px; }
+.dm-key-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
-/* Modal */
-#history-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.75);
-  z-index: 1000;
+.dm-key-input-wrap {
   display: none;
   align-items: center;
-  justify-content: center;
-  padding: 1rem;
+  gap: 6px;
 }
-#history-modal.visible { display: flex; }
-#history-modal .history-inner {
-  background: rgba(20,11,4,0.92);
-  border: 1px solid rgba(201,168,76,0.25);
-  border-radius: 10px;
-  padding: 1.5rem;
-  max-width: 520px;
+.dm-key-input-wrap.open { display: flex; }
+
+.dm-key-input {
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 5px 10px;
+  width: 160px;
+  background: rgba(10,6,2,0.8);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  color: var(--text);
+}
+.dm-key-input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-glow-soft); }
+.dm-key-input::placeholder { color: var(--text-muted); }
+
+.dm-key-pill {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--gold-light);
+  background: var(--gold-glow-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dm-key-clear {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 10px;
+  padding: 0;
+  line-height: 1;
+}
+.dm-key-clear:hover { color: var(--very-rare); }
+
+/* ══════════════════════════════
+   PACK META ROW
+══════════════════════════════ */
+.pack-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 2rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-lg);
+}
+
+.player-field { display: none; }
+.player-field.visible { display: flex; flex-direction: column; gap: 5px; }
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field-label {
+  font-family: var(--font-heading);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.field-input {
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 8px 12px;
+  background: rgba(10,6,2,0.7);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  color: var(--text);
+  transition: border-color 0.2s, box-shadow 0.2s;
   width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
 }
-.history-list { gap: 10px; }
-.history-row {
-  background: rgba(30,16,6,0.80);
-  border: 1px solid rgba(201,168,76,0.15);
-  border-radius: 6px;
-  padding: 10px 14px;
-}
-
-.dm-key-input input,
-.form-group input, .form-group select,
-.search-item,
-.slider-row input[type=range] { font-family: 'Crimson Text', Georgia, serif; }
-
-/* Inputs/selects */
-.dm-key-input input {
-  background: rgba(10,6,2,0.7);
-  border: 1px solid rgba(201,168,76,0.30);
-  color: rgba(240,215,140,0.95);
-  width: 220px;
-  border-radius: 6px;
-}
-.dm-key-input input:focus { outline: none; border-color: #c9a84c; box-shadow: 0 0 0 2px rgba(201,168,76,0.15); }
-
-.form-group input, .form-group select {
-  background: rgba(10,6,2,0.7);
-  border: 1px solid rgba(201,168,76,0.30);
-  color: rgba(240,215,140,0.95);
-  border-radius: 6px;
-}
-.form-group input:focus, .form-group select:focus {
+.field-input:focus {
   outline: none;
-  border-color: #c9a84c;
-  box-shadow: 0 0 0 2px rgba(201,168,76,0.15);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold-glow-soft);
+}
+.field-input::placeholder { color: var(--text-muted); }
+
+select.field-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c9a84c' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+  cursor: pointer;
+}
+select.field-input option { background: #110800; }
+
+.type-pills {
+  display: flex;
+  gap: 6px;
 }
 
-/* Range slider */
-.slider-row input[type=range] {
+.type-pill {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 7px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.type-pill:hover { color: var(--text); border-color: var(--border-hot); }
+.type-pill.active {
+  background: var(--gold-glow-soft);
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+
+/* ══════════════════════════════
+   BUILDER BODY
+══════════════════════════════ */
+.builder-body {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* ── LEFT PANEL ── */
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.panel-box {
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-lg);
+  padding: 1.25rem;
+}
+
+.panel-box-title {
+  font-family: var(--font-heading);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+/* Slider */
+.slider-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.slider-label {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.slider-value {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--gold-light);
+  text-shadow: 0 0 12px var(--gold-glow);
+  min-width: 24px;
+  text-align: right;
+}
+
+.slider-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+input[type=range] {
   -webkit-appearance: none;
+  appearance: none;
   width: 100%;
   height: 3px;
-  background: linear-gradient(to right, #c9a84c 0%, #c9a84c var(--pct, 0%), rgba(201,168,76,0.2) var(--pct, 0%), rgba(201,168,76,0.2) 100%);
+  background: linear-gradient(to right, var(--gold) 0%, var(--gold) var(--pct, 0%), rgba(201,168,76,0.2) var(--pct, 0%), rgba(201,168,76,0.2) 100%);
   border-radius: 2px;
   outline: none;
+  cursor: pointer;
 }
-.slider-row input[type=range]::-webkit-slider-thumb {
+input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #f0d070;
-  border: 2px solid #060300;
-  box-shadow: 0 0 8px rgba(201,168,76,0.5);
+  background: var(--gold-light);
+  border: 2px solid var(--bg-deep);
+  box-shadow: 0 0 8px var(--gold-glow);
   cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+input[type=range]::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 14px var(--gold-glow);
 }
 
-/* Radio pills */
-.radio-pill {
-  font-family: 'Cinzel', serif;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  padding: 7px 14px;
-  border-radius: 6px;
-  border: 1px solid rgba(201,168,76,0.15);
-  background: transparent;
-  color: rgba(160,130,80,0.50);
-  cursor: pointer;
-  transition: all 0.18s;
+/* Categories */
+.cat-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
 }
-.radio-pill:hover { color: rgba(240,215,140,0.95); border-color: rgba(201,168,76,0.30); }
-.radio-pill.selected { background: rgba(201,168,76,0.15); border-color: rgba(201,168,76,0.30); color: #f0d070; font-weight: 700; }
 
-/* Category chips */
 .cat-chip {
-  font-family: 'Cinzel', serif;
+  font-family: var(--font-heading);
   font-size: 10px;
   letter-spacing: 0.04em;
-  padding: 4px 10px;
+  padding: 4px 9px;
   border-radius: 20px;
-  border: 1px solid rgba(201,168,76,0.15);
+  border: 1px solid var(--border-dim);
   background: transparent;
-  color: rgba(160,130,80,0.50);
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.18s;
 }
-.cat-chip:hover { color: rgba(240,215,140,0.95); border-color: rgba(201,168,76,0.30); }
-.cat-chip.on { background: rgba(201,168,76,0.15); border-color: rgba(201,168,76,0.30); color: #f0d070; }
-
-/* Search results */
-.search-result {
-  background: rgba(20,11,4,0.92);
-  border: 1px solid rgba(201,168,76,0.15);
-  border-radius: 6px;
+.cat-chip:hover { color: var(--text-dim); border-color: var(--border); }
+.cat-chip.on {
+  background: var(--gold-glow-soft);
+  border-color: var(--gold);
+  color: var(--gold-light);
 }
-.search-item {
+
+/* ── RIGHT PANEL ── */
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── CARD STAGE ── */
+.card-stage {
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-lg);
+  padding: 1.5rem;
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.stage-label {
+  font-family: var(--font-heading);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.card-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+/* ── CARD SLOT ── */
+.card-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 100px;
+  max-width: 140px;
+  transition: opacity 0.3s;
+}
+
+.card-slot.disabled {
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.card-frame {
+  width: 100%;
+  aspect-ratio: 2/3;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: rgba(10,5,2,0.85);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.card-frame::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 4px;
+  border: 1px solid var(--border-dim);
+  pointer-events: none;
+}
+
+/* Corner ornaments */
+.card-frame::after {
+  content: '◆';
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.card-frame:hover {
+  border-color: var(--gold);
+  box-shadow: 0 0 12px var(--gold-glow-soft), inset 0 0 20px rgba(201,168,76,0.04);
+}
+
+.card-slot-number {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  opacity: 0.5;
+}
+
+.card-slot-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  font-size: 22px;
+  opacity: 0.25;
+}
+
+/* Reveal card special */
+.card-slot.reveal .card-frame {
+  border-color: var(--reveal-color);
+  box-shadow: 0 0 18px var(--reveal-glow), inset 0 0 30px rgba(179,157,219,0.05);
+}
+
+.card-slot.reveal .card-frame::after {
+  color: var(--reveal-color);
+  opacity: 0.8;
+  text-shadow: 0 0 8px var(--reveal-glow);
+}
+
+.card-slot.reveal .card-frame::before {
+  border-color: rgba(179,157,219,0.25);
+}
+
+.reveal-label {
+  font-family: var(--font-heading);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--reveal-color);
+  text-shadow: 0 0 8px var(--reveal-glow);
+  opacity: 0.9;
+}
+
+.slot-label {
+  font-family: var(--font-heading);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* ── RARITY DROPDOWNS (inline under each card) ── */
+.slot-rarity {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rarity-range-sep {
+  text-align: center;
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+
+.rarity-select {
+  font-family: var(--font-body);
+  font-size: 11px;
+  padding: 4px 22px 4px 8px;
+  background: rgba(10,6,2,0.8);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-sm);
+  color: var(--text-dim);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238a6f30' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 7px center;
+  cursor: pointer;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+
+.rarity-select:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.rarity-select option { background: #110800; }
+
+.rarity-select[data-rarity="mundane"]   { color: var(--text-muted); }
+.rarity-select[data-rarity="common"]    { color: var(--common); border-color: rgba(154,160,166,0.3); }
+.rarity-select[data-rarity="uncommon"]  { color: var(--uncommon); border-color: rgba(79,195,247,0.3); }
+.rarity-select[data-rarity="rare"]      { color: var(--rare); border-color: rgba(179,157,219,0.35); }
+.rarity-select[data-rarity="very-rare"] { color: var(--very-rare); border-color: rgba(255,138,101,0.35); }
+.rarity-select[data-rarity="legendary"] { color: var(--legendary); border-color: rgba(255,213,79,0.35); }
+
+.card-slot.reveal .rarity-select {
+  border-color: rgba(179,157,219,0.3);
+  color: var(--reveal-color);
+}
+
+.jackpot-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  margin-top: 3px;
+  z-index: 100;
+  max-height: 180px;
+  overflow-y: auto;
+  display: none;
+}
+.jackpot-results.open { display: block; }
+.jackpot-result-item {
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 7px 12px;
+  color: var(--text-dim);
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-dim);
+  transition: background 0.15s;
+}
+.jackpot-result-item:last-child { border-bottom: none; }
+.jackpot-result-item:hover { background: var(--surface-3); color: var(--gold-light); }
+
+/* ── MODE PANELS ── */
+.mode-panel { display: none; }
+.mode-panel.visible { display: block; }
+
+.pack-count-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pack-count-input {
+  font-family: var(--font-display);
+  font-size: 22px;
+  width: 68px;
+  text-align: center;
+  padding: 6px 4px;
+  background: rgba(10,6,2,0.8);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  color: var(--gold-light);
+  text-shadow: 0 0 10px var(--gold-glow);
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.pack-count-input::-webkit-outer-spin-button,
+.pack-count-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.pack-count-input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-glow-soft); }
+
+.pack-count-label { font-family: var(--font-heading); font-size: 11px; letter-spacing: 0.06em; color: var(--text-dim); }
+.pack-count-hint  { font-size: 11px; color: var(--text-muted); font-style: italic; }
+
+/* Jackpot slot */
+.card-slot.jackpot .card-frame {
+  border-color: var(--legendary);
+  box-shadow: 0 0 20px rgba(255,213,79,0.5), inset 0 0 30px rgba(255,213,79,0.06);
+}
+.card-slot.jackpot .card-frame::after { color: var(--legendary); text-shadow: 0 0 8px rgba(255,213,79,0.8); opacity: 1; }
+
+.slot-jackpot-btn {
+  font-family: var(--font-heading);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1px solid var(--border-dim);
   background: transparent;
-  color: rgba(240,215,140,0.95);
-  border-bottom: 1px solid rgba(201,168,76,0.15);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.18s;
+  width: 100%;
 }
-.search-item:hover { background: rgba(40,22,8,0.60); }
+.slot-jackpot-btn:hover { border-color: rgba(255,213,79,0.4); color: var(--legendary); }
+.card-slot.jackpot .slot-jackpot-btn {
+  border-color: rgba(255,213,79,0.6);
+  color: var(--legendary);
+  background: rgba(255,213,79,0.08);
+  text-shadow: 0 0 6px rgba(255,213,79,0.5);
+}
 
-/* Footer buttons */
-.form-footer { border-top: 1px solid rgba(201,168,76,0.15); padding-top: 1rem; margin-top: 1.5rem; }
+/* Curated: per-slot pin */
+.slot-pin-btn {
+  font-family: var(--font-heading);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1px solid var(--border-dim);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.18s;
+  width: 100%;
+}
+.slot-pin-btn:hover { border-color: var(--border); color: var(--text-dim); }
 
+.slot-pin-area { width: 100%; display: none; flex-direction: column; gap: 4px; }
+.slot-pin-area.open { display: flex; }
+
+.slot-pin-search {
+  font-family: var(--font-body);
+  font-size: 11px;
+  padding: 4px 8px;
+  background: rgba(10,6,2,0.8);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  width: 100%;
+}
+.slot-pin-search:focus { outline: none; border-color: var(--gold); }
+.slot-pin-search::placeholder { color: var(--text-muted); }
+
+.slot-pinned {
+  font-size: 10px;
+  color: var(--gold-light);
+  background: rgba(201,168,76,0.08);
+  border: 1px solid rgba(201,168,76,0.25);
+  border-radius: var(--r-sm);
+  padding: 3px 8px;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  width: 100%;
+}
+.slot-pinned.visible { display: flex; }
+.slot-pinned-name { font-family: var(--font-heading); font-size: 9px; letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.slot-pinned-clear { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 10px; padding: 0 2px; flex-shrink: 0; }
+.slot-pinned-clear:hover { color: var(--very-rare); }
+
+.card-slot.pinned .card-frame {
+  border-color: var(--gold);
+  box-shadow: 0 0 14px var(--gold-glow-soft), inset 0 0 20px rgba(201,168,76,0.05);
+}
+
+/* ── FOOTER ACTIONS ── */
+.builder-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-dim);
+}
+
+.footer-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  flex: 1;
+}
+
+.btn {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  padding: 8px 20px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn:hover {
+  border-color: var(--border-hot);
+  color: var(--text);
+}
+
+.btn-create {
+  border-color: var(--gold-dim);
+  color: var(--gold-light);
+  background: rgba(201,168,76,0.06);
+  position: relative;
+  overflow: hidden;
+}
+.btn-create::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(240,208,112,0.06) 100%);
+  pointer-events: none;
+}
+.btn-create:hover {
+  border-color: var(--gold);
+  background: rgba(201,168,76,0.12);
+  box-shadow: 0 0 16px var(--gold-glow-soft);
+}
+
+/* Divider ornament */
+.ornament-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  margin: 0.25rem 0;
+}
+.ornament-divider::before,
+.ornament-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-dim);
+}
+
+/* ══════════════════════════════
+   SCROLLBAR
+══════════════════════════════ */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.30); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(201,168,76,0.65); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hot); }
+
+/* ══════════════════════════════
+   ANIMATIONS
+══════════════════════════════ */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.card-slot {
+  animation: fadeSlideIn 0.3s ease both;
+}
+.card-slot:nth-child(1) { animation-delay: 0.00s; }
+.card-slot:nth-child(2) { animation-delay: 0.04s; }
+.card-slot:nth-child(3) { animation-delay: 0.08s; }
+.card-slot:nth-child(4) { animation-delay: 0.12s; }
+.card-slot:nth-child(5) { animation-delay: 0.16s; }
+.card-slot:nth-child(6) { animation-delay: 0.20s; }
+
+@keyframes revealPulse {
+  0%, 100% { box-shadow: 0 0 18px var(--reveal-glow), inset 0 0 30px rgba(179,157,219,0.05); }
+  50%       { box-shadow: 0 0 28px var(--reveal-glow), inset 0 0 40px rgba(179,157,219,0.09); }
+}
+.card-slot.reveal .card-frame {
+  animation: revealPulse 3s ease-in-out infinite;
+}
+
+/* ── PACK MODE PILLS ── */
+.mode-pills { display: flex; flex-direction: column; gap: 6px; }
+
+.mode-pill {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: var(--r-md);
+  border: 1px solid var(--border-dim); background: transparent;
+  cursor: pointer; text-align: left; transition: all 0.2s; width: 100%;
+}
+.mode-pill:hover { border-color: var(--border); background: rgba(201,168,76,0.04); }
+.mode-pill.active { border-color: var(--gold); background: var(--gold-glow-soft); }
+
+.mode-pill-icon { font-size: 15px; flex-shrink: 0; opacity: 0.8; }
+.mode-pill-text { display: flex; flex-direction: column; gap: 2px; }
+.mode-pill-name { font-family: var(--font-heading); font-size: 11px; letter-spacing: 0.06em; color: var(--text-dim); }
+.mode-pill.active .mode-pill-name { color: var(--gold-light); }
+.mode-pill-desc { font-size: 10px; color: var(--text-muted); font-style: italic; }
+
+/* ── CURATED RESULT TAG ── */
+.curated-result {
+  display: none; align-items: center; justify-content: space-between;
+  margin-top: 6px; padding: 5px 8px;
+  background: rgba(179,157,219,0.1); border: 1px solid rgba(179,157,219,0.3);
+  border-radius: var(--r-sm);
+}
+.curated-result.visible { display: flex; }
+.curated-result-name { font-size: 11px; color: var(--rare); font-family: var(--font-heading); letter-spacing: 0.04em; }
+.curated-clear { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 10px; padding: 0 2px; transition: color 0.15s; }
+.curated-clear:hover { color: var(--very-rare); }
+
+/* ── MODE HINT ── */
+.mode-hint {
+  margin-top: 12px; font-size: 10px; color: var(--text-muted);
+  font-style: italic; line-height: 1.5;
+  border-top: 1px solid var(--border-dim); padding-top: 10px;
+}
+
+
+/* ══════════════════════════════
+   MY PACKS VIEW
+══════════════════════════════ */
+#view-builder, #view-packs { transition: opacity 0.2s; }
+
+#app-packs {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.packs-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.packs-summary {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.packs-table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+.packs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.packs-table thead tr {
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.packs-table th {
+  font-family: var(--font-heading);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 400;
+}
+
+.packs-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-dim);
+  color: var(--text-dim);
+  vertical-align: middle;
+}
+
+.packs-table tbody tr:last-child td { border-bottom: none; }
+
+.packs-table tbody tr {
+  transition: background 0.15s;
+  cursor: pointer;
+}
+.packs-table tbody tr:hover { background: rgba(201,168,76,0.04); }
+
+.pack-row-label {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+.pack-row-mode {
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 20px;
+  border: 1px solid;
+  display: inline-block;
+}
+.pack-row-mode.curated {
+  color: var(--rare);
+  border-color: rgba(179,157,219,0.35);
+  background: rgba(179,157,219,0.08);
+}
+.pack-row-mode.gamble {
+  color: var(--legendary);
+  border-color: rgba(255,213,79,0.3);
+  background: rgba(255,213,79,0.06);
+}
+.pack-row-mode.shared {
+  color: var(--rare);
+  border-color: rgba(179,157,219,0.35);
+  background: rgba(179,157,219,0.08);
+}
+.pack-row-mode.personal {
+  color: var(--legendary);
+  border-color: rgba(255,213,79,0.3);
+  background: rgba(255,213,79,0.06);
+}
+
+.status-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+  display: inline-block;
+}
+.status-badge.active {
+  background: rgba(29,158,117,0.2);
+  color: #7dd3a8;
+  border: 1px solid rgba(29,158,117,0.35);
+}
+.status-badge.exhausted {
+  background: rgba(154,160,166,0.15);
+  color: var(--common);
+  border: 1px solid rgba(154,160,166,0.25);
+}
+
+.pack-row-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.btn-sm {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-dim);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: var(--font-heading);
+  letter-spacing: 0.04em;
+  transition: all 0.18s;
+}
+.btn-sm:hover { border-color: var(--gold); color: var(--gold-light); background: var(--gold-glow-soft); }
+.btn-sm.danger:hover { border-color: var(--very-rare); color: var(--very-rare); background: rgba(255,138,101,0.08); }
+
+.packs-empty {
+  display: none;
+  text-align: center;
+  padding: 3rem 1rem;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.packs-empty.visible { display: block; }
+
+/* ══════════════════════════════
+   PACK DETAIL MODAL
+══════════════════════════════ */
+.pack-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 500;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+.pack-modal-overlay.open { display: flex; }
+
+.modal-history-wrap { display: none; }
+.modal-history-title { margin-bottom: 0.75rem; }
+.modal-history-list { display: flex; flex-direction: column; gap: 6px; }
+.modal-history-row { display: flex; justify-content: space-between; gap: 10px; }
+.modal-history-row-item { color: rgba(201,168,76,0.85); }
+.modal-history-row-when { color: rgba(160,130,80,0.6); font-size: 11px; }
+
+.pack-modal-inner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  width: 100%;
+  max-width: 560px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px var(--border-dim);
+  animation: fadeSlideIn 0.2s ease both;
+}
+
+.pack-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.pack-modal-title {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  color: var(--gold-light);
+  margin-bottom: 3px;
+}
+
+.pack-modal-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.pack-modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.pack-modal-close:hover { color: var(--very-rare); }
+
+.pack-modal-body {
+  padding: 1.25rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.modal-stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.modal-stat-pill {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: rgba(10,6,2,0.6);
+  border: 1px solid var(--border-dim);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+
+.modal-link-row {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+}
+
+.link-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(10,6,2,0.6);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-md);
+  padding: 7px 10px;
+}
+
+.link-url {
+  font-size: 12px;
+  color: var(--text-muted);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: monospace;
+}
+
+.modal-qr-box {
+  width: 80px;
+  height: 80px;
+  background: rgba(10,6,2,0.6);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-dim);
+}
+
+.btn-danger {
+  border-color: rgba(255,138,101,0.3);
+  color: var(--very-rare);
+}
+.btn-danger:hover {
+  border-color: var(--very-rare);
+  background: rgba(255,138,101,0.08);
+}
+
+/* ══════════════════════════════
+   RESPONSIVE (768px)
+══════════════════════════════ */
+@media (max-width: 768px) {
+  .builder-body {
+    grid-template-columns: 1fr;
+  }
+  .card-row {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 6px;
+  }
+  .packs-table-wrap {
+    overflow-x: auto;
+  }
+}
+
 </style>
 </head>
 <body>
-<div id="page-wrap">
-<div class="dm-wrap">
-  <div class="dm-header">
-    <div class="dm-title">DM Dashboard</div>
-    <div class="dm-key-bar">
-      <div class="dm-key-input visible" id="dm-key-input">
-        <input type="text" id="dm-key-field" placeholder="Enter DM key" autocomplete="off">
-        <button type="button" class="btn-sm" id="dm-key-submit">Save key</button>
+
+<div id="view-builder">
+<div id="app">
+
+  <!-- ── HEADER ── -->
+  <header class="dm-header">
+    <div class="dm-wordmark">
+      <span class="dm-wordmark-title">Loot Forge</span>
+      <span class="dm-wordmark-sub">Pack Builder · DM Tools</span>
+    </div>
+    <div class="dm-header-right">
+      <div class="dm-key-wrap" id="dm-key-wrap">
+        <div class="dm-key-input-wrap open" id="dm-key-input-wrap">
+          <input type="text" class="dm-key-input" id="dm-key-input" placeholder="⚿ DM Key…" onkeydown="onKeySubmit(event)" autocomplete="off" spellcheck="false">
+          <button class="header-btn" onclick="submitKey()">Set</button>
+        </div>
+        <span class="dm-key-pill hidden" id="dm-key-pill">⚿ <span id="dm-key-display"></span> <button class="dm-key-clear" onclick="clearKey()">✕</button></span>
       </div>
-      <div class="dm-key-pill" id="dm-key-pill" style="display:none;">Key: <span id="dm-key-display"></span></div>
-      <button class="btn-sm" id="dm-key-change" style="display:none;">Change key</button>
+      <button class="header-btn" data-view="packs" onclick="showView('packs')">◈ My Packs</button>
+    </div>
+  </header>
+
+  <!-- ── PACK META ROW ── -->
+  <div class="pack-meta-row">
+    <div class="field-group">
+      <span class="field-label">Pack Mode</span>
+      <div class="type-pills">
+        <button class="type-pill active" data-mode="curated">✦ Curated</button>
+        <button class="type-pill" data-mode="gamble">⚄ Gamble</button>
+      </div>
+    </div>
+    <div class="field-group field-group--fill">
+      <span class="field-label">Pack Label</span>
+      <input type="text" class="field-input" placeholder="e.g. Dungeon Delver's Cache" id="pack-label">
+    </div>
+    <div class="field-group player-field visible" id="player-field">
+      <span class="field-label">Player <span class="field-label-optional">(optional)</span></span>
+      <input type="text" class="field-input" placeholder="Player name" id="pack-player">
     </div>
   </div>
 
-  <div class="tab-bar">
-    <button class="tab active" data-tab="packs">My packs</button>
-    <button class="tab" data-tab="create">Create pack</button>
-    <button class="tab" data-tab="result">Pack created</button>
-    <button class="tab" data-tab="history" style="display:none;">History</button>
+  <!-- ── BUILDER BODY ── -->
+  <div class="builder-body">
+
+    <!-- LEFT PANEL -->
+    <aside class="left-panel">
+
+      <!-- Slot count slider -->
+      <div class="panel-box">
+        <div class="panel-box-title">Pack Size</div>
+        <div class="slider-wrap">
+          <div class="slider-header">
+            <span class="slider-label">Filler Cards</span>
+            <span class="slider-value" id="slider-display">3</span>
+          </div>
+          <input type="range" id="slot-slider" min="1" max="4" value="3" aria-label="Filler cards">
+          <span class="slider-sub" id="slider-sub">3 filler + 1 reveal = 4 cards total</span>
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div class="panel-box">
+        <div class="panel-box-title">Categories</div>
+        <div class="cat-grid" id="cat-grid">
+          <button class="cat-chip">Adventuring Gear</button>
+          <button class="cat-chip">Armor</button>
+          <button class="cat-chip">Book</button>
+          <button class="cat-chip">Potion</button>
+          <button class="cat-chip">Quest Hook</button>
+          <button class="cat-chip">Ring</button>
+          <button class="cat-chip">Treasure</button>
+          <button class="cat-chip">Weapon</button>
+          <button class="cat-chip">Wondrous Item</button>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+
+      <!-- Card Stage -->
+      <div class="card-stage">
+        <div class="stage-label">Card Slots — click a slot to configure</div>
+
+        <div class="card-row" id="card-row">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+
+      <!-- Gamble: pack count (visible in gamble mode) -->
+      <div class="panel-box panel-box--pad mode-panel" id="panel-gamble">
+        <div class="form-row">
+          <div class="form-group-stack">
+            <span class="field-label">Packs to Generate</span>
+            <div class="form-group-inline">
+              <input type="number" class="pack-count-input" id="gamble-count" min="2" max="20" value="10" oninput="updateGambleHint()">
+              <span class="pack-count-hint" id="gamble-hint">1 jackpot hidden in 10 packs</span>
+            </div>
+          </div>
+          <div class="form-group-stack field-group--grow">
+            <span class="field-label">Jackpot Item</span>
+            <div class="pos-relative">
+              <input type="text" class="field-input field-input--compact" id="jackpot-search" placeholder="Search for jackpot item…" autocomplete="off" oninput="onJackpotSearch(this)">
+              <div class="jackpot-results" id="jackpot-results"></div>
+            </div>
+            <div class="slot-pinned slot-pinned--mt" id="jackpot-pinned">
+              <span class="slot-pinned-name" id="jackpot-pinned-name"></span>
+              <button class="slot-pinned-clear" onclick="clearJackpotItem()">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Curated: hint (visible in curated mode) -->
+      <div class="panel-box panel-box--pad mode-panel visible" id="panel-curated">
+        <span class="mode-hint-text">
+          Click <span class="mode-hint-accent">+ Pin Item</span> on any card slot to guarantee a specific item in that slot.
+        </span>
+      </div>
+
+      <!-- Footer actions -->
+      <div class="builder-footer">
+        <span class="footer-hint">Pack will generate <span id="footer-count">4</span> cards.</span>
+        <button class="btn">Reset</button>
+        <button class="btn btn-create" onclick="onCreatePack()">◆ Create Pack</button>
+      </div>
+
+    </div>
   </div>
 
-  <div class="section visible" id="tab-packs">
+</div><!-- /app -->
+</div><!-- /view-builder -->
+
+<!-- ══════════════════════════════
+     MY PACKS VIEW
+══════════════════════════════ -->
+<div id="view-packs" class="hidden">
+  <div id="app-packs">
+
+    <header class="dm-header">
+      <div class="dm-wordmark">
+        <span class="dm-wordmark-title">Loot Forge</span>
+        <span class="dm-wordmark-sub">My Packs</span>
+      </div>
+      <div class="dm-header-right">
+        <button class="header-btn" onclick="showView('builder')">← Back to Builder</button>
+      </div>
+    </header>
+
+    <!-- Toolbar -->
     <div class="packs-toolbar">
-      <span class="packs-summary" id="packs-summary">Enter your DM key to load packs.</span>
-      <button class="btn-primary" id="btn-create-pack">+ Create pack</button>
+      <div class="packs-toolbar-row">
+        <input type="text" class="field-input field-input--search" id="packs-search" placeholder="Search packs…" oninput="filterPacks()">
+        <div class="packs-filters" id="status-filters">
+          <button class="cat-chip on" data-filter="all" onclick="setStatusFilter('all',this)">All</button>
+          <button class="cat-chip" data-filter="active" onclick="setStatusFilter('active',this)">Active</button>
+          <button class="cat-chip" data-filter="exhausted" onclick="setStatusFilter('exhausted',this)">Exhausted</button>
+        </div>
+      </div>
+      <span class="packs-summary" id="packs-summary">0 packs</span>
     </div>
-    <div class="dm-error" id="pack-error" style="display:none;"></div>
-    <div class="pack-grid" id="pack-list"></div>
-  </div>
 
-  <div class="section" id="tab-create">
-    <form id="create-form" class="form-grid">
-      <div class="form-group full">
-        <div class="form-label">Pack label</div>
-        <input type="text" id="form-label" placeholder="e.g. BBEG Vault — Session 12" required>
-      </div>
-      <div class="form-group">
-        <div class="form-label">Type</div>
-        <div class="radio-group">
-          <span class="radio-pill selected" data-type="shared">Shared</span>
-          <span class="radio-pill" data-type="personal">Personal</span>
-        </div>
-      </div>
-      <div class="form-group form-group-player" style="display:none;">
-        <div class="form-label">Player name</div>
-        <input type="text" id="form-player-name" placeholder="Player name">
-      </div>
-      <div class="form-group">
-        <div class="form-label">Quantity</div>
-        <div class="slider-row">
-          <input type="range" id="form-quantity" min="1" max="20" value="1">
-          <span class="slider-val" id="qty-val">1</span>
-        </div>
-      </div>
-      <div class="form-group">
-        <div class="form-label">CR hint</div>
-        <div class="slider-row">
-          <input type="range" id="form-cr" min="1" max="20" value="10">
-          <span class="slider-val" id="cr-val">10</span>
-        </div>
-        <div class="tier-suggest" id="cr-suggest">Suggested: Rare – Very Rare</div>
-      </div>
-      <div class="form-group">
-        <div class="form-label">Reveal tier min</div>
-        <select id="form-tier-min">
-          <option value="0">Mundane</option>
-          <option value="1">Common</option>
-          <option value="2">Uncommon</option>
-          <option value="3" selected>Rare</option>
-          <option value="4">Very Rare</option>
-          <option value="5">Legendary</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <div class="form-label">Reveal tier max</div>
-        <select id="form-tier-max">
-          <option value="0">Mundane</option>
-          <option value="1">Common</option>
-          <option value="2">Uncommon</option>
-          <option value="3">Rare</option>
-          <option value="4" selected>Very Rare</option>
-          <option value="5">Legendary</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <div class="form-label">Mundane item count</div>
-        <div class="slider-row">
-          <input type="range" id="form-mundane" min="1" max="5" value="3">
-          <span class="slider-val" id="mundane-val">3</span>
-        </div>
-      </div>
-      <div class="form-group full">
-        <div class="form-label">Guaranteed item (optional)</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <input type="text" id="form-item-search" placeholder="Search items..." autocomplete="off" style="flex:1;">
-          <button type="button" class="btn-sm" id="form-item-clear" style="display:none;">Clear</button>
-        </div>
-        <input type="hidden" id="form-guaranteed-id" value="">
-        <div class="search-result" id="search-results" style="display:none;"></div>
-      </div>
-      <div class="form-group full">
-        <div class="form-label">Categories (leave all unchecked for any)</div>
-        <div class="cat-grid" id="cat-grid"></div>
-      </div>
-      <div class="form-footer">
-        <button type="button" class="btn-sm" id="form-cancel">Cancel</button>
-        <button type="submit" class="btn-primary">Create pack</button>
-      </div>
-    </form>
-  </div>
+    <!-- Pack list table -->
+    <div class="packs-table-wrap">
+      <table class="packs-table">
+        <thead>
+          <tr>
+            <th>Pack Label</th>
+            <th>Mode</th>
+            <th>Cards</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="packs-tbody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+      <div class="packs-empty" id="packs-empty">No packs yet. <span class="link-cta" onclick="showView('builder')">Create your first pack →</span></div>
+    </div>
 
-  <div class="section" id="tab-result">
-    <div class="result-card">
-      <div class="result-title" id="result-title"></div>
-      <div class="result-sub" id="result-sub"></div>
-      <div class="pack-stats" id="result-stats"></div>
-      <div class="result-body">
-        <div>
-          <div class="form-label result-label">Shareable link</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     PACK DETAIL MODAL
+══════════════════════════════ -->
+<div id="pack-modal" class="pack-modal-overlay" onclick="closePackModal(event)">
+  <div class="pack-modal-inner">
+    <div class="pack-modal-header">
+      <div>
+        <div class="pack-modal-title" id="modal-title"></div>
+        <div class="pack-modal-sub" id="modal-sub"></div>
+      </div>
+      <button class="pack-modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="pack-modal-body">
+      <!-- Stats row -->
+      <div class="modal-stats" id="modal-stats"></div>
+
+      <!-- History -->
+      <div class="panel-box panel-box--pad modal-history-wrap" id="modal-history-wrap">
+        <div class="panel-box-title modal-history-title">Open History</div>
+        <div id="modal-history" class="modal-history-list"></div>
+      </div>
+
+      <!-- Link + QR -->
+      <div class="modal-link-row">
+        <div class="modal-body-col">
+          <span class="field-label">Shareable Link</span>
           <div class="link-box">
-            <span class="link-url" id="result-link-url"></span>
-            <button type="button" class="btn-sm" id="result-copy">Copy</button>
-          </div>
-          <div class="result-actions">
-            <button type="button" class="btn-sm" id="result-download-qr">Download QR as PNG</button>
-            <button type="button" class="btn-sm" id="result-create-another">Create another</button>
-            <button type="button" class="btn-sm" id="result-back">Back to packs</button>
+            <span class="link-url" id="modal-link"></span>
+            <button class="btn-sm" onclick="copyModalLink()">Copy</button>
           </div>
         </div>
-        <div>
-          <div class="form-label result-label">QR code</div>
-          <div class="qr-box"><div id="qr-container"></div></div>
+        <div class="modal-qr-col">
+          <span class="field-label">QR Code</span>
+          <div class="modal-qr-box" id="modal-qr">
+            <span class="qr-placeholder">QR</span>
+          </div>
         </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="modal-actions">
+        <button class="btn" onclick="duplicatePack()">⧉ Duplicate</button>
+        <button class="btn" id="modal-regenerate" onclick="regeneratePack()">◎ Add 1 Opening</button>
       </div>
     </div>
   </div>
 </div>
-</div>
 
-<div id="history-modal">
-  <div class="history-inner" id="history-inner">
-    <div class="history-header" id="history-header"></div>
-    <div class="history-sub" id="history-sub"></div>
-    <div class="history-list" id="history-list"></div>
-  </div>
-</div>
 
-<script src="assets/js/loot-constants.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="assets/js/dm-dashboard.js"></script>
+<script>
+const RARITIES = [
+  { value: 'mundane',   label: 'Mundane',   color: '#888' },
+  { value: 'common',    label: 'Common',    color: '#9aa0a6' },
+  { value: 'uncommon',  label: 'Uncommon',  color: '#4fc3f7' },
+  { value: 'rare',      label: 'Rare',      color: '#b39ddb' },
+  { value: 'very-rare', label: 'Very Rare', color: '#ff8a65' },
+  { value: 'legendary', label: 'Legendary', color: '#ffd54f' },
+];
+
+const API_BASE = '/tools/loot-box-tests/api';
+const DM_KEY_STORAGE_KEY = 'lootForgeDmKey';
+let LOOT = null; // loaded from tools/loot-box-tests/loot-table.json
+
+const ICONS = ['⚔','🛡','🧪','📜','💍','🔮','🪄','🗡','🏹','✨'];
+
+const slider      = document.getElementById('slot-slider');
+const sliderDisp  = document.getElementById('slider-display');
+const sliderSub   = document.getElementById('slider-sub');
+const cardRow     = document.getElementById('card-row');
+const footerCount = document.getElementById('footer-count');
+const playerField = document.getElementById('player-field');
+
+let slotRarities = [];
+let currentMode  = 'curated';
+let jackpotSlot  = null;
+let pinnedItems  = {};
+let dmKey = (window.sessionStorage.getItem(DM_KEY_STORAGE_KEY) || '').trim();
+let jackpotItem = null; // { id:number, name:string } | null
+
+function initSlotRarities(fillerCount) {
+  const existing = [...slotRarities];
+  slotRarities = [];
+  for (let i = 0; i < fillerCount; i++) {
+    slotRarities[i] = existing[i] || { min: 'mundane', max: 'common' };
+  }
+  slotRarities[fillerCount] = existing[fillerCount] || { min: 'rare', max: 'legendary' };
+}
+
+function raritySelectHTML(slotIndex, which, value) {
+  const opts = RARITIES.map(r =>
+    `<option value="${r.value}" ${r.value === value ? 'selected' : ''}>${r.label}</option>`
+  ).join('');
+  return `<select class="rarity-select" data-slot="${slotIndex}" data-which="${which}" data-rarity="${value}"
+    onchange="onRarityChange(this)">${opts}</select>`;
+}
+
+function onRarityChange(sel) {
+  const slot = parseInt(sel.dataset.slot);
+  const which = sel.dataset.which;
+  const val = sel.value;
+  slotRarities[slot][which] = val;
+  sel.dataset.rarity = val;
+}
+
+function gambleExtrasHTML(slotIndex) {
+  const isJackpot = jackpotSlot === slotIndex;
+  return `<button class="slot-jackpot-btn" onclick="setJackpot(${slotIndex})">
+    ${isJackpot ? '★ Jackpot' : '☆ Set Jackpot'}
+  </button>`;
+}
+
+function curatedExtrasHTML(slotIndex) {
+  const pinned = pinnedItems[slotIndex];
+  return `
+    <button class="slot-pin-btn" onclick="togglePinArea(${slotIndex})">+ Pin Item</button>
+    <div class="slot-pin-area" id="pin-area-${slotIndex}">
+      <input class="slot-pin-search" placeholder="Search item…"
+        oninput="onPinSearch(${slotIndex}, this)" autocomplete="off">
+    </div>
+    <div class="slot-pinned ${pinned ? 'visible' : ''}" id="pinned-${slotIndex}">
+      <span class="slot-pinned-name" id="pinned-name-${slotIndex}">${pinned || ''}</span>
+      <button class="slot-pinned-clear" onclick="clearPin(${slotIndex})">✕</button>
+    </div>`;
+}
+
+function buildCardRow(fillerCount) {
+  initSlotRarities(fillerCount);
+  const total = fillerCount + 1;
+
+  let html = '';
+  for (let i = 0; i < fillerCount; i++) {
+    const icon = ICONS[i % ICONS.length];
+    const sr = slotRarities[i];
+    const classes = ['card-slot', jackpotSlot === i ? 'jackpot' : '', pinnedItems[i] ? 'pinned' : ''].filter(Boolean).join(' ');
+    const extras = currentMode === 'gamble' ? gambleExtrasHTML(i) : curatedExtrasHTML(i);
+    html += `
+      <div class="${classes}" data-slot="${i}">
+        <div class="card-frame">
+          <span class="card-slot-icon">${icon}</span>
+          <span class="card-slot-number">Slot ${i+1}</span>
+        </div>
+        <span class="slot-label">Slot ${i+1}</span>
+        <div class="slot-rarity">
+          ${raritySelectHTML(i, 'min', sr.min)}
+          <div class="rarity-range-sep">to</div>
+          ${raritySelectHTML(i, 'max', sr.max)}
+        </div>
+        ${extras}
+      </div>`;
+  }
+
+  const rr = slotRarities[fillerCount];
+  const revealClasses = ['card-slot','reveal', jackpotSlot === fillerCount ? 'jackpot' : '', pinnedItems[fillerCount] ? 'pinned' : ''].filter(Boolean).join(' ');
+  const revealExtras = currentMode === 'gamble' ? gambleExtrasHTML(fillerCount) : curatedExtrasHTML(fillerCount);
+  html += `
+    <div class="${revealClasses}" data-slot="${fillerCount}">
+      <div class="card-frame">
+        <span class="card-slot-icon">✨</span>
+        <span class="card-slot-number">Reveal</span>
+      </div>
+      <span class="reveal-label">✦ Reveal</span>
+      <div class="slot-rarity">
+        ${raritySelectHTML(fillerCount, 'min', rr.min)}
+        <div class="rarity-range-sep">to</div>
+        ${raritySelectHTML(fillerCount, 'max', rr.max)}
+      </div>
+      ${revealExtras}
+    </div>`;
+
+  cardRow.innerHTML = html;
+  footerCount.textContent = total;
+  sliderSub.textContent = `${fillerCount} filler + 1 reveal = ${total} cards total`;
+}
+
+function setJackpot(slotIndex) {
+  jackpotSlot = (jackpotSlot === slotIndex) ? null : slotIndex;
+  buildCardRow(parseInt(slider.value));
+}
+
+function togglePinArea(slotIndex) {
+  const area = document.getElementById(`pin-area-${slotIndex}`);
+  if (!area) return;
+  area.classList.toggle('open');
+  if (area.classList.contains('open')) area.querySelector('.slot-pin-search')?.focus();
+}
+
+function onPinSearch(slotIndex, input) {
+  const q = input.value.trim().toLowerCase();
+  if (!q) return;
+  const match = findLootMatch(q);
+  if (match) pinItem(slotIndex, match);
+}
+
+function pinItem(slotIndex, item) {
+  pinnedItems[slotIndex] = item;
+  const area   = document.getElementById(`pin-area-${slotIndex}`);
+  const pinned = document.getElementById(`pinned-${slotIndex}`);
+  const pname  = document.getElementById(`pinned-name-${slotIndex}`);
+  const slot   = document.querySelector(`.card-slot[data-slot="${slotIndex}"]`);
+  if (area)   area.classList.remove('open');
+  if (pinned) pinned.classList.add('visible');
+  if (pname)  pname.textContent = item?.name || '';
+  if (slot)   slot.classList.add('pinned');
+}
+
+function clearPin(slotIndex) {
+  delete pinnedItems[slotIndex];
+  const pinned = document.getElementById(`pinned-${slotIndex}`);
+  const slot   = document.querySelector(`.card-slot[data-slot="${slotIndex}"]`);
+  if (pinned) pinned.classList.remove('visible');
+  if (slot)   slot.classList.remove('pinned');
+}
+
+function onJackpotSearch(input) {
+  const q = input.value.trim().toLowerCase();
+  const results = document.getElementById('jackpot-results');
+  if (!q) { results.classList.remove('open'); results.innerHTML = ''; return; }
+  const matches = findLootMatches(q, 8);
+  if (!matches.length) { results.classList.remove('open'); return; }
+  results.innerHTML = matches.map(m => {
+    const safeName = escapeHtml(m.name);
+    return `<div class="jackpot-result-item" onclick="selectJackpotItem(${Number(m.id)}, '${safeName.replace(/'/g, '&#39;')}')">${safeName}</div>`;
+  }).join('');
+  results.classList.add('open');
+}
+
+function selectJackpotItem(id, name) {
+  const pinned     = document.getElementById('jackpot-pinned');
+  const pinnedName = document.getElementById('jackpot-pinned-name');
+  const search     = document.getElementById('jackpot-search');
+  const results    = document.getElementById('jackpot-results');
+  jackpotItem = { id: Number(id), name: String(name) };
+  pinnedName.textContent = jackpotItem.name;
+  pinned.classList.add('visible');
+  search.value = '';
+  results.classList.remove('open');
+  results.innerHTML = '';
+}
+
+function clearJackpotItem() {
+  const pinned = document.getElementById('jackpot-pinned');
+  const pinnedName = document.getElementById('jackpot-pinned-name');
+  pinned.classList.remove('visible');
+  pinnedName.textContent = '';
+  jackpotItem = null;
+}
+
+// Close jackpot results on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('#panel-gamble')) {
+    document.getElementById('jackpot-results')?.classList.remove('open');
+  }
+});
+
+// ── DM Key ──
+function submitKey() {
+  const input = document.getElementById('dm-key-input');
+  const key = input.value.trim();
+  if (!key) return;
+  dmKey = key;
+  window.sessionStorage.setItem(DM_KEY_STORAGE_KEY, dmKey);
+  const masked = key.length > 4 ? key.slice(0, 4) + '···' : key;
+  document.getElementById('dm-key-display').textContent = masked;
+  document.getElementById('dm-key-pill').classList.remove('hidden');
+  input.value = '';
+  renderPackList(); // refresh from API
+}
+
+function onKeySubmit(e) {
+  if (e.key === 'Enter') submitKey();
+}
+
+function clearKey() {
+  document.getElementById('dm-key-pill').classList.add('hidden');
+  document.getElementById('dm-key-input').value = '';
+  document.getElementById('dm-key-input').focus();
+  dmKey = '';
+  window.sessionStorage.removeItem(DM_KEY_STORAGE_KEY);
+  renderPackList();
+}
+
+function updateGambleHint() {
+  const el = document.getElementById('gamble-hint');
+  const v  = parseInt(document.getElementById('gamble-count')?.value) || 10;
+  if (el) el.textContent = `1 jackpot hidden in ${v} packs`;
+}
+
+function updateSlider() {
+  const v = parseInt(slider.value);
+  const pct = ((v - 1) / (slider.max - slider.min)) * 100;
+  slider.style.setProperty('--pct', pct + '%');
+  sliderDisp.textContent = v;
+  buildCardRow(v);
+}
+
+slider.addEventListener('input', updateSlider);
+
+// Mode pills
+document.querySelectorAll('.type-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.type-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    currentMode = pill.dataset.mode;
+    const isGamble = currentMode === 'gamble';
+    document.getElementById('panel-gamble')?.classList.toggle('visible', isGamble);
+    document.getElementById('panel-curated')?.classList.toggle('visible', !isGamble);
+    playerField.classList.toggle('visible', !isGamble);
+    buildCardRow(parseInt(slider.value));
+  });
+});
+
+// Category chips
+document.querySelectorAll('.cat-chip').forEach(chip => {
+  chip.addEventListener('click', () => chip.classList.toggle('on'));
+});
+
+updateSlider();
+
+// ══════════════════════════════
+// PACK DATA & HELPERS
+// ══════════════════════════════
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+async function loadLoot() {
+  if (LOOT) return LOOT;
+  const res = await fetch('loot-table.json', { cache: 'no-cache' });
+  if (!res.ok) throw new Error('Could not load loot-table.json');
+  LOOT = await res.json();
+  return LOOT;
+}
+
+function findLootMatches(q, limit = 8) {
+  if (!LOOT?.items?.length) return [];
+  const query = String(q || '').trim().toLowerCase();
+  if (!query) return [];
+  const out = [];
+  for (const it of LOOT.items) {
+    if (!it?.name) continue;
+    if (String(it.name).toLowerCase().includes(query)) {
+      out.push({ id: it.id, name: it.name });
+      if (out.length >= limit) break;
+    }
+  }
+  return out;
+}
+
+function findLootMatch(q) {
+  const matches = findLootMatches(q, 1);
+  return matches[0] || null;
+}
+
+function getPackLink(packId) {
+  const origin = window.location.origin || '';
+  return origin + '/tools/loot-box-tests/pack/' + String(packId || '');
+}
+
+function rarityToTier(r) {
+  switch (r) {
+    case 'mundane': return 0;
+    case 'common': return 1;
+    case 'uncommon': return 2;
+    case 'rare': return 3;
+    case 'very-rare': return 4;
+    case 'legendary': return 5;
+    default: return 1;
+  }
+}
+
+async function apiGet(path) {
+  const res = await fetch(API_BASE + path, { method: 'GET' });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw data?.error ? new Error(data.error) : new Error('Request failed');
+  return data;
+}
+
+async function apiPost(path, body) {
+  const res = await fetch(API_BASE + path, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body || {}),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw data?.error ? new Error(data.error) : new Error('Request failed');
+  return data;
+}
+
+function buildPackConfig() {
+  const labelInput  = document.getElementById('pack-label');
+  const playerInput = document.getElementById('pack-player');
+  const label  = (labelInput?.value || '').trim() || 'Untitled Pack';
+  const player = (playerInput?.value || '').trim();
+
+  const fillerCount  = parseInt(slider.value) || 0;
+  const cardsPerPack = fillerCount + 1;
+
+  const categories = Array.from(document.querySelectorAll('.cat-chip.on'))
+    .map(c => c.textContent.trim())
+    .filter(Boolean);
+
+  const gambleCountInput = document.getElementById('gamble-count');
+  let gambleCount = parseInt(gambleCountInput?.value) || 10;
+  if (gambleCount < 2) gambleCount = 2;
+  if (gambleCount > 20) gambleCount = 20;
+
+  const jackpotPinnedNameEl = document.getElementById('jackpot-pinned-name');
+  const jackpotItemText = (jackpotPinnedNameEl?.textContent || '').trim();
+
+  const config = {
+    mode: currentMode,
+    label,
+    player,
+    fillerCount,
+    cardsPerPack,
+    slotRarities: slotRarities.map(sr => ({ ...sr })),
+    pinnedItems: { ...pinnedItems },
+    jackpotSlot,
+    categories,
+    gambleCount,
+    jackpotItem: jackpotItemText || null,
+  };
+
+  return { config, cardsPerPack, label, player, mode: currentMode };
+}
+
+async function onCreatePack() {
+  const { config, label, player } = buildPackConfig();
+  if (!dmKey) throw new Error('DM Key is required');
+
+  const fillerCount = config.fillerCount;
+  const revealRange = config.slotRarities?.[fillerCount] || { min: 'rare', max: 'legendary' };
+
+  const slot_config = {
+    mundane_count: fillerCount,
+    reveal_tier_min: rarityToTier(revealRange.min),
+    reveal_tier_max: rarityToTier(revealRange.max),
+    categories: config.categories || [],
+  };
+
+  const quantity = config.mode === 'gamble' ? (config.gambleCount || 10) : 1;
+  const type = player ? 'personal' : 'shared';
+
+  const revealPinned = config.pinnedItems?.[fillerCount] || null;
+  const guaranteed_item_id =
+    revealPinned?.id != null ? Number(revealPinned.id)
+    : jackpotItem?.id != null ? Number(jackpotItem.id)
+    : null;
+
+  await apiPost('/pack/create', {
+    dm_key: dmKey,
+    label,
+    type,
+    player_name: player || undefined,
+    quantity,
+    slot_config,
+    guaranteed_item_id,
+  });
+
+  await renderPackList();
+  showView('packs');
+}
+
+// ══════════════════════════════
+// MY PACKS — view + data
+// ══════════════════════════════
+
+let PACKS = [];
+let activePackId   = null;
+let activeFilter   = 'all';
+
+// ── View switching ──
+function showView(view) {
+  document.getElementById('view-builder').classList.toggle('hidden', view !== 'builder');
+  document.getElementById('view-packs').classList.toggle('hidden', view !== 'packs');
+  if (view === 'packs') renderPackList();
+}
+
+// Wire My Packs button
+document.querySelector('.header-btn[data-view="packs"]')?.addEventListener('click', () => showView('packs'));
+
+// ── Render pack list ──
+async function renderPackList() {
+  const search    = (document.getElementById('packs-search')?.value || '').toLowerCase();
+  const tbody     = document.getElementById('packs-tbody');
+  const emptyMsg  = document.getElementById('packs-empty');
+  const summary   = document.getElementById('packs-summary');
+
+  if (!dmKey) {
+    PACKS = [];
+    summary.textContent = '0 packs';
+    tbody.innerHTML = '';
+    emptyMsg.classList.add('visible');
+    return;
+  }
+
+  try {
+    const data = await apiGet('/dm/packs?dm_key=' + encodeURIComponent(dmKey));
+    PACKS = Array.isArray(data?.packs) ? data.packs : [];
+  } catch (e) {
+    PACKS = [];
+  }
+
+  const normalized = PACKS.map(p => {
+    const qty = Number(p.quantity ?? 0);
+    return {
+      id: p.id,
+      label: p.label,
+      type: p.type,
+      player_name: p.player_name,
+      quantity: qty,
+      cards: (p.slot_config?.mundane_count ?? 0) + 1,
+      created_at: p.created_at,
+      status: qty > 0 ? 'active' : 'exhausted',
+      slot_config: p.slot_config,
+    };
+  });
+
+  let filtered = normalized.filter(p => {
+    const matchSearch = !search || String(p.label || '').toLowerCase().includes(search);
+    const matchStatus = activeFilter === 'all' || p.status === activeFilter;
+    return matchSearch && matchStatus;
+  });
+
+  summary.textContent = `${filtered.length} pack${filtered.length !== 1 ? 's' : ''}`;
+
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    emptyMsg.classList.add('visible');
+    return;
+  }
+  emptyMsg.classList.remove('visible');
+
+  tbody.innerHTML = filtered.map(p => `
+    <tr onclick="openPackModal('${p.id}')">
+      <td><span class="pack-row-label">${escapeHtml(p.label)}</span></td>
+      <td><span class="pack-row-mode ${p.type}">${p.type === 'personal' ? '◈ Personal' : '✦ Shared'}</span></td>
+      <td>${p.cards}</td>
+      <td><span class="status-badge ${p.status}">${p.status.charAt(0).toUpperCase() + p.status.slice(1)}</span></td>
+      <td>${formatDate(p.created_at)}</td>
+      <td onclick="event.stopPropagation()">
+        <div class="pack-row-actions">
+          <button class="btn-sm" onclick="openPackModal('${p.id}')">Open</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function formatDate(d) {
+  const date = new Date(d);
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function filterPacks() { renderPackList(); }
+
+function setStatusFilter(filter, btn) {
+  activeFilter = filter;
+  document.querySelectorAll('#status-filters .cat-chip').forEach(c => c.classList.remove('on'));
+  btn.classList.add('on');
+  renderPackList();
+}
+
+// ── Modal ──
+function openPackModal(id) {
+  const pack = PACKS.find(p => p.id === id);
+  if (!pack) return;
+  activePackId = id;
+
+  const cards = (pack.slot_config?.mundane_count ?? 0) + 1;
+  document.getElementById('modal-title').textContent = pack.label;
+  document.getElementById('modal-sub').textContent   = `${pack.type === 'personal' ? '◈ Personal' : '✦ Shared'} · ${cards} cards · Created ${formatDate(pack.created_at)}`;
+  document.getElementById('modal-link').textContent  = getPackLink(pack.id);
+  document.getElementById('modal-stats').innerHTML   = `
+    <span class="modal-stat-pill">${cards} cards</span>
+    <span class="modal-stat-pill">${pack.type === 'personal' ? '◈ Personal' : '✦ Shared'}</span>
+    <span class="modal-stat-pill">Openings: ${pack.quantity ?? 0}</span>`;
+
+  document.getElementById('pack-modal').classList.add('open');
+  loadPackHistoryIntoModal(id);
+}
+
+function closeModal() {
+  document.getElementById('pack-modal').classList.remove('open');
+  activePackId = null;
+}
+
+function closePackModal(e) {
+  if (e.target === document.getElementById('pack-modal')) closeModal();
+}
+
+function copyModalLink() {
+  const link = document.getElementById('modal-link').textContent;
+  navigator.clipboard?.writeText(link).catch(() => {});
+  const btn = document.querySelector('.link-box .btn-sm');
+  if (btn) { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1500); }
+}
+
+async function duplicatePack() {
+  const pack = PACKS.find(p => p.id === activePackId);
+  if (!pack) return;
+  if (!dmKey) return;
+
+  await apiPost('/pack/create', {
+    dm_key: dmKey,
+    label: (pack.label || 'Untitled Pack') + ' (Copy)',
+    type: pack.type || 'shared',
+    player_name: pack.player_name || undefined,
+    quantity: pack.quantity ?? 1,
+    slot_config: pack.slot_config || {},
+    guaranteed_item_id: pack.guaranteed_item_id ?? null,
+  });
+
+  closeModal();
+  await renderPackList();
+}
+
+async function regeneratePack() {
+  if (!activePackId || !dmKey) return;
+  try {
+    await apiPost('/dm/pack/' + encodeURIComponent(activePackId) + '/regenerate?dm_key=' + encodeURIComponent(dmKey), { dm_key: dmKey });
+  } catch {}
+  await renderPackList();
+  openPackModal(activePackId);
+}
+
+async function loadPackHistoryIntoModal(id) {
+  const wrap = document.getElementById('modal-history-wrap');
+  const list = document.getElementById('modal-history');
+  if (!wrap || !list) return;
+  wrap.style.display = 'none';
+  list.innerHTML = '';
+  if (!dmKey) return;
+
+  try {
+    const data = await apiGet('/dm/pack/' + encodeURIComponent(id) + '/history?dm_key=' + encodeURIComponent(dmKey));
+    const history = Array.isArray(data?.history) ? data.history : [];
+    if (!history.length) return;
+    wrap.style.display = '';
+    list.innerHTML = history.slice(0, 10).map(h => {
+      const when = h.opened_at ? formatDate(h.opened_at) : '';
+      const revealName = h.reveal?.name ? escapeHtml(h.reveal.name) : '(unknown)';
+      return `<div class="modal-history-row">
+        <span class="modal-history-row-item">${revealName}</span>
+        <span class="modal-history-row-when">${escapeHtml(when)}</span>
+      </div>`;
+    }).join('');
+  } catch {}
+}
+
+// Escape to close modal
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Init: load loot + restore DM key pill
+(async function initDm() {
+  try { await loadLoot(); } catch {}
+  if (dmKey) {
+    const masked = dmKey.length > 4 ? dmKey.slice(0, 4) + '···' : dmKey;
+    document.getElementById('dm-key-display').textContent = masked;
+    document.getElementById('dm-key-pill').classList.remove('hidden');
+  }
+})();
+</script>
 </body>
 </html>

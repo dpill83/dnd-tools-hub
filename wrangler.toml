@@ -13,3 +13,8 @@ binding = "ADVENTURE_LOG_DB"
 database_name = "adventure-log-db"
 # Replace with your database id from: npx wrangler d1 create adventure-log-db
 database_id = "7786bca6-fb87-45cf-bb53-6bd841d5c753"
+
+[[d1_databases]]
+binding = "LOOT_CHEST_DB"
+database_name = "loot-chest-db"
+database_id = "34526e64-3c3a-477b-8161-273a043aec57"
