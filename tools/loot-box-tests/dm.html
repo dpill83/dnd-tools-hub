@@ -253,8 +253,9 @@ body::after {
   border-radius: var(--r-lg);
 }
 
-.player-field { display: none; }
-.player-field.visible { display: flex; flex-direction: column; gap: 5px; }
+/* Must beat .field-group { display: flex } on the same element */
+.field-group.player-field { display: none; }
+.field-group.player-field.visible { display: flex; flex-direction: column; gap: 5px; }
 
 .field-group {
   display: flex;

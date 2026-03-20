@@ -101,7 +101,7 @@
   gap: 1.25rem;
   margin-top: 0.25rem;
   width: 100%;
-  max-width: min(96vw, 900px);
+  max-width: min(98vw, 1600px);
   position: relative;
   z-index: 1;
 }
@@ -123,12 +123,20 @@
 }
 .pack-history-open {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
-  gap: clamp(0.6rem, 2vw, 1.25rem);
+  gap: clamp(0.45rem, 1.2vw, 0.85rem);
   align-items: flex-end;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
 }
 .pack-history-open .item-slot {
+  flex-shrink: 0;
   opacity: 1;
   transform: scale(1);
   animation: none;
@@ -388,6 +396,10 @@
       ? `<div class="card-modal-desc-divider"></div><div class="card-modal-desc">${desc}</div>`
       : '';
     const reqHtml = item.requirements ? `<div class="card-modal-req">${item.requirements}</div>` : '';
+    const authorRaw = item.author != null ? String(item.author).trim() : '';
+    const authorHtml = authorRaw
+      ? `<div class="card-modal-author">${authorRaw.replace(/</g, '&lt;')}</div>`
+      : '';
 
     cardModal.innerHTML = `
       <div class="card-modal-content">
@@ -399,6 +411,7 @@
         <div class="card-modal-value">${itemValueStr(item)}</div>
         ${descBlock}
         ${reqHtml}
+        ${authorHtml}
       </div>
     `;
     zoomDim.classList.add('active');

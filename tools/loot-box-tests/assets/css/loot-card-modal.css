@@ -179,3 +179,14 @@
   flex-shrink: 0;
 }
 
+.card-modal-author {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.45rem, 0.95vw, 0.58rem);
+  letter-spacing: 0.1em;
+  color: rgba(160,130,80,0.75);
+  text-align: center;
+  width: 100%;
+  margin-top: 0.45rem;
+  flex-shrink: 0;
+}
+

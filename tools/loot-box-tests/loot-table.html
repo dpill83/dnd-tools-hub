@@ -322,6 +322,10 @@ body {
       ? `<div class="card-modal-desc-divider"></div><div class="card-modal-desc">${desc}</div>`
       : '';
     const reqHtml = item.requirements ? `<div class="card-modal-req">${item.requirements}</div>` : '';
+    const authorRaw = item.author != null ? String(item.author).trim() : '';
+    const authorHtml = authorRaw
+      ? `<div class="card-modal-author">${authorRaw.replace(/</g, '&lt;')}</div>`
+      : '';
 
     cardModal.innerHTML = `
       <div class="card-modal-content">
@@ -332,6 +336,7 @@ body {
         <div class="card-modal-value">${itemValueStr(item)}</div>
         ${descBlock}
         ${reqHtml}
+        ${authorHtml}
       </div>
     `;
     zoomDim.classList.add('active');
