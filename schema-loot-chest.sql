@@ -4,6 +4,7 @@
 CREATE TABLE IF NOT EXISTS packs (
   id TEXT PRIMARY KEY,
   dm_key TEXT NOT NULL,
+  batch_id TEXT,
   label TEXT NOT NULL,
   type TEXT NOT NULL DEFAULT 'shared',
   player_name TEXT,

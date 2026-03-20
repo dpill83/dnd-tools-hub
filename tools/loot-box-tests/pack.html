@@ -34,6 +34,105 @@
   border-color: rgba(201,168,76,0.5);
   background: rgba(201,168,76,0.06);
 }
+#chest-wrap.pack-claimed {
+  cursor: default;
+}
+#chest-wrap.pack-claimed #chest-hint {
+  opacity: 0 !important;
+  visibility: hidden;
+}
+#chest-wrap.pack-claimed #chest-img-closed,
+#chest-wrap.pack-claimed #chest-img-partial,
+#chest-wrap.pack-claimed #chest-img-open {
+  opacity: 0 !important;
+}
+#chest-wrap.pack-claimed #chest-img-empty {
+  opacity: 1 !important;
+}
+#chest-wrap.pack-claimed #chest-glow {
+  opacity: 0 !important;
+}
+#chest-wrap.pack-claimed {
+  animation: none;
+}
+/* Empty chest layer: same sizing as scene.css chest PNGs; hidden until .pack-claimed */
+#chest-img-empty {
+  opacity: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(0,0,0,0.45));
+  transition: opacity 0.12s ease;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+#stage.stage--pack-claimed {
+  justify-content: flex-start;
+  padding-top: clamp(1rem, 3vh, 2rem);
+  padding-bottom: clamp(1rem, 3vh, 2rem);
+  overflow-y: auto;
+  gap: clamp(0.65rem, 2vh, 1.1rem);
+}
+.pack-claimed-msg {
+  position: relative;
+  z-index: 5;
+  flex-shrink: 0;
+  max-width: min(94vw, 36rem);
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.2rem, 4.8vw, 1.65rem);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: #fff8e8;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.95), 0 0 18px rgba(0,0,0,0.75);
+  background: rgba(0,0,0,0.78);
+  border: 1px solid rgba(201,168,76,0.45);
+  border-radius: 14px;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+#slots-row.slots-row--claimed {
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+  gap: 1.25rem;
+  margin-top: 0.25rem;
+  width: 100%;
+  max-width: min(96vw, 900px);
+  position: relative;
+  z-index: 1;
+}
+.pack-history-block {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.pack-history-block + .pack-history-block {
+  padding-top: 1rem;
+  border-top: 1px solid rgba(201,168,76,0.12);
+}
+.pack-history-meta {
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  color: rgba(201,168,76,0.65);
+}
+.pack-history-open {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(0.6rem, 2vw, 1.25rem);
+  align-items: flex-end;
+}
+.pack-history-open .item-slot {
+  opacity: 1;
+  transform: scale(1);
+  animation: none;
+}
 </style>
 </head>
 <body>
@@ -73,12 +172,15 @@
 <!-- Main Stage -->
 <div id="stage" class="flex-center-col">
 
+  <div id="pack-claimed-msg" class="pack-claimed-msg" hidden></div>
+
   <!-- Chest -->
   <div id="chest-wrap" tabindex="0" role="button" aria-label="Open chest">
     <div id="chest-glow"></div>
     <img id="chest-img-closed"  class="abs-fill" src="assets/images/chest-closed.png"  alt="Closed chest"  draggable="false"/>
     <img id="chest-img-partial" class="abs-fill" src="assets/images/chest-partial.png" alt="Opening chest" draggable="false"/>
     <img id="chest-img-open"    class="abs-fill" src="assets/images/chest-open.png"    alt="Open chest"    draggable="false"/>
+    <img id="chest-img-empty"   class="abs-fill" src="assets/images/chest-empty.png"   alt="Empty chest"   draggable="false"/>
     <div id="chest-hint">✦ CLICK TO OPEN ✦</div>
   </div>
 
@@ -167,11 +269,96 @@
   const zoomDim    = document.getElementById('zoom-dim');
   const cardModal = document.getElementById('card-modal');
   const particlesContainer = document.getElementById('particles');
+  const packClaimedMsg = document.getElementById('pack-claimed-msg');
 
   function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+  function formatOpenedAt(at) {
+    if (!at) return '';
+    try {
+      var normalized = String(at).replace(' ', 'T');
+      var d = new Date(normalized);
+      if (isNaN(d.getTime())) return String(at);
+      return d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    } catch (e) {
+      return String(at);
+    }
+  }
+
+  function wireRevealedSlot(slot) {
+    function activate() {
+      openCardModal(slot);
+    }
+    slot.addEventListener('click', activate);
+    slot.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        activate();
+      }
+    });
+  }
+
+  function renderOpensIntoSlots(opens) {
+    slotsRow.innerHTML = '';
+    slotsRow.classList.add('slots-row--claimed');
+    opens.forEach(function(open) {
+      var mundane = Array.isArray(open.mundane) ? open.mundane : [];
+      var currentRoll = { mundane: mundane, reveal: open.reveal || null };
+      var block = document.createElement('div');
+      block.className = 'pack-history-block';
+      if (opens.length > 1 && open.opened_at) {
+        var meta = document.createElement('div');
+        meta.className = 'pack-history-meta';
+        meta.textContent = formatOpenedAt(open.opened_at);
+        block.appendChild(meta);
+      }
+      var row = document.createElement('div');
+      row.className = 'pack-history-open';
+      for (var i = 0; i < mundane.length; i++) {
+        var slot = createSlot(mundane[i], false, currentRoll);
+        var inner = slot.querySelector('.card-inner');
+        if (inner) inner.classList.add('flipped');
+        wireRevealedSlot(slot);
+        row.appendChild(slot);
+      }
+      var mysterySlot = createSlot(null, true, currentRoll);
+      var innerM = mysterySlot.querySelector('.card-inner');
+      if (innerM) innerM.classList.add('flipped');
+      wireRevealedSlot(mysterySlot);
+      row.appendChild(mysterySlot);
+      block.appendChild(row);
+      slotsRow.appendChild(block);
+    });
+  }
+
+  function showClaimedState(label, opens) {
+    packReady = false;
+    state = 'claimed';
+    stage.classList.add('stage--pack-claimed');
+    chestWrap.classList.add('pack-claimed');
+    chestWrap.style.pointerEvents = 'none';
+    chestWrap.setAttribute('aria-disabled', 'true');
+    chestWrap.setAttribute('aria-label', 'Chest has been looted');
+    chestHint.textContent = '';
+    packClaimedMsg.hidden = false;
+    packClaimedMsg.textContent = (label ? label + ' — ' : '') + 'This chest has already been claimed.';
+    var list = Array.isArray(opens) ? opens : [];
+    if (list.length) {
+      renderOpensIntoSlots(list);
+    } else {
+      slotsRow.innerHTML = '';
+      slotsRow.classList.remove('slots-row--claimed');
+    }
+  }
+
   function showEmptyScreen(message) {
+    stage.classList.remove('stage--pack-claimed');
+    packClaimedMsg.hidden = true;
+    packClaimedMsg.textContent = '';
+    chestWrap.classList.remove('pack-claimed');
     chestWrap.style.display = 'none';
+    slotsRow.innerHTML = '';
+    slotsRow.classList.remove('slots-row--claimed');
     const empty = document.createElement('div');
     empty.className = 'flex-center-col';
     empty.style.cssText = 'text-align:center; padding:2rem;';
@@ -237,7 +424,13 @@
 
     const openRes = await fetch(API_BASE + '/pack/' + packId + '/open', { method: 'POST' });
     if (openRes.status === 410) {
-      showEmptyScreen('This chest has already been claimed.');
+      var body410 = null;
+      try {
+        body410 = await openRes.json();
+      } catch (e) {}
+      var label410 = body410 && body410.label ? String(body410.label) : '';
+      var opens410 = body410 && Array.isArray(body410.opens) ? body410.opens : [];
+      showClaimedState(label410, opens410);
       return;
     }
     if (!openRes.ok) {
@@ -414,8 +607,10 @@
       return;
     }
     if (res.status === 410) {
-      const data = await res.json();
-      showEmptyScreen((data.label ? data.label + ' — ' : '') + 'This chest has already been claimed.');
+      var data410 = await res.json().catch(function() { return {}; });
+      var labelGone = data410.label ? String(data410.label) : '';
+      var opensGone = Array.isArray(data410.opens) ? data410.opens : [];
+      showClaimedState(labelGone, opensGone);
       return;
     }
     if (!res.ok) {
@@ -423,7 +618,16 @@
       return;
     }
 
-    await res.json();
+    const packData = await res.json();
+    var qty = Number(packData.quantity ?? 0);
+    if (qty < 1) {
+      var labelEx = packData.label ? String(packData.label) : '';
+      var opensEx = Array.isArray(packData.opens) ? packData.opens : [];
+      showClaimedState(labelEx, opensEx);
+      return;
+    }
+
+    stage.classList.remove('stage--pack-claimed');
     packReady = true;
     chestWrap.style.pointerEvents = '';
     chestWrap.removeAttribute('aria-disabled');

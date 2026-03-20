@@ -1,4 +1,5 @@
 import { json } from '../../_shared/http.js';
+import { getOpensByPackId } from '../../_shared/pack-opens.js';
 
 export async function onRequestGet(context) {
   const DB = context.env.LOOT_CHEST_DB;
@@ -12,6 +13,9 @@ export async function onRequestGet(context) {
 
   if (!row) return json({ error: 'Pack not found' }, 404);
 
+  const quantity = Number(row.quantity ?? 0);
+  const opens = quantity < 1 ? await getOpensByPackId(DB, id) : undefined;
+
   return json({
     id: row.id,
     label: row.label,
@@ -20,5 +24,6 @@ export async function onRequestGet(context) {
     quantity: row.quantity,
     slot_config: typeof row.slot_config === 'string' ? JSON.parse(row.slot_config) : row.slot_config,
     created_at: row.created_at,
+    ...(opens !== undefined ? { opens } : {}),
   });
 }

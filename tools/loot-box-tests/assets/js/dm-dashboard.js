@@ -132,7 +132,6 @@
             '<div class="pack-actions">' +
             '<button type="button" class="btn-sm btn-history" data-id="' + escapeHtml(pack.id) + '">View History</button>' +
             (pack.active === 1 ? '<button type="button" class="btn-sm btn-deactivate" data-id="' + escapeHtml(pack.id) + '">Deactivate</button>' : '') +
-            (pack.active === 0 ? '<button type="button" class="btn-sm btn-regenerate" data-id="' + escapeHtml(pack.id) + '">Regenerate</button>' : '') +
             '</div>';
           list.appendChild(card);
         });
@@ -141,9 +140,6 @@
         });
         list.querySelectorAll('.btn-deactivate').forEach(function(btn) {
           btn.addEventListener('click', function() { deactivatePack(btn.getAttribute('data-id')); });
-        });
-        list.querySelectorAll('.btn-regenerate').forEach(function(btn) {
-          btn.addEventListener('click', function() { regeneratePack(btn.getAttribute('data-id')); });
         });
       })
       .catch(function() {
@@ -207,25 +203,6 @@
       .then(function(_ref) {
         if (!_ref.res.ok) alert(apiError(_ref.res, _ref.body));
         else loadPacks();
-      })
-      .catch(function() { alert('Could not reach server'); });
-  }
-
-  function regeneratePack(packId) {
-    fetch(API_BASE + '/dm/pack/' + packId + '/regenerate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dm_key: dmKey })
-    })
-      .then(function(res) { return res.json().then(function(body) { return { res: res, body: body }; }); })
-      .then(function(_ref) {
-        if (!_ref.res.ok) alert(apiError(_ref.res, _ref.body));
-        else {
-          var id = _ref.body && _ref.body.id;
-          var base = location.origin + (location.pathname.indexOf('/tools/') >= 0 ? '/tools/loot-box-tests' : '');
-          alert('New pack created. Share this link: ' + base + '/pack/' + id);
-          loadPacks();
-        }
       })
       .catch(function() { alert('Could not reach server'); });
   }

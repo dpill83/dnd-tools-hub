@@ -1,5 +1,6 @@
 import { json, getBody } from '../../_shared/http.js';
 import { rollItems } from '../../_shared/roller.js';
+import { getOpensByPackId } from '../../_shared/pack-opens.js';
 
 export async function onRequestPost(context) {
   const DB = context.env.LOOT_CHEST_DB;
@@ -13,7 +14,10 @@ export async function onRequestPost(context) {
 
   if (!pack) return json({ error: 'Pack not found' }, 404);
   const quantity = pack.quantity ?? 1;
-  if (quantity < 1) return json({ label: pack.label ?? null }, 410);
+  if (quantity < 1) {
+    const opens = await getOpensByPackId(DB, id);
+    return json({ label: pack.label ?? null, opens }, 410);
+  }
 
   const slot_config = typeof pack.slot_config === 'string' ? JSON.parse(pack.slot_config) : pack.slot_config;
   const opens_used = Number(pack.opens_used ?? 0);

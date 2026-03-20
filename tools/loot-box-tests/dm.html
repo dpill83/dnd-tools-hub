@@ -1050,6 +1050,18 @@ input[type=range]::-webkit-slider-thumb:hover {
   border: 1px solid rgba(154,160,166,0.25);
 }
 
+.jackpot-opened-badge {
+  margin-left: 8px;
+  background: rgba(255,213,79,0.12);
+  color: var(--legendary);
+  border: 1px solid rgba(255,213,79,0.35);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+  display: inline-block;
+}
+
 .pack-row-actions {
   display: flex;
   gap: 6px;
@@ -1111,8 +1123,14 @@ input[type=range]::-webkit-slider-thumb:hover {
   border-radius: var(--r-lg);
   width: 100%;
   max-width: 560px;
+  min-width: 0;
   box-shadow: 0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px var(--border-dim);
   animation: fadeSlideIn 0.2s ease both;
+}
+
+/* Wider modal when viewing a Gamble batch (long URLs + many rows). */
+.pack-modal-inner.pack-modal-inner--gamble-batch {
+  max-width: min(92vw, 760px);
 }
 
 .pack-modal-header {
@@ -1153,6 +1171,7 @@ input[type=range]::-webkit-slider-thumb:hover {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  min-width: 0;
 }
 
 .modal-stats {
@@ -1174,26 +1193,142 @@ input[type=range]::-webkit-slider-thumb:hover {
   display: flex;
   gap: 1.25rem;
   align-items: flex-start;
+  min-width: 0;
+}
+
+.modal-link-row .modal-body-col {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Gamble batch: full width for URL list (QR is not useful per-pack). */
+.modal-link-row.modal-link-row--gamble-batch .modal-body-col {
+  flex: 1 1 100%;
+  max-width: 100%;
+}
+
+.modal-link-row.modal-link-row--gamble-batch .modal-qr-col {
+  display: none;
 }
 
 .link-box {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   gap: 8px;
   background: rgba(10,6,2,0.6);
   border: 1px solid var(--border-dim);
   border-radius: var(--r-md);
-  padding: 7px 10px;
+  padding: 8px 10px;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.link-url-line {
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.link-url-line .link-url {
+  flex: 1;
+  min-width: 0;
+}
+
+.link-url-line .link-reveal-btn {
+  flex-shrink: 0;
+}
+
+.link-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.link-row-actions .btn-sm {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.modal-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  min-width: 0;
+  width: 100%;
+}
+
+.link-box.is-used {
+  opacity: 0.6;
+  border-color: rgba(154,160,166,0.35);
+}
+
+.link-box.is-handed-out {
+  border-color: rgba(201,168,76,0.45);
+  background: rgba(201,168,76,0.08);
+}
+
+.link-status {
+  font-size: 10px;
+  border: 1px solid var(--border-dim);
+  border-radius: 20px;
+  padding: 2px 7px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.link-status.opened {
+  color: var(--common);
+  border-color: rgba(154,160,166,0.35);
+  background: rgba(154,160,166,0.12);
+}
+
+.link-status.open {
+  color: #7dd3a8;
+  border-color: rgba(29,158,117,0.35);
+  background: rgba(29,158,117,0.15);
+}
+
+.link-status.handed {
+  color: var(--gold-light);
+  border-color: rgba(201,168,76,0.45);
+  background: rgba(201,168,76,0.12);
 }
 
 .link-url {
   font-size: 12px;
   color: var(--text-muted);
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  white-space: normal;
+  word-break: break-all;
+  overflow-wrap: anywhere;
   font-family: monospace;
+  line-height: 1.45;
+}
+
+.link-url.is-masked {
+  color: rgba(201,168,76,0.35);
+  letter-spacing: 0.04em;
+  font-style: italic;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+/* Strikethrough only after the pack was actually opened (chest claimed), not merely revealed in the modal. */
+.link-url.is-pack-opened {
+  text-decoration: line-through;
+  text-decoration-color: rgba(201,168,76,0.5);
+  text-decoration-thickness: 1px;
 }
 
 .modal-qr-box {
@@ -1215,6 +1350,8 @@ input[type=range]::-webkit-slider-thumb:hover {
   padding-top: 0.5rem;
   border-top: 1px solid var(--border-dim);
 }
+
+.modal-actions--end { justify-content: flex-end; }
 
 .btn-danger {
   border-color: rgba(255,138,101,0.3);
@@ -1475,13 +1612,10 @@ input[type=range]::-webkit-slider-thumb:hover {
       </div>
 
       <!-- Link + QR -->
-      <div class="modal-link-row">
+      <div class="modal-link-row" id="modal-link-row">
         <div class="modal-body-col">
-          <span class="field-label">Shareable Link</span>
-          <div class="link-box">
-            <span class="link-url" id="modal-link"></span>
-            <button class="btn-sm" onclick="copyModalLink()">Copy</button>
-          </div>
+          <span class="field-label">Pack URLs</span>
+          <div id="modal-links-list" class="modal-links-list"></div>
         </div>
         <div class="modal-qr-col">
           <span class="field-label">QR Code</span>
@@ -1494,7 +1628,29 @@ input[type=range]::-webkit-slider-thumb:hover {
       <!-- Actions -->
       <div class="modal-actions">
         <button class="btn" onclick="duplicatePack()">⧉ Duplicate</button>
-        <button class="btn" id="modal-regenerate" onclick="regeneratePack()">◎ Add 1 Opening</button>
+        <button class="btn btn-danger" id="modal-delete" onclick="confirmDeletePack()">⌫ Delete Pack</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     DELETE CONFIRMATION MODAL
+══════════════════════════════ -->
+<div id="delete-modal" class="pack-modal-overlay" onclick="closeDeleteModal(event)">
+  <div class="pack-modal-inner">
+    <div class="pack-modal-header">
+      <div>
+        <div class="pack-modal-title" id="delete-modal-title">Delete Pack</div>
+        <div class="pack-modal-sub" id="delete-modal-sub"></div>
+      </div>
+      <button class="pack-modal-close" onclick="closeDeleteModal()">✕</button>
+    </div>
+    <div class="pack-modal-body">
+      <div class="modal-stats" id="delete-modal-stats"></div>
+      <div class="modal-actions modal-actions--end">
+        <button class="btn" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn btn-danger" onclick="deleteActivePack()">Delete</button>
       </div>
     </div>
   </div>
@@ -1513,6 +1669,25 @@ const RARITIES = [
 
 const API_BASE = '/tools/loot-box-tests/api';
 const DM_KEY_STORAGE_KEY = 'lootForgeDmKey';
+/** Persist DM "handed out" (Reveal) per pack id across modal sessions. */
+const HANDOUT_PACK_STORAGE_PREFIX = 'lootForgeHandout:';
+
+function isPackHandedOutStored(packId) {
+  if (!packId) return false;
+  try {
+    return window.localStorage.getItem(HANDOUT_PACK_STORAGE_PREFIX + String(packId)) === '1';
+  } catch (_e) {
+    return false;
+  }
+}
+
+function markPackHandedOutStored(packId) {
+  if (!packId) return;
+  try {
+    window.localStorage.setItem(HANDOUT_PACK_STORAGE_PREFIX + String(packId), '1');
+  } catch (_e) {}
+}
+
 let LOOT = null; // loaded from tools/loot-box-tests/loot-table.json
 
 const ICONS = ['⚔','🛡','🧪','📜','💍','🔮','🪄','🗡','🏹','✨'];
@@ -1943,7 +2118,7 @@ async function apiPost(path, body) {
 function buildPackConfig() {
   const labelInput  = document.getElementById('pack-label');
   const playerInput = document.getElementById('pack-player');
-  const label  = (labelInput?.value || '').trim() || 'Untitled Pack';
+  const label  = (labelInput?.value || '').trim();
   const player = (playerInput?.value || '').trim();
 
   const fillerCount  = parseInt(slider.value) || 0;
@@ -1992,11 +2167,36 @@ async function onCreatePack() {
     return;
   }
 
+  if (!label) {
+    const input = document.getElementById('pack-label');
+    if (input) {
+      input.classList.remove('shake');
+      // force reflow so the animation can restart
+      void input.offsetWidth;
+      input.classList.add('shake');
+      input.focus();
+    }
+    return;
+  }
+
+  // Curated packs are always personal: player name is required.
+  if (config.mode === 'curated' && !player) {
+    const input = document.getElementById('pack-player');
+    if (input) {
+      input.classList.remove('shake');
+      // force reflow so the animation can restart
+      void input.offsetWidth;
+      input.classList.add('shake');
+      input.focus();
+    }
+    return;
+  }
+
   const fillerCount = config.fillerCount;
   const revealRange = config.slotRarities?.[fillerCount] || { min: 'rare', max: 'legendary' };
 
   const quantity = config.mode === 'gamble' ? (config.gambleCount || 10) : 1;
-  const type = player ? 'personal' : 'shared';
+  const type = config.mode === 'curated' ? 'personal' : 'shared';
 
   const slot_config = {
     mundane_count: fillerCount,
@@ -2024,15 +2224,23 @@ async function onCreatePack() {
     : jackpotItem?.id != null ? Number(jackpotItem.id)
     : null;
 
-  await apiPost('/pack/create', {
+  const created = await apiPost('/pack/create', {
     dm_key: dmKey,
     label,
     type,
-    player_name: player || undefined,
+    player_name: config.mode === 'curated' ? player : undefined,
     quantity,
     slot_config,
     guaranteed_item_id,
   });
+
+  if (config.mode === 'gamble') {
+    if (!Array.isArray(created?.pack_urls) || created.pack_urls.length !== quantity) {
+      throw new Error('Invalid Gamble batch response');
+    }
+  } else if (!created?.id) {
+    throw new Error('Invalid Curated create response');
+  }
 
   await renderPackList();
   showView('packs');
@@ -2045,6 +2253,41 @@ async function onCreatePack() {
 let PACKS = [];
 let activePackId   = null;
 let activeFilter   = 'all';
+let DISPLAY_PACKS = [];
+let activeModalLinks = [];
+
+function renderModalLinks(linkEntries) {
+  const listEl = document.getElementById('modal-links-list');
+  if (!listEl) return;
+  const entries = Array.isArray(linkEntries) ? linkEntries : [];
+  listEl.innerHTML = entries.map((entry, idx) => {
+    const url = String(entry?.url || '');
+    const isUsed = Boolean(entry?.used);
+    const isRevealed = Boolean(entry?.revealed);
+    const urlVisible = isRevealed || isUsed;
+    const displayUrl = urlVisible ? url : 'Hidden until revealed';
+    const showActions = isRevealed || isUsed;
+    let actionsHtml = '';
+    if (showActions) {
+      if (isUsed) actionsHtml += '<span class="link-status opened">Opened</span>';
+      if (isRevealed) actionsHtml += '<span class="link-status handed">Handed Out</span>';
+      actionsHtml += `<button type="button" class="btn-sm" data-copy-idx="${idx}" onclick="handleModalLinkCopy(${idx})">Copy</button>`;
+    }
+    const revealBtn =
+      !urlVisible
+        ? `<button type="button" class="btn-sm link-reveal-btn" onclick="handleModalLinkReveal(${idx})">Reveal</button>`
+        : '';
+    return `
+      <div class="link-box${isUsed ? ' is-used' : ''}${isRevealed ? ' is-handed-out' : ''}">
+        <div class="link-url-line">
+          <span class="link-url ${urlVisible ? 'is-visible' : 'is-masked'}${isUsed ? ' is-pack-opened' : ''}" title="${urlVisible ? escapeHtml(url) : ''}">${escapeHtml(displayUrl)}</span>
+          ${revealBtn}
+        </div>
+        <div class="link-row-actions">${actionsHtml}</div>
+      </div>
+    `;
+  }).join('');
+}
 
 // ── View switching ──
 function showView(view) {
@@ -2057,6 +2300,92 @@ function showView(view) {
 document.querySelector('.header-btn[data-view="packs"]')?.addEventListener('click', () => showView('packs'));
 
 // ── Render pack list ──
+function buildDisplayPacks(rawPacks) {
+  const normalized = rawPacks.map(p => {
+    const qty = Number(p.quantity ?? 0);
+    const opensUsed = Number(p.opens_used ?? 0);
+    const isOpened = qty <= 0 || opensUsed > 0;
+    return {
+      id: p.id,
+      batch_id: p.batch_id || null,
+      label: p.label,
+      type: p.type,
+      player_name: p.player_name,
+      quantity: qty,
+      opens_used: opensUsed,
+      guaranteed_item_id: p.guaranteed_item_id ?? null,
+      cards: (p.slot_config?.mundane_count ?? 0) + 1,
+      created_at: p.created_at,
+      slot_config: p.slot_config,
+      jackpot_opened: Boolean(p.jackpot_opened),
+      is_opened: isOpened,
+    };
+  });
+
+  const grouped = [];
+  const gambleRows = normalized.filter(p => p.type === 'shared' && p.batch_id);
+  const curatedRows = normalized.filter(p => !(p.type === 'shared' && p.batch_id));
+  const byBatch = new Map();
+  for (const row of gambleRows) {
+    if (!byBatch.has(row.batch_id)) byBatch.set(row.batch_id, []);
+    byBatch.get(row.batch_id).push(row);
+  }
+  byBatch.forEach((rows, batchId) => {
+    rows.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    const representative = rows[0];
+    const total = rows.length;
+    const opened = rows.filter(r => r.is_opened).length;
+    const created_at = rows.reduce((latest, r) => {
+      if (!latest) return r.created_at;
+      return new Date(r.created_at) > new Date(latest) ? r.created_at : latest;
+    }, representative?.created_at || null);
+    grouped.push({
+      id: representative.id,
+      kind: 'gambleBatch',
+      batch_id: batchId,
+      label: representative.label,
+      type: 'shared',
+      cards: representative.cards,
+      opened,
+      total,
+      quantity: Math.max(0, total - opened),
+      status: opened < total ? 'active' : 'exhausted',
+      created_at,
+      slot_config: representative.slot_config,
+      jackpot_opened: rows.some(r => r.guaranteed_item_id != null && r.is_opened),
+      rows,
+      links: rows.map(r => getPackLink(r.id)),
+    });
+  });
+
+  const curated = curatedRows.map(p => {
+    const total = p.opens_used + p.quantity;
+    return {
+      id: p.id,
+      kind: 'pack',
+      batch_id: null,
+      label: p.label,
+      type: p.type,
+      player_name: p.player_name,
+      cards: p.cards,
+      opened: p.opens_used,
+      total,
+      quantity: p.quantity,
+      status: p.quantity > 0 ? 'active' : 'exhausted',
+      created_at: p.created_at,
+      slot_config: p.slot_config,
+      guaranteed_item_id: p.guaranteed_item_id,
+      jackpot_opened: Boolean(p.jackpot_opened),
+      row: p,
+      links: [getPackLink(p.id)],
+    };
+  });
+
+  const all = grouped.concat(curated);
+  all.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  return all;
+}
+
 async function renderPackList() {
   const search    = (document.getElementById('packs-search')?.value || '').toLowerCase();
   const tbody     = document.getElementById('packs-tbody');
@@ -2065,6 +2394,7 @@ async function renderPackList() {
 
   if (!dmKey) {
     PACKS = [];
+    DISPLAY_PACKS = [];
     summary.textContent = '0 packs';
     tbody.innerHTML = '';
     emptyMsg.classList.add('visible');
@@ -2078,24 +2408,8 @@ async function renderPackList() {
     PACKS = [];
   }
 
-  const normalized = PACKS.map(p => {
-    const qty = Number(p.quantity ?? 0);
-    const opened = Number(p.opens_used ?? 0);
-    const total = opened + qty;
-    return {
-      id: p.id,
-      label: p.label,
-      type: p.type,
-      player_name: p.player_name,
-      quantity: qty,
-      opened,
-      total,
-      cards: (p.slot_config?.mundane_count ?? 0) + 1,
-      created_at: p.created_at,
-      status: qty > 0 ? 'active' : 'exhausted',
-      slot_config: p.slot_config,
-    };
-  });
+  const normalized = buildDisplayPacks(PACKS);
+  DISPLAY_PACKS = normalized;
 
   let filtered = normalized.filter(p => {
     const matchSearch = !search || String(p.label || '').toLowerCase().includes(search);
@@ -2103,7 +2417,7 @@ async function renderPackList() {
     return matchSearch && matchStatus;
   });
 
-  summary.textContent = `${filtered.length} pack${filtered.length !== 1 ? 's' : ''}`;
+  summary.textContent = `${filtered.length} row${filtered.length !== 1 ? 's' : ''}`;
 
   if (!filtered.length) {
     tbody.innerHTML = '';
@@ -2115,10 +2429,13 @@ async function renderPackList() {
   tbody.innerHTML = filtered.map(p => `
     <tr onclick="openPackModal('${p.id}')">
       <td><span class="pack-row-label">${escapeHtml(p.label)}</span></td>
-      <td><span class="pack-row-mode ${p.type}">${p.type === 'personal' ? '◈ Personal' : '✦ Shared'}</span></td>
+      <td><span class="pack-row-mode ${p.kind === 'gambleBatch' ? 'gamble' : 'curated'}">${p.kind === 'gambleBatch' ? '⚄ Gamble' : '✦ Curated'}</span></td>
       <td>${p.cards}</td>
       <td>${p.opened}/${p.total}</td>
-      <td><span class="status-badge ${p.status}">${p.status.charAt(0).toUpperCase() + p.status.slice(1)}</span></td>
+      <td>
+        <span class="status-badge ${p.status}">${p.status.charAt(0).toUpperCase() + p.status.slice(1)}</span>
+        ${p.jackpot_opened ? '<span class="jackpot-opened-badge">Jackpot Opened</span>' : ''}
+      </td>
       <td>${formatDate(p.created_at)}</td>
       <td onclick="event.stopPropagation()">
         <div class="pack-row-actions">
@@ -2144,18 +2461,40 @@ function setStatusFilter(filter, btn) {
 
 // ── Modal ──
 function openPackModal(id) {
-  const pack = PACKS.find(p => p.id === id);
+  const pack = DISPLAY_PACKS.find(p => p.id === id);
   if (!pack) return;
   activePackId = id;
 
   const cards = (pack.slot_config?.mundane_count ?? 0) + 1;
+  const isBatch = pack.kind === 'gambleBatch';
+  activeModalLinks = isBatch
+    ? (pack.rows || []).map((row) => ({
+        packId: row.id,
+        url: getPackLink(row.id),
+        used: Boolean(row.is_opened),
+        revealed: isPackHandedOutStored(row.id),
+      }))
+    : [{
+        packId: pack.id,
+        url: getPackLink(pack.id),
+        used: Boolean((pack.opened ?? 0) > 0 || (pack.quantity ?? 0) <= 0),
+        revealed: isPackHandedOutStored(pack.id),
+      }];
   document.getElementById('modal-title').textContent = pack.label;
-  document.getElementById('modal-sub').textContent   = `${pack.type === 'personal' ? '◈ Personal' : '✦ Shared'} · ${cards} cards · Created ${formatDate(pack.created_at)}`;
-  document.getElementById('modal-link').textContent  = getPackLink(pack.id);
+  document.getElementById('modal-sub').textContent = `${isBatch ? '⚄ Gamble Batch' : '✦ Curated'} · ${cards} cards · Created ${formatDate(pack.created_at)}`;
+  renderModalLinks(activeModalLinks);
+  const linkRow = document.getElementById('modal-link-row');
+  const modalInner = document.querySelector('#pack-modal > .pack-modal-inner');
+  if (linkRow) linkRow.classList.toggle('modal-link-row--gamble-batch', isBatch);
+  if (modalInner) modalInner.classList.toggle('pack-modal-inner--gamble-batch', isBatch);
   document.getElementById('modal-stats').innerHTML   = `
     <span class="modal-stat-pill">${cards} cards</span>
-    <span class="modal-stat-pill">${pack.type === 'personal' ? '◈ Personal' : '✦ Shared'}</span>
-    <span class="modal-stat-pill">Openings: ${pack.quantity ?? 0}</span>`;
+    <span class="modal-stat-pill">${isBatch ? '⚄ Gamble' : '✦ Curated'}</span>
+    <span class="modal-stat-pill">${isBatch ? `Packs: ${pack.total}` : `Openings: ${pack.quantity ?? 0}`}</span>
+    <span class="modal-stat-pill">Opened: ${pack.opened ?? 0}/${pack.total ?? pack.quantity ?? 0}</span>`;
+
+  const duplicateBtn = document.querySelector('.modal-actions .btn');
+  if (duplicateBtn) duplicateBtn.style.display = isBatch ? 'none' : '';
 
   document.getElementById('pack-modal').classList.add('open');
   loadPackHistoryIntoModal(id);
@@ -2164,22 +2503,44 @@ function openPackModal(id) {
 function closeModal() {
   document.getElementById('pack-modal').classList.remove('open');
   activePackId = null;
+  activeModalLinks = [];
+  renderModalLinks([]);
+  document.getElementById('modal-link-row')?.classList.remove('modal-link-row--gamble-batch');
+  document.querySelector('#pack-modal > .pack-modal-inner')?.classList.remove('pack-modal-inner--gamble-batch');
 }
 
 function closePackModal(e) {
   if (e.target === document.getElementById('pack-modal')) closeModal();
 }
 
-function copyModalLink() {
-  const link = document.getElementById('modal-link').textContent;
-  navigator.clipboard?.writeText(link).catch(() => {});
-  const btn = document.querySelector('.link-box .btn-sm');
-  if (btn) { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1500); }
+function handleModalLinkReveal(index) {
+  const entry = activeModalLinks[index];
+  if (!entry || entry.revealed || entry.used) return;
+  if (entry.packId) markPackHandedOutStored(entry.packId);
+  entry.revealed = true;
+  renderModalLinks(activeModalLinks);
+}
+
+function handleModalLinkCopy(index) {
+  const entry = activeModalLinks[index];
+  if (!entry) return;
+  const visible = entry.revealed || entry.used;
+  if (!visible) return;
+  const url = entry.url;
+  if (!url) return;
+  navigator.clipboard?.writeText(url).catch(() => {});
+  const btn = document.querySelector(`#modal-links-list button[data-copy-idx="${index}"]`);
+  if (btn) {
+    const prev = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = prev; }, 1200);
+  }
 }
 
 async function duplicatePack() {
-  const pack = PACKS.find(p => p.id === activePackId);
+  const pack = DISPLAY_PACKS.find(p => p.id === activePackId);
   if (!pack) return;
+  if (pack.kind === 'gambleBatch') return;
   if (!dmKey) return;
 
   await apiPost('/pack/create', {
@@ -2196,13 +2557,48 @@ async function duplicatePack() {
   await renderPackList();
 }
 
-async function regeneratePack() {
+function confirmDeletePack() {
+  if (!activePackId) return;
+  const pack = DISPLAY_PACKS.find(p => p.id === activePackId);
+
+  const sub = document.getElementById('delete-modal-sub');
+  if (sub) sub.textContent = pack?.label || 'this pack';
+
+  const stats = document.getElementById('delete-modal-stats');
+  if (stats) {
+    if (pack?.kind === 'gambleBatch') {
+      stats.textContent = `Permanently delete this Gamble batch and all history. Packs: ${pack.total}, opened: ${pack.opened}.`;
+    } else {
+      const openings = pack?.quantity ?? 0;
+      stats.textContent = `Permanently delete this pack and its open history. Openings remaining: ${openings}.`;
+    }
+  }
+
+  document.getElementById('delete-modal')?.classList.add('open');
+}
+
+function closeDeleteModal(e) {
+  const wrap = document.getElementById('delete-modal');
+  if (!wrap) return;
+
+  // Only close on backdrop click (like closePackModal does).
+  if (e && e.target && e.target !== wrap) return;
+  wrap.classList.remove('open');
+}
+
+async function deleteActivePack() {
   if (!activePackId || !dmKey) return;
+
   try {
-    await apiPost('/dm/pack/' + encodeURIComponent(activePackId) + '/regenerate?dm_key=' + encodeURIComponent(dmKey), { dm_key: dmKey });
+    await apiPost(
+      '/dm/pack/' + encodeURIComponent(activePackId) + '/delete?dm_key=' + encodeURIComponent(dmKey),
+      { dm_key: dmKey }
+    );
   } catch {}
+
+  closeDeleteModal();
+  closeModal();
   await renderPackList();
-  openPackModal(activePackId);
 }
 
 async function loadPackHistoryIntoModal(id) {
@@ -2230,7 +2626,12 @@ async function loadPackHistoryIntoModal(id) {
 }
 
 // Escape to close modal
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const deleteModal = document.getElementById('delete-modal');
+  if (deleteModal?.classList.contains('open')) closeDeleteModal();
+  else closeModal();
+});
 
 // Init: load loot + restore DM key pill
 (async function initDm() {
