@@ -1689,7 +1689,7 @@ function markPackHandedOutStored(packId) {
   } catch (_e) {}
 }
 
-let LOOT = null; // loaded from tools/loot-box-tests/loot-table.json
+let LOOT = null; // loaded from GET /api/loot-table (R2)
 
 const ICONS = ['⚔','🛡','🧪','📜','💍','🔮','🪄','🗡','🏹','✨'];
 
@@ -2055,8 +2055,8 @@ function escapeHtml(s) {
 
 async function loadLoot() {
   if (LOOT) return LOOT;
-  const res = await fetch('loot-table.json', { cache: 'no-cache' });
-  if (!res.ok) throw new Error('Could not load loot-table.json');
+  const res = await fetch('/api/loot-table', { cache: 'no-cache' });
+  if (!res.ok) throw new Error('Could not load loot table from API');
   LOOT = await res.json();
   return LOOT;
 }

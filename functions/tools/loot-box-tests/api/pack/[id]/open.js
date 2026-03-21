@@ -31,7 +31,7 @@ export async function onRequestPost(context) {
     : opens_used === 0  // legacy gamble pack: no index stored → use jackpot only on first open
   );
   const effectiveGuaranteedId = useJackpot ? (pack.guaranteed_item_id ?? undefined) : undefined;
-  const { mundane, reveal } = rollItems(slot_config, effectiveGuaranteedId);
+  const { mundane, reveal } = await rollItems(context.env, slot_config, effectiveGuaranteedId);
 
   await DB.prepare(
     'UPDATE packs SET quantity = quantity - 1, opens_used = opens_used + 1 WHERE id = ?'

@@ -277,7 +277,7 @@
           return;
         }
         if (!lootTable || !lootTable.items) {
-          fetch('loot-table.json').then(function(r) { return r.json(); }).then(function(data) { lootTable = data; doSearch(q); }).catch(function() { searchResults.innerHTML = '<div class="search-item">Load failed</div>'; searchResults.style.display = 'block'; });
+          fetch('/api/loot-table').then(function(r) { return r.json(); }).then(function(data) { lootTable = data; doSearch(q); }).catch(function() { searchResults.innerHTML = '<div class="search-item">Load failed</div>'; searchResults.style.display = 'block'; });
           return;
         }
         doSearch(q);

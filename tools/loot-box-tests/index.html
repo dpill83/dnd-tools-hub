@@ -271,7 +271,7 @@
         chestHint.textContent = '✦ CLICK TO OPEN ✦';
       } else {
         try {
-          const res = await fetch('loot-table.json');
+          const res = await fetch('/api/loot-table');
           if (!res.ok) throw new Error(res.statusText);
           LOOT = await res.json();
           const indexed = {};
@@ -282,7 +282,7 @@
           chestHint.textContent = '✦ CLICK TO OPEN ✦';
         } catch(e) {
           chestHint.textContent = '✦ CLICK TO OPEN ✦';
-          console.warn('Could not load loot-table.json, using fallback');
+          console.warn('Could not load /api/loot-table, using fallback');
           LOOT = getEmbeddedLoot();
         }
       }

@@ -18,3 +18,8 @@ database_id = "7786bca6-fb87-45cf-bb53-6bd841d5c753"
 binding = "LOOT_CHEST_DB"
 database_name = "loot-chest-db"
 database_id = "34526e64-3c3a-477b-8161-273a043aec57"
+
+# Global loot table for loot-box-tests (GET/PUT /api/loot-table). Create bucket in dashboard: wrangler r2 bucket create loot-table
+[[r2_buckets]]
+binding = "LOOT_TABLE_BUCKET"
+bucket_name = "loot-table"

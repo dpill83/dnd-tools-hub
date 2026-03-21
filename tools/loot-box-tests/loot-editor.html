@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loot table editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #c9a84c;
+  --gold-light: #f0d070;
+  --bg: #080502;
+  --surface: rgba(20, 11, 4, 0.95);
+  --border: rgba(201, 168, 76, 0.35);
+  --text: rgba(240, 215, 140, 0.95);
+  --muted: rgba(160, 130, 80, 0.55);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Crimson Text', Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  padding: 1.25rem 1rem 3rem;
+}
+h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--gold-light);
+  margin: 0 0 0.35rem;
+}
+.sub {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 1.25rem;
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.toolbar label { font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.06em; color: var(--gold); }
+input[type="search"], input[type="number"], input[type="text"], select {
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 0.35rem 0.5rem;
+  background: rgba(10, 6, 2, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+}
+input[type="search"] { min-width: 200px; flex: 1; max-width: 320px; }
+button {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  padding: 0.45rem 0.9rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--gold-light);
+  cursor: pointer;
+}
+button:hover { background: rgba(201, 168, 76, 0.12); }
+button.primary {
+  background: rgba(201, 168, 76, 0.2);
+  border-color: var(--gold);
+}
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+.status { font-size: 0.9rem; margin-top: 0.5rem; min-height: 1.25em; }
+.status.err { color: #ff8a65; }
+.status.ok { color: #81c784; }
+.wrap-table {
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+th, td {
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.12);
+  text-align: left;
+  vertical-align: middle;
+}
+th {
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  position: sticky;
+  top: 0;
+  background: rgba(12, 8, 4, 0.98);
+}
+td input[type="text"], td input[type="number"], td select {
+  width: 100%;
+  min-width: 0;
+}
+td.narrow { width: 4rem; }
+td.actions { width: 5rem; white-space: nowrap; }
+.btn-del {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.65rem;
+  color: #ffab91;
+  border-color: rgba(255, 138, 101, 0.4);
+}
+.loading { padding: 2rem; text-align: center; color: var(--muted); }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<h1>Loot table editor</h1>
+<p class="sub">Loads and saves the global table via <code>/api/loot-table</code> (R2). Bookmark this page for quick edits.</p>
+
+<div id="loading" class="loading">Loading…</div>
+
+<div id="app" class="hidden">
+  <div class="toolbar">
+    <div>
+      <label for="q">Search</label><br>
+      <input type="search" id="q" placeholder="Filter by name…" autocomplete="off">
+    </div>
+    <button type="button" id="btn-add">Add row</button>
+    <button type="button" id="btn-save" class="primary">Save to R2</button>
+  </div>
+  <p id="status" class="status" aria-live="polite"></p>
+  <div class="wrap-table">
+    <table>
+      <thead>
+        <tr>
+          <th class="narrow">ID</th>
+          <th>Name</th>
+          <th>Rarity</th>
+          <th>Category</th>
+          <th class="narrow">Value (gp)</th>
+          <th class="actions"> </th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var API = '/api/loot-table';
+  var RARITIES = ['Unknown', 'Mundane', 'Common', 'Uncommon', 'Rare', 'Very Rare', 'Legendary'];
+  var CATEGORIES = [
+    'Adventuring Gear', 'Armor', 'Book', 'Potion', 'Quest Hook', 'Ring', 'Treasure', 'Weapon', 'Wondrous Item'
+  ];
+
+  /** Full document from GET (items + optional by_tier, meta). */
+  var doc = { items: [] };
+  var filter = '';
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  function escapeRe(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function visibleItems() {
+    var q = filter.trim().toLowerCase();
+    if (!q) return doc.items;
+    return doc.items.filter(function (it) {
+      return String(it.name || '').toLowerCase().indexOf(q) !== -1;
+    });
+  }
+
+  function nextId() {
+    var max = -1;
+    doc.items.forEach(function (it) {
+      var n = Number(it.id);
+      if (!Number.isNaN(n) && n > max) max = n;
+    });
+    return max + 1;
+  }
+
+  function setStatus(msg, kind) {
+    var el = $('status');
+    el.textContent = msg || '';
+    el.className = 'status' + (kind ? ' ' + kind : '');
+  }
+
+  function rarityOptions(selected) {
+    return RARITIES.map(function (r) {
+      return '<option value="' + r + '"' + (r === selected ? ' selected' : '') + '>' + r + '</option>';
+    }).join('');
+  }
+
+  function categoryOptions(selected) {
+    var opts = CATEGORIES.slice();
+    if (selected && opts.indexOf(selected) === -1) opts = opts.concat([selected]);
+    return opts.map(function (c) {
+      return '<option value="' + c.replace(/"/g, '&quot;') + '"' + (c === selected ? ' selected' : '') + '>' + c + '</option>';
+    }).join('');
+  }
+
+  function itemById(id) {
+    var needle = Number(id);
+    return doc.items.find(function (it) { return Number(it.id) === needle; }) || null;
+  }
+
+  function render() {
+    var tbody = $('tbody');
+    var rows = visibleItems();
+    tbody.innerHTML = rows.map(function (it) {
+      var rid = Number(it.id);
+      return (
+        '<tr data-item-id="' + rid + '">' +
+        '<td class="narrow">' + rid + '</td>' +
+        '<td><input type="text" data-f="name" value="' + String(it.name || '').replace(/"/g, '&quot;') + '"></td>' +
+        '<td><select data-f="rarity">' + rarityOptions(it.rarity || 'Common') + '</select></td>' +
+        '<td><select data-f="category">' + categoryOptions(it.category || 'Adventuring Gear') + '</select></td>' +
+        '<td class="narrow"><input type="number" data-f="value" step="any" value="' + (it.value != null ? it.value : 0) + '"></td>' +
+        '<td class="actions"><button type="button" class="btn-del" data-del-id="' + rid + '">Delete</button></td>' +
+        '</tr>'
+      );
+    }).join('');
+
+    tbody.querySelectorAll('tr').forEach(function (tr) {
+      var rid = Number(tr.getAttribute('data-item-id'));
+      tr.querySelectorAll('[data-f]').forEach(function (inp) {
+        var f = inp.getAttribute('data-f');
+        function sync() {
+          var row = itemById(rid);
+          if (!row) return;
+          if (f === 'value') row.value = Number(inp.value);
+          else if (f === 'name') row.name = inp.value;
+          else if (f === 'rarity') row.rarity = inp.value;
+          else if (f === 'category') row.category = inp.value;
+        }
+        if (f === 'name' || f === 'value') inp.addEventListener('input', sync);
+        inp.addEventListener('change', sync);
+      });
+      var delBtn = tr.querySelector('[data-del-id]');
+      if (delBtn) {
+        delBtn.addEventListener('click', function () {
+          if (!confirm('Delete this row?')) return;
+          var id = Number(delBtn.getAttribute('data-del-id'));
+          doc.items = doc.items.filter(function (x) { return Number(x.id) !== id; });
+          render();
+        });
+      }
+    });
+  }
+
+  $('btn-add').addEventListener('click', function () {
+    doc.items.push({
+      id: nextId(),
+      name: 'New item',
+      rarity: 'Common',
+      category: 'Adventuring Gear',
+      value: 0,
+      description: '',
+      tier: 1
+    });
+    render();
+  });
+
+  $('q').addEventListener('input', function () {
+    filter = this.value;
+    render();
+  });
+
+  $('btn-save').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    setStatus('Saving…', '');
+    fetch(API, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(doc)
+    })
+      .then(function (res) { return res.json().then(function (body) { return { res: res, body: body }; }); })
+      .then(function (x) {
+        if (!x.res.ok) {
+          var err = (x.body && x.body.errors && x.body.errors.join('; ')) || (x.body && x.body.error) || x.res.statusText;
+          setStatus('Save failed: ' + err, 'err');
+          return;
+        }
+        setStatus('Saved (' + (x.body.itemCount != null ? x.body.itemCount + ' items' : 'ok') + ').', 'ok');
+      })
+      .catch(function () {
+        setStatus('Save failed: network error', 'err');
+      })
+      .then(function () {
+        btn.disabled = false;
+      });
+  });
+
+  fetch(API, { cache: 'no-cache' })
+    .then(function (res) {
+      if (!res.ok) throw new Error(res.statusText);
+      return res.json();
+    })
+    .then(function (json) {
+      if (!json || !Array.isArray(json.items)) throw new Error('Invalid response');
+      doc = json;
+      if (!Array.isArray(doc.items)) doc.items = [];
+      $('loading').classList.add('hidden');
+      $('app').classList.remove('hidden');
+      render();
+    })
+    .catch(function (e) {
+      $('loading').textContent = 'Could not load loot table: ' + (e.message || String(e)) + '. Seed R2 or check LOOT_TABLE_BUCKET binding.';
+      $('loading').classList.add('err');
+    });
+})();
+</script>
+</body>
+</html>
