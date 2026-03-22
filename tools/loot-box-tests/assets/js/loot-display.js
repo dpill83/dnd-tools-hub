@@ -1,10 +1,23 @@
 (function() {
   'use strict';
 
+  function isSafeIconSrc(s) {
+    if (!s || typeof s !== 'string') return false;
+    var t = s.trim().toLowerCase();
+    if (!t) return false;
+    if (t.indexOf('javascript:') === 0 || t.indexOf('vbscript:') === 0) return false;
+    return true;
+  }
+
   function itemIconHTML(item, size) {
     if (!item) return '<span style="font-size:2rem">📦</span>';
-    var imgPath = window.CAT_IMG[item.category];
     var sz = size || 'clamp(2.8rem, 6vw, 5rem)';
+    var custom = item.icon != null && String(item.icon).trim();
+    if (custom && isSafeIconSrc(custom)) {
+      var src = String(item.icon).trim().replace(/"/g, '&quot;');
+      return '<img src="' + src + '" alt="" style="width:' + sz + ';height:' + sz + ';object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.7));-webkit-user-drag:none;" draggable="false">';
+    }
+    var imgPath = window.CAT_IMG[item.category];
     if (imgPath) {
       return '<img src="' + imgPath + '" alt="' + item.category + '" style="width:' + sz + ';height:' + sz + ';object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.7));-webkit-user-drag:none;" draggable="false">';
     }

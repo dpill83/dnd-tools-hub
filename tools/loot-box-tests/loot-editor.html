@@ -49,7 +49,7 @@ h1 {
   border-radius: 8px;
 }
 .toolbar label { font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.06em; color: var(--gold); }
-input[type="search"], input[type="number"], input[type="text"], select {
+input[type="search"], input[type="number"], input[type="text"], select, textarea {
   font-family: inherit;
   font-size: 0.95rem;
   padding: 0.35rem 0.5rem;
@@ -57,6 +57,13 @@ input[type="search"], input[type="number"], input[type="text"], select {
   border: 1px solid var(--border);
   border-radius: 4px;
   color: var(--text);
+}
+textarea { min-height: 4.5rem; resize: vertical; width: 100%; max-width: 100%; }
+input[type="file"] {
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: var(--muted);
+  max-width: 100%;
 }
 input[type="search"] { min-width: 200px; flex: 1; max-width: 320px; }
 button {
@@ -120,6 +127,111 @@ td.actions { width: 5rem; white-space: nowrap; }
 }
 .loading { padding: 2rem; text-align: center; color: var(--muted); }
 .hidden { display: none !important; }
+th[data-sort] {
+  cursor: pointer;
+  user-select: none;
+}
+th[data-sort]:hover { color: var(--gold-light); }
+th.sort-asc::after,
+th.sort-desc::after {
+  content: '';
+  display: inline-block;
+  margin-left: 0.35em;
+  font-size: 0.65em;
+  opacity: 0.85;
+  vertical-align: middle;
+}
+th.sort-asc::after { content: '▲'; }
+th.sort-desc::after { content: '▼'; }
+.modal-dim {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.25rem;
+  overflow: auto;
+}
+.modal-panel {
+  width: 100%;
+  max-width: 28rem;
+  margin: auto 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.1rem 1.15rem 1rem;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.55);
+}
+.modal-panel h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--gold-light);
+  margin: 0 0 0.85rem;
+}
+.modal-field { margin-bottom: 0.65rem; }
+.modal-field label, .modal-field .label-like {
+  display: block;
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.25rem;
+}
+.modal-field input[type="text"],
+.modal-field input[type="number"],
+.modal-field select,
+.modal-field textarea {
+  width: 100%;
+  max-width: 100%;
+}
+.modal-hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 0.35rem 0 0;
+  line-height: 1.35;
+}
+.modal-preview-wrap {
+  margin-top: 0.5rem;
+  min-height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px dashed rgba(201, 168, 76, 0.25);
+  border-radius: 6px;
+  padding: 0.5rem;
+}
+.modal-preview-wrap img {
+  max-width: 100%;
+  max-height: 120px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+}
+.modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(201, 168, 76, 0.15);
+}
+.btn-text {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  text-decoration: underline;
+  padding: 0.25rem 0;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-text:hover { color: var(--gold-light); background: transparent; }
 </style>
 </head>
 <body>
@@ -140,19 +252,83 @@ td.actions { width: 5rem; white-space: nowrap; }
   </div>
   <p id="status" class="status" aria-live="polite"></p>
   <div class="wrap-table">
-    <table>
+    <table id="loot-table">
       <thead>
         <tr>
-          <th class="narrow">ID</th>
-          <th>Name</th>
-          <th>Rarity</th>
-          <th>Category</th>
-          <th class="narrow">Value (gp)</th>
-          <th class="actions"> </th>
+          <th class="narrow" data-sort="id" scope="col">ID</th>
+          <th data-sort="name" scope="col">Name</th>
+          <th data-sort="icon" scope="col">Icon</th>
+          <th data-sort="rarity" scope="col">Rarity</th>
+          <th data-sort="category" scope="col">Category</th>
+          <th class="narrow" data-sort="value" scope="col">Value (gp)</th>
+          <th data-sort="description" scope="col">Description</th>
+          <th class="narrow" data-sort="weight" scope="col">Weight</th>
+          <th data-sort="properties" scope="col">Properties</th>
+          <th data-sort="requirement" scope="col">Requirement</th>
+          <th data-sort="author" scope="col">Author</th>
+          <th class="actions" scope="col"> </th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
     </table>
+  </div>
+
+  <div id="add-modal-dim" class="modal-dim hidden" role="dialog" aria-modal="true" aria-labelledby="add-modal-title">
+    <div class="modal-panel" role="document">
+      <h2 id="add-modal-title">Add item</h2>
+      <form id="add-item-form">
+        <div class="modal-field">
+          <label for="add-name">Name</label>
+          <input type="text" id="add-name" required autocomplete="off" placeholder="Item name">
+        </div>
+        <div class="modal-field">
+          <span class="label-like">Picture (optional)</span>
+          <input type="text" id="add-icon" autocomplete="off" placeholder="Image URL (https://… or /path/to.png)">
+          <p class="modal-hint">Paste a link to a hosted image, or pick a file below. Files are embedded as base64 in the saved JSON—use small images (under ~500&nbsp;KB) so the table stays fast.</p>
+          <input type="file" id="add-icon-file" accept="image/*">
+          <div class="modal-preview-wrap" id="add-modal-preview-wrap">
+            <img id="add-modal-preview" class="hidden" alt="Preview">
+          </div>
+          <button type="button" class="btn-text" id="add-icon-clear">Clear picture</button>
+        </div>
+        <div class="modal-field">
+          <label for="add-rarity">Rarity</label>
+          <select id="add-rarity"></select>
+        </div>
+        <div class="modal-field">
+          <label for="add-category">Category</label>
+          <select id="add-category"></select>
+        </div>
+        <div class="modal-field">
+          <label for="add-value">Value (gp)</label>
+          <input type="number" id="add-value" step="any" value="0">
+        </div>
+        <div class="modal-field">
+          <label for="add-weight">Weight</label>
+          <input type="number" id="add-weight" step="any" placeholder="Optional">
+        </div>
+        <div class="modal-field">
+          <label for="add-description">Description</label>
+          <textarea id="add-description" rows="3" placeholder="Optional"></textarea>
+        </div>
+        <div class="modal-field">
+          <label for="add-properties">Properties</label>
+          <textarea id="add-properties" rows="2" placeholder="Optional"></textarea>
+        </div>
+        <div class="modal-field">
+          <label for="add-requirement">Requirement</label>
+          <input type="text" id="add-requirement" autocomplete="off" placeholder="Optional">
+        </div>
+        <div class="modal-field">
+          <label for="add-author">Author</label>
+          <input type="text" id="add-author" autocomplete="off" placeholder="Optional">
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="add-modal-cancel">Cancel</button>
+          <button type="submit" class="primary" id="add-modal-submit">Add to table</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
@@ -169,6 +345,11 @@ td.actions { width: 5rem; white-space: nowrap; }
   /** Full document from GET (items + optional by_tier, meta). */
   var doc = { items: [] };
   var filter = '';
+  /** null = preserve document / filter order */
+  var sortKey = null;
+  /** 1 = ascending, -1 = descending */
+  var sortDir = 1;
+  var sortHeadersBound = false;
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -181,6 +362,108 @@ td.actions { width: 5rem; white-space: nowrap; }
     if (!q) return doc.items;
     return doc.items.filter(function (it) {
       return String(it.name || '').toLowerCase().indexOf(q) !== -1;
+    });
+  }
+
+  function weightSortNum(it) {
+    if (it.weight == null || it.weight === '') return null;
+    var w = Number(it.weight);
+    return Number.isNaN(w) ? null : w;
+  }
+
+  /** Compare a and b for sortKey; returns -1, 0, or 1 (ascending semantics). */
+  function compareItems(a, b, key) {
+    var av;
+    var bv;
+    switch (key) {
+      case 'id':
+        av = Number(a.id);
+        bv = Number(b.id);
+        if (Number.isNaN(av)) av = 0;
+        if (Number.isNaN(bv)) bv = 0;
+        return av < bv ? -1 : av > bv ? 1 : 0;
+      case 'value':
+        av = Number(a.value);
+        bv = Number(b.value);
+        if (Number.isNaN(av)) av = 0;
+        if (Number.isNaN(bv)) bv = 0;
+        return av < bv ? -1 : av > bv ? 1 : 0;
+      case 'weight':
+        av = weightSortNum(a);
+        bv = weightSortNum(b);
+        if (av === null && bv === null) return 0;
+        if (av === null) return 1;
+        if (bv === null) return -1;
+        return av < bv ? -1 : av > bv ? 1 : 0;
+      case 'rarity':
+        av = RARITIES.indexOf(a.rarity);
+        bv = RARITIES.indexOf(b.rarity);
+        if (av < 0) av = 999;
+        if (bv < 0) bv = 999;
+        return av < bv ? -1 : av > bv ? 1 : 0;
+      case 'name':
+      case 'category':
+      case 'description':
+      case 'properties':
+      case 'requirement':
+      case 'author':
+      case 'icon':
+        av = String(a[key] || '').toLowerCase();
+        bv = String(b[key] || '').toLowerCase();
+        return av < bv ? -1 : av > bv ? 1 : 0;
+      default:
+        return 0;
+    }
+  }
+
+  /** Rows to render: filtered list, optionally sorted (view only; does not mutate doc.items). */
+  function displayedItems() {
+    var list = visibleItems();
+    if (!sortKey) return list;
+    var key = sortKey;
+    var dir = sortDir;
+    return list.slice().sort(function (a, b) {
+      var cmp = compareItems(a, b, key);
+      if (cmp !== 0) return dir * cmp;
+      var ia = Number(a.id);
+      var ib = Number(b.id);
+      if (Number.isNaN(ia)) ia = 0;
+      if (Number.isNaN(ib)) ib = 0;
+      return ia - ib;
+    });
+  }
+
+  function updateSortHeaders() {
+    var thead = $('loot-table').querySelector('thead');
+    if (!thead) return;
+    thead.querySelectorAll('th[data-sort]').forEach(function (th) {
+      th.classList.remove('sort-asc', 'sort-desc');
+      var k = th.getAttribute('data-sort');
+      if (sortKey === k) {
+        th.classList.add(sortDir > 0 ? 'sort-asc' : 'sort-desc');
+        th.setAttribute('aria-sort', sortDir > 0 ? 'ascending' : 'descending');
+      } else {
+        th.setAttribute('aria-sort', 'none');
+      }
+    });
+  }
+
+  function bindSortHeaders() {
+    if (sortHeadersBound) return;
+    sortHeadersBound = true;
+    var thead = $('loot-table').querySelector('thead');
+    if (!thead) return;
+    thead.addEventListener('click', function (e) {
+      var th = e.target.closest('th[data-sort]');
+      if (!th) return;
+      var key = th.getAttribute('data-sort');
+      if (!key) return;
+      if (sortKey === key) sortDir = -sortDir;
+      else {
+        sortKey = key;
+        sortDir = 1;
+      }
+      render();
     });
   }
 
@@ -220,16 +503,22 @@ td.actions { width: 5rem; white-space: nowrap; }
 
   function render() {
     var tbody = $('tbody');
-    var rows = visibleItems();
+    var rows = displayedItems();
     tbody.innerHTML = rows.map(function (it) {
       var rid = Number(it.id);
       return (
         '<tr data-item-id="' + rid + '">' +
         '<td class="narrow">' + rid + '</td>' +
         '<td><input type="text" data-f="name" value="' + String(it.name || '').replace(/"/g, '&quot;') + '"></td>' +
+        '<td><input type="text" data-f="icon" placeholder="Image URL" value="' + String(it.icon || '').replace(/"/g, '&quot;') + '"></td>' +
         '<td><select data-f="rarity">' + rarityOptions(it.rarity || 'Common') + '</select></td>' +
         '<td><select data-f="category">' + categoryOptions(it.category || 'Adventuring Gear') + '</select></td>' +
         '<td class="narrow"><input type="number" data-f="value" step="any" value="' + (it.value != null ? it.value : 0) + '"></td>' +
+        '<td><input type="text" data-f="description" value="' + String(it.description || '').replace(/"/g, '&quot;') + '"></td>' +
+        '<td class="narrow"><input type="number" data-f="weight" step="any" value="' + (it.weight != null && it.weight !== '' ? it.weight : '') + '"></td>' +
+        '<td><input type="text" data-f="properties" value="' + String(it.properties || '').replace(/"/g, '&quot;') + '"></td>' +
+        '<td><input type="text" data-f="requirement" value="' + String(it.requirement || '').replace(/"/g, '&quot;') + '"></td>' +
+        '<td><input type="text" data-f="author" value="' + String(it.author || '').replace(/"/g, '&quot;') + '"></td>' +
         '<td class="actions"><button type="button" class="btn-del" data-del-id="' + rid + '">Delete</button></td>' +
         '</tr>'
       );
@@ -246,8 +535,21 @@ td.actions { width: 5rem; white-space: nowrap; }
           else if (f === 'name') row.name = inp.value;
           else if (f === 'rarity') row.rarity = inp.value;
           else if (f === 'category') row.category = inp.value;
+          else if (f === 'description') row.description = inp.value;
+          else if (f === 'weight') {
+            var w = inp.value === '' ? null : Number(inp.value);
+            if (inp.value !== '' && Number.isNaN(w)) return;
+            if (w === null) delete row.weight;
+            else row.weight = w;
+          } else if (f === 'properties') row.properties = inp.value;
+          else if (f === 'requirement') row.requirement = inp.value;
+          else if (f === 'author') row.author = inp.value;
+          else if (f === 'icon') {
+            if (!inp.value.trim()) delete row.icon;
+            else row.icon = inp.value;
+          }
         }
-        if (f === 'name' || f === 'value') inp.addEventListener('input', sync);
+        if (f === 'name' || f === 'value' || f === 'description' || f === 'properties' || f === 'requirement' || f === 'author' || f === 'weight' || f === 'icon') inp.addEventListener('input', sync);
         inp.addEventListener('change', sync);
       });
       var delBtn = tr.querySelector('[data-del-id]');
@@ -260,19 +562,130 @@ td.actions { width: 5rem; white-space: nowrap; }
         });
       }
     });
+    updateSortHeaders();
+  }
+
+  function populateAddModalSelects() {
+    $('add-rarity').innerHTML = RARITIES.map(function (r) {
+      return '<option value="' + r.replace(/"/g, '&quot;') + '">' + r + '</option>';
+    }).join('');
+    $('add-category').innerHTML = CATEGORIES.map(function (c) {
+      return '<option value="' + c.replace(/"/g, '&quot;') + '">' + c + '</option>';
+    }).join('');
+  }
+
+  function updateAddModalPreview() {
+    var url = ($('add-icon').value || '').trim();
+    var img = $('add-modal-preview');
+    if (!url) {
+      img.classList.add('hidden');
+      img.removeAttribute('src');
+      return;
+    }
+    img.onerror = function () {
+      img.classList.add('hidden');
+    };
+    img.onload = function () {
+      img.classList.remove('hidden');
+    };
+    img.src = url;
+  }
+
+  function openAddModal() {
+    $('add-name').value = '';
+    $('add-icon').value = '';
+    $('add-icon-file').value = '';
+    $('add-rarity').value = 'Common';
+    $('add-category').value = 'Adventuring Gear';
+    $('add-value').value = '0';
+    $('add-weight').value = '';
+    $('add-description').value = '';
+    $('add-properties').value = '';
+    $('add-requirement').value = '';
+    $('add-author').value = '';
+    updateAddModalPreview();
+    $('add-modal-dim').classList.remove('hidden');
+    $('add-name').focus();
+  }
+
+  function closeAddModal() {
+    $('add-modal-dim').classList.add('hidden');
   }
 
   $('btn-add').addEventListener('click', function () {
-    doc.items.push({
+    openAddModal();
+  });
+
+  $('add-modal-cancel').addEventListener('click', function () {
+    closeAddModal();
+  });
+
+  $('add-modal-dim').addEventListener('click', function (e) {
+    if (e.target === this) closeAddModal();
+  });
+
+  $('add-icon').addEventListener('input', function () {
+    updateAddModalPreview();
+  });
+
+  $('add-icon-clear').addEventListener('click', function () {
+    $('add-icon').value = '';
+    $('add-icon-file').value = '';
+    updateAddModalPreview();
+  });
+
+  $('add-icon-file').addEventListener('change', function () {
+    var f = this.files && this.files[0];
+    if (!f || !f.type || f.type.indexOf('image/') !== 0) return;
+    var fr = new FileReader();
+    fr.onload = function () {
+      var u = fr.result;
+      if (typeof u === 'string') {
+        $('add-icon').value = u;
+        updateAddModalPreview();
+        if (u.length > 800000) {
+          setStatus('Tip: this image is large; the saved JSON will be big. Consider a smaller file or a hosted URL.', '');
+        }
+      }
+    };
+    fr.readAsDataURL(f);
+  });
+
+  $('add-item-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = ($('add-name').value || '').trim();
+    if (!name) {
+      $('add-name').focus();
+      return;
+    }
+    var item = {
       id: nextId(),
-      name: 'New item',
-      rarity: 'Common',
-      category: 'Adventuring Gear',
-      value: 0,
-      description: '',
+      name: name,
+      rarity: $('add-rarity').value,
+      category: $('add-category').value,
+      value: Number($('add-value').value) || 0,
+      description: $('add-description').value || '',
+      properties: $('add-properties').value || '',
+      requirement: $('add-requirement').value || '',
+      author: $('add-author').value || '',
       tier: 1
-    });
+    };
+    var wv = String($('add-weight').value || '').trim();
+    if (wv !== '') {
+      var nw = Number(wv);
+      if (!Number.isNaN(nw)) item.weight = nw;
+    }
+    var ic = ($('add-icon').value || '').trim();
+    if (ic) item.icon = ic;
+    doc.items.push(item);
+    closeAddModal();
     render();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if ($('add-modal-dim').classList.contains('hidden')) return;
+    closeAddModal();
   });
 
   $('q').addEventListener('input', function () {
@@ -317,6 +730,8 @@ td.actions { width: 5rem; white-space: nowrap; }
       if (!Array.isArray(doc.items)) doc.items = [];
       $('loading').classList.add('hidden');
       $('app').classList.remove('hidden');
+      populateAddModalSelects();
+      bindSortHeaders();
       render();
     })
     .catch(function (e) {
