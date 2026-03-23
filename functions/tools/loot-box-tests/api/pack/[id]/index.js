@@ -8,7 +8,7 @@ export async function onRequestGet(context) {
   if (!id) return json({ error: 'Pack id required' }, 400);
 
   const row = await DB.prepare(
-    'SELECT id, label, type, player_name, quantity, slot_config, created_at FROM packs WHERE id = ?'
+    'SELECT id, label, type, player_name, quantity, slot_config, guaranteed_item_id, created_at FROM packs WHERE id = ?'
   ).bind(id).first();
 
   if (!row) return json({ error: 'Pack not found' }, 404);
@@ -23,6 +23,7 @@ export async function onRequestGet(context) {
     player_name: row.player_name,
     quantity: row.quantity,
     slot_config: typeof row.slot_config === 'string' ? JSON.parse(row.slot_config) : row.slot_config,
+    guaranteed_item_id: row.guaranteed_item_id,
     created_at: row.created_at,
     ...(opens !== undefined ? { opens } : {}),
   });

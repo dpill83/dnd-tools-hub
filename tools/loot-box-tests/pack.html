@@ -94,6 +94,26 @@
   border-radius: 14px;
   box-shadow: 0 6px 28px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.06);
 }
+.pack-jackpot-msg {
+  position: relative;
+  z-index: 5;
+  flex-shrink: 0;
+  max-width: min(94vw, 44rem);
+  margin: 0 auto;
+  padding: 0.65rem 1.1rem;
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.9rem, 2.8vw, 1.05rem);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  color: var(--gold-light, #f0d070);
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.85);
+  background: rgba(18,10,4,0.82);
+  border: 1px solid rgba(201,168,76,0.38);
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+}
 #slots-row.slots-row--claimed {
   flex-direction: column;
   align-items: center;
@@ -180,6 +200,7 @@
 <!-- Main Stage -->
 <div id="stage" class="flex-center-col">
 
+  <div id="pack-jackpot-msg" class="pack-jackpot-msg" hidden></div>
   <div id="pack-claimed-msg" class="pack-claimed-msg" hidden></div>
 
   <!-- Chest -->
@@ -277,7 +298,9 @@
   const zoomDim    = document.getElementById('zoom-dim');
   const cardModal = document.getElementById('card-modal');
   const particlesContainer = document.getElementById('particles');
+  const packJackpotMsg = document.getElementById('pack-jackpot-msg');
   const packClaimedMsg = document.getElementById('pack-claimed-msg');
+  let lootTableCache = null;
 
   function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -291,6 +314,62 @@
     } catch (e) {
       return String(at);
     }
+  }
+
+  async function getLootTable() {
+    if (lootTableCache && Array.isArray(lootTableCache.items)) return lootTableCache;
+    try {
+      const res = await fetch('/api/loot-table', { cache: 'no-cache' });
+      if (!res.ok) return null;
+      const data = await res.json();
+      lootTableCache = data;
+      return data;
+    } catch (_e) {
+      return null;
+    }
+  }
+
+  async function resolveJackpotItemName(guaranteedItemId, opens) {
+    var gid = Number(guaranteedItemId);
+    if (Number.isNaN(gid)) return '';
+
+    var list = Array.isArray(opens) ? opens : [];
+    for (var i = 0; i < list.length; i++) {
+      var reveal = list[i] && list[i].reveal ? list[i].reveal : null;
+      if (!reveal) continue;
+      var rid = Number(reveal.id);
+      if (!Number.isNaN(rid) && rid === gid && reveal.name) {
+        return String(reveal.name);
+      }
+    }
+
+    var loot = await getLootTable();
+    var items = loot && Array.isArray(loot.items) ? loot.items : [];
+    for (var j = 0; j < items.length; j++) {
+      var item = items[j];
+      if (!item) continue;
+      var iid = Number(item.id);
+      if (!Number.isNaN(iid) && iid === gid && item.name) return String(item.name);
+    }
+    return 'Item #' + String(gid);
+  }
+
+  async function updateJackpotBanner(packData) {
+    if (!packJackpotMsg) return;
+    var gid = Number(packData && packData.guaranteed_item_id);
+    if (Number.isNaN(gid)) {
+      packJackpotMsg.hidden = true;
+      packJackpotMsg.textContent = '';
+      return;
+    }
+    var name = await resolveJackpotItemName(gid, packData && packData.opens);
+    if (!name) {
+      packJackpotMsg.hidden = true;
+      packJackpotMsg.textContent = '';
+      return;
+    }
+    packJackpotMsg.textContent = 'Jackpot Item: ' + name;
+    packJackpotMsg.hidden = false;
   }
 
   function wireRevealedSlot(slot) {
@@ -632,6 +711,7 @@
     }
 
     const packData = await res.json();
+    await updateJackpotBanner(packData);
     var qty = Number(packData.quantity ?? 0);
     if (qty < 1) {
       var labelEx = packData.label ? String(packData.label) : '';
