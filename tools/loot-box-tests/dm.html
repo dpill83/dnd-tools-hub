@@ -177,6 +177,12 @@ body::after {
   color: var(--gold-light);
   background: var(--gold-glow-soft);
 }
+a.header-btn {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+}
 
 .dm-key-wrap {
   display: flex;
@@ -1401,6 +1407,7 @@ input[type=range]::-webkit-slider-thumb:hover {
         </div>
         <span class="dm-key-pill hidden" id="dm-key-pill">⚿ <span id="dm-key-display"></span> <button class="dm-key-clear" onclick="clearKey()">✕</button></span>
       </div>
+      <a href="loot-editor.html" class="header-btn">Loot Editor</a>
       <button class="header-btn" data-view="packs" onclick="showView('packs')">◈ My Packs</button>
     </div>
   </header>
@@ -1548,6 +1555,7 @@ input[type=range]::-webkit-slider-thumb:hover {
         <span class="dm-wordmark-sub">My Packs</span>
       </div>
       <div class="dm-header-right">
+        <a href="loot-editor.html" class="header-btn">Loot Editor</a>
         <button class="header-btn" onclick="showView('builder')">← Back to Builder</button>
       </div>
     </header>

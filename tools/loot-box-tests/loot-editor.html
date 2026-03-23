@@ -232,6 +232,38 @@ th.sort-desc::after { content: '▼'; }
   font-family: inherit;
 }
 .btn-text:hover { color: var(--gold-light); background: transparent; }
+.pagination-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.pagination-bar label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  margin-right: 0.35rem;
+}
+.pagination-bar select#page-size {
+  min-width: 5.5rem;
+}
+.page-info {
+  font-size: 0.88rem;
+  color: var(--muted);
+  flex: 1;
+  min-width: 10rem;
+}
+.pagination-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 </style>
 </head>
 <body>
@@ -271,6 +303,23 @@ th.sort-desc::after { content: '▼'; }
       </thead>
       <tbody id="tbody"></tbody>
     </table>
+  </div>
+
+  <div class="pagination-bar" id="pagination-bar" aria-label="Table pagination">
+    <div>
+      <label for="page-size">Rows per page</label>
+      <select id="page-size" aria-label="Rows per page">
+        <option value="10">10</option>
+        <option value="50" selected>50</option>
+        <option value="100">100</option>
+        <option value="all">All</option>
+      </select>
+    </div>
+    <span id="page-info" class="page-info" aria-live="polite"></span>
+    <div class="pagination-nav">
+      <button type="button" id="btn-page-prev">Previous</button>
+      <button type="button" id="btn-page-next">Next</button>
+    </div>
   </div>
 
   <div id="add-modal-dim" class="modal-dim hidden" role="dialog" aria-modal="true" aria-labelledby="add-modal-title">
@@ -350,8 +399,77 @@ th.sort-desc::after { content: '▼'; }
   /** 1 = ascending, -1 = descending */
   var sortDir = 1;
   var sortHeadersBound = false;
+  /** '10' | '50' | '100' | 'all' */
+  var pageSize = '50';
+  /** 0-based page index */
+  var pageIndex = 0;
 
   var $ = function (id) { return document.getElementById(id); };
+
+  function pageSizeNumber() {
+    if (pageSize === 'all') return Infinity;
+    var n = Number(pageSize);
+    return Number.isNaN(n) || n < 1 ? 50 : n;
+  }
+
+  function allDisplayedItems() {
+    return displayedItems();
+  }
+
+  function totalItemCount() {
+    return allDisplayedItems().length;
+  }
+
+  function pageCount() {
+    var n = totalItemCount();
+    var ps = pageSizeNumber();
+    if (!isFinite(ps)) return 1;
+    return Math.max(1, Math.ceil(n / ps));
+  }
+
+  function clampPageIndex() {
+    var pc = pageCount();
+    if (pageIndex < 0) pageIndex = 0;
+    if (pageIndex >= pc) pageIndex = Math.max(0, pc - 1);
+  }
+
+  function itemsOnCurrentPage() {
+    var all = allDisplayedItems();
+    var ps = pageSizeNumber();
+    if (!isFinite(ps)) return all;
+    var start = pageIndex * ps;
+    return all.slice(start, start + ps);
+  }
+
+  function updatePaginationUI() {
+    var info = $('page-info');
+    var prevBtn = $('btn-page-prev');
+    var nextBtn = $('btn-page-next');
+    var n = totalItemCount();
+    var ps = pageSizeNumber();
+    var pc = pageCount();
+    if (!info || !prevBtn || !nextBtn) return;
+
+    if (!isFinite(ps)) {
+      info.textContent = n ? 'Showing all ' + n + ' row' + (n !== 1 ? 's' : '') : 'No rows';
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
+      return;
+    }
+
+    if (n === 0) {
+      info.textContent = 'No rows';
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
+      return;
+    }
+
+    var start = pageIndex * ps + 1;
+    var end = Math.min(n, (pageIndex + 1) * ps);
+    info.textContent = 'Showing ' + start + '–' + end + ' of ' + n + ' · Page ' + (pageIndex + 1) + ' of ' + pc;
+    prevBtn.disabled = pageIndex <= 0;
+    nextBtn.disabled = pageIndex >= pc - 1;
+  }
 
   function escapeRe(s) {
     return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -502,8 +620,9 @@ th.sort-desc::after { content: '▼'; }
   }
 
   function render() {
+    clampPageIndex();
     var tbody = $('tbody');
-    var rows = displayedItems();
+    var rows = itemsOnCurrentPage();
     tbody.innerHTML = rows.map(function (it) {
       var rid = Number(it.id);
       return (
@@ -563,6 +682,7 @@ th.sort-desc::after { content: '▼'; }
       }
     });
     updateSortHeaders();
+    updatePaginationUI();
   }
 
   function populateAddModalSelects() {
@@ -679,6 +799,7 @@ th.sort-desc::after { content: '▼'; }
     if (ic) item.icon = ic;
     doc.items.push(item);
     closeAddModal();
+    pageIndex = Number.MAX_SAFE_INTEGER;
     render();
   });
 
@@ -690,6 +811,25 @@ th.sort-desc::after { content: '▼'; }
 
   $('q').addEventListener('input', function () {
     filter = this.value;
+    pageIndex = 0;
+    render();
+  });
+
+  $('page-size').addEventListener('change', function () {
+    pageSize = String(this.value || '50');
+    pageIndex = 0;
+    render();
+  });
+
+  $('btn-page-prev').addEventListener('click', function () {
+    if (pageIndex <= 0) return;
+    pageIndex--;
+    render();
+  });
+
+  $('btn-page-next').addEventListener('click', function () {
+    if (pageIndex >= pageCount() - 1) return;
+    pageIndex++;
     render();
   });
 
