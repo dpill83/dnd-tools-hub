@@ -164,6 +164,39 @@ th.sort-desc::after { content: '▼'; }
   padding: 1.1rem 1.15rem 1rem;
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.55);
 }
+.modal-panel--add-item {
+  max-width: min(44rem, calc(100vw - 2rem));
+}
+.add-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 1.25rem;
+  align-items: start;
+}
+.add-modal-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+.add-modal-col .modal-field {
+  margin-bottom: 0.65rem;
+}
+.add-modal-col .modal-field:last-child {
+  margin-bottom: 0;
+}
+.modal-actions--span {
+  grid-column: 1 / -1;
+  margin-top: 0.35rem;
+}
+@media (max-width: 640px) {
+  .add-modal-grid {
+    grid-template-columns: 1fr;
+  }
+  .modal-actions--span {
+    margin-top: 0.5rem;
+  }
+}
 .modal-panel h2 {
   font-family: 'Cinzel', serif;
   font-size: 1rem;
@@ -208,7 +241,7 @@ th.sort-desc::after { content: '▼'; }
 }
 .modal-preview-wrap img {
   max-width: 100%;
-  max-height: 120px;
+  max-height: min(220px, 40vh);
   object-fit: contain;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
 }
@@ -232,6 +265,20 @@ th.sort-desc::after { content: '▼'; }
   font-family: inherit;
 }
 .btn-text:hover { color: var(--gold-light); background: transparent; }
+.btn-id-edit {
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--gold-light);
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  min-width: 0;
+}
+.btn-id-edit:hover { color: #fff4d0; }
 .pagination-bar {
   display: flex;
   flex-wrap: wrap;
@@ -323,58 +370,64 @@ th.sort-desc::after { content: '▼'; }
   </div>
 
   <div id="add-modal-dim" class="modal-dim hidden" role="dialog" aria-modal="true" aria-labelledby="add-modal-title">
-    <div class="modal-panel" role="document">
+    <div class="modal-panel modal-panel--add-item" role="document">
       <h2 id="add-modal-title">Add item</h2>
       <form id="add-item-form">
-        <div class="modal-field">
-          <label for="add-name">Name</label>
-          <input type="text" id="add-name" required autocomplete="off" placeholder="Item name">
-        </div>
-        <div class="modal-field">
-          <span class="label-like">Picture (optional)</span>
-          <input type="text" id="add-icon" autocomplete="off" placeholder="Image URL (https://… or /path/to.png)">
-          <p class="modal-hint">Paste a link to a hosted image, or pick a file below. Files are embedded as base64 in the saved JSON—use small images (under ~500&nbsp;KB) so the table stays fast.</p>
-          <input type="file" id="add-icon-file" accept="image/*">
-          <div class="modal-preview-wrap" id="add-modal-preview-wrap">
-            <img id="add-modal-preview" class="hidden" alt="Preview">
+        <div class="add-modal-grid">
+          <div class="add-modal-col">
+            <div class="modal-field">
+              <label for="add-name">Name</label>
+              <input type="text" id="add-name" required autocomplete="off" placeholder="Item name">
+            </div>
+            <div class="modal-field">
+              <span class="label-like">Picture (optional)</span>
+              <input type="text" id="add-icon" autocomplete="off" placeholder="Image URL (https://… or /path/to.png)">
+              <p class="modal-hint">Paste a link to a hosted image, or pick a file below. Files are embedded as base64 in the saved JSON—use small images (under ~500&nbsp;KB) so the table stays fast.</p>
+              <input type="file" id="add-icon-file" accept="image/*">
+              <div class="modal-preview-wrap" id="add-modal-preview-wrap">
+                <img id="add-modal-preview" class="hidden" alt="Preview">
+              </div>
+              <button type="button" class="btn-text" id="add-icon-clear">Clear picture</button>
+            </div>
+            <div class="modal-field">
+              <label for="add-rarity">Rarity</label>
+              <select id="add-rarity"></select>
+            </div>
+            <div class="modal-field">
+              <label for="add-category">Category</label>
+              <select id="add-category"></select>
+            </div>
+            <div class="modal-field">
+              <label for="add-value">Value (gp)</label>
+              <input type="number" id="add-value" step="any" value="0">
+            </div>
+            <div class="modal-field">
+              <label for="add-weight">Weight</label>
+              <input type="number" id="add-weight" step="any" placeholder="Optional">
+            </div>
           </div>
-          <button type="button" class="btn-text" id="add-icon-clear">Clear picture</button>
-        </div>
-        <div class="modal-field">
-          <label for="add-rarity">Rarity</label>
-          <select id="add-rarity"></select>
-        </div>
-        <div class="modal-field">
-          <label for="add-category">Category</label>
-          <select id="add-category"></select>
-        </div>
-        <div class="modal-field">
-          <label for="add-value">Value (gp)</label>
-          <input type="number" id="add-value" step="any" value="0">
-        </div>
-        <div class="modal-field">
-          <label for="add-weight">Weight</label>
-          <input type="number" id="add-weight" step="any" placeholder="Optional">
-        </div>
-        <div class="modal-field">
-          <label for="add-description">Description</label>
-          <textarea id="add-description" rows="3" placeholder="Optional"></textarea>
-        </div>
-        <div class="modal-field">
-          <label for="add-properties">Properties</label>
-          <textarea id="add-properties" rows="2" placeholder="Optional"></textarea>
-        </div>
-        <div class="modal-field">
-          <label for="add-requirement">Requirement</label>
-          <input type="text" id="add-requirement" autocomplete="off" placeholder="Optional">
-        </div>
-        <div class="modal-field">
-          <label for="add-author">Author</label>
-          <input type="text" id="add-author" autocomplete="off" placeholder="Optional">
-        </div>
-        <div class="modal-actions">
-          <button type="button" id="add-modal-cancel">Cancel</button>
-          <button type="submit" class="primary" id="add-modal-submit">Add to table</button>
+          <div class="add-modal-col">
+            <div class="modal-field">
+              <label for="add-description">Description</label>
+              <textarea id="add-description" rows="5" placeholder="Optional"></textarea>
+            </div>
+            <div class="modal-field">
+              <label for="add-properties">Properties</label>
+              <textarea id="add-properties" rows="4" placeholder="Optional"></textarea>
+            </div>
+            <div class="modal-field">
+              <label for="add-requirement">Requirement</label>
+              <input type="text" id="add-requirement" autocomplete="off" placeholder="Optional">
+            </div>
+            <div class="modal-field">
+              <label for="add-author">Author</label>
+              <input type="text" id="add-author" autocomplete="off" placeholder="Optional">
+            </div>
+          </div>
+          <div class="modal-actions modal-actions--span">
+            <button type="button" id="add-modal-cancel">Cancel</button>
+            <button type="submit" class="primary" id="add-modal-submit">Add to table</button>
+          </div>
         </div>
       </form>
     </div>
@@ -403,6 +456,8 @@ th.sort-desc::after { content: '▼'; }
   var pageSize = '50';
   /** 0-based page index */
   var pageIndex = 0;
+  /** null = add new item; number = editing existing row id */
+  var addModalEditingId = null;
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -627,7 +682,7 @@ th.sort-desc::after { content: '▼'; }
       var rid = Number(it.id);
       return (
         '<tr data-item-id="' + rid + '">' +
-        '<td class="narrow">' + rid + '</td>' +
+        '<td class="narrow"><button type="button" class="btn-id-edit" data-edit-id="' + rid + '" title="Open editor (picture and fields)">' + rid + '</button></td>' +
         '<td><input type="text" data-f="name" value="' + String(it.name || '').replace(/"/g, '&quot;') + '"></td>' +
         '<td><input type="text" data-f="icon" placeholder="Image URL" value="' + String(it.icon || '').replace(/"/g, '&quot;') + '"></td>' +
         '<td><select data-f="rarity">' + rarityOptions(it.rarity || 'Common') + '</select></td>' +
@@ -680,6 +735,13 @@ th.sort-desc::after { content: '▼'; }
           render();
         });
       }
+      var idBtn = tr.querySelector('[data-edit-id]');
+      if (idBtn) {
+        idBtn.addEventListener('click', function () {
+          var eid = Number(idBtn.getAttribute('data-edit-id'));
+          openEditModal(eid);
+        });
+      }
     });
     updateSortHeaders();
     updatePaginationUI();
@@ -712,6 +774,9 @@ th.sort-desc::after { content: '▼'; }
   }
 
   function openAddModal() {
+    addModalEditingId = null;
+    $('add-modal-title').textContent = 'Add item';
+    $('add-modal-submit').textContent = 'Add to table';
     $('add-name').value = '';
     $('add-icon').value = '';
     $('add-icon-file').value = '';
@@ -723,6 +788,32 @@ th.sort-desc::after { content: '▼'; }
     $('add-properties').value = '';
     $('add-requirement').value = '';
     $('add-author').value = '';
+    updateAddModalPreview();
+    $('add-modal-dim').classList.remove('hidden');
+    $('add-name').focus();
+  }
+
+  function openEditModal(id) {
+    var it = itemById(id);
+    if (!it) return;
+    addModalEditingId = Number(it.id);
+    $('add-modal-title').textContent = 'Edit item';
+    $('add-modal-submit').textContent = 'Save changes';
+    $('add-name').value = it.name || '';
+    $('add-icon').value = it.icon || '';
+    $('add-icon-file').value = '';
+    $('add-rarity').value = it.rarity && RARITIES.indexOf(it.rarity) >= 0 ? it.rarity : 'Common';
+    var cat = it.category || 'Adventuring Gear';
+    if (CATEGORIES.indexOf(cat) === -1) {
+      $('add-category').innerHTML = categoryOptions(cat);
+    }
+    $('add-category').value = cat;
+    $('add-value').value = it.value != null ? String(it.value) : '0';
+    $('add-weight').value = it.weight != null && it.weight !== '' ? String(it.weight) : '';
+    $('add-description').value = it.description || '';
+    $('add-properties').value = it.properties || '';
+    $('add-requirement').value = it.requirement || '';
+    $('add-author').value = it.author || '';
     updateAddModalPreview();
     $('add-modal-dim').classList.remove('hidden');
     $('add-name').focus();
@@ -778,24 +869,59 @@ th.sort-desc::after { content: '▼'; }
       $('add-name').focus();
       return;
     }
+    var rarity = $('add-rarity').value;
+    var category = $('add-category').value;
+    var value = Number($('add-value').value) || 0;
+    var description = $('add-description').value || '';
+    var properties = $('add-properties').value || '';
+    var requirement = $('add-requirement').value || '';
+    var author = $('add-author').value || '';
+    var wv = String($('add-weight').value || '').trim();
+    var ic = ($('add-icon').value || '').trim();
+
+    if (addModalEditingId != null) {
+      var row = itemById(addModalEditingId);
+      if (!row) {
+        closeAddModal();
+        return;
+      }
+      row.name = name;
+      row.rarity = rarity;
+      row.category = category;
+      row.value = value;
+      row.description = description;
+      row.properties = properties;
+      row.requirement = requirement;
+      row.author = author;
+      if (wv !== '') {
+        var nw = Number(wv);
+        if (!Number.isNaN(nw)) row.weight = nw;
+      } else {
+        delete row.weight;
+      }
+      if (ic) row.icon = ic;
+      else delete row.icon;
+      closeAddModal();
+      render();
+      return;
+    }
+
     var item = {
       id: nextId(),
       name: name,
-      rarity: $('add-rarity').value,
-      category: $('add-category').value,
-      value: Number($('add-value').value) || 0,
-      description: $('add-description').value || '',
-      properties: $('add-properties').value || '',
-      requirement: $('add-requirement').value || '',
-      author: $('add-author').value || '',
+      rarity: rarity,
+      category: category,
+      value: value,
+      description: description,
+      properties: properties,
+      requirement: requirement,
+      author: author,
       tier: 1
     };
-    var wv = String($('add-weight').value || '').trim();
     if (wv !== '') {
-      var nw = Number(wv);
-      if (!Number.isNaN(nw)) item.weight = nw;
+      var nw2 = Number(wv);
+      if (!Number.isNaN(nw2)) item.weight = nw2;
     }
-    var ic = ($('add-icon').value || '').trim();
     if (ic) item.icon = ic;
     doc.items.push(item);
     closeAddModal();
