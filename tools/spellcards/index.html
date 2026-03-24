@@ -122,6 +122,7 @@ var SCHOOL_MAP={"A":{name:"Abjuration",color:"#2a4a7f"},"C":{name:"Conjuration",
 function makeSVG(sc,color){var c=color||"#3a2a1a";var m={"A":"<polygon points='100,15 160,100 40,100' fill='none' stroke='rgba(200,180,100,0.5)' stroke-width='2'/><circle cx='100' cy='62' r='22' fill='none' stroke='rgba(200,180,100,0.4)' stroke-width='1.5'/>","C":"<circle cx='100' cy='60' r='36' fill='none' stroke='rgba(200,160,255,0.5)' stroke-width='2' stroke-dasharray='5 3'/><circle cx='100' cy='60' r='18' fill='rgba(180,140,220,0.2)' stroke='rgba(200,160,255,0.4)' stroke-width='1.5'/><circle cx='100' cy='60' r='6' fill='rgba(220,180,255,0.7)'/>","D":"<ellipse cx='100' cy='56' rx='40' ry='28' fill='none' stroke='rgba(80,200,200,0.5)' stroke-width='2'/><line x1='60' y1='56' x2='140' y2='56' stroke='rgba(80,200,200,0.3)' stroke-width='1'/><line x1='100' y1='28' x2='100' y2='84' stroke='rgba(80,200,200,0.3)' stroke-width='1'/><circle cx='100' cy='56' r='8' fill='rgba(80,220,220,0.4)'/>","EN":"<path d='M55,28 Q100,58 145,28' fill='none' stroke='rgba(240,120,180,0.5)' stroke-width='2'/><path d='M55,50 Q100,80 145,50' fill='none' stroke='rgba(240,120,180,0.35)' stroke-width='1.5'/><path d='M55,72 Q100,102 145,72' fill='none' stroke='rgba(240,120,180,0.2)' stroke-width='1'/><circle cx='100' cy='60' r='16' fill='rgba(220,100,160,0.2)'/>","EV":"<polygon points='100,8 118,52 165,52 128,78 142,118 100,92 58,118 72,78 35,52 82,52' fill='none' stroke='rgba(255,160,60,0.5)' stroke-width='2'/><circle cx='100' cy='62' r='16' fill='rgba(255,160,60,0.2)' stroke='rgba(255,160,60,0.4)' stroke-width='1.5'/>","I":"<ellipse cx='90' cy='35' rx='30' ry='10' fill='none' stroke='rgba(140,200,100,0.4)' stroke-width='1.5'/><ellipse cx='100' cy='58' rx='36' ry='12' fill='none' stroke='rgba(140,200,100,0.3)' stroke-width='1.2'/><ellipse cx='110' cy='80' rx='28' ry='10' fill='none' stroke='rgba(140,200,100,0.2)' stroke-width='1'/>","N":"<circle cx='100' cy='60' r='42' fill='none' stroke='rgba(140,120,220,0.2)' stroke-width='1'/><circle cx='100' cy='60' r='26' fill='none' stroke='rgba(140,120,220,0.3)' stroke-width='1.2'/><circle cx='100' cy='60' r='12' fill='rgba(80,60,140,0.2)' stroke='rgba(140,120,220,0.4)' stroke-width='1.5'/><line x1='58' y1='60' x2='142' y2='60' stroke='rgba(140,120,220,0.2)' stroke-width='0.8'/><line x1='100' y1='18' x2='100' y2='102' stroke='rgba(140,120,220,0.2)' stroke-width='0.8'/>","T":"<path d='M60,28 L100,14 L140,28 L156,70 L140,104 L100,118 L60,104 L44,70 Z' fill='none' stroke='rgba(210,175,60,0.5)' stroke-width='2'/><path d='M74,38 L100,28 L126,38 L138,70 L126,98 L100,108 L74,98 L62,70 Z' fill='rgba(200,170,60,0.08)' stroke='rgba(210,175,60,0.3)' stroke-width='1.2'/>"};var inner=m[sc]||m["A"];return "<svg viewBox='0 0 200 120' xmlns='http://www.w3.org/2000/svg'><rect width='200' height='120' fill='"+c+"' opacity='0.9'/>"+inner+"</svg>";}
 
 var allSpells=[],filteredSpells=[],currentIndex=0,activeLevel="all",activeSchool="all",activeClass="all",preparedFilter="all",searchQuery="",hintHidden=false;
+var cardNavToken=0;
 var PREPARED_STORAGE_KEY="spellcards-prepared-v1";
 var FILTER_TRAY_STORAGE_KEY="spellcards-filter-tray-collapsed-v1";
 var preparedSpells=loadPrepared();
@@ -170,7 +171,7 @@ function buildCard(spell){
   var levelDisplay=spell.level===0?"C":String(spell.level);
   var compShort=spell.components?spell.components.split("(")[0].trim():"";
   var cornerSVG="<svg viewBox='0 0 20 20' width='18' height='18'><path d='M2,18 L2,2 L18,2' stroke='#c9a84c' stroke-width='1.5' fill='none'/><circle cx='2' cy='2' r='2' fill='#c9a84c'/></svg>";
-  var descHTML=spell.description.split("\n\n").map(function(p){return "<p class='desc-para'>"+esc(p)+"</p>";}).join("");
+  var descHTML=(spell.description||"").split("\n\n").map(function(p){return "<p class='desc-para'>"+esc(p)+"</p>";}).join("");
   var higherHTML=spell.higherLevels?"<div class='higher-levels'><span class='higher-levels-label'>At Higher Levels</span>"+esc(spell.higherLevels)+"</div>":"";
   var card=document.createElement("div");
   card.className="card";
@@ -188,15 +189,155 @@ function resetStageMotion(){var stage=document.getElementById("card-stage");stag
 
 function applyStageMotion(dx){var stage=document.getElementById("card-stage");var max=window.innerWidth*0.28||1;var ratio=Math.max(-1,Math.min(1,dx/max));stage.style.transform="translateX("+(ratio*4)+"px)";var s1=stage.querySelector(".card-shadow-1"),s2=stage.querySelector(".card-shadow-2");if(s1)s1.style.transform="translate("+(ratio*2)+"px,6px) scale(.97)";if(s2)s2.style.transform="translate("+(ratio*4)+"px,12px) scale(.94)";}
 
-function showCard(index,dir){var stage=document.getElementById("card-stage");var ex=stage.querySelector(".card");if(ex)ex.remove();resetStageMotion();if(!filteredSpells.length){document.getElementById("no-results").style.display="flex";updateCounter();return;}document.getElementById("no-results").style.display="none";var card=buildCard(filteredSpells[index]);if(dir==="right"){card.classList.add("aer");card.addEventListener("animationend",function(){card.classList.remove("aer");},{once:true});}else if(dir==="left"){card.classList.add("ael");card.addEventListener("animationend",function(){card.classList.remove("ael");},{once:true});}stage.appendChild(card);setupTouch(card);updateCounter();}
+function showCard(index,dir){
+  cardNavToken++;
+  var stage=document.getElementById("card-stage");
+  var ex=stage.querySelector(".card");
+  if(ex)ex.remove();
+  resetStageMotion();
+  if(!filteredSpells.length){document.getElementById("no-results").style.display="flex";updateCounter();return;}
+  document.getElementById("no-results").style.display="none";
+  var n=filteredSpells.length;
+  var idx=Math.max(0,Math.min(n-1,parseInt(index,10)||0));
+  currentIndex=idx;
+  var spell=filteredSpells[idx];
+  if(!spell){updateCounter();return;}
+  var card;
+  try{card=buildCard(spell);}catch(err){
+    console.error(err);
+    card=document.createElement("div");
+    card.className="card";
+    card.innerHTML="<div class='card-inner'><div class='card-body' style='padding:20px'><p class='description-text'>Could not render this spell card.</p></div></div>";
+  }
+  card.style.opacity="1";
+  if(dir==="right"){card.classList.add("aer");card.addEventListener("animationend",function(){card.classList.remove("aer");},{once:true});}
+  else if(dir==="left"){card.classList.add("ael");card.addEventListener("animationend",function(){card.classList.remove("ael");},{once:true});}
+  stage.appendChild(card);
+  setupTouch(card);
+  updateCounter();
+}
 
 function updateCounter(){var preparedCount=Object.keys(preparedSpells).length;document.getElementById("counter").textContent=filteredSpells.length?(currentIndex+1)+" / "+filteredSpells.length+"  |  Prepared: "+preparedCount:"";}
 
-function navigateNext(){var card=document.getElementById("card-stage").querySelector(".card");if(!card||!filteredSpells.length)return;card.style.transition="none";card.style.willChange="transform,opacity";card.classList.add("afl");card.addEventListener("animationend",function(){currentIndex=(currentIndex+1)%filteredSpells.length;showCard(currentIndex,"right");},{once:true});}
+function navigateNext(){
+  var card=document.getElementById("card-stage").querySelector(".card");
+  if(!card||!filteredSpells.length)return;
+  cardNavToken++;
+  var token=cardNavToken;
+  var finished=false;
+  function go(){
+    if(finished||token!==cardNavToken)return;
+    finished=true;
+    currentIndex=(currentIndex+1)%filteredSpells.length;
+    showCard(currentIndex,"right");
+  }
+  card.style.transition="none";
+  card.style.willChange="transform,opacity";
+  card.classList.add("afl");
+  card.addEventListener("animationend",go,{once:true});
+  setTimeout(go,450);
+}
 
-function navigatePrev(){var card=document.getElementById("card-stage").querySelector(".card");if(!card||!filteredSpells.length)return;card.style.transition="none";card.style.willChange="transform,opacity";card.classList.add("afr");card.addEventListener("animationend",function(){currentIndex=(currentIndex-1+filteredSpells.length)%filteredSpells.length;showCard(currentIndex,"left");},{once:true});}
+function navigatePrev(){
+  var card=document.getElementById("card-stage").querySelector(".card");
+  if(!card||!filteredSpells.length)return;
+  cardNavToken++;
+  var token=cardNavToken;
+  var finished=false;
+  function go(){
+    if(finished||token!==cardNavToken)return;
+    finished=true;
+    currentIndex=(currentIndex-1+filteredSpells.length)%filteredSpells.length;
+    showCard(currentIndex,"left");
+  }
+  card.style.transition="none";
+  card.style.willChange="transform,opacity";
+  card.classList.add("afr");
+  card.addEventListener("animationend",go,{once:true});
+  setTimeout(go,450);
+}
 
-function setupTouch(card){var startX=0,startY=0,dragX=0,dragging=false,scrolling=false,moved=false,mouseDown=false;function begin(x,y){startX=x;startY=y;dragging=false;scrolling=false;moved=false;dragX=0;}function move(x,y,prevent){var dx=x-startX,dy=y-startY;if(!moved){moved=true;scrolling=Math.abs(dy)>Math.abs(dx);}if(scrolling)return;if(prevent)prevent();dragging=true;dragX=dx;card.style.transform="translateX("+dragX+"px) rotate("+(dragX*0.05)+"deg)";card.style.transition="none";applyStageMotion(dragX);var li=card.querySelector(".swipe-left-indicator"),ri=card.querySelector(".swipe-right-indicator");if(dragX<-30){li.style.opacity=Math.min(1,Math.abs(dragX)/100);ri.style.opacity=0;}else if(dragX>30){ri.style.opacity=Math.min(1,dragX/100);li.style.opacity=0;}else{li.style.opacity=0;ri.style.opacity=0;}hideHint();}function fling(dir){var offX=dir==="next"?-120:120;card.style.transition="transform .22s ease-out, opacity .22s ease-out";card.style.transform="translateX("+offX+"vw) rotate("+(dir==="next"?-22:22)+"deg)";card.style.opacity="0";card.addEventListener("transitionend",function(){if(dir==="next")currentIndex=(currentIndex+1)%filteredSpells.length;else currentIndex=(currentIndex-1+filteredSpells.length)%filteredSpells.length;showCard(currentIndex,dir==="next"?"right":"left");},{once:true});}function endMouse(){if(!mouseDown)return;mouseDown=false;document.removeEventListener("mouseup",endMouse,true);document.removeEventListener("mousemove",onDocMouseMove,true);end();}function onDocMouseMove(e){if(!mouseDown)return;move(e.clientX,e.clientY,function(){e.preventDefault();});}function end(){if(!dragging)return;card.querySelector(".swipe-left-indicator").style.opacity=0;card.querySelector(".swipe-right-indicator").style.opacity=0;var threshold=window.innerWidth*0.28;if(dragX<-threshold)fling("next");else if(dragX>threshold)fling("prev");else{card.style.transform="";card.style.transition="transform .35s cubic-bezier(.25,.46,.45,.94)";resetStageMotion();}dragging=false;}card.addEventListener("touchstart",function(e){begin(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});card.addEventListener("touchmove",function(e){move(e.touches[0].clientX,e.touches[0].clientY,function(){e.preventDefault();});},{passive:false});card.addEventListener("touchend",function(){end();},{passive:true});card.addEventListener("mousedown",function(e){if(e.button!==0)return;mouseDown=true;begin(e.clientX,e.clientY);document.addEventListener("mousemove",onDocMouseMove,true);document.addEventListener("mouseup",endMouse,true);});card.addEventListener("mouseleave",function(){if(mouseDown)endMouse();});}
+function setupTouch(card){
+  var startX=0,startY=0,dragX=0,dragging=false,scrolling=false,moved=false,mouseDown=false;
+  function begin(x,y){startX=x;startY=y;dragging=false;scrolling=false;moved=false;dragX=0;}
+  function move(x,y,prevent){
+    var dx=x-startX,dy=y-startY;
+    if(!moved){moved=true;scrolling=Math.abs(dy)>Math.abs(dx);}
+    if(scrolling)return;
+    if(prevent)prevent();
+    dragging=true;
+    dragX=dx;
+    card.style.transform="translateX("+dragX+"px) rotate("+(dragX*0.05)+"deg)";
+    card.style.transition="none";
+    applyStageMotion(dragX);
+    var li=card.querySelector(".swipe-left-indicator"),ri=card.querySelector(".swipe-right-indicator");
+    if(dragX<-30){li.style.opacity=Math.min(1,Math.abs(dragX)/100);ri.style.opacity=0;}
+    else if(dragX>30){ri.style.opacity=Math.min(1,dragX/100);li.style.opacity=0;}
+    else{li.style.opacity=0;ri.style.opacity=0;}
+    hideHint();
+  }
+  function fling(dir){
+    var myToken=cardNavToken;
+    var finished=false;
+    var tid=null;
+    function finishFling(){
+      if(finished||myToken!==cardNavToken)return;
+      finished=true;
+      if(tid)clearTimeout(tid);
+      card.removeEventListener("transitionend",onTransitionEnd);
+      if(dir==="next")currentIndex=(currentIndex+1)%filteredSpells.length;
+      else currentIndex=(currentIndex-1+filteredSpells.length)%filteredSpells.length;
+      showCard(currentIndex,dir==="next"?"right":"left");
+    }
+    function onTransitionEnd(e){
+      if(e.target!==card)return;
+      if(e.propertyName!=="transform"&&e.propertyName!=="opacity")return;
+      finishFling();
+    }
+    card.addEventListener("transitionend",onTransitionEnd);
+    tid=setTimeout(finishFling,450);
+    var offX=dir==="next"?-120:120;
+    card.style.transition="transform .22s ease-out, opacity .22s ease-out";
+    card.style.transform="translateX("+offX+"vw) rotate("+(dir==="next"?-22:22)+"deg)";
+    card.style.opacity="0";
+  }
+  function endMouse(){
+    if(!mouseDown)return;
+    mouseDown=false;
+    document.removeEventListener("mouseup",endMouse,true);
+    document.removeEventListener("mousemove",onDocMouseMove,true);
+    end();
+  }
+  function onDocMouseMove(e){
+    if(!mouseDown)return;
+    move(e.clientX,e.clientY,function(){e.preventDefault();});
+  }
+  function end(){
+    if(!dragging)return;
+    card.querySelector(".swipe-left-indicator").style.opacity=0;
+    card.querySelector(".swipe-right-indicator").style.opacity=0;
+    var threshold=window.innerWidth*0.28;
+    if(dragX<-threshold)fling("next");
+    else if(dragX>threshold)fling("prev");
+    else{
+      card.style.transform="";
+      card.style.transition="transform .35s cubic-bezier(.25,.46,.45,.94)";
+      resetStageMotion();
+    }
+    dragging=false;
+  }
+  card.addEventListener("touchstart",function(e){begin(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+  card.addEventListener("touchmove",function(e){move(e.touches[0].clientX,e.touches[0].clientY,function(){e.preventDefault();});},{passive:false});
+  card.addEventListener("touchend",function(){end();},{passive:true});
+  card.addEventListener("mousedown",function(e){
+    if(e.button!==0)return;
+    mouseDown=true;
+    begin(e.clientX,e.clientY);
+    document.addEventListener("mousemove",onDocMouseMove,true);
+    document.addEventListener("mouseup",endMouse,true);
+  });
+  card.addEventListener("mouseleave",function(){if(mouseDown)endMouse();});
+}
 
 function setupKeyboard(){document.addEventListener("keydown",function(e){var t=e.target;var isTyping=t&&(t.tagName==="INPUT"||t.tagName==="TEXTAREA"||t.isContentEditable);if(isTyping)return;if(e.key==="ArrowRight"){hideHint();navigateNext();}if(e.key==="ArrowLeft"){hideHint();navigatePrev();}if(e.key==="f"||e.key==="F"){toggleFilterTray();}});}
 

@@ -3,6 +3,11 @@
 
     const STORAGE_KEY = 'dnd-hub-starred';
     const SORT_STORAGE_KEY = 'dnd-hub-sort';
+    const DATES_URL = 'hub-tool-dates.json';
+
+    /** @type {Record<string, number>|null} null = not loaded yet */
+    var toolGitDates = null;
+    var toolGitDatesPromise = null;
     // Order for "default" and for "oldest"/"newest" when DOM order is used (see buildAddOrder).
     const DEFAULT_ORDER = [
         'tools/ai-dm-prompt-builder/',
@@ -52,7 +57,49 @@
 
     function getSort() {
         const v = localStorage.getItem(SORT_STORAGE_KEY);
-        return (v === 'name-asc' || v === 'name-desc' || v === 'emoji' || v === 'newest' || v === 'oldest') ? v : 'default';
+        return (v === 'name-asc' || v === 'name-desc' || v === 'emoji' || v === 'newest' || v === 'oldest' || v === 'git-newest' || v === 'git-oldest') ? v : 'default';
+    }
+
+    function loadToolGitDates() {
+        if (toolGitDatesPromise) return toolGitDatesPromise;
+        toolGitDatesPromise = fetch(DATES_URL, { cache: 'no-cache' })
+            .then(function (r) {
+                return r.ok ? r.json() : null;
+            })
+            .then(function (data) {
+                toolGitDates = data && data.tools && typeof data.tools === 'object' ? data.tools : {};
+                return toolGitDates;
+            })
+            .catch(function () {
+                toolGitDates = {};
+                return toolGitDates;
+            });
+        return toolGitDatesPromise;
+    }
+
+    function getGitTs(href) {
+        if (toolGitDates === null) return null;
+        const v = toolGitDates[href];
+        if (typeof v !== 'number' || v <= 0) return null;
+        return v;
+    }
+
+    function cmpGitOrder(hrefA, hrefB, addOrder, newestFirst) {
+        const tsA = getGitTs(hrefA);
+        const tsB = getGitTs(hrefB);
+        const unkA = tsA == null;
+        const unkB = tsB == null;
+        if (unkA && unkB) {
+            const iA = addOrder.indexOf(hrefA);
+            const iB = addOrder.indexOf(hrefB);
+            return (iA < 0 ? 999 : iA) - (iB < 0 ? 999 : iB);
+        }
+        if (unkA) return 1;
+        if (unkB) return -1;
+        if (tsA !== tsB) return newestFirst ? tsB - tsA : tsA - tsB;
+        const iA = addOrder.indexOf(hrefA);
+        const iB = addOrder.indexOf(hrefB);
+        return (iA < 0 ? 999 : iA) - (iB < 0 ? 999 : iB);
     }
 
     function setSort(value) {
@@ -121,6 +168,12 @@
                 const eb = getCardEmoji(b);
                 return (ea || '').localeCompare(eb || '', undefined, { sensitivity: 'base' });
             }
+            if (sortBy === 'git-newest') {
+                return cmpGitOrder(hrefA, hrefB, addOrder, true);
+            }
+            if (sortBy === 'git-oldest') {
+                return cmpGitOrder(hrefA, hrefB, addOrder, false);
+            }
             return 0;
         });
 
@@ -177,8 +230,12 @@
                 applyOrder();
             });
         }
-        applyOrder();
         updateStarButtons();
+        applyOrder();
+        loadToolGitDates().finally(function () {
+            applyOrder();
+            updateStarButtons();
+        });
         document.querySelectorAll('.tool-card-star').forEach(function (btn) {
             btn.addEventListener('click', toggleStar);
         });
