@@ -4,3 +4,4 @@ tools/waterdeep-trader/node_modules/
 .wrangler/
 serve-loot-box-tests.bat
 serve-waterdeep-trader.bat
+tools/waterdeep-trader/directory-tree.txt
