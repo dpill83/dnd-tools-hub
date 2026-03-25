@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wagers &amp; Fortunes – Play</title>
+    <link rel="stylesheet" href="../../global.css">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="play.css">
+</head>
+<body>
+    <div class="wfp-wrap">
+
+        <header class="wfp-header">
+            <a href="index.html" class="wfp-back">← DM View</a>
+            <h1 class="wfp-title">Wagers &amp; Fortunes</h1>
+            <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+        </header>
+
+        <!-- ── Setup ──────────────────────────────────── -->
+        <main id="wfp-setup" class="wfp-screen">
+
+            <div id="wfp-step-game" class="wfp-step wfp-hidden">
+                <h2 class="wfp-step-heading">Choose a game</h2>
+                <div id="wfp-game-cards" class="wfp-select-list"></div>
+            </div>
+
+            <div id="wfp-step-tier" class="wfp-step wfp-hidden">
+                <h2 class="wfp-step-heading">Choose your wager</h2>
+                <div id="wfp-tier-cards" class="wfp-select-list wfp-tier-list"></div>
+            </div>
+
+            <div id="wfp-step-player" class="wfp-step wfp-hidden">
+                <h2 class="wfp-step-heading">Step up to the table</h2>
+                <p id="wfp-wager-display" class="wfp-wager-display"></p>
+                <div class="wfp-player-row">
+                    <input type="text" id="wfp-player-name" class="wfp-name-input"
+                           placeholder="Your name (optional)" autocomplete="nickname">
+                    <button type="button" id="wfp-start-btn" class="wfp-cta">Open the vault</button>
+                </div>
+                <label class="wfp-dm-label">
+                    <input type="checkbox" id="wfp-dm-override"> DM override (bypass limiter)
+                </label>
+                <p id="wfp-limiter-msg" class="wfp-error wfp-hidden"></p>
+            </div>
+
+        </main>
+
+        <!-- ── Play ───────────────────────────────────── -->
+        <main id="wfp-play" class="wfp-screen wfp-hidden">
+
+            <div class="wfp-play-bar">
+                <span id="wfp-play-info" class="wfp-play-info"></span>
+                <button type="button" id="wfp-hint-btn" class="wfp-hint-trigger wfp-hidden"></button>
+            </div>
+
+            <div id="wfp-hint-panel" class="wfp-hint-panel wfp-hidden">
+                <p id="wfp-hint-prompt" class="wfp-hint-prompt"></p>
+                <div class="wfp-hint-input-row">
+                    <input type="number" id="wfp-hint-roll" class="wfp-hint-roll-input"
+                           placeholder="Roll total" min="1" max="30">
+                    <button type="button" id="wfp-hint-submit" class="wfp-btn-sm">Submit</button>
+                    <button type="button" id="wfp-hint-cancel" class="wfp-btn-sm wfp-btn-ghost">✕</button>
+                </div>
+                <p id="wfp-hint-result" class="wfp-hint-result wfp-hidden"></p>
+            </div>
+
+            <div id="wfp-boxes" class="wfp-boxes"></div>
+
+            <div id="wfp-reveal" class="wfp-reveal wfp-hidden">
+                <span id="wfp-outcome-badge" class="wfp-outcome-badge"></span>
+                <p id="wfp-reveal-text" class="wfp-reveal-text"></p>
+                <p id="wfp-reveal-contents" class="wfp-reveal-contents"></p>
+                <button type="button" id="wfp-play-again" class="wfp-cta wfp-cta-outline">Play again</button>
+            </div>
+
+        </main>
+
+        <!-- ── Empty state ────────────────────────────── -->
+        <main id="wfp-empty" class="wfp-screen wfp-hidden">
+            <div class="wfp-empty-state">
+                <p class="wfp-empty-text">No games set up yet.</p>
+                <a href="index.html" class="wfp-cta">Go to DM Builder</a>
+            </div>
+        </main>
+
+    </div>
+
+    <script src="wf-logic.js"></script>
+    <script src="seed-data.js"></script>
+    <script src="play.js"></script>
+    <script src="../../theme.js"></script>
+</body>
+</html>

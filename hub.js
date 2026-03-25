@@ -17,6 +17,7 @@
         'tools/combat-turn-helper/',
         'tools/cosmetic-battle-pass/',
         'tools/wagers-fortunes/',
+        'tools/waterdeep-trader/dist/',
         'tools/interactive-map/',
         'tools/cassalanter-inquiry-runner/',
         'tools/cassalanter-inquiry-wizard/',

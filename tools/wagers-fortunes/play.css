@@ -1,0 +1,576 @@
+/* Wagers & Fortunes – Play page */
+
+.wfp-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 1.25rem 5rem;
+}
+
+/* ── Header ─────────────────────────────────────────── */
+.wfp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+}
+
+.wfp-back {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.wfp-back:hover { color: var(--primary-color); }
+
+.wfp-title {
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+/* ── Utility ─────────────────────────────────────────── */
+.wfp-hidden { display: none !important; }
+
+.wfp-screen { min-height: 50vh; }
+
+.wfp-error {
+    color: var(--error);
+    font-size: 0.9rem;
+    margin: 0.5rem 0 0;
+}
+
+/* ── Setup steps ─────────────────────────────────────── */
+.wfp-step {
+    margin-bottom: 2.5rem;
+    animation: wfp-fadein 0.22s ease;
+}
+
+@keyframes wfp-fadein {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.wfp-step-heading {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-light);
+    margin: 0 0 1rem;
+}
+
+/* ── Select cards (game + tier) ───────────────────────── */
+.wfp-select-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.wfp-select-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    width: 100%;
+    padding: 1rem 1.25rem;
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    color: inherit;
+    font-family: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.12s;
+}
+
+.wfp-select-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 16px var(--shadow);
+    transform: translateY(-2px);
+}
+
+.wfp-select-card:active { transform: translateY(0); }
+
+.wfp-select-card-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.wfp-select-card-meta {
+    font-size: 0.82rem;
+    color: var(--text-light);
+}
+
+.wfp-select-card-detail {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    opacity: 0.65;
+}
+
+/* Tier cards lay out side-by-side */
+.wfp-tier-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.wfp-tier-card {
+    flex: 1;
+    min-width: 110px;
+    align-items: center;
+    text-align: center;
+    padding: 1.25rem 1rem;
+}
+
+.wfp-tier-gp {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    line-height: 1;
+}
+
+/* ── Player step ─────────────────────────────────────── */
+.wfp-wager-display {
+    font-size: 0.88rem;
+    color: var(--text-light);
+    margin: 0 0 1.1rem;
+}
+
+.wfp-player-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: stretch;
+    flex-wrap: wrap;
+    margin-bottom: 0.85rem;
+}
+
+.wfp-name-input {
+    flex: 1;
+    min-width: 160px;
+    padding: 0.65rem 1rem;
+    font-size: 1rem;
+    font-family: inherit;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: inherit;
+    transition: border-color 0.15s;
+}
+
+.wfp-name-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* ── Buttons ─────────────────────────────────────────── */
+.wfp-cta {
+    padding: 0.65rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    background: var(--primary-color);
+    color: #fff;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: opacity 0.15s, transform 0.1s;
+    white-space: nowrap;
+}
+
+.wfp-cta:hover   { opacity: 0.88; transform: translateY(-1px); }
+.wfp-cta:active  { transform: translateY(0); }
+
+.wfp-cta-outline {
+    background: transparent;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.wfp-cta-outline:hover {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+.wfp-dm-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--text-light);
+    cursor: pointer;
+}
+
+/* ── Play bar ─────────────────────────────────────────── */
+.wfp-play-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 1.1rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    min-height: 2.4rem;
+}
+
+.wfp-play-info {
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.wfp-hint-trigger {
+    padding: 0.38rem 0.9rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: inherit;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    color: inherit;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.wfp-hint-trigger:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* ── Hint panel ───────────────────────────────────────── */
+.wfp-hint-panel {
+    padding: 1rem 1.25rem;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    animation: wfp-fadein 0.2s ease;
+}
+
+.wfp-hint-prompt {
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+}
+
+.wfp-hint-input-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.wfp-hint-roll-input {
+    width: 96px;
+    padding: 0.42rem 0.75rem;
+    font-size: 1rem;
+    font-family: inherit;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    background: var(--card-bg);
+    color: inherit;
+    transition: border-color 0.15s;
+}
+
+.wfp-hint-roll-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.wfp-btn-sm {
+    padding: 0.42rem 0.9rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-family: inherit;
+    background: var(--primary-color);
+    color: #fff;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.wfp-btn-sm:hover { opacity: 0.85; }
+
+.wfp-btn-ghost {
+    background: transparent;
+    border-color: var(--border);
+    color: inherit;
+}
+
+.wfp-btn-ghost:hover { background: var(--input-bg); opacity: 1; }
+
+.wfp-hint-result {
+    margin: 0.75rem 0 0;
+    font-weight: 600;
+    font-size: 0.92rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+}
+
+.wfp-hint-pass {
+    background: rgba(74, 144, 217, 0.1);
+    color: #4a90d9;
+    border: 1px solid rgba(74, 144, 217, 0.4);
+}
+
+.wfp-hint-fail {
+    background: rgba(192, 57, 43, 0.1);
+    color: #c0392b;
+    border: 1px solid rgba(192, 57, 43, 0.4);
+}
+
+/* ── Box cards ────────────────────────────────────────── */
+.wfp-boxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    padding: 1rem 0 2.5rem;
+    perspective: 1100px;
+}
+
+.wfp-box-card {
+    width: 148px;
+    height: 188px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(.4, 0, .2, 1),
+                opacity  0.38s ease,
+                filter   0.38s ease;
+    cursor: pointer;
+    border-radius: 10px;
+    /* subtle lift at rest */
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.22));
+}
+
+.wfp-box-card:hover:not(.wfp-box-picked):not(.wfp-box-unchosen) {
+    transform: translateY(-10px);
+    filter: drop-shadow(0 16px 28px rgba(0,0,0,0.35));
+}
+
+.wfp-box-card.wfp-box-picked {
+    transform: rotateY(180deg) translateY(-4px);
+    cursor: default;
+}
+
+.wfp-box-card.wfp-box-unchosen {
+    opacity: 0.22;
+    transform: scale(0.94);
+    cursor: default;
+    pointer-events: none;
+}
+
+.wfp-box-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+}
+
+/* Front */
+.wfp-box-front {
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    display: flex;
+    flex-direction: column;
+}
+
+.wfp-box-lid {
+    height: 38%;
+    background: var(--input-bg);
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    /* subtle top accent */
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 6px,
+        rgba(128,128,128,0.07) 6px,
+        rgba(128,128,128,0.07) 7px
+    );
+}
+
+.wfp-box-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.5rem;
+}
+
+.wfp-box-glyph {
+    font-size: 2.4rem;
+    font-weight: 900;
+    line-height: 1;
+    opacity: 0.28;
+    font-family: serif;
+}
+
+.wfp-box-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-light);
+}
+
+/* Back */
+.wfp-box-back {
+    transform: rotateY(180deg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 2px solid var(--border);
+    background: var(--card-bg);
+}
+
+.wfp-box-back[data-outcome="win"] {
+    border-color: #c9993a;
+    background: rgba(201, 153, 58, 0.07);
+    filter: drop-shadow(0 0 18px rgba(201, 153, 58, 0.35));
+}
+
+.wfp-box-back[data-outcome="break-even"] {
+    border-color: #4a90d9;
+    background: rgba(74, 144, 217, 0.07);
+    filter: drop-shadow(0 0 18px rgba(74, 144, 217, 0.28));
+}
+
+.wfp-box-back[data-outcome="loss"] {
+    border-color: #c0392b;
+    background: rgba(192, 57, 43, 0.07);
+    filter: drop-shadow(0 0 18px rgba(192, 57, 43, 0.28));
+}
+
+.wfp-box-back[data-outcome="custom"] {
+    border-color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.07);
+    filter: drop-shadow(0 0 18px rgba(139, 92, 246, 0.28));
+}
+
+.wfp-back-icon {
+    font-size: 2.6rem;
+    line-height: 1;
+    font-style: normal;
+}
+
+.wfp-box-back[data-outcome="win"]        .wfp-back-icon { color: #c9993a; }
+.wfp-box-back[data-outcome="break-even"] .wfp-back-icon { color: #4a90d9; }
+.wfp-box-back[data-outcome="loss"]       .wfp-back-icon { color: #c0392b; }
+.wfp-box-back[data-outcome="custom"]     .wfp-back-icon { color: #8b5cf6; }
+
+.wfp-back-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+}
+
+/* ── Reveal panel ─────────────────────────────────────── */
+.wfp-reveal {
+    margin-top: 0.5rem;
+    padding: 1.75rem 1.5rem;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    background: var(--card-bg);
+    text-align: center;
+    animation: wfp-slideup 0.3s ease;
+}
+
+@keyframes wfp-slideup {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.wfp-outcome-badge {
+    display: inline-block;
+    padding: 0.28rem 1rem;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+.wfp-outcome-badge[data-outcome="win"] {
+    background: rgba(201, 153, 58, 0.12);
+    color: #c9993a;
+    border: 1px solid rgba(201, 153, 58, 0.5);
+}
+
+.wfp-outcome-badge[data-outcome="break-even"] {
+    background: rgba(74, 144, 217, 0.12);
+    color: #4a90d9;
+    border: 1px solid rgba(74, 144, 217, 0.5);
+}
+
+.wfp-outcome-badge[data-outcome="loss"] {
+    background: rgba(192, 57, 43, 0.12);
+    color: #c0392b;
+    border: 1px solid rgba(192, 57, 43, 0.5);
+}
+
+.wfp-outcome-badge[data-outcome="custom"] {
+    background: rgba(139, 92, 246, 0.12);
+    color: #8b5cf6;
+    border: 1px solid rgba(139, 92, 246, 0.5);
+}
+
+.wfp-reveal-text {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+    line-height: 1.45;
+}
+
+.wfp-reveal-contents {
+    font-size: 0.92rem;
+    color: var(--text-light);
+    margin: 0 0 1.75rem;
+    white-space: pre-wrap;
+    line-height: 1.65;
+}
+
+/* ── Empty state ─────────────────────────────────────── */
+.wfp-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 5rem 2rem;
+    text-align: center;
+}
+
+.wfp-empty-text {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    margin: 0;
+}
+
+/* ── Responsive ─────────────────────────────────────── */
+@media (max-width: 480px) {
+    .wfp-boxes    { gap: 1rem; }
+    .wfp-box-card { width: 128px; height: 164px; }
+    .wfp-box-glyph { font-size: 1.9rem; }
+
+    .wfp-player-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .wfp-cta { text-align: center; }
+}

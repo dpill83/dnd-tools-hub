@@ -1,0 +1,5 @@
+/* After global.css: full-bleed shell for the game UI */
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+}
