@@ -3,3 +3,4 @@ tools/waterdeep-trader/node_modules/
 .dev.vars
 .wrangler/
 serve-loot-box-tests.bat
+serve-waterdeep-trader.bat
