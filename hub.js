@@ -99,7 +99,8 @@
         }
         if (unkA) return 1;
         if (unkB) return -1;
-        if (tsA !== tsB) return newestFirst ? tsB - tsA : tsA - tsB;
+        // Note: hub-tool-dates.json stores epoch seconds. Direction here controls "newest first".
+        if (tsA !== tsB) return newestFirst ? tsA - tsB : tsB - tsA;
         const iA = addOrder.indexOf(hrefA);
         const iB = addOrder.indexOf(hrefB);
         return (iA < 0 ? 999 : iA) - (iB < 0 ? 999 : iB);
@@ -158,7 +159,8 @@
             if (sortBy === 'newest') {
                 const iA = addOrder.indexOf(hrefA);
                 const iB = addOrder.indexOf(hrefB);
-                return (iB < 0 ? -1 : iB) - (iA < 0 ? -1 : iA);
+                // Higher index = newer in hub list; unknowns go last.
+                return (iB < 0 ? -999 : iB) - (iA < 0 ? -999 : iA);
             }
             if (sortBy === 'name-asc' || sortBy === 'name-desc') {
                 const ta = getCardTitle(a);
