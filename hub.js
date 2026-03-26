@@ -18,6 +18,8 @@
         'tools/cosmetic-battle-pass/',
         'tools/wagers-fortunes/',
         'tools/waterdeep-trader/dist/',
+        'tools/waterdeep-text-adventure/',
+        'tools/roguelike/',
         'tools/interactive-map/',
         'tools/cassalanter-inquiry-runner/',
         'tools/cassalanter-inquiry-wizard/',
