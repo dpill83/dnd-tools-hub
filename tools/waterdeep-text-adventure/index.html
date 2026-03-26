@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DOWN IN THE DARK</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="terminal">
+    <div id="output" role="log" aria-live="polite" aria-relevant="additions"></div>
+
+    <div id="input-row">
+      <span aria-hidden="true">&gt;</span>
+      <label class="sr-only" for="cmd-input">Command input</label>
+      <input
+        id="cmd-input"
+        type="text"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+        placeholder="type a command..."
+        aria-label="Command input"
+      />
+    </div>
+  </div>
+
+  <div id="hint-bar">LOOK &nbsp;|&nbsp; GO [N/S/E/W] &nbsp;|&nbsp; TAKE [ITEM] &nbsp;|&nbsp; INVENTORY &nbsp;|&nbsp; ATTACK &nbsp;|&nbsp; USE [ITEM] &nbsp;|&nbsp; HELP</div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

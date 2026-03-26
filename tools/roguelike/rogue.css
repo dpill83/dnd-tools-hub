@@ -1,0 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+body {
+  margin: 0;
+  padding: 16px;
+  background: #05050a;
+  color: #c8c8b4;
+}
+
+#rogue-wrap {
+  font-family: 'Share Tech Mono', 'Courier New', monospace;
+  background: #0a0a0f;
+  color: #c8c8b4;
+  padding: 12px;
+  border-radius: 8px;
+  user-select: none;
+  outline: none;
+  max-width: max-content;
+}
+
+#rogue-canvas {
+  display: block;
+  line-height: 1.15;
+  font-size: 15px;
+  letter-spacing: 1px;
+  white-space: pre;
+  outline: none;
+  cursor: default;
+}
+
+#rogue-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+#rogue-stats span {
+  color: #c8c8b4;
+}
+
+.s-hp {
+  color: #e06c6c !important;
+}
+.s-xp {
+  color: #e0c46c !important;
+}
+.s-gold {
+  color: #e0d96c !important;
+}
+
+#rogue-log {
+  font-size: 11px;
+  color: #666;
+  margin-top: 8px;
+  min-height: 36px;
+  line-height: 1.5;
+  border-top: 1px solid #1a1a2a;
+  padding-top: 6px;
+}
+
+#rogue-log span {
+  color: #aaa;
+}
+
+#rogue-keys {
+  font-size: 10px;
+  color: #444;
+  margin-top: 6px;
+}
+
+.dead {
+  color: #e06c6c;
+}
+
+#rogue-help[hidden] {
+  display: none;
+}
+
+#rogue-help {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+#rogue-help-inner {
+  width: min(520px, 100%);
+  background: #0a0a0f;
+  border: 1px solid #1a1a2a;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+#rogue-help-title {
+  font-size: 14px;
+  color: #c8c8b4;
+  margin-bottom: 10px;
+}
+
+#rogue-help-body {
+  font-size: 12px;
+  color: #aaa;
+  display: grid;
+  gap: 6px;
+}
+
+#rogue-help-body code {
+  color: #c8c8b4;
+}
+
+#rogue-help-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+#rogue-help-close {
+  border-radius: 8px;
+  border: 1px solid #1a1a2a;
+  background: #121220;
+  color: #c8c8b4;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+#rogue-help-close:hover {
+  background: #16162a;
+}
+

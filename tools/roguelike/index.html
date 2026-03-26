@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Roguelike (Browser)</title>
+    <link rel="stylesheet" href="./rogue.css" />
+  </head>
+  <body>
+    <div id="rogue-wrap" tabindex="0">
+      <div id="rogue-stats">
+        <div>HP: <span class="s-hp" id="s-hp">10/10</span></div>
+        <div>ATK: <span id="s-atk">3</span></div>
+        <div>DEF: <span id="s-def">0</span></div>
+        <div>LVL: <span id="s-lvl">1</span></div>
+        <div>XP: <span class="s-xp" id="s-xp">0</span></div>
+        <div>Gold: <span class="s-gold" id="s-gold">0</span></div>
+        <div>Floor: <span id="s-floor">1</span></div>
+      </div>
+      <div id="rogue-canvas" aria-label="Dungeon view" role="img"></div>
+      <div id="rogue-log"><span id="log-text">You descend into the dungeon...</span></div>
+      <div id="rogue-keys">
+        Arrow keys / WASD to move &nbsp;|&nbsp; g = grab gold &nbsp;|&nbsp; &gt; = descend stairs
+        &nbsp;|&nbsp; . = wait &nbsp;|&nbsp; ? = help
+        <span id="focus-hint" hidden>&nbsp;|&nbsp; Click/tap the game to focus</span>
+      </div>
+    </div>
+
+    <div id="rogue-help" hidden>
+      <div id="rogue-help-inner" role="dialog" aria-modal="true" aria-label="Help">
+        <div id="rogue-help-title">Help</div>
+        <div id="rogue-help-body">
+          <div><b>Move</b>: Arrow keys / WASD (also hjkl)</div>
+          <div><b>Wait</b>: <code>.</code></div>
+          <div><b>Grab</b>: <code>g</code></div>
+          <div><b>Descend</b>: <code>&gt;</code></div>
+          <div><b>Restart</b>: <code>R</code></div>
+          <div><b>Toggle help</b>: <code>?</code></div>
+        </div>
+        <div id="rogue-help-footer">
+          <button id="rogue-help-close" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./src/game.js"></script>
+  </body>
+</html>

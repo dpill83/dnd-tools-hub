@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOWN IN THE DARK</title>
+<style>
+  :root {
+    --green: #00ff41;
+    --green-dim: #00c032;
+    --green-dark: #003b0f;
+    --bg: #000000;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--green);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.7) 100%);
+    pointer-events: none;
+    z-index: 99;
+  }
+
+  #terminal {
+    width: 100%;
+    max-width: 720px;
+    height: 100vh;
+    padding: 48px 40px 80px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: screenOn 0.4s ease-out forwards;
+  }
+
+  @keyframes screenOn {
+    0%   { opacity: 0; filter: brightness(3); }
+    10%  { opacity: 1; filter: brightness(1.5); }
+    15%  { opacity: 0.7; }
+    20%  { opacity: 1; filter: brightness(1); }
+    100% { opacity: 1; }
+  }
+
+  .line {
+    text-shadow: 0 0 4px var(--green), 0 0 10px rgba(0,255,65,0.4);
+    opacity: 0;
+    animation: fadeIn 0.05s forwards;
+  }
+
+  @keyframes fadeIn { to { opacity: 1; } }
+
+  .line.blank   { height: 1.6em; opacity: 1; }
+  .line.divider { border-bottom: 1px solid var(--green-dim); margin: 16px 0; opacity: 0; animation: fadeIn 0.05s forwards; text-shadow: none; }
+  .line.label   { font-size: 18px; letter-spacing: 0.08em; color: var(--green); }
+
+  #output {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--green-dim) transparent;
+    scroll-behavior: smooth;
+  }
+
+  #output::-webkit-scrollbar { width: 4px; }
+  #output::-webkit-scrollbar-thumb { background: var(--green-dim); }
+
+  #input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(0,255,65,0.2);
+  }
+
+  #input-row span {
+    color: var(--green);
+    text-shadow: 0 0 6px var(--green);
+    flex-shrink: 0;
+  }
+
+  #cmd-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--green);
+    font-family: inherit;
+    font-size: inherit;
+    flex: 1;
+    caret-color: var(--green);
+    text-shadow: 0 0 6px var(--green);
+    letter-spacing: 0.05em;
+  }
+
+  #cmd-input::placeholder { color: var(--green-dark); }
+
+  .art {
+    white-space: pre;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--green-dim);
+    text-shadow: 0 0 8px rgba(0,255,65,0.5);
+    opacity: 0;
+    animation: fadeIn 0.05s forwards;
+    margin: 12px 0;
+    letter-spacing: 0.05em;
+  }
+
+  .item-found { color: #ffe066; text-shadow: 0 0 8px rgba(255,224,102,0.6); }
+  .danger     { color: #ff4444; text-shadow: 0 0 8px rgba(255,68,68,0.6); }
+  .success    { color: #66ffaa; text-shadow: 0 0 8px rgba(102,255,170,0.6); }
+  .dim        { color: var(--green-dim); opacity: 0.7; }
+  .warning    { color: #ffaa00; text-shadow: 0 0 8px rgba(255,170,0,0.5); }
+
+  #hint-bar {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: var(--green-dim);
+    letter-spacing: 0.12em;
+    text-shadow: 0 0 6px rgba(0,255,65,0.3);
+    background: rgba(0,0,0,0.85);
+    padding: 6px 16px;
+    border: 1px solid rgba(0,192,50,0.2);
+    white-space: nowrap;
+    z-index: 150;
+  }
+</style>
+</head>
+<body>
+
+<div id="terminal">
+  <div id="output"></div>
+  <div id="input-row">
+    <span>&gt;</span>
+    <input id="cmd-input" type="text" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="type a command..." />
+  </div>
+</div>
+
+<div id="hint-bar">LOOK &nbsp;|&nbsp; GO [N/S/E/W] &nbsp;|&nbsp; TAKE [ITEM] &nbsp;|&nbsp; INVENTORY &nbsp;|&nbsp; ATTACK &nbsp;|&nbsp; USE [ITEM] &nbsp;|&nbsp; HELP</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const state = {
+  room: 'drain',
+  inventory: [],
+  hp: 12,
+  maxHp: 12,
+  lanternOil: 100,
+  lanternLit: true,
+  turnCount: 0,
+  flags: {
+    ratsDead: false,
+    otyughDead: false,
+    thiefDead: false,
+    thiefFled: false,
+    letterRead: false,
+    letterPocketed: false,
+    gateReached: false,
+    whistleUsed: false,
+    torchLit: false,
+    crowbarUsed: false,
+    gameOver: false,
+    won: false,
+  }
+};
+
+// ─── ITEMS ────────────────────────────────────────────────────────────────────
+const items = {
+  whistle:  { name: 'watchman whistle',  examine: 'Your City Watch whistle. Three blasts means officer in distress. Standard issue.' },
+  crowbar:  { name: 'rusted crowbar',    examine: 'Heavy iron. Rusted but solid. Good for prying -- or breaking teeth.' },
+  letter:   { name: 'wax-sealed letter', examine: 'The seal is the mark of the Shadow Thieves. It is addressed to Watch Commander Aldric Voss. You should read this.' },
+  torch:    { name: 'sewer torch',       examine: 'A tar-soaked torch pulled from a wall sconce. Still burning.' },
+  badge:    { name: 'watch badge',       examine: 'Your bronze City Watch badge. Ward of North. It means something up there. Down here, nothing.' },
+  ration:   { name: 'hard ration',       examine: 'A block of dense bread and dried meat from your belt pouch. Eating it restores 3 HP.' },
+};
+
+// ─── ROOMS ────────────────────────────────────────────────────────────────────
+const rooms = {
+
+  drain: {
+    name: 'DRAINAGE SHAFT',
+    art: `
++---------------------------+
+|      DRAINAGE SHAFT       |
++---------------------------+
+|                           |
+|   +-------------------+   |
+|   |    IRON GRATE     |   |
+|   |   (locked above)  |   |
+|   +-------------------+   |
+|                           |
+|          [YOU]            |
+|                           |
+|   water flows south >>    |
++------------[S]------------+`,
+    first: [
+      'You are at the bottom of a drainage shaft.',
+      'Ten feet above, an iron grate lets in grey Waterdeep light.',
+      'It is locked from the street side. You came down chasing a suspect.',
+      'That was an hour ago. The suspect is gone. You are not.',
+      '',
+      'Your lantern casts a sick yellow circle on the wet stone.',
+      'Black water moves south through a low tunnel.',
+      '',
+      'Your WATCHMAN WHISTLE and BADGE are on your belt.',
+      'A HARD RATION is in your pouch.',
+      '',
+      'Exits: SOUTH into the sewer tunnel. The grate above is locked.',
+    ],
+    look: [
+      'A vertical shaft of old stone. The grate above is locked shut.',
+      'Black water flows south through a low arch.',
+      () => state.flags.whistleUsed && !state.flags.won
+        ? 'You have blown the whistle. Someone topside should have heard it. You need to get back here.'
+        : 'Exits: SOUTH.',
+    ],
+    exits: { south: 'tunnel' },
+    items: [],
+  },
+
+  tunnel: {
+    name: 'MAIN SEWER TUNNEL',
+    art: `
+           [N] to drain shaft
+                  |
++---------------------------+
+|       MAIN TUNNEL         |
++---------------------------+
+|                           |
+|  [CROWBAR against wall]   |
+|                           |
+|  ~~~~~~~~~~~~~~~~~~~~~~~~ |
+|  ~ ~ ~ water channel ~ ~ ~|
+|  ~~~~~~~~~~~~~~~~~~~~~~~~ |
+|                           |
++---+-------------------+---+
+   [W]               [E]
+  junction         collapsed`,
+    first: [
+      'The main channel. Waste-water runs along a central trough.',
+      'The smell is remarkable. You breathe through your mouth.',
+      '',
+      'A RUSTED CROWBAR leans against the wall -- someone left it here.',
+      'The tunnel splits. EAST leads toward a collapsed section.',
+      'WEST leads toward the sound of something large moving in water.',
+      'NORTH returns to the drain shaft.',
+    ],
+    look: [
+      'The main sewer channel. Water moves west.',
+      () => rooms.tunnel.items.includes('crowbar') ? 'A RUSTED CROWBAR leans against the wall.' : '',
+      'Exits: NORTH to the drain shaft, EAST to the collapsed section, WEST toward the junction.',
+    ],
+    exits: { north: 'drain', east: 'collapse', west: 'junction' },
+    items: ['crowbar'],
+  },
+
+  collapse: {
+    name: 'COLLAPSED SECTION',
+    art: `
++---------------------------+
+|     COLLAPSED SECTION     |
++---------------------------+
+|                           |
+|  +---------------------+  |
+|  | hollow in wall:     |  |
+|  |   - wax-sealed letter  |
+|  |   - sewer torch     |  |
+|  +---------------------+  |
+|                           |
+|  RUBBLE ################  |
+|  (passage blocked)        |
+|                           |
++---[W]---------------------+
+   to main tunnel`,
+    first: [
+      'The tunnel ceiling has caved in. Rubble blocks the far passage.',
+      'A dead end -- almost.',
+      '',
+      'Behind a loose stone you notice a hollow in the wall.',
+      'Inside: a WAX-SEALED LETTER and an unlit SEWER TORCH.',
+      '',
+      'This is a Shadow Thief dead drop. Someone has been using these tunnels.',
+      '',
+      'Exits: WEST back to the main tunnel.',
+    ],
+    look: [
+      'Collapsed stone. Rubble chest-high against the far wall.',
+      () => rooms.collapse.items.length > 0
+        ? 'The hollow in the wall still holds: ' + rooms.collapse.items.map(k => items[k]?.name || k).join(', ') + '.'
+        : 'The hollow in the wall is empty.',
+      'Exits: WEST.',
+    ],
+    exits: { west: 'tunnel' },
+    items: ['letter', 'torch'],
+  },
+
+  junction: {
+    name: 'FLOODED JUNCTION',
+    art: () => `
+           [E] to tunnel
+                  |
++---------------------------+
+|      FLOODED JUNCTION     |
++---------------------------+
+|                           |
+|  ~~~~~~~~~~~~~~~~~~~~~~~~ |
+|  ~                      ~ |
+|  ~  ${state.flags.ratsDead ? '                  ' : '[RAT] [RAT] [RAT]'}  ~ |
+|  ~                      ~ |
+|  ~~~~~~~~~~~~~~~~~~~~~~~~ |
+|                           |
++------------[S]------------+
+          deep channel`,
+    first: [
+      'A wide junction where three channels meet.',
+      'The water is knee-deep here and black.',
+      '',
+      () => state.flags.ratsDead
+        ? 'The giant rats are dead. Their bodies float.'
+        : 'THREE GIANT RATS are feeding on something in the water. They notice you.',
+      '',
+      'Exits: EAST back to the tunnel, SOUTH toward the deep channel.',
+    ],
+    look: [
+      'The flooded junction. Water from three directions.',
+      () => state.flags.ratsDead
+        ? 'The rats are dead. It is quiet.'
+        : 'The giant rats are between you and the south passage.',
+      'Exits: EAST, SOUTH.',
+    ],
+    exits: { east: 'tunnel', south: 'deepchannel' },
+    items: [],
+  },
+
+  deepchannel: {
+    name: 'DEEP CHANNEL',
+    art: () => `
+           [N] to junction
+                  |
++---------------------------+
+|        DEEP CHANNEL       |
++---------------------------+
+|                           |
+|  ~~~~~~~~~~~~~~~~~~~~~~~~ |
+|  ~                      ~ |
+|  ~  ${state.flags.otyughDead ? '   [OTYUGH - dead]  ' : '     [OTYUGH]       '}  ~ |
+|  ~                      ~ |
+|  ~~~~~~~~~~~~~~~~~~~~~~~~ |
+|                           |
+|  iron door [S] >>         |
++---------------------------+`,
+    first: [
+      'The channel widens into a deep cistern. The water here is waist-high.',
+      'The smell is suffocating.',
+      '',
+      () => state.flags.otyughDead
+        ? 'The otyugh is dead. It takes up most of the cistern.'
+        : 'An OTYUGH squats in the far end -- a massive, tentacled thing that lives in filth. It is territorial.',
+      '',
+      'A SHADOW THIEF passage is carved into the south wall. The door is iron, slightly ajar.',
+      'Exits: NORTH back to the junction, SOUTH to the stash room (the otyugh blocks the way).',
+    ],
+    look: [
+      () => state.flags.otyughDead
+        ? 'The dead otyugh fills the cistern. You step over its tentacles.'
+        : 'The otyugh regards you with three black eyes. It is not moving yet.',
+      () => state.flags.otyughDead
+        ? 'Exits: NORTH, SOUTH.'
+        : 'You cannot reach the south door while the otyugh lives.',
+    ],
+    exits: {
+      north: 'junction',
+      get south() { return state.flags.otyughDead ? 'stash' : null; }
+    },
+    items: [],
+  },
+
+  stash: {
+    name: 'SHADOW THIEF STASH ROOM',
+    art: () => `
++---------------------------+
+|   SHADOW THIEF STASH      |
++---------------------------+
+|                           |
+|  [CRATE]       [CRATE]    |
+|                           |
+|  [MAPS on wall]           |
+|                           |
+|  ${state.flags.thiefDead ? '[THIEF - dead]     ' : state.flags.thiefFled ? '[THIEF - fled]     ' : '[THIEF at table]   '}    |
+|                           |
+|  ladder up [N] >>         |
++------------[N]------------+
+          to drain shaft`,
+    first: [
+      'A dry room carved out of the sewer wall. Crates. A hanging lantern.',
+      'Maps pinned to stone. Routes marked in red ink.',
+      '',
+      () => state.flags.thiefDead
+        ? 'The Shadow Thief is dead on the floor.'
+        : state.flags.thiefFled
+        ? 'The room is empty. The thief ran.'
+        : 'A SHADOW THIEF sits at a small table. He sees you the same moment you see him.',
+      '',
+      () => !state.flags.thiefDead && !state.flags.thiefFled
+        ? 'He goes for a blade at his hip.'
+        : '',
+      '',
+      'This is the route back. A ladder on the north wall leads up to a surface GRATE -- directly above the drain shaft.',
+      'Exits: NORTH (ladder to drain shaft), SOUTH back to the deep channel.',
+    ],
+    look: [
+      'Crates. Maps. A thief stash built for long use.',
+      () => state.flags.thiefDead ? 'The thief is dead.' : state.flags.thiefFled ? 'Empty. The thief is gone.' : 'The Shadow Thief watches you carefully.',
+      'A ladder leads up to a surface grate. Exits: NORTH (up the ladder), SOUTH.',
+    ],
+    exits: { south: 'deepchannel', north: 'drain' },
+    items: [],
+  },
+
+};
+
+// ─── OUTPUT ENGINE ────────────────────────────────────────────────────────────
+const output = document.getElementById('output');
+let printQueue = [];
+let printing = false;
+
+function enqueue(lines) {
+  printQueue.push(...lines);
+  if (!printing) drain();
+}
+
+function drain() {
+  if (printQueue.length === 0) { printing = false; return; }
+  printing = true;
+  const item = printQueue.shift();
+  printLine(item);
+  const delay = item.type === 'art' ? 0 : item.delay ?? 40;
+  setTimeout(drain, delay);
+}
+
+function printLine(item) {
+  if (typeof item === 'string') item = { text: item };
+  const div = document.createElement('div');
+  if (item.type === 'art') {
+    div.className = 'art';
+    div.textContent = item.text;
+  } else if (item.text === '') {
+    div.className = 'line blank';
+  } else if (item.text === '---') {
+    div.className = 'line divider';
+  } else {
+    div.className = 'line' + (item.cls ? ' ' + item.cls : '');
+    div.textContent = item.text;
+  }
+  output.appendChild(div);
+  output.scrollTop = output.scrollHeight;
+}
+
+function print(text, cls, delay) {
+  if (Array.isArray(text)) {
+    text.forEach(t => enqueue([{ text: t, cls, delay: delay ?? 40 }]));
+  } else {
+    enqueue([{ text: text ?? '', cls, delay: delay ?? 40 }]);
+  }
+}
+
+function printArt(text) { enqueue([{ type: 'art', text }]); }
+function echo(text)     { enqueue([{ text: '> ' + text, cls: 'dim', delay: 0 }, { text: '', delay: 0 }]); }
+
+// ─── ROOM ENTRY ───────────────────────────────────────────────────────────────
+const visited = new Set();
+
+function enterRoom(roomId) {
+  const room = rooms[roomId];
+  if (!room) { print('You cannot go that way.'); return; }
+
+  if (roomId === 'stash' && !state.flags.otyughDead) {
+    print('The otyugh coils a tentacle around your leg and drags you back.', 'danger');
+    print('You cannot get past it.');
+    return;
+  }
+
+  state.room = roomId;
+  const isFirst = !visited.has(roomId);
+  visited.add(roomId);
+
+  print('');
+  print('--- ' + room.name + ' ---', 'label');
+  if (room.art) printArt(typeof room.art === 'function' ? room.art() : room.art);
+  print('');
+
+  const lines = isFirst ? room.first : resolveLines(room.look);
+  lines.forEach(l => { const t = typeof l === 'function' ? l() : l; if (t !== undefined) print(t); });
+  print('');
+
+  if (state.lanternLit && state.lanternOil <= 20 && state.lanternOil > 15) {
+    print('Your lantern flickers. The oil is almost gone.', 'warning');
+  }
+}
+
+function resolveLines(arr) {
+  return arr.map(l => typeof l === 'function' ? l() : l).filter(l => l !== undefined && l !== null);
+}
+
+// ─── LANTERN / TURN ──────────────────────────────────────────────────────────
+function tickTurn() {
+  state.turnCount++;
+  if (state.lanternLit) {
+    state.lanternOil -= 2;
+    if (state.lanternOil <= 0) {
+      state.lanternOil = 0;
+      state.lanternLit = false;
+      print('');
+      print('Your lantern oil runs dry. The flame goes out.', 'danger');
+      if (!state.flags.torchLit) {
+        print('You are in complete darkness.', 'danger');
+        print('You cannot navigate the sewers blind.', 'danger');
+        print('');
+        print('You sit down in the dark and wait. No one comes.', 'danger');
+        print('');
+        print('YOU HAVE DIED IN THE DARK.', 'danger');
+        print('');
+        print('  [ Refresh to begin again ]', 'dim');
+        endGame();
+      } else {
+        print('Your sewer torch is still burning. You have some time left.', 'warning');
+      }
+    }
+  }
+}
+
+function lightStatus() {
+  if (state.lanternLit) return 'Lantern: ' + Math.ceil(state.lanternOil) + '%';
+  if (state.flags.torchLit) return 'Torch: burning (limited)';
+  return 'DARKNESS';
+}
+
+function endGame() {
+  state.flags.gameOver = true;
+  document.getElementById('cmd-input').disabled = true;
+}
+
+// ─── COMBAT ──────────────────────────────────────────────────────────────────
+function doAttack() {
+  // rats
+  if (state.room === 'junction' && !state.flags.ratsDead) {
+    const hasCrowbar = state.inventory.includes('crowbar');
+    const hasTorch   = state.inventory.includes('torch');
+    const bonus = hasCrowbar ? 2 : hasTorch ? 1 : 0;
+    const roll  = Math.floor(Math.random() * 6) + 1 + bonus;
+    if (roll >= 5) {
+      state.flags.ratsDead = true;
+      print('');
+      if (hasCrowbar) {
+        print('You swing the crowbar in a wide arc. Bone cracks. The rats scatter -- then stop moving.', 'success');
+      } else if (hasTorch) {
+        print('You thrust the torch at the nearest rat. It shrieks and flees. The others follow.', 'success');
+        print('They will not come back.');
+      } else {
+        print('You kick and stomp until the squealing stops.', 'success');
+        print('Your boot will never be clean again.');
+      }
+      print('The south passage is clear.');
+    } else {
+      const dmg = Math.floor(Math.random() * 2) + 1;
+      state.hp -= dmg;
+      print('A rat bites through your boot. ' + dmg + ' damage.', 'danger');
+      checkDeath();
+    }
+    print('');
+    return;
+  }
+
+  // otyugh
+  if (state.room === 'deepchannel' && !state.flags.otyughDead) {
+    const hasCrowbar = state.inventory.includes('crowbar');
+    if (!hasCrowbar) {
+      print('You have nothing that can hurt it. You need a weapon.', 'danger');
+      print('The otyugh swats you aside. ' );
+      const dmg = Math.floor(Math.random() * 3) + 2;
+      state.hp -= dmg;
+      print('You take ' + dmg + ' damage.', 'danger');
+      checkDeath();
+      return;
+    }
+    const roll = Math.floor(Math.random() * 6) + 1;
+    if (roll >= 4) {
+      state.flags.otyughDead = true;
+      print('');
+      print('You drive the crowbar into its central eye. It convulses.', 'success');
+      print('Tentacles thrash. The water turns black.');
+      print('Then nothing. It is dead.');
+      print('The south door is clear.');
+    } else {
+      const dmg = Math.floor(Math.random() * 4) + 2;
+      state.hp -= dmg;
+      print('A tentacle catches you across the chest. ' + dmg + ' damage.', 'danger');
+      print('You keep your footing. Barely.');
+      checkDeath();
+    }
+    print('');
+    return;
+  }
+
+  // shadow thief
+  if (state.room === 'stash' && !state.flags.thiefDead && !state.flags.thiefFled) {
+    const roll = Math.floor(Math.random() * 6) + 1;
+    if (roll >= 4) {
+      state.flags.thiefDead = true;
+      print('');
+      print('You get inside his reach before he draws. He goes down hard.', 'success');
+      print('He does not get up.');
+    } else {
+      const dmg = Math.floor(Math.random() * 3) + 1;
+      state.hp -= dmg;
+      print('He nicks your forearm. ' + dmg + ' damage.', 'danger');
+      print('You circle each other in the cramped room.');
+      checkDeath();
+    }
+    print('');
+    return;
+  }
+
+  print('There is nothing to attack here.');
+}
+
+function doFlee() {
+  // flee from thief
+  if (state.room === 'stash' && !state.flags.thiefDead && !state.flags.thiefFled) {
+    state.flags.thiefFled = true;
+    print('You back toward the ladder. He lets you go -- for now.');
+    print('He has no reason to follow a watchman into the street.');
+    return;
+  }
+  print('There is nothing to flee from.');
+}
+
+function checkDeath() {
+  if (state.hp <= 0) {
+    print('');
+    print('You go under. The black water closes over your face.', 'danger');
+    print('');
+    print('YOU HAVE DIED.', 'danger');
+    print('');
+    print('  [ Refresh to begin again ]', 'dim');
+    endGame();
+  }
+}
+
+// ─── USE ─────────────────────────────────────────────────────────────────────
+function doUse(noun) {
+  // whistle
+  if (noun === 'whistle' || noun === 'watchman whistle') {
+    if (!state.inventory.includes('whistle')) { print('You are not carrying that.'); return; }
+    if (state.room !== 'drain' && state.room !== 'stash') {
+      print('You are too deep in the sewers. No one would hear it from here.');
+      return;
+    }
+    if (state.flags.whistleUsed) {
+      print('You have already signaled. Someone topside heard you. Get back to the drain shaft.');
+      return;
+    }
+    state.flags.whistleUsed = true;
+    print('');
+    print('Three sharp blasts. The sound echoes through the shaft.', 'success');
+    print('Up through the grate. Into the street.');
+    print('');
+    print('Someone up there should have heard that. Get back to the drain shaft and wait.', 'success');
+    print('');
+
+    // if already at drain, win
+    if (state.room === 'drain') {
+      triggerEscape();
+    }
+    return;
+  }
+
+  // torch - light it
+  if (noun === 'torch' || noun === 'sewer torch') {
+    if (!state.inventory.includes('torch')) { print('You are not carrying that.'); return; }
+    if (state.flags.torchLit) { print('The torch is already burning.'); return; }
+    if (!state.lanternLit) { print('Your lantern is out. You have no flame to light it with.'); return; }
+    state.flags.torchLit = true;
+    print('You light the torch from your lantern. It catches with a whoosh.', 'success');
+    print('More light. More time.');
+    return;
+  }
+
+  // crowbar on grate
+  if ((noun === 'crowbar' || noun === 'rusted crowbar') && state.room === 'drain') {
+    if (!state.inventory.includes('crowbar')) { print('You are not carrying a crowbar.'); return; }
+    print('You jam the crowbar into the grate and heave.');
+    print('It shifts -- but the lock holds. You cannot force this from below.');
+    print('You need to signal someone to open it from the street side.');
+    return;
+  }
+
+  // read letter
+  if (noun === 'letter' || noun === 'wax-sealed letter') {
+    if (!state.inventory.includes('letter')) { print('You are not carrying that.'); return; }
+    state.flags.letterRead = true;
+    print('');
+    print('You break the seal and read by lantern light.', 'success');
+    print('');
+    print('  "Commander -- the shipment moves on Tenday. Your cut is', 'item-found');
+    print('   enclosed. Destroy this after reading. -- V"', 'item-found');
+    print('');
+    print('V. Vivienne, maybe. Or someone else entirely.');
+    print('Commander Aldric Voss is your superior officer.');
+    print('This letter is worth something. To someone.');
+    print('');
+    return;
+  }
+
+  // eat ration
+  if (noun === 'ration' || noun === 'hard ration') {
+    if (!state.inventory.includes('ration')) { print('You are not carrying that.'); return; }
+    if (state.hp >= state.maxHp) { print('You are not hungry enough to waste it.'); return; }
+    state.inventory = state.inventory.filter(i => i !== 'ration');
+    const healed = Math.min(3, state.maxHp - state.hp);
+    state.hp += healed;
+    print('You eat the ration quickly. It tastes like leather.', 'success');
+    print('HP restored: ' + healed + '. HP: ' + state.hp + '/' + state.maxHp);
+    return;
+  }
+
+  print('Nothing happens.');
+}
+
+// ─── WIN ─────────────────────────────────────────────────────────────────────
+function triggerEscape() {
+  state.flags.won = true;
+  setTimeout(() => {
+    print('');
+    print('---');
+    print('');
+    print('Boots on the grate above. A muffled voice.', 'success');
+    print('"Someone down there? Hold on --"');
+    print('');
+    print('Iron scrapes iron. Grey light floods the shaft.', 'success');
+    print('A watchman peers down. Young. Wide-eyed.');
+    print('"Gods. Are you alright?"');
+    print('');
+    print('You look down at yourself. Soaked in sewer water.', 'dim');
+    print('Blood on your sleeve. Something foul on your boots.', 'dim');
+    print('');
+    print('"I need a report form," you say. "And a bath."', 'success');
+    print('');
+    print('He helps you up into the cold Waterdeep air.');
+    print('');
+
+    if (state.flags.letterPocketed) {
+      print('The letter is still in your coat.', 'warning');
+      print('You have not decided what to do with it yet.', 'warning');
+      print('Commander Voss will want a full debrief.');
+      print('');
+    } else if (state.flags.letterRead) {
+      print('You left the letter in the sewers.', 'dim');
+      print('Whatever Voss is mixed up in -- that is above your rank.');
+      print('');
+    } else {
+      print('There is a sealed letter in your coat you never read.', 'dim');
+      print('You will look at it later.', 'dim');
+      print('');
+    }
+
+    print('YOU ESCAPED THE WATERDEEP SEWERS.', 'success');
+    print('');
+    print('  [ Refresh to play again ]', 'dim');
+    endGame();
+  }, 800);
+}
+
+// ─── COMMANDS ─────────────────────────────────────────────────────────────────
+function handle(raw) {
+  const input = raw.trim().toLowerCase();
+  if (!input || state.flags.gameOver) return;
+  echo(raw);
+  tickTurn();
+  if (state.flags.gameOver) return;
+
+  const words = input.split(/\s+/);
+  const verb  = words[0];
+  const noun  = words.slice(1).join(' ');
+
+  // resolve inventory key from noun (by key or display name)
+  function resolveItem(n) {
+    return state.inventory.find(k => k === n || (items[k]?.name || '').toLowerCase() === n);
+  }
+
+  // ─ GO ─
+  if (['go','move','walk','run','n','s','e','w','north','south','east','west','up','climb','ladder'].includes(verb)) {
+    const dirMap = { n:'north',s:'south',e:'east',w:'west',north:'north',south:'south',east:'east',west:'west',up:'north',climb:'north',ladder:'north' };
+    let dir = dirMap[verb] || dirMap[noun];
+    if (!dir) { print('Which direction?'); return; }
+    const exits = rooms[state.room].exits;
+    const dest  = typeof exits[dir] === 'function' ? exits[dir]() : exits[dir];
+    if (dest) {
+      if (dest === 'drain' && state.flags.whistleUsed && !state.flags.won) {
+        state.room = 'drain';
+        enterRoom('drain');
+        triggerEscape();
+      } else {
+        enterRoom(dest);
+      }
+    } else {
+      print('You cannot go that way.');
+    }
+    return;
+  }
+
+  // ─ LOOK ─
+  if (['look','l'].includes(verb) && !noun) {
+    const room = rooms[state.room];
+    print('');
+    print('--- ' + room.name + ' ---', 'label');
+    if (room.art) {
+      const map = mapCache[state.room] || room.art;
+      printArt(map);
+    }
+    print('');
+    resolveLines(room.look).forEach(l => print(l));
+    print('');
+    return;
+  }
+
+  // ─ EXAMINE ─
+  if (['examine','x','inspect','read','look'].includes(verb) && noun) {
+    const invKey = resolveItem(noun);
+    if (invKey) {
+      print(items[invKey]?.examine || 'Nothing more to learn from it.');
+      if (invKey === 'letter' && !state.flags.letterRead) doUse('letter');
+      return;
+    }
+    // world objects
+    const worldExamine = {
+      grate:   'Iron bars. Locked from the street side. You cannot open it from below without help.',
+      ladder:  'Iron rungs hammered into the stone. They lead up to a surface grate.',
+      crates:  'Wooden crates stamped with merchant marks. Mostly empty. Smuggled goods, long since moved.',
+      maps:    'Routes through the sewer system, marked in red. Someone has been moving things through here for months.',
+      channel: 'The water is black and moves slowly west. You do not want to know what is in it.',
+      water:   'You do not want to know what is in it.',
+      rats:    state.flags.ratsDead ? 'Dead rats. Good.' : 'Big. Aggressive. Several of them.',
+      otyugh:  state.flags.otyughDead ? 'Dead. It takes up most of the cistern.' : 'A mass of rotting flesh, tentacles, and teeth. It feeds on waste. It is territorial.',
+      thief:   state.flags.thiefDead ? 'Dead. Shadow Thief, by the leathers.' : state.flags.thiefFled ? 'Gone.' : 'A Shadow Thief operative. Armed. Watching you.',
+    };
+    if (worldExamine[noun]) { print(worldExamine[noun]); return; }
+    print('You do not see that here.');
+    return;
+  }
+
+  // ─ TAKE ─
+  if (['take','get','grab','pick'].includes(verb)) {
+    const roomItems = rooms[state.room].items;
+    const target = roomItems.find(k => k === noun || (items[k]?.name || '').toLowerCase() === noun);
+    if (target) {
+      state.inventory.push(target);
+      rooms[state.room].items = roomItems.filter(i => i !== target);
+      print('You take the ' + (items[target]?.name || target) + '.', 'success');
+      // auto-read letter hint
+      if (target === 'letter') print('You should READ it.');
+    } else if (['grate','ladder','otyugh','thief','rats','crates','maps'].includes(noun)) {
+      print('That is not something you can carry.');
+    } else {
+      print('There is nothing like that to take.');
+    }
+    return;
+  }
+
+  // ─ INVENTORY ─
+  if (['inventory','inv','i'].includes(verb)) {
+    if (state.inventory.length === 0) {
+      print('You carry nothing useful.');
+    } else {
+      print('You are carrying:');
+      state.inventory.forEach(k => print('  - ' + (items[k]?.name || k)));
+    }
+    print('HP: ' + state.hp + '/' + state.maxHp);
+    print(lightStatus());
+    return;
+  }
+
+  // ─ ATTACK ─
+  if (['attack','fight','kill','stab','hit','strike','slash'].includes(verb)) {
+    doAttack(); return;
+  }
+
+  // ─ FLEE / RUN ─
+  if (['flee','run','escape','retreat','back'].includes(verb)) {
+    doFlee(); return;
+  }
+
+  // ─ USE ─
+  if (['use','blow','light','eat','drink','read','open'].includes(verb)) {
+    doUse(noun || verb); return;
+  }
+
+  // ─ POCKET (letter choice) ─
+  if (['pocket','keep','hide'].includes(verb) && (noun === 'letter' || noun === 'wax-sealed letter')) {
+    if (!state.inventory.includes('letter')) { print('You are not carrying the letter.'); return; }
+    if (!state.flags.letterRead) { print('You should read it first.'); return; }
+    state.flags.letterPocketed = true;
+    print('You fold the letter and tuck it inside your coat.', 'success');
+    print('This is evidence. Or leverage. You have not decided which.');
+    return;
+  }
+
+  // ─ HELP ─
+  if (['help','?','h','commands'].includes(verb)) {
+    print('');
+    print('COMMANDS:', 'label');
+    print('  LOOK              -- examine the room');
+    print('  GO [direction]    -- north / south / east / west');
+    print('  TAKE [item]       -- pick up an item');
+    print('  EXAMINE [item]    -- look closely at something');
+    print('  INVENTORY         -- check what you carry and your status');
+    print('  ATTACK            -- fight whatever is here');
+    print('  FLEE              -- try to back away from a fight');
+    print('  USE [item]        -- use an item (whistle, torch, crowbar, ration)');
+    print('  READ [item]       -- read the letter');
+    print('  POCKET letter     -- keep the letter hidden on you');
+    print('');
+    return;
+  }
+
+  // ─ FLAVOR ─
+  if (['wait','rest'].includes(verb)) {
+    const w = ['The sewer does not hurry for you.','Water drips. Something moves in the dark.','You wait. The smell does not improve.'];
+    print(w[Math.floor(Math.random() * w.length)]); return;
+  }
+
+  if (['listen','hear'].includes(verb)) {
+    const s = {
+      drain:      'The street above. Distant cart wheels. Voices.',
+      tunnel:     'Your own breathing. The drip of water. Something scraping stone to the west.',
+      collapse:   'Nothing. This section is dead.',
+      junction:   state.flags.ratsDead ? 'Quiet. Just the water.' : 'Squealing. Wet movement in the dark.',
+      deepchannel: state.flags.otyughDead ? 'The body settling.' : 'Something large. Breathing through water.',
+      stash:      state.flags.thiefDead || state.flags.thiefFled ? 'Silence.' : 'The scrape of a blade being drawn.',
+    };
+    print(s[state.room] || 'Nothing useful.'); return;
+  }
+
+  if (['smell','sniff'].includes(verb)) {
+    print('It smells like a sewer. Specifically, the worst part of a sewer.'); return;
+  }
+
+  const fallbacks = [
+    'Nothing happens.',
+    'The sewer does not respond.',
+    'That is not something you can do here.',
+    'You try. Nothing comes of it.',
+  ];
+  print(fallbacks[Math.floor(Math.random() * fallbacks.length)]);
+}
+
+// ─── INPUT ────────────────────────────────────────────────────────────────────
+const inputEl  = document.getElementById('cmd-input');
+const cmdHistory = [];
+let histIdx = -1;
+
+inputEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const val = inputEl.value;
+    if (val.trim()) { cmdHistory.unshift(val); histIdx = -1; }
+    handle(val);
+    inputEl.value = '';
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (histIdx < cmdHistory.length - 1) { histIdx++; inputEl.value = cmdHistory[histIdx]; }
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (histIdx > 0) { histIdx--; inputEl.value = cmdHistory[histIdx]; }
+    else { histIdx = -1; inputEl.value = ''; }
+  }
+});
+
+document.addEventListener('click', () => inputEl.focus());
+
+// ─── BOOT ─────────────────────────────────────────────────────────────────────
+function boot() {
+  const bootLines = [
+    { text: 'DOWN IN THE DARK', cls: 'label', delay: 120 },
+    { text: 'A Waterdeep Sewer Adventure', cls: 'dim', delay: 80 },
+    { text: '──────────────────────────────', delay: 60 },
+    { text: '', delay: 100 },
+    { text: 'City Watch. Ward of North. Year of the Gauntlet.', cls: 'dim', delay: 60 },
+    { text: '', delay: 300 },
+    { text: '---', delay: 0 },
+    { text: '', delay: 0 },
+  ];
+  bootLines.forEach(l => enqueue([l]));
+
+  const bootDuration = bootLines.reduce((a, b) => a + (b.delay ?? 40), 0) + 200;
+  setTimeout(() => {
+    state.inventory.push('whistle', 'badge', 'ration');
+    enterRoom('drain');
+    setTimeout(() => inputEl.focus(), 400);
+  }, bootDuration);
+}
+
+boot();
+</script>
+</body>
+</html>
