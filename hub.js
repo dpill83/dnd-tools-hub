@@ -8,7 +8,7 @@
     /** @type {Record<string, number>|null} null = not loaded yet */
     var toolGitDates = null;
     var toolGitDatesPromise = null;
-    // Order for "default" and for "oldest"/"newest" when DOM order is used (see buildAddOrder).
+    // Order for "default"; tie-breaker and fallback when hub-tool-dates.json has no entry (see buildAddOrder).
     const DEFAULT_ORDER = [
         'tools/ai-dm-prompt-builder/',
         'tools/adventure-packet-builder/',
@@ -152,15 +152,10 @@
                 return (iA < 0 ? 999 : iA) - (iB < 0 ? 999 : iB);
             }
             if (sortBy === 'oldest') {
-                const iA = addOrder.indexOf(hrefA);
-                const iB = addOrder.indexOf(hrefB);
-                return (iA < 0 ? 999 : iA) - (iB < 0 ? 999 : iB);
+                return cmpGitOrder(hrefA, hrefB, addOrder, false);
             }
             if (sortBy === 'newest') {
-                const iA = addOrder.indexOf(hrefA);
-                const iB = addOrder.indexOf(hrefB);
-                // Higher index = newer in hub list; unknowns go last.
-                return (iB < 0 ? -999 : iB) - (iA < 0 ? -999 : iA);
+                return cmpGitOrder(hrefA, hrefB, addOrder, true);
             }
             if (sortBy === 'name-asc' || sortBy === 'name-desc') {
                 const ta = getCardTitle(a);

@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-03-27T20:42:29.908Z",
+  "generatedAt": "2026-03-27T20:53:55.334Z",
   "tools": {
-    "tools/lazy-dm-prep/lazy-dm-generator.html": 1774644135,
     "tools/ai-dm-prompt-builder/": 1770177288,
+    "tools/lazy-dm-prep/lazy-dm-generator.html": 1774644052,
     "tools/adventure-packet-builder/": 1770177288,
     "tools/adventure-log-builder/": 1773378388,
     "tools/adventure-maker/": 1770177288,
@@ -18,17 +18,19 @@
     "tools/legacy-project-builder/": 1770177288,
     "tools/songbook/": 1770705596,
     "tools/spell-to-json/": 1771101200,
-    "tools/spellcards/": 1774306097,
+    "tools/spellcards/": 1774316078,
     "tools/qbasic-editor/": 1770177288,
     "tools/cosmetic-battle-pass/": 1771981345,
-    "tools/wagers-fortunes/": 1770884002,
-    "tools/waterdeep-trader/dist/": 1774401066,
+    "tools/wagers-fortunes/": 1774402143,
+    "tools/waterdeep-trader/dist/": 1774421920,
+    "tools/waterdeep-text-adventure/": 1774570239,
     "tools/party-loot-ledger/": 1773516940,
     "tools/interactive-map/": 1773445260,
     "tools/tetra-dnd/dnd-reference.html": 1772385579,
     "tools/tetra-dnd/dnd-char-gen.html": 1772385579,
     "tools/tetra-dnd/dnd-magic-items.html": 1772385579,
     "tools/tetra-dnd/dnd-statblock.html": 1773267533,
-    "tools/loot-box-tests/loot-box-test-with-assests-by-claude.html": 1774315256
+    "tools/loot-box-tests/loot-box-test-with-assests-by-claude.html": 1774315256,
+    "tools/roguelike/": 1774575273
   }
 }
