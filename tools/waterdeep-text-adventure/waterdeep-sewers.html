@@ -486,7 +486,27 @@ function printLine(item) {
     div.textContent = item.text;
   }
   output.appendChild(div);
+  applyHistoryFade();
   output.scrollTop = output.scrollHeight;
+}
+
+function applyHistoryFade() {
+  // Fade older lines while keeping the newest lines bright.
+  // This keeps color classes (danger/success/etc.) but reduces intensity with opacity.
+  const maxLines = 28;
+  const minOpacity = 0.38;
+  const lines = Array.from(output.querySelectorAll('.line')).filter(el => !el.classList.contains('divider'));
+  const start = Math.max(0, lines.length - maxLines);
+  const window = lines.slice(start);
+  const lastIdx = window.length - 1;
+
+  for (let i = 0; i < window.length; i++) {
+    const el = window[i];
+    const age = lastIdx <= 0 ? 1 : i / lastIdx; // 0 oldest -> 1 newest
+    const fade = minOpacity + (1 - minOpacity) * age;
+    const base = el.classList.contains('dim') ? 0.7 : 1;
+    el.style.opacity = String(Math.max(0, Math.min(1, fade * base)));
+  }
 }
 
 function print(text, cls, delay) {
@@ -822,9 +842,14 @@ function handle(raw) {
   }
 
   // ─ GO ─
-  if (['go','move','walk','run','n','s','e','w','north','south','east','west','up','climb','ladder'].includes(verb)) {
-    const dirMap = { n:'north',s:'south',e:'east',w:'west',north:'north',south:'south',east:'east',west:'west',up:'north',climb:'north',ladder:'north' };
-    let dir = dirMap[verb] || dirMap[noun];
+  if (['go','move','walk','run','n','s','e','w','north','south','east','west','up','down','climb','descend','ladder'].includes(verb)) {
+    const dirMap = {
+      n:'north', s:'south', e:'east', w:'west',
+      north:'north', south:'south', east:'east', west:'west',
+      up:'north', climb:'north', ladder:'north',
+      down:'south', descend:'south'
+    };
+    let dir = dirMap[verb] || dirMap[noun] || (noun.includes('north') ? 'north' : noun.includes('south') ? 'south' : noun.includes('east') ? 'east' : noun.includes('west') ? 'west' : noun.includes('up') ? 'north' : noun.includes('down') || noun.includes('descend') ? 'south' : null);
     if (!dir) { print('Which direction?'); return; }
     const exits = rooms[state.room].exits;
     const dest  = typeof exits[dir] === 'function' ? exits[dir]() : exits[dir];

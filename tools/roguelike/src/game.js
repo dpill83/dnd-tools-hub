@@ -4,6 +4,7 @@ import { computeFov } from './fov.js';
 import { generateLevel, randomFloorCell } from './mapgen.js';
 import { renderToElement } from './render.js';
 import { idxOf, inBounds, rnd } from './util.js';
+import { bindAudioToggle, playSfx, setupAudioUnlock } from './audio.js';
 
 function makeState() {
   const gridType = new Uint8Array(W * H);
@@ -135,6 +136,7 @@ function autoPickupGold(state) {
   state.player.gold += it.value;
   state.items.splice(itIndex, 1);
   addLog(state, `You find ${it.value} gold.`, 's-gold');
+  playSfx('gold');
   resetLookupTables(state);
 }
 
@@ -148,15 +150,18 @@ function triggerTrapIfPresent(state) {
   it.revealed = true;
   state.player.hp -= it.dmg;
   addLog(state, `A trap snaps! You take ${it.dmg} damage.`, 'dead');
+  playSfx('hurt');
   if (state.player.hp <= 0) {
     state.gameOver = true;
     addLog(state, 'You have died. Press R to restart.', 'dead');
+    playSfx('death');
   }
 }
 
 function checkLevelUp(state) {
   const needed = state.player.level * 15;
   if (state.player.xp >= needed) {
+    playSfx('levelUp');
     state.player.level++;
     state.player.maxHp += 5;
     state.player.hp = state.player.maxHp;
@@ -175,6 +180,7 @@ function attackMonster(state, mx, my) {
   const dmg = Math.max(1, state.player.atk + rnd(3) - m.def);
   m.hp -= dmg;
   if (m.hp <= 0) {
+    playSfx('kill');
     state.player.xp += m.xp;
     const drop = rnd(4) === 0 ? Math.floor(m.xp / 2) : 0;
     if (drop > 0) state.items.push({ x: mx, y: my, type: ItemType.Gold, value: drop });
@@ -183,6 +189,7 @@ function attackMonster(state, mx, my) {
     checkLevelUp(state);
     resetLookupTables(state);
   } else {
+    playSfx('playerHit');
     addLog(state, `You hit ${m.name} for ${dmg}. (${m.hp} HP left)`);
   }
 }
@@ -192,9 +199,11 @@ function applyEndOfTurnEffects(state) {
     state.player.poisonTurns--;
     state.player.hp -= 1;
     addLog(state, 'Poison burns your veins (-1 HP).', 'dead');
+    playSfx('hurt');
     if (state.player.hp <= 0) {
       state.gameOver = true;
       addLog(state, 'You have died. Press R to restart.', 'dead');
+      playSfx('death');
     }
   }
 }
@@ -235,8 +244,10 @@ function monsterTurns(state) {
     if (dist === 1) {
       const dmg = Math.max(0, m.atk + rnd(3) - state.player.def);
       state.player.hp -= dmg;
-      if (dmg > 0) addLog(state, `${m.name} hits you for ${dmg}!`, 'dead');
-      else addLog(state, `${m.name} attacks but misses.`);
+      if (dmg > 0) {
+        addLog(state, `${m.name} hits you for ${dmg}!`, 'dead');
+        playSfx('hurt');
+      } else addLog(state, `${m.name} attacks but misses.`);
 
       if (m.poisonChance && dmg > 0 && Math.random() < m.poisonChance) {
         state.player.poisonTurns = Math.max(state.player.poisonTurns, 4);
@@ -246,6 +257,7 @@ function monsterTurns(state) {
       if (state.player.hp <= 0) {
         state.gameOver = true;
         addLog(state, 'You have died. Press R to restart.', 'dead');
+        playSfx('death');
         return;
       }
     } else {
@@ -289,6 +301,7 @@ function tryMove(state, dx, dy) {
     // Content addition: doors. Opening costs a turn.
     state.gridType[nIdx] = CellType.DoorOpen;
     addLog(state, 'You open the door.');
+    playSfx('door');
     monsterTurns(state);
     applyEndOfTurnEffects(state);
     recomputeVisibility(state);
@@ -310,6 +323,7 @@ function tryMove(state, dx, dy) {
 
   state.player.x = nx;
   state.player.y = ny;
+  playSfx('move');
   autoPickupGold(state);
   triggerTrapIfPresent(state);
   if (!state.gameOver) {
@@ -325,6 +339,7 @@ function grabItem(state) {
   const itIndex = state.itemAt[pIdx];
   if (itIndex === -1) {
     addLog(state, 'Nothing here.');
+    playSfx('noop');
     return;
   }
   const it = state.items[itIndex];
@@ -333,26 +348,32 @@ function grabItem(state) {
     state.player.gold += it.value;
     state.items.splice(itIndex, 1);
     addLog(state, `Picked up ${it.value} gold.`, 's-gold');
+    playSfx('gold');
   } else if (it.type === ItemType.Potion) {
     const h = 5 + rnd(8);
     state.player.hp = Math.min(state.player.hp + h, state.player.maxHp);
     state.items.splice(itIndex, 1);
     addLog(state, `Potion restores ${h} HP!`, 's-hp');
+    playSfx('item');
   } else if (it.type === ItemType.Sword) {
     state.player.atk += 2;
     state.items.splice(itIndex, 1);
     addLog(state, 'You grab a sword. +2 ATK!');
+    playSfx('item');
   } else if (it.type === ItemType.Shield) {
     state.player.def += 1;
     state.items.splice(itIndex, 1);
     addLog(state, 'You find a shield. +1 DEF!');
+    playSfx('item');
   } else if (it.type === ItemType.Trap) {
     // allow disarming once revealed
     if (!it.revealed) {
       addLog(state, 'You fumble around but find nothing.');
+      playSfx('noop');
     } else {
       state.items.splice(itIndex, 1);
       addLog(state, 'You dismantle the trap.');
+      playSfx('item');
     }
   }
 
@@ -369,13 +390,16 @@ function descend(state) {
     state.won = true;
     state.gameOver = true;
     addLog(state, 'You seize the Amulet of Yendor! YOU WIN! Press R to restart.', 's-xp');
+    playSfx('win');
     return;
   }
   if (t !== CellType.Stairs) {
     addLog(state, 'No stairs here.');
+    playSfx('deny');
     return;
   }
   state.floor++;
+  playSfx('descend');
   generateAndPopulateLevel(state);
   state.player.maxHp = Math.min(state.player.maxHp + 2, 50);
   state.player.hp = Math.min(state.player.hp + 4, state.player.maxHp);
@@ -408,6 +432,9 @@ function main() {
   const canvas = document.getElementById('rogue-canvas');
   if (!wrap || !canvas) return;
 
+  setupAudioUnlock();
+  bindAudioToggle();
+
   const state = makeState();
   const focusHint = document.getElementById('focus-hint');
 
@@ -418,6 +445,53 @@ function main() {
 
   const render = () => renderToElement(canvas, state);
 
+  const helpEl = () => document.getElementById('rogue-help');
+  const helpOpen = () => {
+    const h = helpEl();
+    return !!(h && !h.hidden);
+  };
+
+  const bindButton = (id, handler) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    let lastPointerDownAt = 0;
+    const run = (e, kind) => {
+      if (e) e.preventDefault();
+      wrap.focus();
+      handler(kind);
+    };
+
+    el.addEventListener(
+      'pointerdown',
+      (e) => {
+        lastPointerDownAt = performance.now();
+        run(e, 'pointerdown');
+      },
+      { passive: false }
+    );
+    el.addEventListener('click', (e) => {
+      // Avoid double-trigger when a click follows pointerdown.
+      if (performance.now() - lastPointerDownAt < 500) {
+        e.preventDefault();
+        return;
+      }
+      run(e, 'click');
+    });
+  };
+
+  const doWait = () => {
+    playSfx('wait');
+    monsterTurns(state);
+    applyEndOfTurnEffects(state);
+    recomputeVisibility(state);
+    updateStats(state);
+  };
+
+  const toggleHelp = () => {
+    setHelpVisible(helpEl()?.hidden ?? true);
+  };
+
   const setFocused = (focused) => {
     if (!focusHint) return;
     focusHint.hidden = focused;
@@ -426,18 +500,61 @@ function main() {
   wrap.addEventListener('blur', () => setFocused(false));
   setFocused(document.activeElement === wrap);
 
+  // Touch controls (mobile-friendly); mirrors keyboard semantics.
+  bindButton('btn-move-up', () => {
+    if (helpOpen() || state.gameOver) return;
+    tryMove(state, 0, -1);
+    render();
+  });
+  bindButton('btn-move-down', () => {
+    if (helpOpen() || state.gameOver) return;
+    tryMove(state, 0, 1);
+    render();
+  });
+  bindButton('btn-move-left', () => {
+    if (helpOpen() || state.gameOver) return;
+    tryMove(state, -1, 0);
+    render();
+  });
+  bindButton('btn-move-right', () => {
+    if (helpOpen() || state.gameOver) return;
+    tryMove(state, 1, 0);
+    render();
+  });
+  bindButton('btn-act-grab', () => {
+    if (helpOpen() || state.gameOver) return;
+    grabItem(state);
+    render();
+  });
+  bindButton('btn-act-descend', () => {
+    if (helpOpen() || state.gameOver) return;
+    descend(state);
+    render();
+  });
+  bindButton('btn-act-wait', () => {
+    if (helpOpen() || state.gameOver) return;
+    doWait();
+    render();
+  });
+  bindButton('btn-act-help', () => {
+    toggleHelp();
+  });
+  bindButton('btn-act-restart', () => {
+    if (helpOpen()) return;
+    startGame(state);
+    render();
+  });
+
   wrap.addEventListener('keydown', (e) => {
     const k = e.key;
 
     if (k === '?') {
       e.preventDefault();
-      const help = document.getElementById('rogue-help');
-      setHelpVisible(help?.hidden ?? true);
+      toggleHelp();
       return;
     }
 
-    const help = document.getElementById('rogue-help');
-    if (help && !help.hidden) {
+    if (helpOpen()) {
       if (k === 'Escape') setHelpVisible(false);
       return;
     }
@@ -471,15 +588,12 @@ function main() {
     } else if (k === 'g' || k === 'G') {
       e.preventDefault();
       grabItem(state);
-    } else if (k === '>') {
+    } else if (k === '>' || k === 'e' || k === 'E' || k === 'Enter') {
       e.preventDefault();
       descend(state);
     } else if (k === '.' || k === '5') {
       e.preventDefault();
-      monsterTurns(state);
-      applyEndOfTurnEffects(state);
-      recomputeVisibility(state);
-      updateStats(state);
+      doWait();
     } else if (k === 'r' || k === 'R') {
       startGame(state);
     }

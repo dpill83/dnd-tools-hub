@@ -5,3 +5,5 @@ tools/waterdeep-trader/node_modules/
 serve-loot-box-tests.bat
 serve-waterdeep-trader.bat
 tools/waterdeep-trader/directory-tree.txt
+serve-hub.bat
+serve.bat
