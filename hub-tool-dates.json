@@ -1,6 +1,7 @@
 {
-  "generatedAt": "2026-03-24T01:27:26.955Z",
+  "generatedAt": "2026-03-27T20:42:29.908Z",
   "tools": {
+    "tools/lazy-dm-prep/lazy-dm-generator.html": 1774644135,
     "tools/ai-dm-prompt-builder/": 1770177288,
     "tools/adventure-packet-builder/": 1770177288,
     "tools/adventure-log-builder/": 1773378388,
