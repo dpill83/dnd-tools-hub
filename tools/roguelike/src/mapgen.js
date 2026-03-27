@@ -73,7 +73,7 @@ function placeDoors(gridType) {
   }
 }
 
-export function generateLevel({ floor, gridType, gridVisible, gridSeen }) {
+export function generateLevel({ floor, gridType, gridVisible, gridSeen, runMode = 'story' }) {
   gridType.fill(CellType.Wall);
   gridVisible.fill(false);
   gridSeen.fill(false);
@@ -81,14 +81,16 @@ export function generateLevel({ floor, gridType, gridVisible, gridSeen }) {
   const rooms = getRooms();
   rooms.forEach((r) => carveRoom(gridType, r.x, r.y, r.w, r.h));
   for (let i = 1; i < rooms.length; i++) carveTunnel(gridType, rooms[i - 1].cx, rooms[i - 1].cy, rooms[i].cx, rooms[i].cy);
-  if (!rooms.length) return generateLevel({ floor, gridType, gridVisible, gridSeen });
+  if (!rooms.length) return generateLevel({ floor, gridType, gridVisible, gridSeen, runMode });
 
-  // Start + stairs/amulet placement (match old behavior).
+  // Start + stairs/amulet placement (story: amulet on floor 5; endless: always stairs).
   const start = rooms[0];
   const startPos = { x: start.cx, y: start.cy };
   const stairRoom = rooms[rooms.length - 1];
   const stairsPos = { x: stairRoom.cx, y: stairRoom.cy };
-  gridType[idxOf(stairsPos.x, stairsPos.y, W)] = floor >= 5 ? CellType.Amulet : CellType.Stairs;
+  const topTile =
+    runMode === 'endless' ? CellType.Stairs : floor >= 5 ? CellType.Amulet : CellType.Stairs;
+  gridType[idxOf(stairsPos.x, stairsPos.y, W)] = topTile;
 
   placeDoors(gridType);
 

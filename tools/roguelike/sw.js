@@ -1,8 +1,9 @@
-const CACHE_NAME = 'roguelike-v2';
+const CACHE_NAME = 'roguelike-v5';
 
 const ASSETS = [
   './',
   './index.html',
+  './play.html',
   './rogue.css',
   './manifest.webmanifest',
   './src/game.js',

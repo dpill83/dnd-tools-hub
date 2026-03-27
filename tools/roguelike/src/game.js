@@ -25,6 +25,8 @@ function makeState() {
     floor: 1,
     gameOver: false,
     won: false,
+    /** @type {'story' | 'endless'} */
+    runMode: 'story',
 
     log: [],
   };
@@ -96,6 +98,7 @@ function generateAndPopulateLevel(state) {
     gridType: state.gridType,
     gridVisible: state.gridVisible,
     gridSeen: state.gridSeen,
+    runMode: state.runMode,
   });
 
   state.player.x = startPos.x;
@@ -154,6 +157,7 @@ function triggerTrapIfPresent(state) {
   if (state.player.hp <= 0) {
     state.gameOver = true;
     addLog(state, 'You have died. Press R to restart.', 'dead');
+    if (state.runMode === 'endless') addLog(state, `You reached floor ${state.floor}.`, 's-xp');
     playSfx('death');
   }
 }
@@ -203,6 +207,7 @@ function applyEndOfTurnEffects(state) {
     if (state.player.hp <= 0) {
       state.gameOver = true;
       addLog(state, 'You have died. Press R to restart.', 'dead');
+      if (state.runMode === 'endless') addLog(state, `You reached floor ${state.floor}.`, 's-xp');
       playSfx('death');
     }
   }
@@ -257,6 +262,7 @@ function monsterTurns(state) {
       if (state.player.hp <= 0) {
         state.gameOver = true;
         addLog(state, 'You have died. Press R to restart.', 'dead');
+        if (state.runMode === 'endless') addLog(state, `You reached floor ${state.floor}.`, 's-xp');
         playSfx('death');
         return;
       }
@@ -384,6 +390,16 @@ function grabItem(state) {
   updateStats(state);
 }
 
+/** Touch “Use”: stairs or amulet → descend; otherwise grab/pick up. */
+function useInteract(state) {
+  const t = state.gridType[idxOf(state.player.x, state.player.y, W)];
+  if (t === CellType.Stairs || t === CellType.Amulet) {
+    descend(state);
+  } else {
+    grabItem(state);
+  }
+}
+
 function descend(state) {
   const t = state.gridType[idxOf(state.player.x, state.player.y, W)];
   if (t === CellType.Amulet) {
@@ -422,7 +438,11 @@ function startGame(state) {
   state.gameOver = false;
   state.won = false;
   state.log = [];
-  addLog(state, 'You descend into the dungeon. Find the Amulet of Yendor on floor 5!');
+  if (state.runMode === 'endless') {
+    addLog(state, 'Endless — descend as deep as you can. Death ends the run.');
+  } else {
+    addLog(state, 'You descend into the dungeon. Find the Amulet of Yendor on floor 5!');
+  }
   generateAndPopulateLevel(state);
   updateStats(state);
 }
@@ -436,6 +456,16 @@ function main() {
   bindAudioToggle();
 
   const state = makeState();
+  const urlMode = new URLSearchParams(window.location.search).get('mode');
+  if (urlMode !== 'story' && urlMode !== 'endless') {
+    window.location.replace(new URL('index.html', window.location.href).href);
+    return;
+  }
+  state.runMode = urlMode;
+  startGame(state);
+  renderToElement(canvas, state);
+  wrap.focus();
+
   const focusHint = document.getElementById('focus-hint');
 
   document.getElementById('rogue-help-close')?.addEventListener('click', () => setHelpVisible(false));
@@ -521,14 +551,9 @@ function main() {
     tryMove(state, 1, 0);
     render();
   });
-  bindButton('btn-act-grab', () => {
+  bindButton('btn-act-use', () => {
     if (helpOpen() || state.gameOver) return;
-    grabItem(state);
-    render();
-  });
-  bindButton('btn-act-descend', () => {
-    if (helpOpen() || state.gameOver) return;
-    descend(state);
+    useInteract(state);
     render();
   });
   bindButton('btn-act-wait', () => {
@@ -602,9 +627,14 @@ function main() {
   });
 
   wrap.addEventListener('click', () => wrap.focus());
-  wrap.focus();
-  startGame(state);
-  render();
+  let resizeRaf = 0;
+  window.addEventListener('resize', () => {
+    if (resizeRaf) cancelAnimationFrame(resizeRaf);
+    resizeRaf = requestAnimationFrame(() => {
+      resizeRaf = 0;
+      render();
+    });
+  });
 }
 
 if (typeof document !== 'undefined') {

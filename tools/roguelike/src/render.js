@@ -1,12 +1,12 @@
-import { CellType, COLS, H, ItemType, W } from './constants.js';
+import { CellType, COLS, getRenderPalette, H, ItemType, W } from './constants.js';
 import { idxOf } from './util.js';
 
-function cellGlyphAndColor(cellType) {
+function cellGlyphAndColor(cellType, C) {
   switch (cellType) {
     case CellType.Floor:
-      return { g: '.', c: COLS.floor };
+      return { g: '.', c: C.floor };
     case CellType.Wall:
-      return { g: '#', c: COLS.wall };
+      return { g: '#', c: C.wall };
     case CellType.Stairs:
       return { g: '>', c: COLS.stairs };
     case CellType.Amulet:
@@ -16,7 +16,7 @@ function cellGlyphAndColor(cellType) {
     case CellType.DoorOpen:
       return { g: '/', c: COLS.door };
     default:
-      return { g: ' ', c: COLS.fog };
+      return { g: ' ', c: C.fog };
   }
 }
 
@@ -39,6 +39,7 @@ function itemGlyphAndColor(item) {
 
 export function renderToElement(el, state) {
   const { player, gridType, gridVisible, gridSeen, monsters, monsterAt, items, itemAt, gameOver, won } = state;
+  const C = getRenderPalette();
 
   const parts = [];
   let runColor = null;
@@ -97,15 +98,15 @@ export function renderToElement(el, state) {
 
       const cellType = gridType[idx];
       if (visible) {
-        const { g, c } = cellGlyphAndColor(cellType);
+        const { g, c } = cellGlyphAndColor(cellType, C);
         pushGlyph(g, c);
       } else if (seen) {
         const isFloorLike =
           cellType === CellType.Floor || cellType === CellType.Stairs || cellType === CellType.Amulet || cellType === CellType.DoorOpen || cellType === CellType.DoorClosed;
-        const { g } = cellGlyphAndColor(cellType === CellType.Wall ? CellType.Wall : CellType.Floor);
-        pushGlyph(g, isFloorLike ? COLS.seen : COLS.fog);
+        const { g } = cellGlyphAndColor(cellType === CellType.Wall ? CellType.Wall : CellType.Floor, C);
+        pushGlyph(g, isFloorLike ? C.seen : C.fog);
       } else {
-        pushGlyph(' ', COLS.fog);
+        pushGlyph(' ', C.fog);
       }
     }
     endLine();

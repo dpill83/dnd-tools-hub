@@ -40,3 +40,17 @@ export const COLS = Object.freeze({
   trap: '#b07070',
 });
 
+/**
+ * On narrow screens, nudge only unexplored fog + “memory” (seen) so OLEDs stay readable.
+ * Lit tiles keep COLS.floor / COLS.wall so FoW stays: darkest unexplored < dim memory < bright LOS.
+ */
+export function getRenderPalette() {
+  if (typeof window === 'undefined' || !window.matchMedia) return COLS;
+  if (!window.matchMedia('(max-width: 520px)').matches) return COLS;
+  return {
+    ...COLS,
+    fog: '#12121c',
+    seen: '#1e1e32',
+  };
+}
+

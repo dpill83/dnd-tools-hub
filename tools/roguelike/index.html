@@ -2,69 +2,119 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Roguelike (Browser)</title>
-    <meta name="theme-color" content="#05050a" />
-    <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./rogue.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>ROGUE-OS v1.0</title>
+    <style>
+      :root {
+        --glow: #00ff41;
+        --bg: #05050a;
+        --dim: #003b00;
+      }
+
+      body {
+        background-color: var(--bg);
+        color: var(--glow);
+        font-family: 'Courier New', Courier, monospace;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
+        text-shadow: 0 0 5px var(--glow);
+      }
+
+      /* CRT Scanline Effect */
+      body::before {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0; left: 0; bottom: 0; right: 0;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+        z-index: 2;
+        background-size: 100% 2px, 3px 100%;
+        pointer-events: none;
+      }
+
+      #rogue-container {
+        border: 2px solid var(--glow);
+        padding: 40px;
+        position: relative;
+        background: rgba(0, 20, 0, 0.1);
+        box-shadow: inset 0 0 20px var(--dim);
+      }
+
+      pre {
+        line-height: 1.2;
+        font-weight: bold;
+      }
+
+      .status-line {
+        border-top: 1px solid var(--dim);
+        margin-top: 20px;
+        padding-top: 10px;
+        font-size: 0.8rem;
+        color: var(--dim);
+      }
+
+      #rogue-title-actions {
+        margin-top: 30px;
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+      }
+
+      .rogue-btn {
+        color: var(--bg);
+        background: var(--glow);
+        padding: 10px 20px;
+        text-decoration: none;
+        font-weight: bold;
+        text-transform: uppercase;
+        transition: all 0.2s;
+        border: 2px solid var(--glow);
+      }
+
+      .rogue-btn:hover {
+        background: var(--bg);
+        color: var(--glow);
+        box-shadow: 0 0 15px var(--glow);
+      }
+
+      /* Subtle Flicker Animation */
+      @keyframes flicker {
+        0% { opacity: 0.97; }
+        5% { opacity: 0.92; }
+        10% { opacity: 0.98; }
+        100% { opacity: 1; }
+      }
+      #rogue-container { animation: flicker 0.1s infinite; }
+    </style>
   </head>
   <body>
-    <div id="rogue-wrap" tabindex="0">
-      <div id="rogue-stats">
-        <button id="btn-audio-toggle" class="rogue-btn rogue-btn-audio" type="button" aria-pressed="true" aria-label="Toggle sound">Sound: on</button>
-        <div>HP: <span class="s-hp" id="s-hp">10/10</span></div>
-        <div>ATK: <span id="s-atk">3</span></div>
-        <div>DEF: <span id="s-def">0</span></div>
-        <div>LVL: <span id="s-lvl">1</span></div>
-        <div>XP: <span class="s-xp" id="s-xp">0</span></div>
-        <div>Gold: <span class="s-gold" id="s-gold">0</span></div>
-        <div>Floor: <span id="s-floor">1</span></div>
+
+    <div id="rogue-container">
+      <pre id="rogue-title-art">
+ ██████╗  ██████╗  ██████╗ ██╗   ██╗███████╗
+ ██╔══██╗██╔═══██╗██╔════╝ ██║   ██║██╔════╝
+ ██████╔╝██║   ██║██║  ███╗██║   ██║█████╗  
+ ██╔══██╗██║   ██║██║   ██║██║   ██║██╔══╝  
+ ██║  ██║╚██████╔╝╚██████╔╝╚██████╔╝███████╗
+ ╚═╝  ╚═╝ ╚═════╝  ╚═════╝  ╚═════╝ ╚══════╝
+      </pre>
+      
+      <div id="rogue-title-actions">
+        <a href="./play.html?mode=story" class="rogue-btn">Enter Dungeon</a>
+        <a href="./play.html?mode=endless" class="rogue-btn">Endless Void</a>
       </div>
-      <div id="rogue-canvas" aria-label="Dungeon view" role="img"></div>
-      <div id="rogue-controls" aria-label="Touch controls">
-        <div id="rogue-dpad" role="group" aria-label="Move">
-          <button id="btn-move-up" class="rogue-btn" type="button" aria-label="Move up">▲</button>
-          <div id="rogue-dpad-mid">
-            <button id="btn-move-left" class="rogue-btn" type="button" aria-label="Move left">◀</button>
-            <button id="btn-move-down" class="rogue-btn" type="button" aria-label="Move down">▼</button>
-            <button id="btn-move-right" class="rogue-btn" type="button" aria-label="Move right">▶</button>
-          </div>
-        </div>
-        <div id="rogue-actions" role="group" aria-label="Actions">
-          <button id="btn-act-grab" class="rogue-btn rogue-btn-wide" type="button" aria-label="Grab item">Grab</button>
-          <button id="btn-act-descend" class="rogue-btn rogue-btn-wide" type="button" aria-label="Descend stairs">Descend</button>
-          <button id="btn-act-wait" class="rogue-btn rogue-btn-wide" type="button" aria-label="Wait a turn">Wait</button>
-          <button id="btn-act-help" class="rogue-btn rogue-btn-wide" type="button" aria-label="Toggle help">Help</button>
-          <button id="btn-act-restart" class="rogue-btn rogue-btn-wide" type="button" aria-label="Restart game">Restart</button>
-        </div>
-      </div>
-      <div id="rogue-log"><span id="log-text">You descend into the dungeon...</span></div>
-      <div id="rogue-keys">
-        Arrow keys / WASD to move &nbsp;|&nbsp; g = grab gold &nbsp;|&nbsp; e/Enter = descend stairs
-        &nbsp;|&nbsp; . = wait &nbsp;|&nbsp; ? = help
-        <span id="focus-hint" hidden>&nbsp;|&nbsp; Click/tap the game to focus</span>
-      </div>
+
     </div>
 
-    <div id="rogue-help" hidden>
-      <div id="rogue-help-inner" role="dialog" aria-modal="true" aria-label="Help">
-        <div id="rogue-help-title">Help</div>
-        <div id="rogue-help-body">
-          <div><b>Move</b>: Arrow keys / WASD (also hjkl)</div>
-          <div><b>Wait</b>: <code>.</code></div>
-          <div><b>Grab</b>: <code>g</code></div>
-          <div><b>Descend</b>: <code>e</code> / <code>Enter</code> (also <code>&gt;</code>)</div>
-          <div><b>Restart</b>: <code>R</code></div>
-          <div><b>Toggle help</b>: <code>?</code></div>
-        </div>
-        <div id="rogue-help-footer">
-          <button id="rogue-help-close" type="button">Close</button>
-        </div>
-      </div>
-    </div>
-
-    <script type="module" src="./src/game.js"></script>
     <script>
+      // Add a random seed for "flavor"
+      document.getElementById('seed').innerText = Math.random().toString(36).substring(2, 10).toUpperCase();
+
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('./sw.js').catch(() => {});

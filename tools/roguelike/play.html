@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Roguelike — Play</title>
+    <meta name="theme-color" content="#05050a" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./rogue.css" />
+  </head>
+  <body>
+    <div id="rogue-wrap" tabindex="0">
+      <div id="rogue-stats">
+        <button id="btn-audio-toggle" class="rogue-btn rogue-btn-audio" type="button" aria-pressed="true" aria-label="Toggle sound">Sound: on</button>
+        <div>HP: <span class="s-hp" id="s-hp">10/10</span></div>
+        <div>ATK: <span id="s-atk">3</span></div>
+        <div>DEF: <span id="s-def">0</span></div>
+        <div>LVL: <span id="s-lvl">1</span></div>
+        <div>XP: <span class="s-xp" id="s-xp">0</span></div>
+        <div>Gold: <span class="s-gold" id="s-gold">0</span></div>
+        <div>Floor: <span id="s-floor">1</span></div>
+      </div>
+      <div id="rogue-canvas" aria-label="Dungeon view" role="img"></div>
+      <div id="rogue-controls" aria-label="Touch controls">
+        <div id="rogue-dpad" role="group" aria-label="Move">
+          <button id="btn-move-up" class="rogue-btn" type="button" aria-label="Move up">▲</button>
+          <div id="rogue-dpad-mid">
+            <button id="btn-move-left" class="rogue-btn" type="button" aria-label="Move left">◀</button>
+            <button id="btn-move-down" class="rogue-btn" type="button" aria-label="Move down">▼</button>
+            <button id="btn-move-right" class="rogue-btn" type="button" aria-label="Move right">▶</button>
+          </div>
+        </div>
+        <div id="rogue-actions" role="group" aria-label="Actions">
+          <button id="btn-act-use" class="rogue-btn rogue-btn-wide" type="button" aria-label="Grab items, or descend when on stairs or amulet">Use</button>
+          <button id="btn-act-wait" class="rogue-btn rogue-btn-wide" type="button" aria-label="Wait a turn">Wait</button>
+          <button id="btn-act-help" class="rogue-btn rogue-btn-wide" type="button" aria-label="Toggle help">Help</button>
+          <button id="btn-act-restart" class="rogue-btn rogue-btn-wide" type="button" aria-label="Restart game">Restart</button>
+        </div>
+      </div>
+      <div id="rogue-log"><span id="log-text">You descend into the dungeon...</span></div>
+      <div id="rogue-keys">
+        Arrow keys / WASD to move &nbsp;|&nbsp; g = grab &nbsp;|&nbsp; e/Enter = stairs
+        &nbsp;|&nbsp; . = wait &nbsp;|&nbsp; ? = help &nbsp;|&nbsp; touch: Use = grab or stairs
+        <span id="focus-hint" hidden>&nbsp;|&nbsp; Click/tap the game to focus</span>
+      </div>
+    </div>
+
+    <div id="rogue-help" hidden>
+      <div id="rogue-help-inner" role="dialog" aria-modal="true" aria-label="Help">
+        <div id="rogue-help-title">Help</div>
+        <div id="rogue-help-body">
+          <div><b>Move</b>: Arrow keys / WASD (also hjkl)</div>
+          <div><b>Wait</b>: <code>.</code></div>
+          <div><b>Grab</b>: <code>g</code> &nbsp;|&nbsp; <b>Descend</b>: <code>e</code> / <code>Enter</code> (also <code>&gt;</code>)</div>
+          <div><b>Touch</b>: <b>Use</b> — grab / pick up on items; descend when standing on stairs or the amulet.</div>
+          <div><b>Restart</b>: <code>R</code></div>
+          <div><b>Toggle help</b>: <code>?</code></div>
+          <div><b>Modes</b>: <b>Story</b> — find the Amulet on floor 5. <b>Endless</b> — stairs forever; how deep can you go?</div>
+        </div>
+        <div id="rogue-help-footer">
+          <button id="rogue-help-close" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./src/game.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>
