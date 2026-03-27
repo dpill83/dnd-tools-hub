@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lazy DM Prep Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0c09;--bg2:#141108;--bg3:#1a1510;--bg4:#221c14;
+  --surface:#1f1a12;--surface2:#272018;
+  --ember:#c8611a;--ember2:#e07830;
+  --gold:#b8943f;--gold2:#d4aa55;--gold3:#f0cc80;
+  --ink:#e8dfc8;--ink2:#c8b898;--ink3:#8a7a60;--ink4:#5a4e3a;
+  --green-dk:#0f2218;--green-md:#1a4030;--green-bd:#2d7a50;--green-lt:#d0ede0;
+  --border:#3a3020;--border2:#4e4030;--border3:#6a5a40;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--ink2);font-family:'Crimson Text',Georgia,serif;font-size:17px;line-height:1.65;min-height:100vh;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");opacity:.35;pointer-events:none;z-index:9999;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 50% 25%,transparent 35%,rgba(0,0,0,.65) 100%);pointer-events:none;z-index:1;}
+.app{position:relative;z-index:2;max-width:900px;margin:0 auto;padding:3rem 1.5rem 5rem;}
+.header{text-align:center;margin-bottom:3rem;}
+.rune-row{font-size:1rem;letter-spacing:.6em;color:var(--gold);margin-bottom:1rem;opacity:.7;}
+.header h1{font-family:'Cinzel',serif;font-size:clamp(2rem,5vw,3.2rem);font-weight:400;color:var(--ink);letter-spacing:.06em;line-height:1.1;margin-bottom:.5rem;}
+.header h1 span{color:var(--ember2);font-weight:600;}
+.header-rule{display:flex;align-items:center;gap:1rem;margin:1.2rem 0 .8rem;}
+.header-rule::before,.header-rule::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border3),transparent);}
+.header-rule-diamond{width:6px;height:6px;background:var(--gold);transform:rotate(45deg);flex-shrink:0;}
+.header .subtitle{font-size:1rem;color:var(--ink3);font-style:italic;}
+.header .book-ref{font-size:.75rem;color:var(--ink4);letter-spacing:.04em;margin-top:.3rem;}
+.tome{background:var(--surface);border:1px solid var(--border2);position:relative;margin-bottom:1.25rem;box-shadow:0 0 0 1px var(--bg),0 2px 20px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.03);}
+.tome::before{content:'';position:absolute;inset:0;border:1px solid rgba(255,255,255,.03);pointer-events:none;}
+.tome-header{padding:.85rem 1.25rem .7rem;border-bottom:1px solid var(--border);display:flex;align-items:baseline;gap:.75rem;background:var(--bg3);}
+.tome-title{font-family:'Cinzel',serif;font-size:.8rem;font-weight:600;letter-spacing:.12em;color:var(--gold2);text-transform:uppercase;}
+.tome-page-ref{font-size:.7rem;color:var(--ink4);font-family:'Crimson Text',serif;letter-spacing:.03em;}
+.core-badge{font-family:'Cinzel',serif;font-size:.55rem;font-weight:600;letter-spacing:.1em;padding:2px 7px;background:var(--green-md);color:var(--green-lt);border:1px solid var(--green-bd);text-transform:uppercase;}
+.tome-body{padding:1.25rem 1.4rem;}
+.tome-hint{font-size:.82rem;color:var(--ink4);font-style:italic;margin-bottom:1rem;}
+.tome-core{border-color:var(--green-bd);}
+.tome-core .tome-header{background:var(--green-dk);border-bottom-color:var(--green-md);}
+.tome-core .tome-title{color:#6dc895;}
+.tome-prompt{border-color:var(--border3);}
+.tome-prompt .tome-header{background:var(--bg2);border-bottom-color:var(--border2);}
+.tome-prompt .tome-title{color:var(--ember2);font-size:.9rem;}
+.field-row{display:grid;gap:1rem;margin-bottom:1rem;}
+.field-row.cols-2{grid-template-columns:1fr 1fr;}
+.field-row.cols-1{grid-template-columns:1fr;}
+@media(max-width:580px){.field-row.cols-2{grid-template-columns:1fr;}}
+.field{display:flex;flex-direction:column;gap:.3rem;}
+.field-label{font-family:'Cinzel',serif;font-size:.6rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);}
+.field-label .opt{font-family:'Crimson Text',serif;font-size:.72rem;text-transform:none;letter-spacing:0;font-weight:400;color:var(--ink4);}
+input[type=text],textarea,select{font-family:'Crimson Text',serif;font-size:.95rem;background:var(--bg2);border:1px solid var(--border2);color:var(--ink2);padding:.5rem .75rem;outline:none;transition:border-color .2s,box-shadow .2s;width:100%;appearance:none;}
+input[type=text]:focus,textarea:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 1px rgba(184,148,63,.15),inset 0 0 12px rgba(184,148,63,.04);}
+input::placeholder,textarea::placeholder{color:var(--ink4);font-style:italic;}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a4e3a'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center;padding-right:2rem;cursor:pointer;}
+select option{background:var(--bg3);}
+.profile-toggle{display:flex;align-items:center;gap:.6rem;font-size:.85rem;color:var(--ink3);cursor:pointer;user-select:none;margin-top:.25rem;}
+.profile-toggle input[type=checkbox]{width:14px;height:14px;border:1px solid var(--border3);background:var(--bg2);appearance:none;cursor:pointer;position:relative;flex-shrink:0;padding:0;}
+.profile-toggle input[type=checkbox]:checked::after{content:'✕';position:absolute;top:-2px;left:2px;font-size:10px;color:var(--ember2);}
+.profile-section{display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);}
+.profile-section.open{display:block;}
+.generate-btn{width:100%;padding:.9rem 2rem;background:linear-gradient(180deg,var(--ember) 0%,#a04c10 100%);color:var(--ink);border:1px solid var(--ember2);font-family:'Cinzel',serif;font-size:1rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s;margin-top:1.25rem;box-shadow:0 2px 12px rgba(200,97,26,.25),inset 0 1px 0 rgba(255,255,255,.08);}
+.generate-btn:hover{background:linear-gradient(180deg,var(--ember2) 0%,var(--ember) 100%);box-shadow:0 4px 20px rgba(200,97,26,.4);}
+.generate-btn:active{transform:translateY(1px);}
+.generate-btn:disabled{background:var(--surface2);border-color:var(--border2);color:var(--ink4);cursor:not-allowed;box-shadow:none;}
+.loading-track{height:2px;background:var(--border);margin-top:.75rem;overflow:hidden;}
+.loading-bar{height:100%;background:linear-gradient(90deg,var(--ember),var(--gold2));width:0%;transition:width .5s ease;box-shadow:0 0 8px var(--ember);}
+.status-text{text-align:center;font-size:.8rem;color:var(--ink4);font-style:italic;margin-top:.5rem;min-height:1.2em;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(232,223,200,.2);border-top-color:var(--ink2);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+.worksheet{display:none;margin-top:2rem;}
+.worksheet.visible{display:block;}
+.session-bar{display:flex;gap:1rem;align-items:flex-end;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border);}
+.session-field{display:flex;flex-direction:column;gap:.25rem;}
+.session-label{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);}
+.session-field:nth-child(2){flex:1;}
+.ws-input{background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--ink2);font-family:'Crimson Text',serif;font-size:.95rem;padding:.3rem .1rem;width:100%;outline:none;transition:border-color .2s;}
+.ws-input:focus{border-bottom-color:var(--gold);}
+.ws-input::placeholder{color:var(--ink4);font-style:italic;}
+textarea.ws-input{resize:vertical;border:1px solid var(--border2);padding:.5rem .6rem;background:var(--bg2);}
+textarea.ws-input:focus{border-color:var(--gold);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;}
+@media(max-width:580px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+.pc-card{background:var(--bg2);border:1px solid var(--border);padding:.6rem .75rem;}
+.pc-name{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;margin-bottom:.35rem;}
+.secrets-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem 1.25rem;}
+@media(max-width:580px){.secrets-grid{grid-template-columns:1fr;}}
+.secret-row{display:flex;align-items:flex-start;gap:.5rem;}
+.secret-num{font-family:'Cinzel',serif;font-size:.7rem;color:var(--ember);min-width:1.1rem;padding-top:.4rem;flex-shrink:0;}
+.scene-row{display:flex;align-items:flex-start;gap:.6rem;margin-bottom:.4rem;}
+.scene-num{font-size:.9rem;color:var(--ink4);min-width:1rem;padding-top:.3rem;flex-shrink:0;font-style:italic;}
+.loc-card{background:var(--bg2);border:1px solid var(--border);padding:.6rem .75rem;}
+.npc-row{display:flex;gap:.75rem;margin-bottom:.5rem;align-items:flex-start;}
+.section-div{display:flex;align-items:center;gap:1rem;margin:1.75rem 0 1.25rem;}
+.section-div::before,.section-div::after{content:'';flex:1;height:1px;background:var(--border);}
+.section-div-text{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--ink4);white-space:nowrap;}
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+@media(max-width:580px){.bottom-grid{grid-template-columns:1fr;}}
+.bottom-grid .tome{margin-bottom:0;}
+.actions{display:flex;gap:.75rem;margin-top:2rem;flex-wrap:wrap;}
+.btn{padding:.55rem 1.25rem;font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--ink3);transition:all .2s;}
+.btn:hover{border-color:var(--border3);color:var(--ink2);background:var(--surface2);}
+.btn-primary{background:linear-gradient(180deg,var(--ember) 0%,#a04c10 100%);border-color:var(--ember2);color:var(--ink);box-shadow:0 2px 10px rgba(200,97,26,.3);}
+.btn-primary:hover{background:linear-gradient(180deg,var(--ember2) 0%,var(--ember) 100%);color:var(--ink);}
+.print-hint{font-size:.75rem;color:var(--ink4);font-style:italic;margin-top:.5rem;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.fade-in{animation:fadeUp .5s ease both;}
+@media print{
+  body{background:white;color:#1a1a1a;}
+  body::before,body::after{display:none;}
+  .tome-prompt,.actions,.generate-btn,.rune-row{display:none!important;}
+  .header{color:#1a1a1a;margin-bottom:1rem;}
+  .header h1{font-size:1.8rem;color:#1a1a1a;}
+  .header h1 span{color:#8b2e0f;}
+  .header .subtitle,.header .book-ref{color:#555;}
+  .header-rule::before,.header-rule::after{background:#ccc;}
+  .header-rule-diamond{background:#999;}
+  .worksheet{display:block!important;}
+  .tome{background:white;border:1px solid #ccc;box-shadow:none;break-inside:avoid;margin-bottom:.75rem;}
+  .tome::before{display:none;}
+  .tome-header{background:#f5f5f5;border-bottom-color:#ddd;}
+  .tome-title{color:#333;}
+  .tome-core .tome-header{background:#f0f7f3;}
+  .tome-core .tome-title{color:#1a4030;}
+  .core-badge{background:#1a4030;color:white;border-color:#2d7a50;}
+  .tome-hint{color:#666;}
+  .ws-input{color:#1a1a1a;border-bottom-color:#bbb;background:transparent;}
+  textarea.ws-input{background:#fafafa;border-color:#ccc;}
+  .pc-card,.loc-card{background:#fafafa;border-color:#ccc;}
+  .pc-name,.tome-page-ref{color:#666;}
+  .secret-num{color:#8b2e0f;}
+  .session-bar{border-bottom-color:#ddd;}
+  .session-label{color:#666;}
+  .section-div::before,.section-div::after{background:#ddd;}
+  .section-div-text{color:#999;}
+  .bottom-grid{grid-template-columns:1fr 1fr;}
+  .print-hint{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="rune-row">⚔ &nbsp;✦&nbsp; ⚔</div>
+    <h1>Lazy DM <span>Prep Generator</span></h1>
+    <div class="header-rule"><div class="header-rule-diamond"></div></div>
+    <p class="subtitle">Answer a few questions. The rest writes itself.</p>
+    <p class="book-ref">Based on Return of the Lazy Dungeon Master &mdash; Michael E. Shea (slyflourish.com)</p>
+  </header>
+
+  <div class="tome tome-prompt">
+    <div class="tome-header"><span class="tome-title">Tell me about your session</span></div>
+    <div class="tome-body">
+      <p class="tome-hint">Fill in what you know. Leave blanks empty and the AI will make interesting choices.</p>
+      <div class="field-row cols-2">
+        <div class="field">
+          <label class="field-label" for="setting">Setting</label>
+          <input type="text" id="setting" placeholder="Waterdeep, a haunted forest, a dungeon…">
+        </div>
+        <div class="field">
+          <label class="field-label" for="tone">Tone</label>
+          <select id="tone">
+            <option value="">— choose or leave blank —</option>
+            <option value="dark and gritty">Dark &amp; gritty</option>
+            <option value="lighthearted and swashbuckling">Lighthearted / swashbuckling</option>
+            <option value="mystery and intrigue">Mystery &amp; intrigue</option>
+            <option value="horror and dread">Horror &amp; dread</option>
+            <option value="political and scheming">Political &amp; scheming</option>
+            <option value="high fantasy epic">High fantasy / epic</option>
+            <option value="heist and cunning">Heist &amp; cunning</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row cols-1">
+        <div class="field">
+          <label class="field-label" for="hook">Hook or situation <span class="opt">(optional)</span></label>
+          <input type="text" id="hook" placeholder="e.g. Someone they trust has gone missing, a merchant hired them as guards…">
+        </div>
+      </div>
+      <div class="field-row cols-1">
+        <div class="field">
+          <label class="field-label" for="party">Party <span class="opt">(optional — names and roles)</span></label>
+          <input type="text" id="party" placeholder="e.g. George (Cleric), Dani (Rogue), Viktor (Fighter), Sirus (Wizard)">
+        </div>
+      </div>
+      <label class="profile-toggle">
+        <input type="checkbox" id="profileToggle"> Use a campaign profile (setting lore, recurring NPCs, etc.)
+      </label>
+      <div class="profile-section" id="profileSection">
+        <div class="field" style="margin-top:.25rem;">
+          <label class="field-label">Campaign lore &amp; context</label>
+          <textarea id="campaignLore" rows="4" placeholder="e.g. Set in Waterdeep, Forgotten Realms. The party works with the City Watch (Captain Hyustus Staget). Shadow Thieves active in the Dock Ward. Recurring antagonist: a fence named Vivienne near the harbor. Party is level 6."></textarea>
+        </div>
+      </div>
+      <button class="generate-btn" id="generateBtn" onclick="generate()">Prepare the Session</button>
+      <div class="loading-track"><div class="loading-bar" id="loadingBar"></div></div>
+      <div class="status-text" id="statusText"></div>
+    </div>
+  </div>
+
+  <div class="worksheet" id="worksheet">
+    <div class="session-bar">
+      <div class="session-field"><span class="session-label">Session #</span><input type="text" class="ws-input" style="width:70px;" placeholder="#"></div>
+      <div class="session-field"><span class="session-label">Adventure / Arc</span><input type="text" class="ws-input" id="adventureTitle" placeholder="Untitled adventure"></div>
+      <div class="session-field"><span class="session-label">Date</span><input type="text" class="ws-input" style="width:100px;" placeholder="—"></div>
+    </div>
+
+    <div class="tome tome-core fade-in">
+      <div class="tome-header"><span class="tome-title">1 — Review the Characters</span><span class="core-badge">Core</span><span class="tome-page-ref">ch.3 · p.12</span></div>
+      <div class="tome-body"><p class="tome-hint">What does each PC want right now? What hook can you pull on this session?</p><div class="grid-2" id="pcGrid"></div></div>
+    </div>
+
+    <div class="tome tome-core fade-in">
+      <div class="tome-header"><span class="tome-title">2 — Strong Start</span><span class="core-badge">Core</span><span class="tome-page-ref">ch.4 · p.14</span></div>
+      <div class="tome-body"><p class="tome-hint">Drop them in the middle of something. No exposition.</p><textarea class="ws-input" id="strongStart" rows="3" placeholder="The session opens with…"></textarea></div>
+    </div>
+
+    <div class="tome tome-core fade-in">
+      <div class="tome-header"><span class="tome-title">3 — Secrets &amp; Clues</span><span class="core-badge">Core</span><span class="tome-page-ref">ch.6 · p.20</span></div>
+      <div class="tome-body"><p class="tome-hint">Things players could discover. Not tied to locations or NPCs — surface them wherever fits.</p><div class="secrets-grid" id="secretsGrid"></div></div>
+    </div>
+
+    <div class="section-div"><span class="section-div-text">Nice to have — fill in as time allows</span></div>
+
+    <div class="tome fade-in">
+      <div class="tome-header"><span class="tome-title">4 — Potential Scenes</span><span class="tome-page-ref">ch.5 · p.18</span></div>
+      <div class="tome-body"><p class="tome-hint">2–4 loose scenes. One sentence each. Write them ready to discard.</p><div id="scenesGrid"></div></div>
+    </div>
+
+    <div class="tome fade-in">
+      <div class="tome-header"><span class="tome-title">5 — Fantastic Locations</span><span class="tome-page-ref">ch.7 · p.23</span></div>
+      <div class="tome-body"><p class="tome-hint">Name + one vivid sensory detail. What makes it memorable beyond its name?</p><div class="grid-3" id="locationsGrid"></div></div>
+    </div>
+
+    <div class="tome fade-in">
+      <div class="tome-header"><span class="tome-title">6 — Key NPCs</span><span class="tome-page-ref">ch.8 · p.27</span></div>
+      <div class="tome-body"><p class="tome-hint">Name + what they want. Improvise everything else. Reskin stat blocks.</p><div id="npcGrid"></div></div>
+    </div>
+
+    <div class="bottom-grid fade-in">
+      <div class="tome">
+        <div class="tome-header"><span class="tome-title">7 — Monsters</span><span class="tome-page-ref">ch.9 · p.30</span></div>
+        <div class="tome-body"><p class="tome-hint">Stat block + reskin. No need to build from scratch.</p><div id="monstersGrid"></div></div>
+      </div>
+      <div class="tome">
+        <div class="tome-header"><span class="tome-title">8 — Magic Items</span><span class="tome-page-ref">ch.10 · p.33</span></div>
+        <div class="tome-body"><p class="tome-hint">1–2 items. Tie them to character goals when possible.</p><div id="itemsGrid"></div></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button>
+      <button class="btn" onclick="regenerate()">Regenerate</button>
+      <button class="btn" onclick="resetForm()">Start Over</button>
+    </div>
+    <p class="print-hint">Use your browser's Print dialog and choose "Save as PDF" to export.</p>
+  </div>
+</div>
+<script>
+document.getElementById('profileToggle').addEventListener('change',function(){
+  document.getElementById('profileSection').classList.toggle('open',this.checked);
+});
+let lastParams=null;
+async function generate(){
+  const params={
+    setting:document.getElementById('setting').value.trim(),
+    tone:document.getElementById('tone').value,
+    hook:document.getElementById('hook').value.trim(),
+    party:document.getElementById('party').value.trim(),
+    lore:document.getElementById('profileToggle').checked?document.getElementById('campaignLore').value.trim():''
+  };
+  lastParams=params;
+  await runGeneration(params);
+}
+async function regenerate(){if(lastParams)await runGeneration(lastParams);}
+async function runGeneration(params){
+  const btn=document.getElementById('generateBtn');
+  const bar=document.getElementById('loadingBar');
+  const status=document.getElementById('statusText');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Consulting the oracle…';
+  bar.style.width='0%';
+  status.textContent='';
+  const steps=['Reviewing the characters…','Crafting a strong start…','Uncovering secrets and clues…','Scouting fantastic locations…','Briefing important NPCs…','Choosing relevant monsters…','Selecting magic item rewards…','Almost ready…'];
+  let si=0;
+  const ticker=setInterval(()=>{
+    if(si<steps.length){status.textContent=steps[si];bar.style.width=`${Math.round((si+1)/steps.length*85)}%`;si++;}
+  },900);
+  const system=`You are an expert Dungeon Master prep assistant trained on the Lazy Dungeon Master method by Michael E. Shea. Generate complete, evocative, immediately usable session prep. Be specific, not generic. Use vivid sensory details. Make secrets surprising but logical. Make NPCs feel real with clear single-sentence motivations. Make locations atmospheric.${params.lore?'\n\nCampaign context: '+params.lore:''}\n\nRespond ONLY with valid JSON. No markdown. No preamble.`;
+  const user=`Generate a complete Lazy DM session prep sheet.\nSetting: ${params.setting||'a classic fantasy world'}\nTone: ${params.tone||'classic fantasy adventure'}\nHook: ${params.hook||'open-ended adventure'}\nParty: ${params.party||'4 adventurers of mixed classes'}\n\nReturn exactly this JSON:\n{\n  "adventureTitle": "evocative 4-6 word title",\n  "characters": [{"name":"PC name or PC 1","hook":"what they want / tension to pull on this session"}],\n  "strongStart": "2-3 sentences. Vivid. Drops players into action or tension. No exposition.",\n  "secrets": ["10 secrets, each one sentence, specific and surprising"],\n  "scenes": ["Scene 1 (one sentence)","Scene 2","Scene 3"],\n  "locations": [{"name":"Location name","detail":"one vivid sensory detail"},{"name":"Location name","detail":"one vivid sensory detail"},{"name":"Location name","detail":"one vivid sensory detail"}],\n  "npcs": [{"name":"NPC name","motivation":"what they want in one sentence"},{"name":"NPC name","motivation":"what they want in one sentence"},{"name":"NPC name","motivation":"what they want in one sentence"}],\n  "monsters": [{"name":"Encounter name","statBlock":"suggested stat block to reskin"},{"name":"Encounter name","statBlock":"suggested stat block to reskin"}],\n  "magicItems": [{"name":"Item name","note":"brief description and which character goal it ties to"},{"name":"Item name","note":"brief description"}]\n}`;
+  try{
+    const res=await fetch('/api/anthropic/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1800,system,messages:[{role:'user',content:user}]})
+    });
+    const data=await res.json();
+    const raw=data.content?.[0]?.text||'';
+    const prep=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    clearInterval(ticker);
+    bar.style.width='100%';
+    status.textContent='Your session is ready.';
+    fillWorksheet(prep);
+    setTimeout(()=>{document.getElementById('worksheet').scrollIntoView({behavior:'smooth',block:'start'});},350);
+  }catch(err){
+    clearInterval(ticker);
+    status.textContent='Something went wrong. Check your API key or try again.';
+    bar.style.width='0%';
+    console.error(err);
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML='Prepare the Session';
+  }
+}
+function fillWorksheet(p){
+  document.getElementById('worksheet').classList.add('visible');
+  document.getElementById('adventureTitle').value=p.adventureTitle||'';
+  const chars=p.characters||[];
+  while(chars.length<4)chars.push({name:`PC ${chars.length+1}`,hook:''});
+  document.getElementById('pcGrid').innerHTML=chars.slice(0,4).map((c,i)=>`<div class="pc-card"><div class="pc-name">${esc(c.name)||`PC ${i+1}`}</div><input class="ws-input" type="text" value="${esc(c.hook)}" placeholder="Goal or hook this session…"></div>`).join('');
+  document.getElementById('strongStart').value=p.strongStart||'';
+  const secs=(p.secrets||[]).slice(0,10);
+  while(secs.length<10)secs.push('');
+  document.getElementById('secretsGrid').innerHTML=secs.map((s,i)=>`<div class="secret-row"><span class="secret-num">${i+1}</span><input class="ws-input" type="text" value="${esc(s)}" placeholder="Secret or clue…"></div>`).join('');
+  const scenes=p.scenes||[];
+  while(scenes.length<3)scenes.push('');
+  document.getElementById('scenesGrid').innerHTML=scenes.slice(0,4).map((s,i)=>`<div class="scene-row"><span class="scene-num">${i+1}.</span><input class="ws-input" type="text" value="${esc(s)}" placeholder="Potential scene…"></div>`).join('');
+  const locs=p.locations||[];
+  while(locs.length<3)locs.push({name:'',detail:''});
+  document.getElementById('locationsGrid').innerHTML=locs.slice(0,3).map(l=>`<div class="loc-card"><input class="ws-input" type="text" value="${esc(l.name)}" placeholder="Location name…" style="font-weight:600;margin-bottom:.35rem;"><input class="ws-input" type="text" value="${esc(l.detail)}" placeholder="One vivid detail…" style="font-size:.85rem;font-style:italic;"></div>`).join('');
+  const npcs=p.npcs||[];
+  document.getElementById('npcGrid').innerHTML=npcs.map(n=>`<div class="npc-row"><input class="ws-input" type="text" value="${esc(n.name)}" placeholder="Name" style="width:150px;flex-shrink:0;font-weight:600;"><input class="ws-input" type="text" value="${esc(n.motivation)}" placeholder="What they want…"></div>`).join('');
+  const mons=p.monsters||[];
+  document.getElementById('monstersGrid').innerHTML=mons.map(m=>`<div style="margin-bottom:.6rem;"><input class="ws-input" type="text" value="${esc(m.name)}" placeholder="Encounter…" style="font-weight:600;margin-bottom:.25rem;"><input class="ws-input" type="text" value="${esc(m.statBlock)}" placeholder="Stat block…" style="font-size:.82rem;font-style:italic;color:var(--ink3);"></div>`).join('');
+  const items=p.magicItems||[];
+  document.getElementById('itemsGrid').innerHTML=items.map(it=>`<div style="margin-bottom:.6rem;"><input class="ws-input" type="text" value="${esc(it.name)}" placeholder="Item name…" style="font-weight:600;margin-bottom:.25rem;"><input class="ws-input" type="text" value="${esc(it.note)}" placeholder="Notes…" style="font-size:.82rem;font-style:italic;color:var(--ink3);"></div>`).join('');
+}
+function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function resetForm(){
+  document.getElementById('worksheet').classList.remove('visible');
+  ['setting','hook','party','campaignLore'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('tone').value='';
+  document.getElementById('profileToggle').checked=false;
+  document.getElementById('profileSection').classList.remove('open');
+  document.getElementById('loadingBar').style.width='0%';
+  document.getElementById('statusText').textContent='';
+  lastParams=null;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
