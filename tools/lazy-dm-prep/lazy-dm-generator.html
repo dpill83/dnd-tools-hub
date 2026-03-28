@@ -265,7 +265,7 @@ select option{background:var(--bg3);}
           </select>
         </div>
         <div class="field full">
-          <label class="field-label" for="hook">Hook or situation <span class="opt">(optional)</span></label>
+          <label class="field-label" for="hook">Hook, situation, or problem <span class="opt">(optional)</span></label>
           <textarea id="hook" rows="2" placeholder="e.g. Someone they trust has gone missing, a merchant hired them as guards…"></textarea>
         </div>
         <div class="field full">
@@ -275,19 +275,21 @@ select option{background:var(--bg3);}
         <div class="field">
           <label class="field-label" for="level">Party level <span class="opt">(optional)</span></label>
           <input type="text" id="level" placeholder="e.g. 5">
+          <span style="font-size:.72rem;color:var(--ink4);font-style:italic;">Average level or a rough guess is fine.</span>
         </div>
         <div class="field">
           <label class="field-label" for="duration">Session length <span class="opt">(optional)</span></label>
           <select id="duration">
             <option value="">— choose —</option>
-            <option value="2 hours, a short one-shot">2 hours</option>
-            <option value="3-4 hours, a standard session">3–4 hours</option>
-            <option value="4-6 hours, a long session">4–6 hours</option>
+            <option value="1 to 2 hours, a short session">1 to 2 hours</option>
+            <option value="2 to 3 hours, a medium session">2 to 3 hours</option>
+            <option value="3 to 4 hours, a standard session">3 to 4 hours</option>
+            <option value="4 or more hours, a long session">4+ hours</option>
           </select>
         </div>
       </div>
       <label class="profile-toggle">
-        <input type="checkbox" id="profileToggle"> Use a campaign profile
+        <input type="checkbox" id="profileToggle"> Use saved campaign profile
       </label>
       <div class="profile-section" id="profileSection">
         <div class="field" style="margin-top:.25rem;">
@@ -305,10 +307,11 @@ select option{background:var(--bg3);}
     <div class="doc" id="doc"></div>
     <div class="actions">
       <button class="btn btn-primary" onclick="printDoc()">Print / Save PDF</button>
+      <button class="btn btn-primary" onclick="downloadDocx()" id="docxBtn">Download Word Doc</button>
       <button class="btn" onclick="regenerate()">Regenerate</button>
       <button class="btn" onclick="resetForm()">Start Over</button>
     </div>
-    <p class="print-hint">Use Print → Save as PDF. Enable "Background graphics" for full styling.</p>
+    <p class="print-hint">Word doc gives you full control over columns, page breaks, and formatting.</p>
   </div>
 </div>
 
@@ -523,6 +526,7 @@ IMPORTANT RULES:
 }
 
 function renderDoc(a){
+  window._lastAdventure=a;
   const output=document.getElementById('output');
   output.classList.add('visible');
 
@@ -679,7 +683,406 @@ function resetForm(){
   document.getElementById('loadingBar').style.width='0%';
   document.getElementById('statusText').textContent='';
   lastParams=null;
+  window._lastAdventure=null;
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── DOCX EXPORT ────────────────────────────────────────────────────
+async function downloadDocx(){
+  const btn=document.getElementById('docxBtn');
+  if(!window._lastAdventure){alert('Generate an adventure first.');return;}
+  btn.disabled=true;
+  btn.textContent='Building doc…';
+  try{
+    await loadDocxLib();
+    buildAndDownload(window._lastAdventure);
+  }catch(e){
+    alert('Could not build Word doc: '+e.message);
+    console.error(e);
+  }finally{
+    btn.disabled=false;
+    btn.textContent='Download Word Doc';
+  }
+}
+
+function loadDocxLib(){
+  return new Promise((resolve,reject)=>{
+    if(window.docx){resolve();return;}
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js';
+    s.onload=resolve;
+    s.onerror=()=>reject(new Error('Could not load docx library.'));
+    document.head.appendChild(s);
+  });
+}
+
+function txt(s){return String(s||'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>');}
+
+function buildAndDownload(a){
+  const {
+    Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,
+    HeadingLevel,AlignmentType,BorderStyle,ShadingType,
+    PageBreak,SectionType,ColumnBreak,
+    WidthType,TableLayoutType,convertInchesToTwip,
+    LevelFormat,UnderlineType
+  }=window.docx;
+
+  const COLORS={
+    black:'1A1A1A', darkBrown:'4A3010', ember:'C8611A',
+    gold:'B8943F', darkGold:'8B6914', midGray:'555555',
+    lightGray:'F5F5F5', medGray:'E8E8E8', border:'CCCCCC',
+    readAloudBg:'FFFDF5', readAloudBorder:'B8943F',
+    dmNoteBg:'F0F0F0', dmNoteBorder:'AAAAAA',
+    green:'1A4030', greenBg:'EEF7F2', greenBorder:'2D7A50',
+    white:'FFFFFF', tableHeader:'EEEEEE'
+  };
+
+  // ── Typography helpers ──────────────────────────────────────────
+  function cinzel(text,sz,color,bold){
+    return new TextRun({text:txt(text),font:'Palatino Linotype',size:sz*2,color:color||COLORS.black,bold:!!bold});
+  }
+  function body(text,sz,color,bold,italic,smallCaps){
+    return new TextRun({text:txt(text),font:'Garamond',size:(sz||10)*2,color:color||COLORS.black,bold:!!bold,italics:!!italic,smallCaps:!!smallCaps});
+  }
+  function para(runs,opts){
+    return new Paragraph({children:Array.isArray(runs)?runs:[runs],...(opts||{})});
+  }
+  function spacer(pts){
+    return para([new TextRun('')],{spacing:{after:pts*20}});
+  }
+  function hRule(){
+    return para([new TextRun('')],{
+      border:{bottom:{style:BorderStyle.SINGLE,size:4,color:COLORS.border}},
+      spacing:{after:80}
+    });
+  }
+
+  // ── Shaded box (read-aloud, DM note) ───────────────────────────
+  function shadedPara(runs,bgColor,borderColor,opts){
+    return new Paragraph({
+      children:Array.isArray(runs)?runs:[runs],
+      shading:{type:ShadingType.SOLID,fill:bgColor,color:bgColor},
+      border:{
+        top:{style:BorderStyle.SINGLE,size:6,color:borderColor},
+        bottom:{style:BorderStyle.SINGLE,size:6,color:borderColor},
+        left:{style:BorderStyle.THICK,size:12,color:borderColor},
+        right:{style:BorderStyle.SINGLE,size:6,color:borderColor}
+      },
+      spacing:{before:80,after:80},
+      indent:{left:140,right:140},
+      ...(opts||{})
+    });
+  }
+
+  // ── Table builder ───────────────────────────────────────────────
+  function makeTable(headers,rows,colWidths){
+    const totalWidth=9072; // twips for ~6.3in content width
+    const widths=colWidths||headers.map(()=>Math.floor(totalWidth/headers.length));
+
+    const headerRow=new TableRow({
+      tableHeader:true,
+      children:headers.map((h,i)=>new TableCell({
+        width:{size:widths[i],type:WidthType.DXA},
+        shading:{type:ShadingType.SOLID,fill:COLORS.tableHeader},
+        children:[para([cinzel(h,8,COLORS.darkBrown,true)],{spacing:{before:40,after:40}})],
+        margins:{top:60,bottom:60,left:100,right:100}
+      }))
+    });
+
+    const dataRows=rows.map(row=>new TableRow({
+      children:row.map((cell,i)=>new TableCell({
+        width:{size:widths[i],type:WidthType.DXA},
+        children:[para([body(String(cell),9)],{spacing:{before:40,after:40}})],
+        margins:{top:60,bottom:60,left:100,right:100}
+      }))
+    }));
+
+    return new Table({
+      width:{size:totalWidth,type:WidthType.DXA},
+      layout:TableLayoutType.FIXED,
+      borders:{
+        top:{style:BorderStyle.SINGLE,size:4,color:COLORS.border},
+        bottom:{style:BorderStyle.SINGLE,size:4,color:COLORS.border},
+        left:{style:BorderStyle.SINGLE,size:4,color:COLORS.border},
+        right:{style:BorderStyle.SINGLE,size:4,color:COLORS.border},
+        insideH:{style:BorderStyle.SINGLE,size:2,color:COLORS.border},
+        insideV:{style:BorderStyle.SINGLE,size:2,color:COLORS.border}
+      },
+      rows:[headerRow,...dataRows]
+    });
+  }
+
+  // ── Build document sections ─────────────────────────────────────
+  const children=[];
+
+  // Title page section (single column)
+  children.push(para([cinzel(a.title,28,COLORS.darkBrown,true)],{
+    alignment:AlignmentType.CENTER,spacing:{after:120}
+  }));
+  children.push(para([cinzel(a.subtitle||'A One-Session Adventure',10,COLORS.ember,false)],{
+    alignment:AlignmentType.CENTER,spacing:{after:80}
+  }));
+  children.push(hRule());
+  children.push(para([body(a.meta||'',9,COLORS.midGray,false,true)],{
+    alignment:AlignmentType.CENTER,spacing:{after:160}
+  }));
+
+  // Summary italic block
+  if(a.summary){
+    children.push(shadedPara(
+      [body(a.summary,10,COLORS.black,false,true)],
+      COLORS.readAloudBg,COLORS.readAloudBorder
+    ));
+    children.push(spacer(6));
+  }
+
+  // DM Background
+  if(a.background){
+    children.push(para([cinzel('⚙ DM Background — Read Before Play',8,COLORS.midGray,true)],{spacing:{before:80,after:40}}));
+    children.push(shadedPara(
+      [body(a.background,9,COLORS.midGray,false,false,true)],
+      COLORS.dmNoteBg,COLORS.dmNoteBorder
+    ));
+    children.push(spacer(6));
+  }
+
+  // Secrets
+  if(a.secrets&&a.secrets.length){
+    children.push(para([cinzel('Secrets & Clues — Drop Anywhere',9,COLORS.darkBrown,true)],{
+      spacing:{before:120,after:60},
+      border:{bottom:{style:BorderStyle.SINGLE,size:4,color:COLORS.border}}
+    }));
+    a.secrets.forEach((s,i)=>{
+      children.push(para([
+        body(`${i+1}.  `,9,COLORS.ember,true),
+        body(s,9)
+      ],{spacing:{after:40}}));
+    });
+    children.push(spacer(8));
+  }
+
+  // Acts and scenes — two column section starts here
+  (a.acts||[]).forEach(act=>{
+    // Act header
+    children.push(para([cinzel(act.name||'',10,COLORS.ember,true)],{
+      spacing:{before:160,after:80},
+      border:{bottom:{style:BorderStyle.SINGLE,size:6,color:COLORS.ember}}
+    }));
+
+    (act.scenes||[]).forEach(scene=>{
+      // Scene title
+      children.push(para([cinzel(`Scene ${scene.number||''} — ${scene.title||''}`,10,COLORS.darkGold,false)],{
+        spacing:{before:120,after:40},italic:true
+      }));
+
+      // Purpose
+      if(scene.purpose){
+        children.push(para([
+          body('Purpose: ',9,COLORS.midGray,true),
+          body(scene.purpose,9,COLORS.midGray,false,true)
+        ],{spacing:{after:60}}));
+      }
+
+      // Setup
+      if(scene.setup){
+        children.push(para([body(scene.setup,9,COLORS.midGray)],{spacing:{after:60}}));
+      }
+
+      // Read aloud
+      if(scene.readAloud){
+        children.push(para([cinzel('📖  Read Aloud',7,COLORS.gold,true)],{spacing:{before:60,after:20}}));
+        children.push(shadedPara(
+          [body(scene.readAloud,9.5,COLORS.black,false,true)],
+          COLORS.readAloudBg,COLORS.readAloudBorder
+        ));
+      }
+
+      // What do you do
+      children.push(para([
+        body('❓ ',10,COLORS.ember),
+        body(scene.whatDo||'What do you do?',9,COLORS.ember,false,true)
+      ],{alignment:AlignmentType.CENTER,spacing:{before:60,after:60},
+        border:{top:{style:BorderStyle.SINGLE,size:2,color:COLORS.border},
+                bottom:{style:BorderStyle.SINGLE,size:2,color:COLORS.border}}}));
+
+      // DM Note
+      if(scene.dmNote){
+        children.push(para([cinzel('⚙ DM Note',7,COLORS.midGray,true)],{spacing:{before:60,after:20}}));
+        children.push(shadedPara(
+          [body(scene.dmNote,8.5,COLORS.midGray,false,false,true)],
+          COLORS.dmNoteBg,COLORS.dmNoteBorder
+        ));
+      }
+
+      // Skill checks
+      if(scene.checks&&scene.checks.length){
+        children.push(para([cinzel('Skill Checks',7,COLORS.midGray,true)],{spacing:{before:60,after:30}}));
+        scene.checks.forEach(c=>{
+          children.push(para([
+            body(`${c.skill} ${c.dc}: `,9,COLORS.ember,true),
+            body(c.result,9)
+          ],{spacing:{after:20},indent:{left:200}}));
+        });
+      }
+
+      // Loot/clues
+      if(scene.loot&&scene.loot.length){
+        scene.loot.forEach(l=>{
+          children.push(para([
+            body(`${l.label||'CLUE'}  `,8,COLORS.gold,true),
+            body(l.text,9,COLORS.black,false,true)
+          ],{spacing:{before:40,after:40},indent:{left:200}}));
+        });
+      }
+
+      children.push(spacer(4));
+    });
+  });
+
+  // NPCs
+  if(a.npcs&&a.npcs.length){
+    children.push(para([cinzel('Key NPCs',9,COLORS.darkBrown,true)],{
+      spacing:{before:160,after:80},
+      border:{bottom:{style:BorderStyle.SINGLE,size:4,color:COLORS.border}}
+    }));
+    a.npcs.forEach(n=>{
+      children.push(para([cinzel(n.name,9,COLORS.darkGold,true)],{spacing:{before:80,after:20}}));
+      children.push(para([body(n.role,8,COLORS.midGray,false,true)],{spacing:{after:20}}));
+      children.push(para([body(`"${n.voice}"`,9,COLORS.black,false,true)],{spacing:{after:20}}));
+      children.push(para([
+        body('Wants: ',9,COLORS.black,true),
+        body(n.wants,9)
+      ],{spacing:{after:60}}));
+    });
+  }
+
+  // DC table
+  if(a.dcs&&a.dcs.length){
+    children.push(para([cinzel('Quick Reference — Key DCs',9,COLORS.darkBrown,true)],{
+      spacing:{before:160,after:80},
+      border:{bottom:{style:BorderStyle.SINGLE,size:4,color:COLORS.border}}
+    }));
+    children.push(makeTable(
+      ['DC','Check','Reveals'],
+      a.dcs.map(d=>[d.dc,d.check,d.reveals]),
+      [900,2200,5972]
+    ));
+    children.push(spacer(8));
+  }
+
+  // XP table
+  if(a.rewards){
+    children.push(para([cinzel('Rewards & Experience',9,COLORS.darkBrown,true)],{
+      spacing:{before:160,after:80},
+      border:{bottom:{style:BorderStyle.SINGLE,size:4,color:COLORS.border}}
+    }));
+
+    if(a.rewards.xpRows&&a.rewards.xpRows.length){
+      const xpData=a.rewards.xpRows.map(r=>[
+        r.category,r.encounter,
+        String(r.xpEach??'—'),String(r.partyXP??'—'),r.notes||''
+      ]);
+      xpData.push(['','Total XP (core)','',String(a.rewards.totalXP??'—'),'']);
+      children.push(makeTable(
+        ['Category','Encounter / Milestone','XP Each','Party XP','Notes'],
+        xpData,
+        [1200,3000,1000,1000,2872]
+      ));
+      children.push(spacer(6));
+    }
+
+    // Reward items
+    const allRewards=[...(a.rewards.items||[])];
+    if(a.rewards.reputation)allRewards.push(a.rewards.reputation);
+    allRewards.forEach(it=>{
+      children.push(para([
+        body('✦  ',9,COLORS.gold),
+        body(it,9)
+      ],{spacing:{after:40}}));
+    });
+    children.push(spacer(6));
+  }
+
+  // Quick run sheet
+  if(a.spine&&a.spine.length){
+    children.push(para([cinzel('DM Quick Run Sheet',9,COLORS.darkBrown,true)],{
+      spacing:{before:160,after:80},
+      border:{bottom:{style:BorderStyle.SINGLE,size:4,color:COLORS.border}}
+    }));
+    children.push(para([cinzel('Session Spine — Run in This Order',8,COLORS.midGray,true)],{spacing:{after:60}}));
+    a.spine.forEach((s,i)=>{
+      children.push(para([
+        body(`${i+1}.  `,9,COLORS.ember,true),
+        body(s,9)
+      ],{spacing:{after:40}}));
+    });
+    if(a.endingNote){
+      children.push(spacer(4));
+      children.push(para([cinzel('⚙ Ending Note',7,COLORS.midGray,true)],{spacing:{before:60,after:20}}));
+      children.push(shadedPara(
+        [body(a.endingNote,9,COLORS.midGray,false,false,true)],
+        COLORS.dmNoteBg,COLORS.dmNoteBorder
+      ));
+    }
+  }
+
+  // ── Assemble document ──────────────────────────────────────────
+  // Title/intro: single column; body: two columns
+  const splitIdx=children.findIndex(c=>
+    c instanceof Paragraph&&
+    c.options&&
+    c.options.children&&
+    c.options.children[0]&&
+    c.options.children[0].options&&
+    (c.options.children[0].options.text||'').includes('ACT')
+  );
+
+  // Build two sections: cover (1-col) then body (2-col)
+  const coverChildren=children.slice(0,splitIdx>0?splitIdx:children.length);
+  const bodyChildren=splitIdx>0?children.slice(splitIdx):[];
+
+  const sections=[];
+
+  sections.push({
+    properties:{
+      type:SectionType.CONTINUOUS,
+      column:{space:720,count:1}
+    },
+    children:coverChildren
+  });
+
+  if(bodyChildren.length){
+    sections.push({
+      properties:{
+        type:SectionType.CONTINUOUS,
+        column:{space:720,count:2,equalWidth:true}
+      },
+      children:bodyChildren
+    });
+  }
+
+  const doc=new Document({
+    creator:'Lazy DM Generator',
+    title:txt(a.title||'Adventure'),
+    styles:{
+      default:{
+        document:{run:{font:'Garamond',size:20,color:COLORS.black}},
+        heading1:{run:{font:'Palatino Linotype',size:28,bold:true,color:COLORS.darkBrown}},
+        heading2:{run:{font:'Palatino Linotype',size:20,bold:true,color:COLORS.ember}}
+      }
+    },
+    sections
+  });
+
+  Packer.toBlob(doc).then(blob=>{
+    const url=URL.createObjectURL(blob);
+    const a2=document.createElement('a');
+    const safeTitle=txt(a.title||'adventure').replace(/[^a-z0-9 _-]/gi,'_').slice(0,60);
+    a2.href=url;
+    a2.download=`Lazy DM — ${safeTitle}.docx`;
+    a2.click();
+    URL.revokeObjectURL(url);
+  });
 }
 </script>
 </body>
