@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lazy DM Prep Generator</title>
+<title>Lazy DM Adventure Generator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
 <style>
+/* ── SCREEN STYLES ── */
 :root{
   --bg:#0e0c09;--bg2:#141108;--bg3:#1a1510;
   --surface:#1f1a12;--surface2:#272018;
@@ -23,7 +24,6 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 50% 25%,transparent 35%,rgba(0,0,0,.65) 100%);pointer-events:none;z-index:1;}
 .app{position:relative;z-index:2;max-width:860px;margin:0 auto;padding:2.5rem 1.5rem 5rem;}
 
-/* ── Header ── */
 .header{text-align:center;margin-bottom:2rem;}
 .rune-row{font-size:.9rem;letter-spacing:.6em;color:var(--gold);margin-bottom:.75rem;opacity:.6;}
 .header h1{font-family:'Cinzel',serif;font-size:clamp(1.8rem,5vw,3rem);font-weight:400;color:var(--ink);letter-spacing:.06em;line-height:1.1;margin-bottom:.4rem;}
@@ -34,30 +34,23 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .header .subtitle{font-size:.95rem;color:var(--ink3);font-style:italic;}
 .header .book-ref{font-size:.72rem;color:var(--ink4);letter-spacing:.04em;margin-top:.25rem;}
 
-/* ── Tome ── */
 .tome{background:var(--surface);border:1px solid var(--border2);position:relative;margin-bottom:1rem;box-shadow:0 0 0 1px var(--bg),0 2px 16px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.03);}
 .tome::before{content:'';position:absolute;inset:0;border:1px solid rgba(255,255,255,.03);pointer-events:none;}
 .tome-header{padding:.7rem 1.1rem .6rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.6rem;background:var(--bg3);flex-wrap:wrap;}
 .tome-title{font-family:'Cinzel',serif;font-size:.75rem;font-weight:600;letter-spacing:.12em;color:var(--gold2);text-transform:uppercase;}
-.tome-page-ref{font-size:.68rem;color:var(--ink4);font-family:'Crimson Text',serif;margin-left:auto;}
-.core-badge{font-family:'Cinzel',serif;font-size:.52rem;font-weight:600;letter-spacing:.1em;padding:1px 6px;background:var(--green-md);color:var(--green-lt);border:1px solid var(--green-bd);text-transform:uppercase;flex-shrink:0;}
 .tome-body{padding:1rem 1.2rem;}
 .tome-hint{font-size:.8rem;color:var(--ink4);font-style:italic;margin-bottom:.75rem;}
-.tome-core{border-color:var(--green-bd);}
-.tome-core .tome-header{background:var(--green-dk);border-bottom-color:var(--green-md);}
-.tome-core .tome-title{color:#6dc895;}
 .tome-prompt .tome-header{background:var(--bg2);border-bottom-color:var(--border2);}
 .tome-prompt .tome-title{color:var(--ember2);font-size:.85rem;}
 
-/* ── Prompt form ── */
 .prompt-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem;}
 @media(max-width:580px){.prompt-grid{grid-template-columns:1fr;}}
 .prompt-grid .full{grid-column:1/-1;}
 .field{display:flex;flex-direction:column;gap:.28rem;}
 .field-label{font-family:'Cinzel',serif;font-size:.58rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--ink3);}
 .field-label .opt{font-family:'Crimson Text',serif;font-size:.7rem;text-transform:none;letter-spacing:0;font-weight:400;color:var(--ink4);}
-input[type=text],textarea,select{font-family:'Crimson Text',serif;font-size:.92rem;background:var(--bg2);border:1px solid var(--border2);color:var(--ink2);padding:.42rem .65rem;outline:none;transition:border-color .2s,box-shadow .2s;width:100%;appearance:none;}
-input[type=text]:focus,textarea:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 1px rgba(184,148,63,.12),inset 0 0 10px rgba(184,148,63,.04);}
+input[type=text],textarea,select{font-family:'Crimson Text',serif;font-size:.92rem;background:var(--bg2);border:1px solid var(--border2);color:var(--ink2);padding:.42rem .65rem;outline:none;transition:border-color .2s;width:100%;appearance:none;}
+input[type=text]:focus,textarea:focus,select:focus{border-color:var(--gold);}
 input::placeholder,textarea::placeholder{color:var(--ink4);font-style:italic;}
 textarea{resize:vertical;}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a4e3a'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .65rem center;padding-right:1.8rem;cursor:pointer;}
@@ -67,8 +60,8 @@ select option{background:var(--bg3);}
 .profile-toggle input[type=checkbox]:checked::after{content:'✕';position:absolute;top:-2px;left:1px;font-size:9px;color:var(--ember2);}
 .profile-section{display:none;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);}
 .profile-section.open{display:block;}
-.generate-btn{width:100%;padding:.8rem 2rem;background:linear-gradient(180deg,var(--ember) 0%,#a04c10 100%);color:var(--ink);border:1px solid var(--ember2);font-family:'Cinzel',serif;font-size:.95rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s;margin-top:1rem;box-shadow:0 2px 10px rgba(200,97,26,.2),inset 0 1px 0 rgba(255,255,255,.07);}
-.generate-btn:hover{background:linear-gradient(180deg,var(--ember2) 0%,var(--ember) 100%);box-shadow:0 4px 18px rgba(200,97,26,.35);}
+.generate-btn{width:100%;padding:.8rem 2rem;background:linear-gradient(180deg,var(--ember) 0%,#a04c10 100%);color:var(--ink);border:1px solid var(--ember2);font-family:'Cinzel',serif;font-size:.95rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s;margin-top:1rem;box-shadow:0 2px 10px rgba(200,97,26,.2);}
+.generate-btn:hover{background:linear-gradient(180deg,var(--ember2) 0%,var(--ember) 100%);}
 .generate-btn:active{transform:translateY(1px);}
 .generate-btn:disabled{background:var(--surface2);border-color:var(--border2);color:var(--ink4);cursor:not-allowed;box-shadow:none;}
 .loading-track{height:2px;background:var(--border);margin-top:.6rem;overflow:hidden;}
@@ -77,146 +70,165 @@ select option{background:var(--bg3);}
 @keyframes spin{to{transform:rotate(360deg);}}
 .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(232,223,200,.2);border-top-color:var(--ink2);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:5px;}
 
-/* ── Worksheet ── */
-.worksheet{display:none;margin-top:1.5rem;}
-.worksheet.visible{display:block;}
-.session-bar{display:flex;gap:.75rem;align-items:flex-end;margin-bottom:1.25rem;padding-bottom:.9rem;border-bottom:1px solid var(--border);}
-.session-field{display:flex;flex-direction:column;gap:.2rem;}
-.session-label{font-family:'Cinzel',serif;font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);}
-.session-field:nth-child(2){flex:1;}
+.output{display:none;margin-top:1.5rem;}
+.output.visible{display:block;}
 
-/* Worksheet inputs — auto-expand textareas everywhere */
-.ws-input{
-  background:transparent;border:none;border-bottom:1px solid var(--border2);
-  color:var(--ink2);font-family:'Crimson Text',serif;font-size:.95rem;
-  padding:.25rem .1rem;width:100%;outline:none;transition:border-color .2s;
-  display:block;
-}
-.ws-input:focus{border-bottom-color:var(--gold);}
-.ws-input::placeholder{color:var(--ink4);font-style:italic;}
+/* ── ADVENTURE DOCUMENT (screen) ── */
+.doc{background:var(--surface);border:1px solid var(--border2);padding:2rem 2.2rem;}
+.doc-title{font-family:'Cinzel',serif;font-size:2rem;font-weight:400;color:var(--ink);letter-spacing:.05em;margin-bottom:.3rem;}
+.doc-subtitle{font-family:'Cinzel',serif;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ember2);margin-bottom:1rem;}
+.doc-rule{height:1px;background:linear-gradient(90deg,transparent,var(--border3),transparent);margin:.75rem 0;}
+.doc-meta{font-size:.85rem;color:var(--ink3);font-style:italic;margin-bottom:.5rem;text-align:center;}
+.doc-summary{font-size:.95rem;color:var(--ink2);line-height:1.7;margin-bottom:1.5rem;padding:1rem 1.2rem;background:var(--bg2);border-left:3px solid var(--ember);font-style:italic;}
 
-/* auto-grow textarea used for all generated content */
-.ws-area{
-  background:var(--bg2);border:1px solid var(--border2);
-  color:var(--ink2);font-family:'Crimson Text',serif;font-size:.92rem;
-  padding:.45rem .6rem;width:100%;outline:none;
-  transition:border-color .2s;display:block;
-  resize:none;overflow:hidden;line-height:1.55;
-  min-height:2.2em;
-}
-.ws-area:focus{border-color:var(--gold);}
-.ws-area::placeholder{color:var(--ink4);font-style:italic;}
+/* Act headers */
+.act-header{font-family:'Cinzel',serif;font-size:1rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--ember2);margin:2rem 0 1rem;padding-bottom:.4rem;border-bottom:1px solid var(--border2);}
 
-/* strong start full-width textarea */
-#strongStart{min-height:4.5em;}
+/* Scene block */
+.scene{margin-bottom:1.75rem;}
+.scene-title{font-family:'Cinzel',serif;font-size:.85rem;font-weight:600;letter-spacing:.08em;color:var(--gold2);margin-bottom:.6rem;font-style:italic;}
+.scene-purpose{font-size:.8rem;color:var(--ink4);margin-bottom:.75rem;}
+.scene-purpose strong{color:var(--ink3);font-style:normal;}
 
-/* PC grid */
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;}
-@media(max-width:540px){.grid-2{grid-template-columns:1fr;}}
-.pc-card{background:var(--bg2);border:1px solid var(--border);padding:.55rem .7rem;}
-.pc-name{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;margin-bottom:.3rem;}
+/* Read-aloud */
+.read-aloud{background:var(--bg2);border:1px solid var(--border2);border-left:3px solid var(--gold);padding:.8rem 1rem;margin:.75rem 0;font-style:italic;font-size:.92rem;color:var(--ink2);line-height:1.7;}
+.read-aloud-label{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem;font-style:normal;}
 
-/* secrets — single column */
-.secrets-list{display:flex;flex-direction:column;gap:.35rem;}
-.secret-row{display:flex;align-items:flex-start;gap:.5rem;}
-.secret-num{font-family:'Cinzel',serif;font-size:.68rem;color:var(--ember);min-width:1.1rem;padding-top:.5rem;flex-shrink:0;line-height:1;}
+/* What do you do */
+.what-do{text-align:center;font-style:italic;color:var(--ember2);font-size:.9rem;margin:.6rem 0;padding:.4rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
 
-/* scenes */
-.scene-row{display:flex;align-items:flex-start;gap:.55rem;margin-bottom:.35rem;}
-.scene-num{font-size:.88rem;color:var(--ink4);min-width:.9rem;padding-top:.45rem;flex-shrink:0;font-style:italic;}
+/* DM Note */
+.dm-note{background:var(--bg3);border:1px solid var(--border);padding:.65rem .9rem;margin:.65rem 0;font-size:.78rem;line-height:1.6;}
+.dm-note-label{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:.3rem;display:flex;align-items:center;gap:.4rem;}
+.dm-note-label::before{content:'⚙';font-size:.7rem;}
+.dm-note p{font-variant:small-caps;color:var(--ink3);font-size:.8rem;letter-spacing:.02em;}
 
-/* locations 3-col */
-.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.65rem;}
-@media(max-width:580px){.grid-3{grid-template-columns:1fr;}}
-.loc-card{background:var(--bg2);border:1px solid var(--border);padding:.55rem .7rem;}
-.loc-name{font-weight:600;margin-bottom:.3rem;}
+/* Skill checks */
+.checks{margin:.65rem 0;}
+.checks-label{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:.4rem;}
+.check-item{display:flex;gap:.5rem;font-size:.83rem;color:var(--ink2);margin-bottom:.2rem;padding-left:.5rem;}
+.check-dc{font-weight:600;color:var(--gold2);flex-shrink:0;}
 
-/* NPC rows */
-.npc-row{display:grid;grid-template-columns:160px 1fr;gap:.6rem;margin-bottom:.4rem;align-items:start;}
-@media(max-width:540px){.npc-row{grid-template-columns:1fr;}}
+/* Loot */
+.loot-item{background:var(--bg2);border:1px solid var(--border);padding:.4rem .65rem;margin:.3rem 0;font-size:.83rem;color:var(--ink2);}
+.loot-label{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-right:.4rem;}
 
-/* monsters & items */
-.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
-@media(max-width:540px){.bottom-grid{grid-template-columns:1fr;}}
-.bottom-grid .tome{margin-bottom:0;}
-.monster-block,.item-block{margin-bottom:.6rem;padding-bottom:.6rem;border-bottom:1px solid var(--border);}
-.monster-block:last-child,.item-block:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
-.mono-label{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.08em;color:var(--ink4);text-transform:uppercase;margin-bottom:.2rem;}
+/* NPC section */
+.npc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin:.5rem 0;}
+@media(max-width:560px){.npc-grid{grid-template-columns:1fr;}}
+.npc-card{background:var(--bg2);border:1px solid var(--border);padding:.6rem .75rem;}
+.npc-name{font-family:'Cinzel',serif;font-size:.72rem;font-weight:600;letter-spacing:.08em;color:var(--gold2);text-transform:uppercase;margin-bottom:.15rem;}
+.npc-role{font-size:.75rem;color:var(--ink3);font-style:italic;margin-bottom:.3rem;}
+.npc-voice{font-size:.82rem;color:var(--ink2);}
+.npc-want{font-size:.78rem;color:var(--ink3);margin-top:.2rem;font-style:italic;}
 
-/* section divider */
-.section-div{display:flex;align-items:center;gap:1rem;margin:1.25rem 0 1rem;}
-.section-div::before,.section-div::after{content:'';flex:1;height:1px;background:var(--border);}
-.section-div-text{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--ink4);white-space:nowrap;}
+/* DC table */
+.dc-table{width:100%;border-collapse:collapse;font-size:.82rem;margin:.5rem 0;}
+.dc-table th{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);padding:.4rem .6rem;text-align:left;border-bottom:1px solid var(--border2);background:var(--bg3);}
+.dc-table td{padding:.35rem .6rem;border-bottom:1px solid var(--border);color:var(--ink2);vertical-align:top;}
+.dc-table td:first-child{color:var(--gold2);font-weight:600;white-space:nowrap;}
+.dc-table tr:last-child td{border-bottom:none;}
 
-/* actions */
+/* XP table */
+.xp-table{width:100%;border-collapse:collapse;font-size:.8rem;margin:.5rem 0;}
+.xp-table th{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);padding:.35rem .5rem;text-align:left;border-bottom:1px solid var(--border2);background:var(--bg3);}
+.xp-table td{padding:.3rem .5rem;border-bottom:1px solid var(--border);color:var(--ink2);vertical-align:top;}
+.xp-table tr:last-child td{border-bottom:none;}
+.xp-total{background:var(--bg3)!important;}
+.xp-total td{font-weight:600;color:var(--gold2)!important;border-top:1px solid var(--border2);}
+
+/* Rewards block */
+.rewards-list{list-style:none;margin:.5rem 0;}
+.rewards-list li{font-size:.88rem;color:var(--ink2);padding:.25rem 0;border-bottom:1px solid var(--border);display:flex;gap:.5rem;align-items:baseline;}
+.rewards-list li::before{content:'✦';color:var(--gold);font-size:.65rem;flex-shrink:0;margin-top:.1rem;}
+
+/* Section label */
+.section-label{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold2);margin:1.5rem 0 .6rem;padding-bottom:.3rem;border-bottom:1px solid var(--border);}
+
+/* Spine box */
+.spine-box{background:var(--bg2);border:1px solid var(--border2);padding:.75rem 1rem;margin:.75rem 0;}
+.spine-box ol{margin-left:1rem;}
+.spine-box li{font-size:.88rem;color:var(--ink2);padding:.15rem 0;}
+
+/* Actions */
 .actions{display:flex;gap:.65rem;margin-top:1.75rem;flex-wrap:wrap;}
 .btn{padding:.5rem 1.1rem;font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--ink3);transition:all .2s;}
 .btn:hover{border-color:var(--border3);color:var(--ink2);background:var(--surface2);}
 .btn-primary{background:linear-gradient(180deg,var(--ember) 0%,#a04c10 100%);border-color:var(--ember2);color:var(--ink);box-shadow:0 2px 8px rgba(200,97,26,.25);}
 .btn-primary:hover{background:linear-gradient(180deg,var(--ember2) 0%,var(--ember) 100%);color:var(--ink);}
 .print-hint{font-size:.73rem;color:var(--ink4);font-style:italic;margin-top:.4rem;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-.fade-in{animation:fadeUp .4s ease both;}
 
-/* ── Print ── */
+/* ── PRINT STYLES ── */
 @media print{
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  @page{margin:.55in .6in;size:letter;}
-  body{background:white!important;color:#1a1a1a!important;font-size:9pt!important;line-height:1.45!important;}
+  @page{margin:.6in .65in;size:letter;}
+
+  body{background:white!important;color:#1a1a1a!important;font-size:9.5pt!important;line-height:1.5!important;}
   body::before,body::after{display:none!important;}
-  .tome-prompt,.actions,.generate-btn,.rune-row,.loading-track,.status-text,.print-hint{display:none!important;}
+
+  .tome-prompt,.actions,.generate-btn,.rune-row,.loading-track,.status-text,.print-hint,.app > .header{display:none!important;}
   .app{padding:0!important;max-width:100%!important;}
-  .header{margin-bottom:.4rem!important;padding-bottom:.35rem!important;border-bottom:.75pt solid #ccc;}
-  .header h1{font-size:14pt!important;color:#1a1a1a!important;}
-  .header h1 span{color:#8b2e0f!important;}
-  .header .subtitle{color:#555!important;font-size:7.5pt!important;}
-  .header .book-ref{color:#aaa!important;font-size:6.5pt!important;}
-  .header-rule::before,.header-rule::after{background:#ddd!important;}
-  .header-rule-diamond{background:#aaa!important;}
-  .worksheet{display:block!important;margin-top:.35rem!important;}
-  .session-bar{border-bottom:.75pt solid #ddd!important;margin-bottom:.4rem!important;padding-bottom:.3rem!important;}
-  .session-label{color:#999!important;font-size:5.5pt!important;}
-  .ws-input{color:#1a1a1a!important;border-bottom:.5pt solid #ddd!important;font-size:8.5pt!important;padding:1pt 0!important;}
-  .tome{background:white!important;border:.75pt solid #ccc!important;box-shadow:none!important;margin-bottom:.35rem!important;break-inside:avoid!important;page-break-inside:avoid!important;}
-  .tome::before{display:none!important;}
-  .tome-header{background:#f5f5f5!important;border-bottom:.75pt solid #ddd!important;padding:.3rem .6rem!important;}
-  .tome-title{color:#333!important;font-size:6pt!important;}
-  .tome-page-ref{color:#bbb!important;font-size:5.5pt!important;}
-  .tome-body{padding:.4rem .6rem!important;}
-  .tome-hint{display:none!important;}
-  .tome-core{border-color:#b0d9c0!important;}
-  .tome-core .tome-header{background:#eef7f2!important;border-bottom-color:#c8e8d5!important;}
-  .tome-core .tome-title{color:#1a4030!important;}
-  .core-badge{background:#1a4030!important;color:white!important;border-color:#2d7a50!important;font-size:5pt!important;padding:1px 4px!important;}
-  .pc-card{background:#fafafa!important;border:.5pt solid #e0e0e0!important;padding:.3rem .4rem!important;}
-  .pc-name{color:#8b2e0f!important;font-size:5.5pt!important;}
-  .loc-card{background:#fafafa!important;border:.5pt solid #e0e0e0!important;padding:.3rem .4rem!important;}
-  .secret-num{color:#8b2e0f!important;font-size:7pt!important;}
-  .scene-num{color:#bbb!important;}
-  .section-div::before,.section-div::after{background:#e0e0e0!important;}
-  .section-div-text{color:#bbb!important;font-size:5pt!important;}
-  .bottom-grid{grid-template-columns:1fr 1fr!important;gap:.6rem!important;}
-  .monster-block,.item-block{border-bottom-color:#eee!important;}
-  .mono-label{color:#bbb!important;font-size:5.5pt!important;}
-  .npc-row{grid-template-columns:120pt 1fr!important;gap:.4rem!important;}
-  /* swap inputs/textareas for print divs */
-  .ws-input,.ws-area{display:none!important;}
-  .ws-print-text{
-    display:block!important;color:#1a1a1a!important;
-    font-family:'Crimson Text',Georgia,serif!important;font-size:8.5pt!important;
-    line-height:1.4!important;padding:1pt 0!important;
-    border-bottom:.5pt solid #e8e8e8!important;
-    white-space:pre-wrap!important;word-break:break-word!important;
-    min-height:11pt!important;
-  }
-  .ws-print-text.is-area{border:.5pt solid #e0e0e0!important;padding:2pt 3pt!important;background:#fafafa!important;min-height:20pt!important;}
-  .ws-print-text.is-bold{font-weight:600!important;}
-  .ws-print-text.is-italic{font-style:italic!important;font-size:8pt!important;}
-  .ws-print-text.is-placeholder{color:#bbb!important;}
-  .section-div{margin:.3rem 0!important;}
-  .grid-2{gap:.35rem!important;}
-  .grid-3{gap:.35rem!important;}
-  .secrets-list{gap:.2rem!important;}
+  .output{display:block!important;}
+
+  .doc{background:white!important;border:none!important;padding:0!important;box-shadow:none!important;}
+
+  .doc-title{font-size:20pt!important;color:#1a1a1a!important;margin-bottom:.15rem!important;}
+  .doc-subtitle{color:#8b2e0f!important;font-size:7.5pt!important;}
+  .doc-rule{background:#ccc!important;}
+  .doc-meta{color:#666!important;font-size:8pt!important;}
+  .doc-summary{background:#fafafa!important;border-left:3pt solid #8b2e0f!important;color:#1a1a1a!important;font-size:9pt!important;padding:.5rem .65rem!important;margin-bottom:.75rem!important;}
+
+  .act-header{color:#8b2e0f!important;font-size:8pt!important;border-bottom-color:#ccc!important;margin:1rem 0 .5rem!important;}
+
+  .scene{margin-bottom:1rem!important;}
+  .scene-title{color:#4a3010!important;font-size:9pt!important;margin-bottom:.3rem!important;}
+  .scene-purpose{font-size:7.5pt!important;color:#666!important;margin-bottom:.35rem!important;}
+
+  .read-aloud{background:#fffdf5!important;border:1pt solid #ddd!important;border-left:3pt solid #b8943f!important;padding:.4rem .55rem!important;font-size:8.5pt!important;margin:.4rem 0!important;}
+  .read-aloud-label{color:#b8943f!important;font-size:6pt!important;}
+
+  .what-do{color:#8b2e0f!important;font-size:8pt!important;border-color:#ddd!important;margin:.35rem 0!important;padding:.25rem 0!important;}
+
+  .dm-note{background:#f5f5f5!important;border-color:#ddd!important;padding:.35rem .5rem!important;margin:.35rem 0!important;}
+  .dm-note-label{color:#666!important;font-size:6pt!important;}
+  .dm-note p{color:#444!important;font-size:7.5pt!important;}
+
+  .checks{margin:.4rem 0!important;}
+  .checks-label{color:#666!important;font-size:6pt!important;}
+  .check-item{font-size:8pt!important;margin-bottom:.1rem!important;}
+  .check-dc{color:#8b2e0f!important;}
+
+  .loot-item{background:#fafafa!important;border-color:#ddd!important;font-size:8pt!important;padding:.25rem .4rem!important;}
+  .loot-label{color:#8b2e0f!important;font-size:6pt!important;}
+
+  .npc-grid{gap:.4rem!important;}
+  .npc-card{background:#fafafa!important;border-color:#ddd!important;padding:.35rem .5rem!important;}
+  .npc-name{color:#4a3010!important;font-size:6.5pt!important;}
+  .npc-role{color:#666!important;font-size:7pt!important;}
+  .npc-voice{font-size:7.5pt!important;color:#1a1a1a!important;}
+  .npc-want{font-size:7pt!important;color:#555!important;}
+
+  .dc-table{font-size:7.5pt!important;}
+  .dc-table th{background:#f0f0f0!important;color:#444!important;font-size:6pt!important;padding:.25rem .4rem!important;}
+  .dc-table td{padding:.2rem .4rem!important;border-bottom-color:#eee!important;}
+  .dc-table td:first-child{color:#8b2e0f!important;}
+
+  .xp-table{font-size:7pt!important;}
+  .xp-table th{background:#f0f0f0!important;color:#444!important;font-size:5.5pt!important;padding:.2rem .35rem!important;}
+  .xp-table td{padding:.18rem .35rem!important;border-bottom-color:#eee!important;}
+  .xp-total{background:#f5f5f0!important;}
+  .xp-total td{color:#4a3010!important;}
+
+  .rewards-list li{font-size:8pt!important;border-bottom-color:#eee!important;}
+  .rewards-list li::before{color:#8b2e0f!important;}
+
+  .section-label{color:#4a3010!important;font-size:6.5pt!important;border-bottom-color:#ccc!important;margin:1rem 0 .4rem!important;}
+
+  .spine-box{background:#fafafa!important;border-color:#ddd!important;padding:.45rem .6rem!important;}
+  .spine-box li{font-size:8pt!important;}
+
+  .scene{break-inside:avoid;page-break-inside:avoid;}
+  .npc-grid,.dc-table,.xp-table{break-inside:avoid;page-break-inside:avoid;}
 }
 </style>
 </head>
@@ -224,16 +236,16 @@ select option{background:var(--bg3);}
 <div class="app">
   <header class="header">
     <div class="rune-row">⚔ &nbsp;✦&nbsp; ⚔</div>
-    <h1>Lazy DM <span>Prep Generator</span></h1>
+    <h1>Lazy DM <span>Adventure Generator</span></h1>
     <div class="header-rule"><div class="header-rule-diamond"></div></div>
-    <p class="subtitle">Answer a few questions. The rest writes itself.</p>
+    <p class="subtitle">Answer a few questions. Get a runnable session document.</p>
     <p class="book-ref">Based on Return of the Lazy Dungeon Master &mdash; Michael E. Shea (slyflourish.com)</p>
   </header>
 
   <div class="tome tome-prompt">
     <div class="tome-header"><span class="tome-title">Tell me about your session</span></div>
     <div class="tome-body">
-      <p class="tome-hint">Fill in what you know. Leave the rest blank and the AI will decide.</p>
+      <p class="tome-hint">Fill in what you know. Leave blanks empty and the AI will decide.</p>
       <div class="prompt-grid">
         <div class="field">
           <label class="field-label" for="setting">Setting</label>
@@ -260,6 +272,19 @@ select option{background:var(--bg3);}
           <label class="field-label" for="party">Party <span class="opt">(optional — names and roles)</span></label>
           <input type="text" id="party" placeholder="e.g. George (Cleric), Dani (Rogue), Viktor (Fighter), Sirus (Wizard)">
         </div>
+        <div class="field">
+          <label class="field-label" for="level">Party level <span class="opt">(optional)</span></label>
+          <input type="text" id="level" placeholder="e.g. 5">
+        </div>
+        <div class="field">
+          <label class="field-label" for="duration">Session length <span class="opt">(optional)</span></label>
+          <select id="duration">
+            <option value="">— choose —</option>
+            <option value="2 hours, a short one-shot">2 hours</option>
+            <option value="3-4 hours, a standard session">3–4 hours</option>
+            <option value="4-6 hours, a long session">4–6 hours</option>
+          </select>
+        </div>
       </div>
       <label class="profile-toggle">
         <input type="checkbox" id="profileToggle"> Use a campaign profile
@@ -267,102 +292,23 @@ select option{background:var(--bg3);}
       <div class="profile-section" id="profileSection">
         <div class="field" style="margin-top:.25rem;">
           <label class="field-label">Campaign lore &amp; context</label>
-          <textarea id="campaignLore" rows="3" placeholder="Setting lore, recurring NPCs, party level, ongoing plots…"></textarea>
+          <textarea id="campaignLore" rows="3" placeholder="Setting lore, recurring NPCs, party backstory, ongoing plots, previous session events…"></textarea>
         </div>
       </div>
-      <button class="generate-btn" id="generateBtn" onclick="generate()">Prepare the Session</button>
+      <button class="generate-btn" id="generateBtn" onclick="generate()">Generate Adventure</button>
       <div class="loading-track"><div class="loading-bar" id="loadingBar"></div></div>
       <div class="status-text" id="statusText"></div>
     </div>
   </div>
 
-  <div class="worksheet" id="worksheet">
-    <div class="session-bar">
-      <div class="session-field"><span class="session-label">Session #</span><input type="text" class="ws-input" style="width:60px;" placeholder="#"></div>
-      <div class="session-field"><span class="session-label">Adventure / Arc</span><input type="text" class="ws-input" id="adventureTitle" placeholder="Untitled adventure"></div>
-      <div class="session-field"><span class="session-label">Date</span><input type="text" class="ws-input" style="width:95px;" placeholder="—"></div>
-    </div>
-
-    <!-- Step 1 -->
-    <div class="tome tome-core fade-in">
-      <div class="tome-header"><span class="tome-title">1 — Review the Characters</span><span class="core-badge">Core</span><span class="tome-page-ref">ch.3 · p.12</span></div>
-      <div class="tome-body">
-        <p class="tome-hint">What does each PC want right now? What hook can you pull on?</p>
-        <div class="grid-2" id="pcGrid"></div>
-      </div>
-    </div>
-
-    <!-- Step 2 -->
-    <div class="tome tome-core fade-in">
-      <div class="tome-header"><span class="tome-title">2 — Strong Start</span><span class="core-badge">Core</span><span class="tome-page-ref">ch.4 · p.14</span></div>
-      <div class="tome-body">
-        <p class="tome-hint">Drop them in the middle of something. No exposition.</p>
-        <textarea class="ws-area" id="strongStart" placeholder="The session opens with…" oninput="autoGrow(this)"></textarea>
-      </div>
-    </div>
-
-    <!-- Step 3 -->
-    <div class="tome tome-core fade-in">
-      <div class="tome-header"><span class="tome-title">3 — Secrets &amp; Clues</span><span class="core-badge">Core</span><span class="tome-page-ref">ch.6 · p.20</span></div>
-      <div class="tome-body">
-        <p class="tome-hint">Things players could discover. Not tied to locations or NPCs — surface them wherever fits.</p>
-        <div class="secrets-list" id="secretsGrid"></div>
-      </div>
-    </div>
-
-    <div class="section-div"><span class="section-div-text">Nice to have — fill in as time allows</span></div>
-
-    <!-- Step 4 -->
-    <div class="tome fade-in">
-      <div class="tome-header"><span class="tome-title">4 — Potential Scenes</span><span class="tome-page-ref">ch.5 · p.18</span></div>
-      <div class="tome-body">
-        <p class="tome-hint">2–4 loose scenes. One sentence each. Ready to discard.</p>
-        <div id="scenesGrid"></div>
-      </div>
-    </div>
-
-    <!-- Step 5 -->
-    <div class="tome fade-in">
-      <div class="tome-header"><span class="tome-title">5 — Fantastic Locations</span><span class="tome-page-ref">ch.7 · p.23</span></div>
-      <div class="tome-body">
-        <p class="tome-hint">Name + one vivid sensory detail.</p>
-        <div class="grid-3" id="locationsGrid"></div>
-      </div>
-    </div>
-
-    <!-- Step 6 -->
-    <div class="tome fade-in">
-      <div class="tome-header"><span class="tome-title">6 — Key NPCs</span><span class="tome-page-ref">ch.8 · p.27</span></div>
-      <div class="tome-body">
-        <p class="tome-hint">Name + what they want. Improvise everything else.</p>
-        <div id="npcGrid"></div>
-      </div>
-    </div>
-
-    <!-- Steps 7 & 8 -->
-    <div class="bottom-grid fade-in">
-      <div class="tome">
-        <div class="tome-header"><span class="tome-title">7 — Monsters</span><span class="tome-page-ref">ch.9 · p.30</span></div>
-        <div class="tome-body">
-          <p class="tome-hint">Stat block + reskin. No building from scratch.</p>
-          <div id="monstersGrid"></div>
-        </div>
-      </div>
-      <div class="tome">
-        <div class="tome-header"><span class="tome-title">8 — Magic Items</span><span class="tome-page-ref">ch.10 · p.33</span></div>
-        <div class="tome-body">
-          <p class="tome-hint">1–2 items. Tie to character goals.</p>
-          <div id="itemsGrid"></div>
-        </div>
-      </div>
-    </div>
-
+  <div class="output" id="output">
+    <div class="doc" id="doc"></div>
     <div class="actions">
-      <button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button>
+      <button class="btn btn-primary" onclick="printDoc()">Print / Save PDF</button>
       <button class="btn" onclick="regenerate()">Regenerate</button>
       <button class="btn" onclick="resetForm()">Start Over</button>
     </div>
-    <p class="print-hint">Use your browser's Print dialog → Save as PDF.</p>
+    <p class="print-hint">Use Print → Save as PDF. Enable "Background graphics" for full styling.</p>
   </div>
 </div>
 
@@ -371,17 +317,9 @@ document.getElementById('profileToggle').addEventListener('change',function(){
   document.getElementById('profileSection').classList.toggle('open',this.checked);
 });
 
-function autoGrow(el){
-  el.style.height='auto';
-  el.style.height=el.scrollHeight+'px';
-}
-
-// auto-grow all ws-area elements after fill
-function growAll(){
-  document.querySelectorAll('.ws-area').forEach(autoGrow);
-}
-
 let lastParams=null;
+
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 async function generate(){
   const params={
@@ -389,6 +327,8 @@ async function generate(){
     tone:document.getElementById('tone').value,
     hook:document.getElementById('hook').value.trim(),
     party:document.getElementById('party').value.trim(),
+    level:document.getElementById('level').value.trim(),
+    duration:document.getElementById('duration').value,
     lore:document.getElementById('profileToggle').checked?document.getElementById('campaignLore').value.trim():''
   };
   lastParams=params;
@@ -402,148 +342,338 @@ async function runGeneration(params){
   const bar=document.getElementById('loadingBar');
   const status=document.getElementById('statusText');
   btn.disabled=true;
-  btn.innerHTML='<span class="spinner"></span> Consulting the oracle…';
+  btn.innerHTML='<span class="spinner"></span> Writing the adventure…';
   bar.style.width='0%';
   status.textContent='';
-  const steps=['Reviewing the characters…','Crafting a strong start…','Uncovering secrets and clues…','Scouting fantastic locations…','Briefing important NPCs…','Choosing relevant monsters…','Selecting magic item rewards…','Almost ready…'];
+
+  const steps=[
+    'Establishing the premise…',
+    'Building the scene spine…',
+    'Writing read-aloud text…',
+    'Adding DM notes and clues…',
+    'Developing the NPCs…',
+    'Setting skill checks and DCs…',
+    'Calculating rewards and XP…',
+    'Finishing the document…'
+  ];
   let si=0;
   const ticker=setInterval(()=>{
     if(si<steps.length){status.textContent=steps[si];bar.style.width=`${Math.round((si+1)/steps.length*85)}%`;si++;}
-  },900);
-  const system=`You are an expert Dungeon Master prep assistant using the Lazy Dungeon Master method by Michael E. Shea. Generate complete, evocative, immediately usable session prep. Be specific, not generic. Vivid sensory details. Secrets that are surprising but logical. NPCs with clear single-sentence motivations. Atmospheric locations.${params.lore?'\n\nCampaign context: '+params.lore:''}\n\nRespond ONLY with valid JSON. No markdown, no preamble, no explanation.`;
-  const user=`Generate a complete Lazy DM session prep sheet.\nSetting: ${params.setting||'a classic fantasy world'}\nTone: ${params.tone||'classic fantasy adventure'}\nHook: ${params.hook||'open-ended adventure'}\nParty: ${params.party||'4 adventurers of mixed classes'}\n\nReturn exactly this JSON:\n{\n  "adventureTitle":"evocative 4-6 word title",\n  "characters":[{"name":"PC name or PC 1","hook":"what they want / tension to pull on this session"}],\n  "strongStart":"2-3 vivid sentences dropping players into action or tension. No exposition.",\n  "secrets":["10 secrets, each one sentence, specific and surprising"],\n  "scenes":["Scene 1 (one sentence)","Scene 2","Scene 3"],\n  "locations":[{"name":"Location name","detail":"one vivid sensory detail"},{"name":"Location name","detail":"one vivid sensory detail"},{"name":"Location name","detail":"one vivid sensory detail"}],\n  "npcs":[{"name":"NPC name","motivation":"what they want in one sentence"},{"name":"NPC name","motivation":"what they want in one sentence"},{"name":"NPC name","motivation":"what they want in one sentence"}],\n  "monsters":[{"name":"Encounter name","statBlock":"suggested stat block to reskin"},{"name":"Encounter name","statBlock":"suggested stat block to reskin"}],\n  "magicItems":[{"name":"Item name","note":"brief description and which character goal it ties to"},{"name":"Item name","note":"brief description"}]\n}`;
+  },1100);
+
+  const system=`You are an expert Dungeon Master and adventure writer trained on the Lazy Dungeon Master method by Michael E. Shea. You write tight, evocative, immediately runnable D&D adventures in the style of Blood on Borrowed Hands — a session document a DM can open and run from directly.
+
+Your adventures have:
+- Strong moral stakes and player agency
+- Clues that reward attention
+- NPCs with distinct voices and clear wants
+- Read-aloud text that is vivid, brief, and sensory
+- DM notes that guide pacing and behavior
+- A spine of 4-6 scenes with clear purpose
+- A satisfying ending with hooks forward
+
+${params.lore?'Campaign context: '+params.lore+'\n\n':''}Respond ONLY with valid JSON. No markdown. No preamble. No explanation.`;
+
+  const user=`Generate a complete runnable adventure session document.
+Setting: ${params.setting||'a classic fantasy world'}
+Tone: ${params.tone||'classic fantasy adventure'}
+Hook: ${params.hook||'the party stumbles into trouble'}
+Party: ${params.party||'4 adventurers of mixed classes, levels 4-5'}
+Level: ${params.level||'4-5'}
+Duration: ${params.duration||'3-4 hours, a standard session'}
+
+Return EXACTLY this JSON structure (no deviations):
+{
+  "title": "Evocative adventure title (4-6 words)",
+  "subtitle": "A [duration] adventure",
+  "meta": "For [party size] Characters · Levels [X] · [X]-[X] Hours · Tone: [tone]",
+  "summary": "2-3 sentence adventure summary. What is the situation, what is the trap or twist, what is the real challenge.",
+  "background": "2-3 sentences of DM-only context explaining what is REALLY going on that the players don't know yet.",
+  "secrets": [
+    "Secret or clue 1 (one sentence, drop anywhere)",
+    "Secret or clue 2",
+    "Secret or clue 3",
+    "Secret or clue 4",
+    "Secret or clue 5",
+    "Secret or clue 6",
+    "Secret or clue 7",
+    "Secret or clue 8"
+  ],
+  "acts": [
+    {
+      "name": "Act 1 — Title",
+      "scenes": [
+        {
+          "number": 1,
+          "title": "Scene Title",
+          "purpose": "One sentence: what this scene accomplishes dramatically.",
+          "setup": "1-2 sentences of DM context before the read-aloud.",
+          "readAloud": "2-4 vivid sentences in second person present tense. Sensory. Drop players into the moment.",
+          "whatDo": "What do you do?",
+          "dmNote": "1-3 sentences in small caps style. Pacing note, NPC behavior, or tactical tip. Start with a directive like PUSH HARD HERE or DO NOT RUSH THIS.",
+          "checks": [
+            {"dc": "DC 12", "skill": "Perception", "result": "What they notice or learn"},
+            {"dc": "DC 14", "skill": "Insight", "result": "What they read in the NPC"}
+          ],
+          "loot": [
+            {"label": "CLUE", "text": "Description of a clue or item found here"}
+          ]
+        }
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "name": "NPC Name",
+      "role": "Role in the adventure",
+      "wants": "What they want in one sentence",
+      "voice": "Their speaking style — one short example quote",
+      "use": "How the DM should use them"
+    }
+  ],
+  "dcs": [
+    {"check": "Skill (context)", "dc": "12", "reveals": "What the party learns or can do"}
+  ],
+  "rewards": {
+    "xpRows": [
+      {"category": "Combat", "encounter": "Encounter name", "xpEach": 50, "partyXP": 200, "notes": "Brief note"},
+      {"category": "Milestone", "encounter": "Milestone description", "xpEach": 0, "partyXP": 300, "notes": "Award once"}
+    ],
+    "totalXP": 1200,
+    "items": [
+      "Item or reward description",
+      "Second reward"
+    ],
+    "reputation": "Any reputation gain or loss in the setting"
+  },
+  "spine": [
+    "Scene 1 — short description of what happens",
+    "Scene 2 — short description",
+    "Scene 3 — short description"
+  ],
+  "endingNote": "One sentence DM note on how to end the session."
+}
+
+IMPORTANT RULES:
+- Every scene MUST have a readAloud block. Make it vivid and specific.
+- Every scene MUST have a dmNote. Write it in directive small-caps style.
+- Include 4-6 scenes total across 2-3 acts.
+- NPCs should have distinct voices. Include 4-6 NPCs.
+- DCs table should have 6-10 entries covering all scenes.
+- XP table should include combat encounters, optional combats, and milestones.
+- The adventure must have a clear moral choice or meaningful decision point.
+- End with a hook forward.`;
+
   try{
     const res=await fetch('/api/anthropic/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1800,system,messages:[{role:'user',content:user}]})
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:6000,system,messages:[{role:'user',content:user}]})
     });
-    const data=await res.json();
-    if(data.error){
-      const msg=typeof data.error==='string'?data.error:(data.error.message||JSON.stringify(data.error));
+
+    // Surface HTTP errors before trying to parse
+    if(!res.ok){
+      let msg=`Server error ${res.status}`;
+      try{const e=await res.json();msg=e?.error?.message||e?.message||msg;}catch(_){}
       throw new Error(msg);
     }
+
+    const data=await res.json();
+
+    // Surface Anthropic API-level errors
+    if(data.error){
+      throw new Error(data.error.message||JSON.stringify(data.error));
+    }
+
     const raw=data.content?.[0]?.text||'';
-    if(!raw.trim())throw new Error(res.ok?'Empty model response':'Unexpected response from API');
-    const prep=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    if(!raw) throw new Error('Empty response from API. Try again.');
+
+    // Check for truncation — Anthropic sets stop_reason to "max_tokens" when cut off
+    if(data.stop_reason==='max_tokens'){
+      throw new Error('Response was too long and got cut off. Try a shorter hook or fewer party members, then regenerate.');
+    }
+
+    let adv;
+    try{
+      adv=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    }catch(parseErr){
+      console.error('Raw response:', raw);
+      throw new Error('The AI returned malformed JSON. Try regenerating — this is usually a one-off.');
+    }
+
     clearInterval(ticker);
     bar.style.width='100%';
-    status.textContent='Your session is ready.';
-    fillWorksheet(prep);
-    setTimeout(()=>{document.getElementById('worksheet').scrollIntoView({behavior:'smooth',block:'start'});},300);
+    status.textContent='Your adventure is ready.';
+
+    renderDoc(adv);
+
+    setTimeout(()=>{
+      document.getElementById('output').scrollIntoView({behavior:'smooth',block:'start'});
+    },300);
+
   }catch(err){
     clearInterval(ticker);
-    status.textContent='Something went wrong. Check your API key or try again.';
+    status.textContent=err.message||'Something went wrong. Try again.';
     bar.style.width='0%';
     console.error(err);
   }finally{
     btn.disabled=false;
-    btn.innerHTML='Prepare the Session';
+    btn.innerHTML='Generate Adventure';
   }
 }
 
-function fillWorksheet(p){
-  document.getElementById('worksheet').classList.add('visible');
-  document.getElementById('adventureTitle').value=p.adventureTitle||'';
+function renderDoc(a){
+  const output=document.getElementById('output');
+  output.classList.add('visible');
 
-  // Characters — textarea per card so hook wraps
-  const chars=p.characters||[];
-  while(chars.length<4)chars.push({name:`PC ${chars.length+1}`,hook:''});
-  document.getElementById('pcGrid').innerHTML=chars.slice(0,4).map((c,i)=>`
-    <div class="pc-card">
-      <div class="pc-name">${esc(c.name)||`PC ${i+1}`}</div>
-      <textarea class="ws-area" placeholder="Goal or hook…" oninput="autoGrow(this)">${esc(c.hook)}</textarea>
-    </div>`).join('');
+  // Set print title
+  output._title=a.title;
 
-  // Strong start
-  const ss=document.getElementById('strongStart');
-  ss.value=p.strongStart||'';
-  autoGrow(ss);
+  let html=`
+    <div class="doc-title">${esc(a.title)}</div>
+    <div class="doc-subtitle">${esc(a.subtitle||'A One-Session Adventure')}</div>
+    <div class="doc-rule"></div>
+    <div class="doc-meta">${esc(a.meta||'')}</div>
+    <div class="doc-summary">${esc(a.summary||'')}</div>`;
 
-  // Secrets — single column, textarea per row
-  const secs=(p.secrets||[]).slice(0,10);
-  while(secs.length<10)secs.push('');
-  document.getElementById('secretsGrid').innerHTML=secs.map((s,i)=>`
-    <div class="secret-row">
-      <span class="secret-num">${i+1}</span>
-      <textarea class="ws-area" placeholder="Secret or clue…" oninput="autoGrow(this)">${esc(s)}</textarea>
-    </div>`).join('');
+  // Background (DM only)
+  if(a.background){
+    html+=`<div class="dm-note"><div class="dm-note-label">DM Background — Read Before Play</div><p>${esc(a.background)}</p></div>`;
+  }
 
-  // Scenes
-  const scenes=p.scenes||[];
-  while(scenes.length<3)scenes.push('');
-  document.getElementById('scenesGrid').innerHTML=scenes.slice(0,4).map((s,i)=>`
-    <div class="scene-row">
-      <span class="scene-num">${i+1}.</span>
-      <textarea class="ws-area" placeholder="Potential scene…" oninput="autoGrow(this)">${esc(s)}</textarea>
-    </div>`).join('');
+  // Secrets
+  if(a.secrets&&a.secrets.length){
+    html+=`<div class="section-label">Secrets &amp; Clues — Drop Anywhere</div>`;
+    a.secrets.forEach((s,i)=>{
+      html+=`<div class="loot-item"><span class="loot-label">${i+1}.</span>${esc(s)}</div>`;
+    });
+  }
 
-  // Locations
-  const locs=p.locations||[];
-  while(locs.length<3)locs.push({name:'',detail:''});
-  document.getElementById('locationsGrid').innerHTML=locs.slice(0,3).map(l=>`
-    <div class="loc-card">
-      <textarea class="ws-area loc-name" placeholder="Location name…" oninput="autoGrow(this)" style="font-weight:600;">${esc(l.name)}</textarea>
-      <textarea class="ws-area" placeholder="One vivid detail…" oninput="autoGrow(this)" style="font-size:.85rem;font-style:italic;">${esc(l.detail)}</textarea>
-    </div>`).join('');
+  // Acts and scenes
+  (a.acts||[]).forEach(act=>{
+    html+=`<div class="act-header">${esc(act.name||'')}</div>`;
+    (act.scenes||[]).forEach(scene=>{
+      html+=`<div class="scene">`;
+      html+=`<div class="scene-title">Scene ${scene.number||''} — ${esc(scene.title||'')}</div>`;
+      if(scene.purpose)html+=`<div class="scene-purpose"><strong>Purpose:</strong> ${esc(scene.purpose)}</div>`;
+      if(scene.setup)html+=`<p style="font-size:.85rem;color:var(--ink3);margin-bottom:.5rem;">${esc(scene.setup)}</p>`;
+
+      if(scene.readAloud){
+        html+=`<div class="read-aloud"><div class="read-aloud-label">📖 Read Aloud</div>${esc(scene.readAloud)}</div>`;
+      }
+
+      html+=`<div class="what-do">❓ ${esc(scene.whatDo||'What do you do?')}</div>`;
+
+      if(scene.dmNote){
+        html+=`<div class="dm-note"><div class="dm-note-label">DM Note</div><p>${esc(scene.dmNote)}</p></div>`;
+      }
+
+      if(scene.checks&&scene.checks.length){
+        html+=`<div class="checks"><div class="checks-label">Skill Checks</div>`;
+        scene.checks.forEach(c=>{
+          html+=`<div class="check-item"><span class="check-dc">${esc(c.skill)} ${esc(c.dc)}:</span> ${esc(c.result)}</div>`;
+        });
+        html+=`</div>`;
+      }
+
+      if(scene.loot&&scene.loot.length){
+        scene.loot.forEach(l=>{
+          html+=`<div class="loot-item"><span class="loot-label">${esc(l.label||'LOOT')}</span>${esc(l.text)}</div>`;
+        });
+      }
+
+      html+=`</div>`;// end scene
+    });
+  });
 
   // NPCs
-  const npcs=p.npcs||[];
-  document.getElementById('npcGrid').innerHTML=npcs.map(n=>`
-    <div class="npc-row">
-      <textarea class="ws-area" placeholder="Name" oninput="autoGrow(this)" style="font-weight:600;">${esc(n.name)}</textarea>
-      <textarea class="ws-area" placeholder="What they want…" oninput="autoGrow(this)">${esc(n.motivation)}</textarea>
-    </div>`).join('');
+  if(a.npcs&&a.npcs.length){
+    html+=`<div class="section-label">Key NPCs</div><div class="npc-grid">`;
+    a.npcs.forEach(n=>{
+      html+=`<div class="npc-card">
+        <div class="npc-name">${esc(n.name)}</div>
+        <div class="npc-role">${esc(n.role)}</div>
+        <div class="npc-voice">"${esc(n.voice)}"</div>
+        <div class="npc-want">Wants: ${esc(n.wants)}</div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
 
-  // Monsters
-  const mons=p.monsters||[];
-  document.getElementById('monstersGrid').innerHTML=mons.map(m=>`
-    <div class="monster-block">
-      <textarea class="ws-area" placeholder="Encounter name…" oninput="autoGrow(this)" style="font-weight:600;">${esc(m.name)}</textarea>
-      <div class="mono-label">Stat block</div>
-      <textarea class="ws-area" placeholder="Stat block to reskin…" oninput="autoGrow(this)" style="font-size:.82rem;font-style:italic;">${esc(m.statBlock)}</textarea>
-    </div>`).join('');
+  // DC table
+  if(a.dcs&&a.dcs.length){
+    html+=`<div class="section-label">Quick Reference — Key DCs</div>
+    <table class="dc-table">
+      <thead><tr><th>DC</th><th>Check</th><th>Reveals</th></tr></thead>
+      <tbody>`;
+    a.dcs.forEach(d=>{
+      html+=`<tr><td>${esc(d.dc)}</td><td>${esc(d.check)}</td><td>${esc(d.reveals)}</td></tr>`;
+    });
+    html+=`</tbody></table>`;
+  }
 
-  // Magic items
-  const items=p.magicItems||[];
-  document.getElementById('itemsGrid').innerHTML=items.map(it=>`
-    <div class="item-block">
-      <textarea class="ws-area" placeholder="Item name…" oninput="autoGrow(this)" style="font-weight:600;">${esc(it.name)}</textarea>
-      <textarea class="ws-area" placeholder="Description…" oninput="autoGrow(this)" style="font-size:.85rem;font-style:italic;">${esc(it.note)}</textarea>
-    </div>`).join('');
+  // Rewards & XP
+  if(a.rewards){
+    html+=`<div class="section-label">Rewards &amp; Experience</div>`;
 
-  // Grow all after a tick so DOM is settled
-  setTimeout(growAll, 50);
+    if(a.rewards.xpRows&&a.rewards.xpRows.length){
+      html+=`<table class="xp-table">
+        <thead><tr><th>Category</th><th>Encounter / Milestone</th><th>XP Each</th><th>Party XP</th><th>Notes</th></tr></thead>
+        <tbody>`;
+      a.rewards.xpRows.forEach(r=>{
+        html+=`<tr><td>${esc(r.category)}</td><td>${esc(r.encounter)}</td><td>${esc(String(r.xpEach??'—'))}</td><td>${esc(String(r.partyXP??'—'))}</td><td>${esc(r.notes||'')}</td></tr>`;
+      });
+      html+=`<tr class="xp-total"><td colspan="3">Total XP (core)</td><td>${esc(String(a.rewards.totalXP??'—'))}</td><td></td></tr>`;
+      html+=`</tbody></table>`;
+    }
+
+    if(a.rewards.items&&a.rewards.items.length||a.rewards.reputation){
+      html+=`<ul class="rewards-list">`;
+      (a.rewards.items||[]).forEach(it=>{html+=`<li>${esc(it)}</li>`;});
+      if(a.rewards.reputation)html+=`<li><em>${esc(a.rewards.reputation)}</em></li>`;
+      html+=`</ul>`;
+    }
+  }
+
+  // Session spine / quick run sheet
+  if(a.spine&&a.spine.length){
+    html+=`<div class="section-label">DM Quick Run Sheet</div>
+    <div class="spine-box">
+      <strong style="font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);">Session Spine — Run in This Order</strong>
+      <ol style="margin-top:.5rem;">`;
+    a.spine.forEach(s=>{html+=`<li>${esc(s)}</li>`;});
+    html+=`</ol>`;
+    if(a.endingNote){
+      html+=`<div class="dm-note" style="margin-top:.65rem;"><div class="dm-note-label">Ending Note</div><p>${esc(a.endingNote)}</p></div>`;
+    }
+    html+=`</div>`;
+  }
+
+  document.getElementById('doc').innerHTML=html;
 }
 
-function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function printDoc(){
+  const output=document.getElementById('output');
+  const raw=output._title||'';
+  // Strip control characters, limit to 80 chars
+  const safeTitle=raw.replace(/[\x00-\x1f\x7f]/g,'').trim().slice(0,80);
+  if(safeTitle){
+    document._prevTitle=document.title;
+    document.title='Lazy DM \u2014 '+safeTitle;
+  }
+  window.print();
+}
 
-// Print: replace ws-area/ws-input with plain divs
-window.addEventListener('beforeprint',function(){
-  document.querySelectorAll('.worksheet .ws-area,.worksheet .ws-input').forEach(el=>{
-    const d=document.createElement('div');
-    d.className='ws-print-text';
-    d.dataset.printReplace='true';
-    const val=el.value||'';
-    d.textContent=val||el.placeholder||'';
-    if(!val)d.classList.add('is-placeholder');
-    if(el.classList.contains('ws-area'))d.classList.add('is-area');
-    if(el.style.fontWeight==='600'||el.style.cssText.includes('font-weight:600'))d.classList.add('is-bold');
-    if(el.style.fontStyle==='italic'||el.style.cssText.includes('font-style:italic'))d.classList.add('is-italic');
-    el.parentNode.insertBefore(d,el);
-    el.dataset.hiddenPrint='true';
-    el.style.display='none';
-  });
-});
 window.addEventListener('afterprint',function(){
-  document.querySelectorAll('[data-print-replace="true"]').forEach(el=>el.remove());
-  document.querySelectorAll('[data-hidden-print="true"]').forEach(el=>{el.style.display='';delete el.dataset.hiddenPrint;});
+  if(document._prevTitle){document.title=document._prevTitle;delete document._prevTitle;}
 });
 
 function resetForm(){
-  document.getElementById('worksheet').classList.remove('visible');
-  ['setting','hook','party','campaignLore'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('output').classList.remove('visible');
+  document.getElementById('doc').innerHTML='';
+  ['setting','hook','party','level','campaignLore'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('tone').value='';
+  document.getElementById('duration').value='';
   document.getElementById('profileToggle').checked=false;
   document.getElementById('profileSection').classList.remove('open');
   document.getElementById('loadingBar').style.width='0%';
