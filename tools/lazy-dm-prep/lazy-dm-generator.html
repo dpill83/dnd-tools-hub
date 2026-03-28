@@ -289,7 +289,7 @@ select option{background:var(--bg3);}
         </div>
       </div>
       <label class="profile-toggle">
-        <input type="checkbox" id="profileToggle"> Use saved campaign profile
+        <input type="checkbox" id="profileToggle"> Add campaign context
       </label>
       <div class="profile-section" id="profileSection">
         <div class="field" style="margin-top:.25rem;">
@@ -383,7 +383,7 @@ Tone: ${params.tone||'classic fantasy adventure'}
 Hook: ${params.hook||'the party stumbles into trouble'}
 Party: ${params.party||'4 adventurers of mixed classes, levels 4-5'}
 Level: ${params.level||'4-5'}
-Duration: ${params.duration||'3-4 hours, a standard session'}
+Duration: ${params.duration||'3 to 4 hours, a standard session'}
 
 Return EXACTLY this JSON structure (no deviations):
 {
@@ -599,6 +599,7 @@ function renderDoc(a){
         <div class="npc-role">${esc(n.role)}</div>
         <div class="npc-voice">"${esc(n.voice)}"</div>
         <div class="npc-want">Wants: ${esc(n.wants)}</div>
+        ${n.use?`<div class="npc-want" style="color:var(--ink4);">Use: ${esc(n.use)}</div>`:''}
       </div>`;
     });
     html+=`</div>`;
@@ -695,7 +696,7 @@ async function downloadDocx(){
   btn.textContent='Building doc…';
   try{
     await loadDocxLib();
-    buildAndDownload(window._lastAdventure);
+    await buildAndDownload(window._lastAdventure);
   }catch(e){
     alert('Could not build Word doc: '+e.message);
     console.error(e);
@@ -862,6 +863,7 @@ function buildAndDownload(a){
   }
 
   // Acts and scenes — two column section starts here
+  let twoColStart=children.length; // capture index before first act is pushed
   (a.acts||[]).forEach(act=>{
     // Act header
     children.push(para([cinzel(act.name||'',10,COLORS.ember,true)],{
@@ -952,7 +954,13 @@ function buildAndDownload(a){
       children.push(para([
         body('Wants: ',9,COLORS.black,true),
         body(n.wants,9)
-      ],{spacing:{after:60}}));
+      ],{spacing:{after:n.use?20:60}}));
+      if(n.use){
+        children.push(para([
+          body('Use: ',9,COLORS.midGray,true),
+          body(n.use,9,COLORS.midGray)
+        ],{spacing:{after:60}}));
+      }
     });
   }
 
@@ -1028,18 +1036,11 @@ function buildAndDownload(a){
 
   // ── Assemble document ──────────────────────────────────────────
   // Title/intro: single column; body: two columns
-  const splitIdx=children.findIndex(c=>
-    c instanceof Paragraph&&
-    c.options&&
-    c.options.children&&
-    c.options.children[0]&&
-    c.options.children[0].options&&
-    (c.options.children[0].options.text||'').includes('ACT')
-  );
+  // twoColStart was recorded as children.length just before acts were pushed
+  const coverChildren=children.slice(0,twoColStart);
+  const bodyChildren=children.slice(twoColStart);
 
   // Build two sections: cover (1-col) then body (2-col)
-  const coverChildren=children.slice(0,splitIdx>0?splitIdx:children.length);
-  const bodyChildren=splitIdx>0?children.slice(splitIdx):[];
 
   const sections=[];
 
@@ -1074,12 +1075,12 @@ function buildAndDownload(a){
     sections
   });
 
-  Packer.toBlob(doc).then(blob=>{
+  return Packer.toBlob(doc).then(blob=>{
     const url=URL.createObjectURL(blob);
     const a2=document.createElement('a');
     const safeTitle=txt(a.title||'adventure').replace(/[^a-z0-9 _-]/gi,'_').slice(0,60);
     a2.href=url;
-    a2.download=`Lazy DM — ${safeTitle}.docx`;
+    a2.download=`Lazy DM \u2014 ${safeTitle}.docx`;
     a2.click();
     URL.revokeObjectURL(url);
   });
