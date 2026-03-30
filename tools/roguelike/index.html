@@ -63,6 +63,47 @@
         display: flex;
         gap: 20px;
         justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      #rogue-comfort-actions {
+        margin-top: 24px;
+        padding-top: 24px;
+        border-top: 1px solid var(--dim);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+
+      #rogue-comfort-label {
+        font-size: 0.75rem;
+        color: var(--dim);
+        text-transform: none;
+        letter-spacing: 0.05em;
+      }
+
+      #rogue-comfort-actions .rogue-btn-comfort {
+        color: var(--glow);
+        background: transparent;
+        padding: 12px 18px;
+        text-decoration: none;
+        font-weight: bold;
+        border: 2px solid var(--glow);
+        font-size: 0.85rem;
+      }
+
+      #rogue-comfort-actions .rogue-btn-comfort:hover {
+        background: var(--glow);
+        color: var(--bg);
+        box-shadow: 0 0 12px var(--glow);
+      }
+
+      #rogue-comfort-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        justify-content: center;
       }
 
       .rogue-btn {
@@ -109,12 +150,17 @@
         <a href="./play.html?mode=endless" class="rogue-btn">Endless Void</a>
       </div>
 
+      <div id="rogue-comfort-actions">
+        <span id="rogue-comfort-label">Large controls &amp; high contrast</span>
+        <div id="rogue-comfort-row">
+          <a href="./play.html?mode=story&amp;comfort=1" class="rogue-btn-comfort">Story (comfort)</a>
+          <a href="./play.html?mode=endless&amp;comfort=1" class="rogue-btn-comfort">Endless (comfort)</a>
+        </div>
+      </div>
+
     </div>
 
     <script>
-      // Add a random seed for "flavor"
-      document.getElementById('seed').innerText = Math.random().toString(36).substring(2, 10).toUpperCase();
-
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('./sw.js').catch(() => {});

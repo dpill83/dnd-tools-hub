@@ -1,4 +1,4 @@
-const CACHE_NAME = 'roguelike-v5';
+const CACHE_NAME = 'roguelike-v6';
 
 const ASSETS = [
   './',

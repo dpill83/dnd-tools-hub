@@ -1,45 +1,63 @@
-import { CellType, COLS, getRenderPalette, H, ItemType, W } from './constants.js';
+import { CellType, getRenderPalette, H, ItemType, W } from './constants.js';
 import { idxOf } from './util.js';
 
-function cellGlyphAndColor(cellType, C) {
+function cellGlyphAndColor(cellType, P) {
   switch (cellType) {
     case CellType.Floor:
-      return { g: '.', c: C.floor };
+      return { g: '.', c: P.floor };
     case CellType.Wall:
-      return { g: '#', c: C.wall };
+      return { g: '#', c: P.wall };
     case CellType.Stairs:
-      return { g: '>', c: COLS.stairs };
+      return { g: '>', c: P.stairs };
     case CellType.Amulet:
-      return { g: '*', c: COLS.amulet };
+      return { g: '*', c: P.amulet };
     case CellType.DoorClosed:
-      return { g: '+', c: COLS.door };
+      return { g: '+', c: P.door };
     case CellType.DoorOpen:
-      return { g: '/', c: COLS.door };
+      return { g: '/', c: P.door };
     default:
-      return { g: ' ', c: C.fog };
+      return { g: ' ', c: P.fog };
   }
 }
 
-function itemGlyphAndColor(item) {
+function itemGlyphAndColor(item, P) {
   switch (item.type) {
     case ItemType.Gold:
-      return { g: '$', c: COLS.gold };
+      return { g: '$', c: P.gold };
     case ItemType.Potion:
-      return { g: '!', c: COLS.potion };
+      return { g: '!', c: P.potion };
     case ItemType.Sword:
-      return { g: ')', c: COLS.sword };
+      return { g: ')', c: P.sword };
     case ItemType.Shield:
-      return { g: '[', c: COLS.shield };
+      return { g: '[', c: P.shield };
     case ItemType.Trap:
-      return { g: '^', c: COLS.trap };
+      return { g: '^', c: P.trap };
     default:
-      return { g: '?', c: COLS.player };
+      return { g: '?', c: P.player };
+  }
+}
+
+/** Monsters store spawn-time hex colors; remap by glyph so comfort palette applies. */
+function monsterPaletteColor(m, P) {
+  switch (m.g) {
+    case 'r':
+      return P.rat;
+    case 'g':
+      return P.goblin;
+    case 'o':
+      return P.orc;
+    case 'T':
+      return P.troll;
+    case 'D':
+      return P.dragon;
+    default:
+      return m.color;
   }
 }
 
 export function renderToElement(el, state) {
   const { player, gridType, gridVisible, gridSeen, monsters, monsterAt, items, itemAt, gameOver, won } = state;
-  const C = getRenderPalette();
+  const P = getRenderPalette();
 
   const parts = [];
   let runColor = null;
@@ -69,7 +87,7 @@ export function renderToElement(el, state) {
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
       if (x === player.x && y === player.y) {
-        pushGlyph('@', COLS.player);
+        pushGlyph('@', P.player);
         continue;
       }
 
@@ -80,7 +98,7 @@ export function renderToElement(el, state) {
       const mIndex = monsterAt[idx];
       if (visible && mIndex !== -1) {
         const m = monsters[mIndex];
-        pushGlyph(m.g, m.color);
+        pushGlyph(m.g, monsterPaletteColor(m, P));
         continue;
       }
 
@@ -90,7 +108,7 @@ export function renderToElement(el, state) {
         if (it.type === ItemType.Trap && !it.revealed) {
           // hidden trap looks like floor until triggered
         } else {
-          const { g, c } = itemGlyphAndColor(it);
+          const { g, c } = itemGlyphAndColor(it, P);
           pushGlyph(g, c);
           continue;
         }
@@ -98,15 +116,15 @@ export function renderToElement(el, state) {
 
       const cellType = gridType[idx];
       if (visible) {
-        const { g, c } = cellGlyphAndColor(cellType, C);
+        const { g, c } = cellGlyphAndColor(cellType, P);
         pushGlyph(g, c);
       } else if (seen) {
         const isFloorLike =
           cellType === CellType.Floor || cellType === CellType.Stairs || cellType === CellType.Amulet || cellType === CellType.DoorOpen || cellType === CellType.DoorClosed;
-        const { g } = cellGlyphAndColor(cellType === CellType.Wall ? CellType.Wall : CellType.Floor, C);
-        pushGlyph(g, isFloorLike ? C.seen : C.fog);
+        const { g } = cellGlyphAndColor(cellType === CellType.Wall ? CellType.Wall : CellType.Floor, P);
+        pushGlyph(g, isFloorLike ? P.seen : P.fog);
       } else {
-        pushGlyph(' ', C.fog);
+        pushGlyph(' ', P.fog);
       }
     }
     endLine();

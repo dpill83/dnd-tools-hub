@@ -343,3 +343,176 @@ body {
   background: #16162a;
 }
 
+/* Comfort / easy-read — play.html?comfort=1 (class set in head before CSS) */
+html.rogue-comfort {
+  background: #12121c;
+}
+
+html.rogue-comfort body {
+  background: #12121c;
+  color: #e8e8dc;
+}
+
+html.rogue-comfort #rogue-wrap {
+  background: #1a1d28;
+  color: #e8e8dc;
+  max-width: min(100%, 960px);
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px;
+}
+
+html.rogue-comfort #rogue-canvas {
+  font-size: clamp(12px, calc((100vw - 48px) / 32), 22px);
+}
+
+html.rogue-comfort #rogue-controls {
+  margin-top: 14px;
+  gap: 16px;
+}
+
+html.rogue-comfort #rogue-dpad {
+  gap: 10px;
+}
+
+html.rogue-comfort #rogue-dpad-mid {
+  gap: 10px;
+}
+
+html.rogue-comfort #rogue-actions {
+  gap: 10px;
+}
+
+html.rogue-comfort .rogue-btn {
+  border-color: #4a4a62;
+  background: #252538;
+  color: #eaeae0;
+  font-size: 17px;
+  min-height: 54px;
+  padding: 14px 18px;
+  border-radius: 12px;
+}
+
+html.rogue-comfort .rogue-btn:active {
+  background: #2e2e48;
+}
+
+html.rogue-comfort .rogue-btn-audio {
+  padding: 12px 16px;
+  font-size: 16px;
+  min-height: 54px;
+  margin-right: 6px;
+}
+
+html.rogue-comfort #rogue-dpad .rogue-btn {
+  min-width: 58px;
+  min-height: 58px;
+}
+
+html.rogue-comfort #rogue-stats {
+  font-size: 15px;
+  color: #a8a8b8;
+  gap: 14px 18px;
+}
+
+html.rogue-comfort #rogue-stats span {
+  color: #e8e8dc;
+}
+
+html.rogue-comfort #rogue-log {
+  font-size: 14px;
+  color: #9090a0;
+  border-top-color: #4a4a62;
+  min-height: 40px;
+}
+
+html.rogue-comfort #rogue-log span {
+  color: #d8d8cc;
+}
+
+html.rogue-comfort #rogue-keys {
+  font-size: 13px;
+  color: #787890;
+  line-height: 1.5;
+}
+
+html.rogue-comfort #rogue-help {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+html.rogue-comfort #rogue-help-inner {
+  background: #1a1d28;
+  border-color: #4a4a62;
+  padding: 18px;
+}
+
+html.rogue-comfort #rogue-help-title {
+  font-size: 18px;
+  color: #e8e8dc;
+  margin-bottom: 12px;
+}
+
+html.rogue-comfort #rogue-help-body {
+  font-size: 15px;
+  color: #c8c8bc;
+  gap: 8px;
+}
+
+html.rogue-comfort #rogue-help-body code {
+  color: #eaeae0;
+}
+
+html.rogue-comfort #rogue-help-close {
+  border-color: #4a4a62;
+  background: #252538;
+  color: #eaeae0;
+  padding: 12px 22px;
+  font-size: 16px;
+  min-height: 48px;
+  border-radius: 10px;
+}
+
+html.rogue-comfort #rogue-help-close:hover {
+  background: #2e2e48;
+}
+
+@media (max-width: 520px) {
+  html.rogue-comfort body {
+    padding: 8px;
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
+  }
+
+  html.rogue-comfort #rogue-wrap {
+    padding: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  html.rogue-comfort #rogue-canvas {
+    font-size: clamp(13px, calc((100vw - 16px) / 30), 22px);
+    letter-spacing: 0.02em;
+  }
+
+  html.rogue-comfort #rogue-stats {
+    font-size: 15px;
+  }
+
+  html.rogue-comfort #rogue-log {
+    font-size: 14px;
+  }
+
+  html.rogue-comfort #rogue-keys {
+    font-size: 13px;
+  }
+
+  html.rogue-comfort #rogue-controls {
+    justify-content: center;
+    gap: 16px;
+  }
+
+  html.rogue-comfort #rogue-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+

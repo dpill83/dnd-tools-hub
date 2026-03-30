@@ -4,7 +4,19 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Roguelike — Play</title>
-    <meta name="theme-color" content="#05050a" />
+    <meta id="rogue-theme-color" name="theme-color" content="#05050a" />
+    <script>
+      (function () {
+        try {
+          var p = new URLSearchParams(location.search);
+          if (p.get('comfort') === '1') {
+            document.documentElement.classList.add('rogue-comfort');
+            var m = document.getElementById('rogue-theme-color');
+            if (m) m.setAttribute('content', '#12121c');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="stylesheet" href="./rogue.css" />
   </head>

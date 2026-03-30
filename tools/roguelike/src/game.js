@@ -1,4 +1,4 @@
-import { CellType, COLS, H, ItemType, W } from './constants.js';
+import { CellType, H, ItemType, W } from './constants.js';
 import { initPlayer, makeGold, makeMonster, makePotion, makeShield, makeSword, makeTrap } from './entities.js';
 import { computeFov } from './fov.js';
 import { generateLevel, randomFloorCell } from './mapgen.js';
