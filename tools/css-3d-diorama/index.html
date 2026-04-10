@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS 3D Diorama — D&amp;D Tools Hub</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: #0d0f12;
+      color: #c8d0dc;
+      font-family: system-ui, Segoe UI, sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+    .top-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.5rem 1rem;
+      background: #151a22;
+      border-bottom: 1px solid #2a3344;
+      flex-shrink: 0;
+    }
+    .top-bar a {
+      color: #8ab4ff;
+      text-decoration: none;
+    }
+    .top-bar a:hover { text-decoration: underline; }
+    .top-bar h1 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    #viewport {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+      perspective: 880px;
+      perspective-origin: 50% 42%;
+      background: linear-gradient(180deg, #1a2230 0%, #0d0f12 55%);
+    }
+    #world {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 1px;
+      height: 1px;
+      margin: 0;
+      transform-style: preserve-3d;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+    #floor {
+      position: absolute;
+      width: 2400px;
+      height: 2400px;
+      left: 50%;
+      top: 50%;
+      margin: -1200px 0 0 -1200px;
+      transform: rotateX(90deg);
+      transform-origin: center center;
+      backface-visibility: hidden;
+      background-color: #1e2636;
+      background-image:
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 47px,
+          rgba(100, 120, 160, 0.22) 47px,
+          rgba(100, 120, 160, 0.22) 48px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 47px,
+          rgba(100, 120, 160, 0.15) 47px,
+          rgba(100, 120, 160, 0.15) 48px
+        );
+    }
+    #walls {
+      transform-style: preserve-3d;
+    }
+    .wall {
+      position: absolute;
+      left: 0;
+      top: 0;
+      background: linear-gradient(180deg, #3d4a62 0%, #2a3344 45%, #232b3a 100%);
+      border: 1px solid rgba(0, 0, 0, 0.35);
+      box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.25);
+      backface-visibility: hidden;
+      transform-origin: center bottom;
+    }
+    #props {
+      transform-style: preserve-3d;
+    }
+    .prop {
+      position: absolute;
+      left: 0;
+      top: 0;
+      transform-origin: center bottom;
+      backface-visibility: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.4);
+      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.2);
+    }
+    .prop--crate {
+      background: linear-gradient(135deg, #5c4a36 0%, #3d3228 50%, #2a2218 100%);
+    }
+    .prop--plank {
+      background: linear-gradient(180deg, #6b5344 0%, #4a3d32 100%);
+    }
+    #hud {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0.65rem 1rem;
+      background: rgba(13, 15, 18, 0.92);
+      border-top: 1px solid #2a3344;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      z-index: 10;
+      pointer-events: none;
+    }
+    #hud kbd {
+      display: inline-block;
+      padding: 0.08em 0.35em;
+      border-radius: 4px;
+      background: #252b38;
+      border: 1px solid #3d4a62;
+      font-family: inherit;
+      font-size: 0.9em;
+    }
+    #hud-pos { font-variant-numeric: tabular-nums; color: #9aa8bc; }
+  </style>
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html">Hub</a>
+    <h1>CSS 3D Diorama (prototype)</h1>
+  </header>
+  <div id="viewport" aria-label="3D view">
+    <div id="world">
+      <div id="floor" aria-hidden="true"></div>
+      <div id="walls" aria-hidden="true"></div>
+      <div id="props" aria-hidden="true"></div>
+    </div>
+  </div>
+  <div id="hud">
+    <div><kbd>W</kbd> <kbd>S</kbd> forward / back · <kbd>A</kbd> <kbd>D</kbd> turn · <span id="hud-pos"></span></div>
+  </div>
+
+  <script>
+(function () {
+  'use strict';
+
+  /** World XZ: +X right, +Z forward (deeper into the screen). Y up. rot is yaw in degrees; rot=0 faces +Z. */
+  const CONFIG = {
+    moveSpeed: 200,
+    turnSpeedDeg: 100,
+    /** World translate Y term (-eyeY in CSS); 0 matches the minimal doc template; ~56px reads as eye height above the floor. */
+    eyeY: 56,
+    maxDt: 0.05,
+  };
+
+  const KEYS = {
+    forward: new Set(['w', 'W', 'ArrowUp']),
+    back: new Set(['s', 'S', 'ArrowDown']),
+    turnLeft: new Set(['a', 'A', 'ArrowLeft']),
+    turnRight: new Set(['d', 'D', 'ArrowRight']),
+  };
+
+  /** Each wall: center at (x, z), width along local X after rotateY, height in Y, rotY in degrees. */
+  const WALLS = [
+    { x: 0, z: -420, w: 840, h: 220, rotY: 0 },
+    { x: 0, z: 420, w: 840, h: 220, rotY: 180 },
+    { x: -420, z: 0, w: 840, h: 220, rotY: -90 },
+    { x: 420, z: 0, w: 840, h: 220, rotY: 90 },
+    { x: 0, z: 0, w: 280, h: 200, rotY: 0 },
+  ];
+
+  /** Flat props (same transform pattern as walls); expand for interactables in Phase 2+. */
+  const PROPS = [
+    { x: -180, z: -120, w: 64, h: 56, rotY: 20, kind: 'crate' },
+    { x: 220, z: 40, w: 120, h: 40, rotY: -90, kind: 'plank' },
+  ];
+
+  const player = { x: 0, z: 180, rot: 0 };
+  const keysDown = new Set();
+
+  const worldEl = document.getElementById('world');
+  const wallsRoot = document.getElementById('walls');
+  const propsRoot = document.getElementById('props');
+  const hudPos = document.getElementById('hud-pos');
+
+  function buildWalls() {
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < WALLS.length; i++) {
+      const d = WALLS[i];
+      const el = document.createElement('div');
+      el.className = 'wall';
+      el.style.width = d.w + 'px';
+      el.style.height = d.h + 'px';
+      el.style.transform =
+        'translate3d(' + d.x + 'px, 0, ' + d.z + 'px) rotateY(' + d.rotY + 'deg)';
+      frag.appendChild(el);
+    }
+    wallsRoot.appendChild(frag);
+  }
+
+  function buildProps() {
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < PROPS.length; i++) {
+      const d = PROPS[i];
+      const el = document.createElement('div');
+      el.className = 'prop prop--' + d.kind;
+      el.style.width = d.w + 'px';
+      el.style.height = d.h + 'px';
+      el.style.transform =
+        'translate3d(' + d.x + 'px, 0, ' + d.z + 'px) rotateY(' + d.rotY + 'deg)';
+      frag.appendChild(el);
+    }
+    propsRoot.appendChild(frag);
+  }
+
+  const Input = {
+    init() {
+      window.addEventListener('keydown', onKeyDown, { passive: true });
+      window.addEventListener('keyup', onKeyUp, { passive: true });
+      window.addEventListener('blur', clearKeys, { passive: true });
+      document.addEventListener('visibilitychange', onVisibility, { passive: true });
+    },
+    isForward() {
+      for (const k of KEYS.forward) if (keysDown.has(k)) return true;
+      return false;
+    },
+    isBack() {
+      for (const k of KEYS.back) if (keysDown.has(k)) return true;
+      return false;
+    },
+    isTurnLeft() {
+      for (const k of KEYS.turnLeft) if (keysDown.has(k)) return true;
+      return false;
+    },
+    isTurnRight() {
+      for (const k of KEYS.turnRight) if (keysDown.has(k)) return true;
+      return false;
+    },
+  };
+
+  function onKeyDown(e) {
+    if (e.repeat) return;
+    keysDown.add(e.key);
+  }
+
+  function onKeyUp(e) {
+    keysDown.delete(e.key);
+  }
+
+  function clearKeys() {
+    keysDown.clear();
+  }
+
+  function onVisibility() {
+    if (document.visibilityState === 'hidden') keysDown.clear();
+  }
+
+  /**
+   * Render: move/rotate the whole stage opposite the player (no real camera).
+   * Doc template: translate3d(-x, 0px, ±z) rotateY(-rot) (use -z when +Z is forward). Optional Y: -eyeY for standing height.
+   * the Z term must be -player.z so the world shifts opposite position (use +z only if you flip forward axis).
+   * Single style write per frame keeps the loop cheap.
+   */
+  function render() {
+    const px = player.x;
+    const pz = player.z;
+    const r = player.rot;
+    worldEl.style.transform =
+      'translate3d(' + (-px) + 'px, ' + (-CONFIG.eyeY) + 'px, ' + (-pz) + 'px) rotateY(' + (-r) + 'deg)';
+    hudPos.textContent =
+      'x ' + px.toFixed(0) + ' · z ' + pz.toFixed(0) + ' · rot ' + r.toFixed(0) + '°';
+  }
+
+  function update(dt) {
+    let forward = 0;
+    if (Input.isForward()) forward += 1;
+    if (Input.isBack()) forward -= 1;
+    let turn = 0;
+    if (Input.isTurnLeft()) turn -= 1;
+    if (Input.isTurnRight()) turn += 1;
+
+    if (turn !== 0) {
+      player.rot += turn * CONFIG.turnSpeedDeg * dt;
+    }
+
+    if (forward !== 0) {
+      const rad = (player.rot * Math.PI) / 180;
+      const dist = forward * CONFIG.moveSpeed * dt;
+      player.x += Math.sin(rad) * dist;
+      player.z += Math.cos(rad) * dist;
+    }
+  }
+
+  let lastT = performance.now();
+  function frame(now) {
+    let dt = (now - lastT) / 1000;
+    lastT = now;
+    if (dt > CONFIG.maxDt) dt = CONFIG.maxDt;
+    update(dt);
+    render();
+    requestAnimationFrame(frame);
+  }
+
+  buildWalls();
+  buildProps();
+  Input.init();
+  render();
+  requestAnimationFrame(frame);
+})();
+  </script>
+</body>
+</html>

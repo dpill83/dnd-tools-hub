@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dungeon Crawler — D&amp;D Tools Hub</title>
+  <link rel="stylesheet" href="../../global.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="dc-toolbar">
+    <a href="../../index.html" class="dc-back">🏠 Hub</a>
+    <h1 class="dc-title">Dungeon Crawler</h1>
+    <div class="dc-toolbar-actions">
+      <div class="dc-seed" aria-label="Seed controls">
+        <span class="dc-seed-label">Seed</span>
+        <input id="dc-seed-input" class="dc-seed-input" inputmode="numeric" autocomplete="off" aria-label="Seed" />
+        <button type="button" id="dc-seed-apply" class="dc-seed-btn" aria-label="Apply seed">Apply</button>
+        <button type="button" id="dc-seed-new" class="dc-seed-btn" aria-label="New seed">New</button>
+      </div>
+      <button type="button" id="dc-hard-toggle" class="dc-hard-toggle" aria-pressed="false" aria-label="Toggle hard mode">Hard: off</button>
+      <button type="button" id="dc-sound-toggle" class="dc-sound-toggle" aria-pressed="true" aria-label="Toggle sound">Sound: on</button>
+      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
+  </header>
+
+  <div id="game-container">
+    <div id="viewport-wrap">
+      <canvas id="view" width="640" height="400" aria-label="Dungeon view"></canvas>
+      <div id="dc-time" aria-live="polite" title="Turns advance torch light. T lights a torch, G buys a potion for gold.">
+        <span class="dc-time-row">Turn <strong id="dc-turn-num">0</strong></span>
+        <span class="dc-time-row">Step <strong id="dc-step-num">0</strong></span>
+        <span class="dc-time-row">Gold <strong id="dc-gold">0</strong></span>
+        <span class="dc-time-row">Rests <strong id="dc-rest-left">3</strong></span>
+        <span class="dc-time-row dc-inv-row">Pot <strong id="dc-pot">0</strong> · Scr <strong id="dc-scroll">0</strong> · Torch <strong id="dc-torch">0</strong> · Light <strong id="dc-light">—</strong></span>
+      </div>
+      <div id="compass" aria-live="polite">N</div>
+      <div id="dc-end-overlay" class="dc-end-overlay" hidden aria-hidden="true" role="dialog" aria-labelledby="dc-end-title" aria-modal="true">
+        <div class="dc-end-panel">
+          <h2 id="dc-end-title" class="dc-end-title">—</h2>
+          <p id="dc-end-lead" class="dc-end-lead"></p>
+          <div id="dc-end-stats" class="dc-end-stats" aria-label="Run statistics"></div>
+          <div id="dc-end-death" class="dc-end-death" hidden></div>
+          <button type="button" id="dc-end-restart" class="dc-end-restart">New run</button>
+          <p class="dc-end-hint"><kbd>Enter</kbd> also restarts</p>
+        </div>
+      </div>
+      <div id="combat-overlay" class="combat-overlay" hidden aria-hidden="true" role="dialog" aria-labelledby="combat-enemy-name" aria-modal="true">
+        <div class="combat-panel">
+          <h2 class="combat-title">Encounter</h2>
+          <div class="combat-enemy-block">
+            <div id="combat-enemy-name" class="combat-enemy-name">—</div>
+            <div class="combat-enemy-hp-wrap">
+              <div id="combat-enemy-hp-bar" class="combat-enemy-hp-bar"></div>
+            </div>
+            <div id="combat-enemy-hp-text" class="combat-enemy-hp-text">HP —/—</div>
+          </div>
+          <div id="combat-log" class="combat-log" aria-live="polite"></div>
+          <p class="combat-striker-label">Attack leader — profile &amp; on-hit effect</p>
+          <div id="combat-striker-row" class="combat-striker-row" role="group" aria-label="Choose who leads the attack"></div>
+          <div class="combat-actions">
+            <button type="button" id="combat-btn-attack" class="combat-btn">Attack</button>
+            <button type="button" id="combat-btn-defend" class="combat-btn">Defend</button>
+            <button type="button" id="combat-btn-spell" class="combat-btn">Spell</button>
+            <button type="button" id="combat-btn-potion" class="combat-btn combat-btn-item">Potion (0)</button>
+            <button type="button" id="combat-btn-scroll" class="combat-btn combat-btn-item">Scroll (0)</button>
+          </div>
+          <p class="combat-hint">Keys <kbd>1</kbd>–<kbd>5</kbd> · <strong>Potion</strong> heals the worst wound · <strong>Scroll</strong> fire burst · Out of fight: <kbd>T</kbd> torch, <kbd>G</kbd> buy potion (25 gp)</p>
+        </div>
+      </div>
+    </div>
+    <aside id="party-panel" aria-label="Party"></aside>
+    <nav id="nav-pad" aria-label="Movement">
+      <button type="button" class="nav-btn" data-nav="nav-nw" aria-label="Forward-left">↖</button>
+      <button type="button" class="nav-btn" data-nav="nav-n" aria-label="Forward">↑</button>
+      <button type="button" class="nav-btn" data-nav="nav-ne" aria-label="Forward-right">↗</button>
+      <button type="button" class="nav-btn" data-nav="nav-w" aria-label="Strafe left">←</button>
+      <button type="button" class="nav-btn nav-mid" data-nav="nav-mid" aria-label="Use door">⌂</button>
+      <button type="button" class="nav-btn" data-nav="nav-e" aria-label="Strafe right">→</button>
+      <button type="button" class="nav-btn" data-nav="nav-sw" aria-label="Back-left">↙</button>
+      <button type="button" class="nav-btn" data-nav="nav-s" aria-label="Back">↓</button>
+      <button type="button" class="nav-btn" data-nav="nav-se" aria-label="Back-right">↘</button>
+    </nav>
+    <div id="dc-actions" class="dc-actions">
+      <button type="button" id="dc-rest-btn" class="dc-rest-btn">Short rest (R)</button>
+    </div>
+    <div id="msg-bar" role="status">New maze each run. Farthest tile = green exit. Chests at dead ends. T torch, G potion (25 gp). Win: ogre or exit. Press L for message log.</div>
+    <div id="dc-explore-log" class="dc-explore-log" hidden aria-hidden="true" role="log" aria-label="Exploration message log"></div>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+  <script src="../../theme.js"></script>
+</body>
+</html>

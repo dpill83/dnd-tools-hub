@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Ashen Vigil</title>
+<style>
+  /* ── Reset & Fullscreen ── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #0a0a0a;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  /* ── HUD Layer ── */
+  #hud {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 10;
+  }
+  #hud > * { pointer-events: auto; }
+
+  /* ── Player Health Bar (top center) ── */
+  #player-hud {
+    position: absolute; top: max(12px, env(safe-area-inset-top, 12px));
+    left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 10px;
+    pointer-events: none;
+  }
+  #player-hud .bar-wrap {
+    width: min(220px, 40vw); height: 16px;
+    background: rgba(0,0,0,0.7); border: 1px solid #6b3a3a;
+    border-radius: 3px; overflow: hidden;
+  }
+  #player-hud .bar-fill {
+    height: 100%; width: 100%;
+    background: linear-gradient(90deg, #8b1a1a, #c0392b);
+    transition: width 0.3s ease;
+  }
+  #player-hud .label {
+    color: #c4a882; font-size: 13px; font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+  }
+
+  /* ── Score / Kill Count ── */
+  #score-hud {
+    position: absolute; top: max(12px, env(safe-area-inset-top, 12px));
+    right: max(16px, env(safe-area-inset-right, 16px));
+    color: #c4a882; font-size: 14px; font-weight: 600;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+    pointer-events: none;
+  }
+
+  /* ── Virtual Joystick (left side) ── */
+  #joystick-zone {
+    position: absolute;
+    bottom: max(20px, env(safe-area-inset-bottom, 20px));
+    left: max(20px, env(safe-area-inset-left, 20px));
+    width: 140px; height: 140px;
+  }
+  #joystick-base {
+    width: 130px; height: 130px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(60,40,30,0.5), rgba(30,20,15,0.7));
+    border: 2px solid rgba(180,140,100,0.3);
+    position: relative;
+  }
+  #joystick-thumb {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(200,160,120,0.7), rgba(140,100,60,0.5));
+    border: 1px solid rgba(200,170,130,0.5);
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    transition: none;
+  }
+
+  /* ── Jump Button (near joystick) ── */
+  #jump-btn {
+    position: absolute;
+    bottom: max(160px, calc(env(safe-area-inset-bottom, 20px) + 140px));
+    left: max(110px, calc(env(safe-area-inset-left, 20px) + 90px));
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(80,70,50,0.6), rgba(40,30,20,0.7));
+    border: 2px solid rgba(180,160,120,0.35);
+    display: flex; align-items: center; justify-content: center;
+    color: #c4a882; font-size: 12px; font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  }
+
+  /* ── Action Buttons (right side) ── */
+  .action-btn {
+    position: absolute; width: 64px; height: 64px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #d4c4a8;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+    border: 2px solid rgba(180,140,100,0.35);
+    transition: transform 0.1s, background 0.1s;
+  }
+  .action-btn:active { transform: scale(0.9); }
+  #atk-sword {
+    bottom: max(30px, calc(env(safe-area-inset-bottom, 20px) + 10px));
+    right: max(90px, calc(env(safe-area-inset-right, 16px) + 74px));
+    background: radial-gradient(circle, rgba(139,69,19,0.6), rgba(80,30,10,0.7));
+    border-color: rgba(200,120,60,0.4);
+  }
+  #atk-magic {
+    bottom: max(100px, calc(env(safe-area-inset-bottom, 20px) + 80px));
+    right: max(20px, env(safe-area-inset-right, 16px));
+    background: radial-gradient(circle, rgba(40,50,100,0.6), rgba(20,20,60,0.7));
+    border-color: rgba(100,120,200,0.4);
+  }
+
+  /* ── Camera Touch Zone (right half for free-look) ── */
+  #camera-zone {
+    position: absolute; top: 0; right: 0;
+    width: 55%; height: 70%;
+  }
+
+  /* ── Game Over / Start Overlay ── */
+  #overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(5,3,2,0.92);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 20; color: #c4a882;
+    text-align: center; gap: 16px;
+  }
+  #overlay h1 {
+    font-size: clamp(28px, 6vw, 52px);
+    font-weight: 300; letter-spacing: 4px;
+    color: #d4a060; text-transform: uppercase;
+    text-shadow: 0 0 20px rgba(200,140,60,0.4);
+  }
+  #overlay p { font-size: 14px; opacity: 0.7; max-width: 280px; }
+  #overlay button {
+    margin-top: 12px; padding: 14px 40px;
+    background: linear-gradient(135deg, #6b3a1a, #8b4513);
+    border: 1px solid rgba(200,160,100,0.3);
+    color: #d4c4a8; font-size: 16px; font-weight: 600;
+    border-radius: 4px; cursor: pointer;
+    letter-spacing: 2px; text-transform: uppercase;
+  }
+  #overlay button:active { background: linear-gradient(135deg, #8b4513, #a0522d); }
+  #overlay.hidden { display: none; }
+
+  /* ── Cooldown indicators on buttons ── */
+  .action-btn .cd-overlay {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.55);
+    pointer-events: none;
+    transition: opacity 0.15s;
+  }
+
+  /* ── Damage flash ── */
+  #damage-flash {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(ellipse, rgba(180,20,20,0.25), transparent 70%);
+    pointer-events: none; z-index: 9;
+    opacity: 0; transition: opacity 0.15s;
+  }
+</style>
+</head>
+<body>
+
+<!-- Game Over / Title Overlay -->
+<div id="overlay">
+  <h1>Ashen Vigil</h1>
+  <p>Survive the cursed hollow. Slay the risen dead.</p>
+  <button id="start-btn">Enter the Hollow</button>
+</div>
+
+<!-- HUD -->
+<div id="hud" class="hidden">
+  <div id="player-hud">
+    <span class="label">HP</span>
+    <div class="bar-wrap"><div class="bar-fill" id="hp-bar"></div></div>
+  </div>
+  <div id="score-hud">Kills: <span id="kill-count">0</span></div>
+
+  <!-- Touch Controls -->
+  <div id="joystick-zone">
+    <div id="joystick-base">
+      <div id="joystick-thumb"></div>
+    </div>
+  </div>
+  <div id="jump-btn">JUMP</div>
+  <div id="camera-zone"></div>
+  <div id="atk-sword" class="action-btn">SWORD<div class="cd-overlay" style="opacity:0"></div></div>
+  <div id="atk-magic" class="action-btn">MAGIC<div class="cd-overlay" style="opacity:0"></div></div>
+</div>
+
+<div id="damage-flash"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.module.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ════════════════════════════════════════════
+//  CONSTANTS & CONFIG
+// ════════════════════════════════════════════
+const PLAYER_SPEED = 6;
+const PLAYER_JUMP_VEL = 9;
+const GRAVITY = -22;
+const PLAYER_MAX_HP = 100;
+const ENEMY_SPEED = 3.2;
+const ENEMY_MAX_HP = 40;
+const ENEMY_DAMAGE = 8;
+const ENEMY_ATK_RANGE = 2.2;
+const ENEMY_ATK_CD = 1.2;
+const SWORD_DAMAGE = 18;
+const SWORD_RANGE = 2.8;
+const SWORD_CD = 0.45;
+const MAGIC_DAMAGE = 25;
+const MAGIC_CD = 1.2;
+const MAGIC_SPEED = 18;
+const CAMERA_DIST = 8;
+const CAMERA_HEIGHT = 4.5;
+const CAMERA_SMOOTH = 0.08;
+const SPAWN_INTERVAL = 4;
+const MAX_ENEMIES = 8;
+const ARENA_RADIUS = 28;
+
+// ════════════════════════════════════════════
+//  DOM REFS
+// ════════════════════════════════════════════
+const overlay = document.getElementById('overlay');
+const startBtn = document.getElementById('start-btn');
+const hud = document.getElementById('hud');
+const hpBar = document.getElementById('hp-bar');
+const killCountEl = document.getElementById('kill-count');
+const joystickBase = document.getElementById('joystick-base');
+const joystickThumb = document.getElementById('joystick-thumb');
+const jumpBtn = document.getElementById('jump-btn');
+const cameraZone = document.getElementById('camera-zone');
+const atkSword = document.getElementById('atk-sword');
+const atkMagic = document.getElementById('atk-magic');
+const damageFlash = document.getElementById('damage-flash');
+
+// ════════════════════════════════════════════
+//  THREE.JS SETUP
+// ════════════════════════════════════════════
+const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.BasicShadowMap; // fast shadows
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.6;
+renderer.outputEncoding = THREE.sRGBEncoding;
+document.body.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0808);
+scene.fog = new THREE.FogExp2(0x0a0808, 0.035);
+
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.5, 80);
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ════════════════════════════════════════════
+//  LIGHTING
+// ════════════════════════════════════════════
+const ambientLight = new THREE.AmbientLight(0x1a1018, 0.6);
+scene.add(ambientLight);
+
+const dirLight = new THREE.DirectionalLight(0xd4a060, 0.8);
+dirLight.position.set(-8, 14, -6);
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.set(1024, 1024);
+dirLight.shadow.camera.near = 1;
+dirLight.shadow.camera.far = 40;
+dirLight.shadow.camera.left = -20;
+dirLight.shadow.camera.right = 20;
+dirLight.shadow.camera.top = 20;
+dirLight.shadow.camera.bottom = -20;
+scene.add(dirLight);
+
+// Subtle fill from below for horror vibe
+const fillLight = new THREE.PointLight(0x331a0a, 0.4, 30);
+fillLight.position.set(0, 0.5, 0);
+scene.add(fillLight);
+
+// ════════════════════════════════════════════
+//  MATERIALS (reuse for perf)
+// ════════════════════════════════════════════
+const groundMat = new THREE.MeshStandardMaterial({ color: 0x1a1410, roughness: 0.95, metalness: 0.05 });
+const rockMat = new THREE.MeshStandardMaterial({ color: 0x2a2220, roughness: 0.9, metalness: 0.1 });
+const ruinMat = new THREE.MeshStandardMaterial({ color: 0x302820, roughness: 0.85, metalness: 0.15 });
+const playerMat = new THREE.MeshStandardMaterial({ color: 0x8b7355, roughness: 0.6, metalness: 0.3 });
+const playerArmorMat = new THREE.MeshStandardMaterial({ color: 0x4a3a2a, roughness: 0.5, metalness: 0.5 });
+const enemyMat = new THREE.MeshStandardMaterial({ color: 0x3a2828, roughness: 0.7, metalness: 0.2 });
+const enemyEyeMat = new THREE.MeshStandardMaterial({ color: 0xcc3300, emissive: 0xcc3300, emissiveIntensity: 2 });
+const swordMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.3, metalness: 0.8 });
+
+// ════════════════════════════════════════════
+//  ENVIRONMENT
+// ════════════════════════════════════════════
+// Ground plane
+const ground = new THREE.Mesh(
+  new THREE.CircleGeometry(ARENA_RADIUS + 5, 32),
+  groundMat
+);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// Ground detail rings
+for (let r = 8; r <= 24; r += 8) {
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(r - 0.1, r + 0.1, 32),
+    new THREE.MeshStandardMaterial({ color: 0x221a14, roughness: 0.9 })
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.01;
+  scene.add(ring);
+}
+
+// Rocks and ruins (static obstacles)
+const obstacles = [];
+function addRock(x, z, sx, sy, sz) {
+  const geo = new THREE.DodecahedronGeometry(1, 0);
+  const rock = new THREE.Mesh(geo, rockMat);
+  rock.position.set(x, sy * 0.5, z);
+  rock.scale.set(sx, sy, sz);
+  rock.rotation.set(Math.random(), Math.random(), Math.random());
+  rock.castShadow = true;
+  rock.receiveShadow = true;
+  scene.add(rock);
+  obstacles.push({ pos: new THREE.Vector3(x, 0, z), radius: Math.max(sx, sz) * 1.1 });
+}
+
+function addRuin(x, z, w, h, d) {
+  const geo = new THREE.BoxGeometry(w, h, d);
+  const ruin = new THREE.Mesh(geo, ruinMat);
+  ruin.position.set(x, h / 2, z);
+  ruin.rotation.y = Math.random() * Math.PI;
+  ruin.castShadow = true;
+  ruin.receiveShadow = true;
+  scene.add(ruin);
+  obstacles.push({ pos: new THREE.Vector3(x, 0, z), radius: Math.max(w, d) * 0.7 });
+}
+
+// Scatter rocks
+addRock(-8, -6, 2, 1.5, 1.8);
+addRock(10, 4, 1.5, 2, 1.3);
+addRock(-4, 12, 1.8, 1.2, 2);
+addRock(14, -10, 2.2, 1.8, 1.5);
+addRock(-12, -14, 1.3, 1, 1.6);
+addRock(6, -16, 1.7, 1.4, 1.4);
+addRock(-16, 6, 2, 1.6, 1.2);
+addRock(18, 12, 1.4, 1.1, 1.8);
+
+// Ruined pillars / walls
+addRuin(-6, 8, 1.2, 4, 1.2);
+addRuin(8, -8, 1.5, 3, 1);
+addRuin(-14, -4, 0.8, 5, 0.8);
+addRuin(12, 14, 6, 2.5, 0.6);
+addRuin(-10, 18, 4, 1.8, 0.5);
+
+// Atmospheric ground fog particles
+const fogGeo = new THREE.BufferGeometry();
+const fogCount = 200;
+const fogPositions = new Float32Array(fogCount * 3);
+for (let i = 0; i < fogCount; i++) {
+  const angle = Math.random() * Math.PI * 2;
+  const r = Math.random() * ARENA_RADIUS;
+  fogPositions[i * 3] = Math.cos(angle) * r;
+  fogPositions[i * 3 + 1] = Math.random() * 0.8;
+  fogPositions[i * 3 + 2] = Math.sin(angle) * r;
+}
+fogGeo.setAttribute('position', new THREE.BufferAttribute(fogPositions, 3));
+const fogMat = new THREE.PointsMaterial({ color: 0x2a2018, size: 2, transparent: true, opacity: 0.3, depthWrite: false });
+const fogPoints = new THREE.Points(fogGeo, fogMat);
+scene.add(fogPoints);
+
+// ════════════════════════════════════════════
+//  PLAYER CHARACTER (low-poly humanoid)
+// ════════════════════════════════════════════
+const player = {
+  group: new THREE.Group(),
+  hp: PLAYER_MAX_HP,
+  velocity: new THREE.Vector3(),
+  onGround: true,
+  facing: 0, // radians
+  isAttacking: false,
+  attackTimer: 0,
+  swordCD: 0,
+  magicCD: 0,
+  hitTimer: 0,
+  dead: false,
+};
+
+// Build player model
+function buildPlayer() {
+  const g = player.group;
+
+  // Body (torso)
+  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.5), playerArmorMat);
+  torso.position.y = 1.5;
+  torso.castShadow = true;
+  g.add(torso);
+  player.torso = torso;
+
+  // Head
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.5, 0.45), playerMat);
+  head.position.y = 2.3;
+  head.castShadow = true;
+  g.add(head);
+
+  // Helmet visor
+  const visor = new THREE.Mesh(
+    new THREE.BoxGeometry(0.48, 0.15, 0.1),
+    new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8 })
+  );
+  visor.position.set(0, 2.3, 0.2);
+  g.add(visor);
+
+  // Legs
+  const legGeo = new THREE.BoxGeometry(0.25, 0.8, 0.3);
+  const legL = new THREE.Mesh(legGeo, playerArmorMat);
+  legL.position.set(-0.2, 0.6, 0);
+  legL.castShadow = true;
+  g.add(legL);
+  player.legL = legL;
+
+  const legR = new THREE.Mesh(legGeo, playerArmorMat);
+  legR.position.set(0.2, 0.6, 0);
+  legR.castShadow = true;
+  g.add(legR);
+  player.legR = legR;
+
+  // Arms
+  const armGeo = new THREE.BoxGeometry(0.2, 0.7, 0.2);
+  const armL = new THREE.Mesh(armGeo, playerMat);
+  armL.position.set(-0.55, 1.5, 0);
+  armL.castShadow = true;
+  g.add(armL);
+  player.armL = armL;
+
+  const armR = new THREE.Mesh(armGeo, playerMat);
+  armR.position.set(0.55, 1.5, 0);
+  armR.castShadow = true;
+  g.add(armR);
+  player.armR = armR;
+
+  // Sword (attached to right arm)
+  const swordBlade = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.1, 0.04), swordMat);
+  swordBlade.position.set(0.55, 1.0, 0.3);
+  g.add(swordBlade);
+  player.swordBlade = swordBlade;
+
+  const swordGuard = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.06, 0.06), swordMat);
+  swordGuard.position.set(0.55, 1.55, 0.3);
+  g.add(swordGuard);
+
+  // Cape
+  const cape = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.7, 1.2),
+    new THREE.MeshStandardMaterial({ color: 0x2a1a1a, roughness: 0.8, side: THREE.DoubleSide })
+  );
+  cape.position.set(0, 1.4, -0.3);
+  g.add(cape);
+  player.cape = cape;
+
+  g.position.set(0, 0, 0);
+  scene.add(g);
+}
+buildPlayer();
+
+// ════════════════════════════════════════════
+//  ENEMY FACTORY
+// ════════════════════════════════════════════
+const enemies = [];
+
+function createEnemy() {
+  const g = new THREE.Group();
+
+  // Body
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.2, 0.6), enemyMat);
+  body.position.y = 1.2;
+  body.castShadow = true;
+  g.add(body);
+
+  // Head (skull-ish)
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.35, 6, 5), enemyMat);
+  head.position.y = 2.2;
+  head.castShadow = true;
+  g.add(head);
+
+  // Eyes
+  const eyeGeo = new THREE.SphereGeometry(0.06, 4, 4);
+  const eyeL = new THREE.Mesh(eyeGeo, enemyEyeMat);
+  eyeL.position.set(-0.12, 2.25, 0.28);
+  g.add(eyeL);
+  const eyeR = new THREE.Mesh(eyeGeo, enemyEyeMat);
+  eyeR.position.set(0.12, 2.25, 0.28);
+  g.add(eyeR);
+
+  // Arms
+  const armGeo = new THREE.BoxGeometry(0.2, 0.8, 0.2);
+  const aL = new THREE.Mesh(armGeo, enemyMat);
+  aL.position.set(-0.6, 1.3, 0);
+  g.add(aL);
+  const aR = new THREE.Mesh(armGeo, enemyMat);
+  aR.position.set(0.6, 1.3, 0);
+  g.add(aR);
+
+  // Legs
+  const legGeo = new THREE.BoxGeometry(0.25, 0.7, 0.3);
+  const lL = new THREE.Mesh(legGeo, enemyMat);
+  lL.position.set(-0.2, 0.5, 0);
+  g.add(lL);
+  const lR = new THREE.Mesh(legGeo, enemyMat);
+  lR.position.set(0.2, 0.5, 0);
+  g.add(lR);
+
+  // HP bar (billboard sprite)
+  const hpCanvas = document.createElement('canvas');
+  hpCanvas.width = 64;
+  hpCanvas.height = 8;
+  const hpCtx = hpCanvas.getContext('2d');
+  const hpTex = new THREE.CanvasTexture(hpCanvas);
+  hpTex.minFilter = THREE.LinearFilter;
+  const hpSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: hpTex, transparent: true, depthWrite: false }));
+  hpSprite.scale.set(1.5, 0.18, 1);
+  hpSprite.position.y = 2.9;
+  g.add(hpSprite);
+
+  // Spawn position (ring around arena edge)
+  const angle = Math.random() * Math.PI * 2;
+  const dist = ARENA_RADIUS * 0.8 + Math.random() * 4;
+  g.position.set(Math.cos(angle) * dist, 0, Math.sin(angle) * dist);
+
+  scene.add(g);
+
+  const enemy = {
+    group: g,
+    body, aL, aR, lL, lR,
+    hp: ENEMY_MAX_HP,
+    maxHp: ENEMY_MAX_HP,
+    hpCanvas, hpCtx, hpTex, hpSprite,
+    atkCD: 0,
+    hitTimer: 0,
+    dead: false,
+    deathTimer: 0,
+    speed: ENEMY_SPEED * (0.85 + Math.random() * 0.3),
+  };
+
+  updateEnemyHPBar(enemy);
+  enemies.push(enemy);
+  return enemy;
+}
+
+function updateEnemyHPBar(e) {
+  const ctx = e.hpCtx;
+  ctx.clearRect(0, 0, 64, 8);
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, 0, 64, 8);
+  const pct = Math.max(0, e.hp / e.maxHp);
+  ctx.fillStyle = pct > 0.3 ? '#8b1a1a' : '#cc2200';
+  ctx.fillRect(1, 1, 62 * pct, 6);
+  e.hpTex.needsUpdate = true;
+}
+
+// ════════════════════════════════════════════
+//  PARTICLE SYSTEM
+// ════════════════════════════════════════════
+const particles = [];
+const particleMeshPool = [];
+const particleGeo = new THREE.SphereGeometry(0.06, 4, 3);
+
+function getParticleMesh(color) {
+  // Reuse from pool if possible
+  for (let i = particleMeshPool.length - 1; i >= 0; i--) {
+    const pm = particleMeshPool[i];
+    if (!pm.visible) {
+      pm.material.color.setHex(color);
+      pm.material.emissive.setHex(color);
+      pm.visible = true;
+      particleMeshPool.splice(i, 1);
+      return pm;
+    }
+  }
+  const mat = new THREE.MeshBasicMaterial({ color, transparent: true });
+  const mesh = new THREE.Mesh(particleGeo, mat);
+  scene.add(mesh);
+  return mesh;
+}
+
+function spawnParticles(pos, color, count = 8, spread = 1.5, life = 0.6) {
+  for (let i = 0; i < count; i++) {
+    const mesh = getParticleMesh(color);
+    mesh.position.copy(pos);
+    const vel = new THREE.Vector3(
+      (Math.random() - 0.5) * spread,
+      Math.random() * spread * 0.8,
+      (Math.random() - 0.5) * spread
+    );
+    const s = 0.5 + Math.random() * 1.5;
+    mesh.scale.setScalar(s);
+    particles.push({ mesh, vel, life, maxLife: life, scale: s });
+  }
+}
+
+function updateParticles(dt) {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.life -= dt;
+    if (p.life <= 0) {
+      p.mesh.visible = false;
+      particleMeshPool.push(p.mesh);
+      particles.splice(i, 1);
+      continue;
+    }
+    p.vel.y -= 6 * dt;
+    p.mesh.position.addScaledVector(p.vel, dt);
+    const alpha = p.life / p.maxLife;
+    p.mesh.material.opacity = alpha;
+    p.mesh.scale.setScalar(p.scale * alpha);
+  }
+}
+
+// ════════════════════════════════════════════
+//  MAGIC PROJECTILES
+// ════════════════════════════════════════════
+const projectiles = [];
+const projGeo = new THREE.SphereGeometry(0.2, 6, 5);
+const projMat = new THREE.MeshBasicMaterial({ color: 0x4488ff, transparent: true, opacity: 0.9 });
+
+function shootMagic() {
+  if (player.magicCD > 0 || player.dead) return;
+  player.magicCD = MAGIC_CD;
+
+  const proj = new THREE.Mesh(projGeo, projMat.clone());
+  // Muzzle position in front of player
+  const dir = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), player.facing);
+  const startPos = player.group.position.clone().add(new THREE.Vector3(0, 1.5, 0)).addScaledVector(dir, 0.8);
+  proj.position.copy(startPos);
+
+  // Point light on projectile
+  const light = new THREE.PointLight(0x4488ff, 1, 6);
+  proj.add(light);
+
+  scene.add(proj);
+  projectiles.push({
+    mesh: proj,
+    vel: dir.multiplyScalar(MAGIC_SPEED),
+    life: 2.5,
+    light,
+  });
+
+  // Muzzle flash particles
+  spawnParticles(startPos, 0x4488ff, 5, 1, 0.3);
+}
+
+function updateProjectiles(dt) {
+  for (let i = projectiles.length - 1; i >= 0; i--) {
+    const p = projectiles[i];
+    p.life -= dt;
+    p.mesh.position.addScaledVector(p.vel, dt);
+
+    // Trail particles
+    if (Math.random() < 0.4) {
+      spawnParticles(p.mesh.position, 0x2266cc, 1, 0.3, 0.2);
+    }
+
+    // Check enemy hits
+    let hit = false;
+    for (const e of enemies) {
+      if (e.dead) continue;
+      const dist = p.mesh.position.distanceTo(e.group.position.clone().add(new THREE.Vector3(0, 1.2, 0)));
+      if (dist < 1.2) {
+        damageEnemy(e, MAGIC_DAMAGE);
+        spawnParticles(p.mesh.position, 0x4488ff, 12, 2, 0.5);
+        hit = true;
+        break;
+      }
+    }
+
+    if (hit || p.life <= 0) {
+      scene.remove(p.mesh);
+      p.mesh.geometry.dispose();
+      p.mesh.material.dispose();
+      projectiles.splice(i, 1);
+    }
+  }
+}
+
+// ════════════════════════════════════════════
+//  COMBAT
+// ════════════════════════════════════════════
+let kills = 0;
+
+function swordAttack() {
+  if (player.swordCD > 0 || player.dead) return;
+  player.swordCD = SWORD_CD;
+  player.isAttacking = true;
+  player.attackTimer = 0.3;
+
+  // Sword swing particles
+  const dir = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), player.facing);
+  const swingPos = player.group.position.clone().add(new THREE.Vector3(0, 1.2, 0)).addScaledVector(dir, 1.2);
+  spawnParticles(swingPos, 0xffaa44, 6, 1.5, 0.3);
+
+  // Check enemies in range
+  for (const e of enemies) {
+    if (e.dead) continue;
+    const dist = player.group.position.distanceTo(e.group.position);
+    if (dist < SWORD_RANGE) {
+      // Angle check (120 degree arc in front)
+      const toEnemy = new THREE.Vector3().subVectors(e.group.position, player.group.position).normalize();
+      const facingDir = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), player.facing);
+      if (toEnemy.dot(facingDir) > 0.3) {
+        damageEnemy(e, SWORD_DAMAGE);
+        const hitPos = e.group.position.clone().add(new THREE.Vector3(0, 1.2, 0));
+        spawnParticles(hitPos, 0xff4400, 10, 2, 0.4);
+      }
+    }
+  }
+}
+
+function damageEnemy(e, dmg) {
+  e.hp -= dmg;
+  e.hitTimer = 0.15;
+  updateEnemyHPBar(e);
+  if (e.hp <= 0) {
+    e.dead = true;
+    e.deathTimer = 1.0;
+    kills++;
+    killCountEl.textContent = kills;
+    spawnParticles(e.group.position.clone().add(new THREE.Vector3(0, 1, 0)), 0x331111, 15, 2.5, 0.8);
+  }
+}
+
+function damagePlayer(dmg) {
+  if (player.dead) return;
+  player.hp -= dmg;
+  player.hitTimer = 0.2;
+  hpBar.style.width = Math.max(0, (player.hp / PLAYER_MAX_HP) * 100) + '%';
+  damageFlash.style.opacity = '1';
+  setTimeout(() => damageFlash.style.opacity = '0', 150);
+  if (player.hp <= 0) {
+    player.dead = true;
+    player.hp = 0;
+    gameOver();
+  }
+}
+
+// ════════════════════════════════════════════
+//  INPUT STATE
+// ════════════════════════════════════════════
+const input = {
+  moveX: 0, moveY: 0,  // joystick -1 to 1
+  cameraYaw: 0,         // accumulated yaw from camera swipe
+  cameraPitch: 0.3,     // pitch angle
+  jump: false,
+};
+
+// Keys (desktop fallback)
+const keysDown = new Set();
+window.addEventListener('keydown', e => { keysDown.add(e.code); e.preventDefault(); });
+window.addEventListener('keyup', e => keysDown.delete(e.code));
+
+// ── Virtual Joystick ──
+let joystickTouchId = null;
+let joystickCenter = { x: 0, y: 0 };
+
+function getJoystickCenter() {
+  const rect = joystickBase.getBoundingClientRect();
+  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+}
+
+joystickBase.addEventListener('pointerdown', e => {
+  if (joystickTouchId !== null) return;
+  joystickTouchId = e.pointerId;
+  joystickBase.setPointerCapture(e.pointerId);
+  joystickCenter = getJoystickCenter();
+  updateJoystick(e);
+});
+
+joystickBase.addEventListener('pointermove', e => {
+  if (e.pointerId !== joystickTouchId) return;
+  updateJoystick(e);
+});
+
+joystickBase.addEventListener('pointerup', e => {
+  if (e.pointerId !== joystickTouchId) return;
+  joystickTouchId = null;
+  input.moveX = 0;
+  input.moveY = 0;
+  joystickThumb.style.transform = 'translate(-50%, -50%)';
+});
+
+joystickBase.addEventListener('pointercancel', e => {
+  if (e.pointerId !== joystickTouchId) return;
+  joystickTouchId = null;
+  input.moveX = 0;
+  input.moveY = 0;
+  joystickThumb.style.transform = 'translate(-50%, -50%)';
+});
+
+function updateJoystick(e) {
+  const maxDist = 45;
+  let dx = e.clientX - joystickCenter.x;
+  let dy = e.clientY - joystickCenter.y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  if (dist > maxDist) {
+    dx = (dx / dist) * maxDist;
+    dy = (dy / dist) * maxDist;
+  }
+  input.moveX = dx / maxDist;
+  input.moveY = dy / maxDist; // positive = down = forward in screen space
+  joystickThumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+}
+
+// ── Camera Swipe (right side) ──
+let cameraTouchId = null;
+let cameraLastX = 0;
+let cameraLastY = 0;
+
+cameraZone.addEventListener('pointerdown', e => {
+  if (cameraTouchId !== null) return;
+  cameraTouchId = e.pointerId;
+  cameraZone.setPointerCapture(e.pointerId);
+  cameraLastX = e.clientX;
+  cameraLastY = e.clientY;
+});
+
+cameraZone.addEventListener('pointermove', e => {
+  if (e.pointerId !== cameraTouchId) return;
+  const dx = e.clientX - cameraLastX;
+  const dy = e.clientY - cameraLastY;
+  input.cameraYaw -= dx * 0.005;
+  input.cameraPitch = Math.max(-0.3, Math.min(0.8, input.cameraPitch + dy * 0.004));
+  cameraLastX = e.clientX;
+  cameraLastY = e.clientY;
+});
+
+cameraZone.addEventListener('pointerup', e => { if (e.pointerId === cameraTouchId) cameraTouchId = null; });
+cameraZone.addEventListener('pointercancel', e => { if (e.pointerId === cameraTouchId) cameraTouchId = null; });
+
+// Desktop mouse look
+let mouseDown = false;
+renderer.domElement.addEventListener('mousedown', e => {
+  if (e.button === 2) { mouseDown = true; }
+});
+window.addEventListener('mouseup', e => {
+  if (e.button === 2) mouseDown = false;
+});
+renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
+window.addEventListener('mousemove', e => {
+  if (!mouseDown) return;
+  input.cameraYaw -= e.movementX * 0.003;
+  input.cameraPitch = Math.max(-0.3, Math.min(0.8, input.cameraPitch + e.movementY * 0.003));
+});
+
+// ── Jump button ──
+jumpBtn.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  input.jump = true;
+});
+
+// ── Attack buttons ──
+atkSword.addEventListener('pointerdown', e => { e.preventDefault(); swordAttack(); });
+atkMagic.addEventListener('pointerdown', e => { e.preventDefault(); shootMagic(); });
+
+// ════════════════════════════════════════════
+//  COLLISION HELPERS
+// ════════════════════════════════════════════
+function clampToArena(pos) {
+  const d = Math.sqrt(pos.x * pos.x + pos.z * pos.z);
+  if (d > ARENA_RADIUS) {
+    pos.x = (pos.x / d) * ARENA_RADIUS;
+    pos.z = (pos.z / d) * ARENA_RADIUS;
+  }
+}
+
+function resolveObstacles(pos, radius) {
+  for (const ob of obstacles) {
+    const dx = pos.x - ob.pos.x;
+    const dz = pos.z - ob.pos.z;
+    const dist = Math.sqrt(dx * dx + dz * dz);
+    const minDist = radius + ob.radius;
+    if (dist < minDist && dist > 0.01) {
+      const push = (minDist - dist);
+      pos.x += (dx / dist) * push;
+      pos.z += (dz / dist) * push;
+    }
+  }
+}
+
+// ════════════════════════════════════════════
+//  ANIMATION HELPERS
+// ════════════════════════════════════════════
+function animatePlayer(dt, moving) {
+  const t = performance.now() * 0.001;
+
+  if (player.dead) {
+    // Fall over
+    player.group.rotation.z = Math.min(player.group.rotation.z + dt * 3, Math.PI / 2);
+    player.group.position.y = Math.max(0, player.group.position.y - dt * 2);
+    return;
+  }
+
+  if (player.isAttacking) {
+    // Sword swing animation
+    player.armR.rotation.x = -Math.PI * 0.7 * (1 - player.attackTimer / 0.3);
+    player.swordBlade.rotation.x = -Math.PI * 0.4 * (1 - player.attackTimer / 0.3);
+  } else if (moving) {
+    // Run animation
+    const runCycle = Math.sin(t * 10) * 0.5;
+    player.legL.rotation.x = runCycle;
+    player.legR.rotation.x = -runCycle;
+    player.armL.rotation.x = -runCycle * 0.6;
+    player.armR.rotation.x = runCycle * 0.6;
+    player.swordBlade.rotation.x = runCycle * 0.3;
+    // Slight body bob
+    player.torso.position.y = 1.5 + Math.abs(Math.sin(t * 10)) * 0.05;
+  } else {
+    // Idle breathing
+    player.legL.rotation.x = 0;
+    player.legR.rotation.x = 0;
+    player.armL.rotation.x = 0;
+    player.armR.rotation.x = Math.sin(t * 2) * 0.05;
+    player.swordBlade.rotation.x = Math.sin(t * 2) * 0.03;
+    player.torso.position.y = 1.5 + Math.sin(t * 2) * 0.02;
+  }
+
+  // Cape sway
+  player.cape.rotation.x = (moving ? 0.3 : 0.1) + Math.sin(t * 3) * 0.05;
+
+  // Hit flash
+  if (player.hitTimer > 0) {
+    player.torso.material = player.hitTimer % 0.06 > 0.03
+      ? new THREE.MeshBasicMaterial({ color: 0xff4444 })
+      : playerArmorMat;
+  } else {
+    player.torso.material = playerArmorMat;
+  }
+}
+
+function animateEnemy(e, dt) {
+  const t = performance.now() * 0.001;
+  if (e.dead) return;
+
+  const dist = e.group.position.distanceTo(player.group.position);
+  const moving = dist > ENEMY_ATK_RANGE;
+
+  if (moving) {
+    const runCycle = Math.sin(t * 8 + e.group.id) * 0.4;
+    e.lL.rotation.x = runCycle;
+    e.lR.rotation.x = -runCycle;
+    e.aL.rotation.x = -runCycle * 0.5;
+    e.aR.rotation.x = runCycle * 0.5;
+  } else {
+    e.lL.rotation.x *= 0.9;
+    e.lR.rotation.x *= 0.9;
+    // Attack reach
+    if (e.atkCD <= 0) {
+      e.aL.rotation.x = -1.2;
+      e.aR.rotation.x = -1.2;
+    }
+  }
+
+  // Hit flash
+  if (e.hitTimer > 0) {
+    e.body.material = e.hitTimer % 0.06 > 0.03
+      ? new THREE.MeshBasicMaterial({ color: 0xff4444 })
+      : enemyMat;
+  } else {
+    e.body.material = enemyMat;
+  }
+}
+
+// ════════════════════════════════════════════
+//  GAME STATE
+// ════════════════════════════════════════════
+let running = false;
+let spawnTimer = 2;
+const clock = new THREE.Clock();
+
+function resetGame() {
+  // Clear enemies
+  for (const e of enemies) {
+    scene.remove(e.group);
+  }
+  enemies.length = 0;
+
+  // Clear projectiles
+  for (const p of projectiles) {
+    scene.remove(p.mesh);
+  }
+  projectiles.length = 0;
+
+  // Clear particles
+  for (const p of particles) {
+    p.mesh.visible = false;
+    particleMeshPool.push(p.mesh);
+  }
+  particles.length = 0;
+
+  // Reset player
+  player.hp = PLAYER_MAX_HP;
+  player.dead = false;
+  player.swordCD = 0;
+  player.magicCD = 0;
+  player.hitTimer = 0;
+  player.isAttacking = false;
+  player.attackTimer = 0;
+  player.velocity.set(0, 0, 0);
+  player.group.position.set(0, 0, 0);
+  player.group.rotation.set(0, 0, 0);
+  player.onGround = true;
+
+  hpBar.style.width = '100%';
+  kills = 0;
+  killCountEl.textContent = '0';
+  spawnTimer = 1.5;
+  input.cameraYaw = 0;
+  input.cameraPitch = 0.3;
+}
+
+function startGame() {
+  resetGame();
+  overlay.classList.add('hidden');
+  hud.classList.remove('hidden');
+  running = true;
+  clock.start();
+}
+
+function gameOver() {
+  running = false;
+  setTimeout(() => {
+    overlay.querySelector('h1').textContent = 'You Have Fallen';
+    overlay.querySelector('p').textContent = `You slew ${kills} cursed souls before the hollow claimed you.`;
+    startBtn.textContent = 'Rise Again';
+    overlay.classList.remove('hidden');
+    hud.classList.add('hidden');
+  }, 1200);
+}
+
+startBtn.addEventListener('click', startGame);
+startBtn.addEventListener('touchend', e => { e.preventDefault(); startGame(); });
+
+// ════════════════════════════════════════════
+//  MAIN GAME LOOP
+// ════════════════════════════════════════════
+const _moveDir = new THREE.Vector3();
+const _camTarget = new THREE.Vector3();
+const _camDesired = new THREE.Vector3();
+
+function update() {
+  requestAnimationFrame(update);
+  if (!running) {
+    renderer.render(scene, camera);
+    return;
+  }
+
+  const dt = Math.min(clock.getDelta(), 0.05);
+
+  // ── Desktop keyboard input ──
+  if (keysDown.size > 0) {
+    input.moveX = 0;
+    input.moveY = 0;
+    if (keysDown.has('KeyA') || keysDown.has('ArrowLeft')) input.moveX = -1;
+    if (keysDown.has('KeyD') || keysDown.has('ArrowRight')) input.moveX = 1;
+    if (keysDown.has('KeyW') || keysDown.has('ArrowUp')) input.moveY = -1;
+    if (keysDown.has('KeyS') || keysDown.has('ArrowDown')) input.moveY = 1;
+    if (keysDown.has('Space')) input.jump = true;
+    if (keysDown.has('KeyJ')) swordAttack();
+    if (keysDown.has('KeyK')) shootMagic();
+  }
+
+  // ── Player movement ──
+  if (!player.dead) {
+    const hasMoveInput = Math.abs(input.moveX) > 0.1 || Math.abs(input.moveY) > 0.1;
+
+    if (hasMoveInput) {
+      // Movement relative to camera yaw
+      _moveDir.set(input.moveX, 0, input.moveY).normalize();
+      _moveDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), input.cameraYaw);
+
+      player.group.position.x += _moveDir.x * PLAYER_SPEED * dt;
+      player.group.position.z += _moveDir.z * PLAYER_SPEED * dt;
+
+      // Face movement direction
+      player.facing = Math.atan2(_moveDir.x, _moveDir.z);
+      player.group.rotation.y = player.facing;
+    }
+
+    // Jump
+    if (input.jump && player.onGround) {
+      player.velocity.y = PLAYER_JUMP_VEL;
+      player.onGround = false;
+    }
+    input.jump = false;
+
+    // Gravity
+    player.velocity.y += GRAVITY * dt;
+    player.group.position.y += player.velocity.y * dt;
+    if (player.group.position.y <= 0) {
+      player.group.position.y = 0;
+      player.velocity.y = 0;
+      player.onGround = true;
+    }
+
+    // Collisions
+    clampToArena(player.group.position);
+    resolveObstacles(player.group.position, 0.5);
+
+    // Cooldowns
+    player.swordCD = Math.max(0, player.swordCD - dt);
+    player.magicCD = Math.max(0, player.magicCD - dt);
+    player.hitTimer = Math.max(0, player.hitTimer - dt);
+
+    // Attack timer
+    if (player.isAttacking) {
+      player.attackTimer -= dt;
+      if (player.attackTimer <= 0) player.isAttacking = false;
+    }
+
+    // Update CD visuals
+    atkSword.querySelector('.cd-overlay').style.opacity = player.swordCD > 0 ? '1' : '0';
+    atkMagic.querySelector('.cd-overlay').style.opacity = player.magicCD > 0 ? '1' : '0';
+
+    animatePlayer(dt, hasMoveInput);
+  } else {
+    animatePlayer(dt, false);
+  }
+
+  // ── Enemy AI ──
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    const e = enemies[i];
+
+    if (e.dead) {
+      e.deathTimer -= dt;
+      // Sink into ground
+      e.group.position.y -= dt * 0.8;
+      e.group.children.forEach(c => {
+        if (c.material && c.material.opacity !== undefined) {
+          c.material.transparent = true;
+          c.material.opacity = Math.max(0, e.deathTimer);
+        }
+      });
+      if (e.deathTimer <= 0) {
+        scene.remove(e.group);
+        enemies.splice(i, 1);
+      }
+      continue;
+    }
+
+    e.hitTimer = Math.max(0, e.hitTimer - dt);
+    e.atkCD = Math.max(0, e.atkCD - dt);
+
+    // Chase player
+    const toPlayer = new THREE.Vector3().subVectors(player.group.position, e.group.position);
+    toPlayer.y = 0;
+    const dist = toPlayer.length();
+
+    if (dist > ENEMY_ATK_RANGE && !player.dead) {
+      toPlayer.normalize();
+      e.group.position.x += toPlayer.x * e.speed * dt;
+      e.group.position.z += toPlayer.z * e.speed * dt;
+      // Face player
+      e.group.rotation.y = Math.atan2(toPlayer.x, toPlayer.z);
+    }
+
+    // Attack player
+    if (dist < ENEMY_ATK_RANGE && e.atkCD <= 0 && !player.dead) {
+      damagePlayer(ENEMY_DAMAGE);
+      e.atkCD = ENEMY_ATK_CD;
+      spawnParticles(
+        player.group.position.clone().add(new THREE.Vector3(0, 1.2, 0)),
+        0xff2200, 6, 1.5, 0.3
+      );
+    }
+
+    // Obstacle avoidance
+    clampToArena(e.group.position);
+    resolveObstacles(e.group.position, 0.5);
+
+    // Enemy-enemy repulsion
+    for (let j = 0; j < enemies.length; j++) {
+      if (i === j || enemies[j].dead) continue;
+      const sep = new THREE.Vector3().subVectors(e.group.position, enemies[j].group.position);
+      sep.y = 0;
+      const d = sep.length();
+      if (d < 1.5 && d > 0.01) {
+        sep.normalize().multiplyScalar((1.5 - d) * 0.5);
+        e.group.position.add(sep);
+      }
+    }
+
+    animateEnemy(e, dt);
+  }
+
+  // ── Spawn enemies ──
+  spawnTimer -= dt;
+  if (spawnTimer <= 0 && enemies.filter(e => !e.dead).length < MAX_ENEMIES) {
+    createEnemy();
+    spawnTimer = Math.max(1.5, SPAWN_INTERVAL - kills * 0.1);
+  }
+
+  // ── Projectiles & Particles ──
+  updateProjectiles(dt);
+  updateParticles(dt);
+
+  // ── Fog animation ──
+  const fogPos = fogGeo.attributes.position;
+  for (let i = 0; i < fogCount; i++) {
+    fogPos.array[i * 3 + 1] = 0.3 + Math.sin(performance.now() * 0.0005 + i) * 0.4;
+  }
+  fogPos.needsUpdate = true;
+
+  // ── Camera ──
+  // Third person camera: orbits around player based on cameraYaw/cameraPitch
+  const camDist = CAMERA_DIST;
+  const camHeight = CAMERA_HEIGHT + input.cameraPitch * 4;
+
+  _camTarget.copy(player.group.position).add(new THREE.Vector3(0, 2, 0));
+
+  _camDesired.set(
+    player.group.position.x - Math.sin(input.cameraYaw) * camDist,
+    player.group.position.y + camHeight,
+    player.group.position.z - Math.cos(input.cameraYaw) * camDist
+  );
+
+  // Smooth follow
+  camera.position.lerp(_camDesired, CAMERA_SMOOTH + (1 - CAMERA_SMOOTH) * 0.15);
+  camera.lookAt(_camTarget);
+
+  // Keep camera from going underground
+  if (camera.position.y < 1) camera.position.y = 1;
+
+  // Clamp camera to arena (prevents seeing behind the fog)
+  clampToArena(camera.position);
+
+  // Move fill light to player
+  fillLight.position.copy(player.group.position).add(new THREE.Vector3(0, 0.5, 0));
+
+  // ── Render ──
+  renderer.render(scene, camera);
+}
+
+// Start render loop (menu shows first)
+update();
+
+// ── Fullscreen on first touch for mobile ──
+document.addEventListener('touchstart', function goFS() {
+  if (document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  }
+  document.removeEventListener('touchstart', goFS);
+}, { once: true });
+
+</script>
+</body>
+</html>
