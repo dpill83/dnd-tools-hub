@@ -935,6 +935,85 @@ html, body {
   border-color: rgba(201, 164, 92, 0.6);
   color: var(--gold);
 }
+
+/* ── SKETCH PARCHMENT (critical-check scene art, left of main parchment) ── */
+.sketch-parchment {
+  position: absolute;
+  right: 52%;
+  top: 50%;
+  transform: translateY(-44%) rotate(-5deg);
+  width: 320px;
+  height: 320px;
+  z-index: 8;
+  cursor: pointer;
+  filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.7));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.sketch-parchment:hover {
+  transform: translateY(-46%) rotate(-5deg) scale(1.02);
+  filter: drop-shadow(0 16px 40px rgba(0, 0, 0, 0.8));
+}
+
+.sketch-parchment-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.sketch-parchment-content {
+  position: absolute;
+  inset: 20px 24px 24px 24px;
+  z-index: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sketch-parchment-loading {
+  display: none;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  background: rgba(42, 26, 8, 0.06);
+}
+
+.sketch-parchment-loading.active {
+  display: flex;
+}
+
+.sketch-parchment-loading span {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  animation: ttPulse 1.5s ease-in-out infinite;
+}
+
+.sketch-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  filter: grayscale(100%) contrast(1.4) brightness(0.9) sepia(20%);
+  transition: opacity 0.4s ease;
+  opacity: 0;
+}
+
+.sketch-image.loaded {
+  opacity: 1;
+}
+
+/* Inline parchment banner retired — scene art lives on sketch parchment only */
+#sceneIllustration {
+  display: none !important;
+}
 </style>
 </head>
 <body>
@@ -943,6 +1022,17 @@ html, body {
 
   <!-- Layer 1: Desk background -->
   <div class="desk"></div>
+
+  <!-- Sketch parchment — left of main parchment, behind it (scene2/4/7 only when images on) -->
+  <div class="sketch-parchment" id="sketchParchment" style="display:none;">
+    <img class="sketch-parchment-bg" src="assets/parchment.png" alt="">
+    <div class="sketch-parchment-content">
+      <div class="sketch-parchment-loading" id="sketchLoading" aria-hidden="true">
+        <span>Rendering scene...</span>
+      </div>
+      <img class="sketch-image" id="sketchImage" src="" alt="Scene sketch">
+    </div>
+  </div>
 
   <!-- Title Screen -->
   <div class="title-screen" id="titleScreen">
@@ -1839,12 +1929,12 @@ async function generateSceneImage(sceneId, opts = {}) {
   if (!bypassCache) {
     const cached = localStorage.getItem(config.cacheKey);
     if (cached) {
-      displaySceneImage(cached, sceneId);
+      displaySketchParchment(cached, sceneId);
       return;
     }
   }
 
-  showIllustrationLoading();
+  showSketchParchmentLoading();
 
   try {
     const response = await fetch('/api/openai/images', {
@@ -1873,24 +1963,31 @@ async function generateSceneImage(sceneId, opts = {}) {
     }
 
     try {
-      // OpenAI image URLs are short-lived signed links; stale entries 403 until refetched (see displaySceneImage onerror).
+      // OpenAI image URLs are short-lived signed links; stale entries 403 until refetched (see displaySketchParchment onerror).
       localStorage.setItem(config.cacheKey, imageUrl);
     } catch {
       // localStorage full — skip caching
     }
 
-    displaySceneImage(imageUrl, sceneId);
+    displaySketchParchment(imageUrl, sceneId);
   } catch (err) {
     console.warn('Image generation error:', err);
     hideIllustration();
   }
 }
 
-function showIllustrationLoading() {
-  const el = document.getElementById('sceneIllustration');
-  if (!el) return;
-  el.innerHTML = '<div class="scene-illustration-loading"><span>Rendering scene...</span></div>';
-  el.classList.add('visible');
+function showSketchParchmentLoading() {
+  const parchment = document.getElementById('sketchParchment');
+  const loading = document.getElementById('sketchLoading');
+  const img = document.getElementById('sketchImage');
+  if (!parchment || !loading || !img) return;
+  img.removeAttribute('src');
+  img.classList.remove('loaded');
+  img.onerror = null;
+  img.onload = null;
+  loading.classList.add('active');
+  parchment.style.display = 'block';
+  parchment.onclick = null;
 }
 
 function openIllustrationLightbox(url) {
@@ -1913,18 +2010,13 @@ function closeIllustrationLightbox() {
   if (lbImg) lbImg.removeAttribute('src');
 }
 
-function displaySceneImage(url, sceneId) {
-  const el = document.getElementById('sceneIllustration');
-  if (!el) return;
-  el.innerHTML =
-    '<button type="button" class="scene-illustration-expand" aria-label="View illustration full size">' +
-    '<img src="" alt="Scene illustration">' +
-    '<span class="scene-illustration-hint">Click to enlarge</span>' +
-    '</button>';
-  el.classList.add('visible');
-  const btn = el.querySelector('.scene-illustration-expand');
-  const img = el.querySelector('img');
-  if (!btn || !img) return;
+function displaySketchParchment(url, sceneId) {
+  const parchment = document.getElementById('sketchParchment');
+  const img = document.getElementById('sketchImage');
+  const loading = document.getElementById('sketchLoading');
+  if (!parchment || !img) return;
+  if (loading) loading.classList.remove('active');
+
   img.onload = () => img.classList.add('loaded');
   img.onerror = () => {
     img.onerror = null;
@@ -1943,17 +2035,38 @@ function displaySceneImage(url, sceneId) {
     console.warn('Scene image URL expired or blocked; fetching a new one.');
     generateSceneImage(sceneId, { bypassCache: true });
   };
+
+  parchment.onclick = () => openIllustrationLightbox(url);
   img.src = url;
   if (img.complete) img.classList.add('loaded');
-  btn.addEventListener('click', () => openIllustrationLightbox(url));
+  parchment.style.display = 'block';
+}
+
+function hideSketchParchment() {
+  const parchment = document.getElementById('sketchParchment');
+  const img = document.getElementById('sketchImage');
+  const loading = document.getElementById('sketchLoading');
+  if (parchment) {
+    parchment.style.display = 'none';
+    parchment.onclick = null;
+  }
+  if (loading) loading.classList.remove('active');
+  if (img) {
+    img.removeAttribute('src');
+    img.classList.remove('loaded');
+    img.onerror = null;
+    img.onload = null;
+  }
 }
 
 function hideIllustration() {
   closeIllustrationLightbox();
   const el = document.getElementById('sceneIllustration');
-  if (!el) return;
-  el.classList.remove('visible');
-  el.innerHTML = '';
+  if (el) {
+    el.classList.remove('visible');
+    el.innerHTML = '';
+  }
+  hideSketchParchment();
 }
 
 function updateChronicle() {
