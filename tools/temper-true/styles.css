@@ -1,0 +1,1007 @@
+/* ── RESET & ROOT ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold: #c9a45c;
+  --gold-dim: #8a6e3a;
+  --gold-bright: #e8c87a;
+  --ink: #1a120a;
+  --ink-mid: #2e1f0f;
+  --parchment: #f2e8d0;
+  --parchment-dark: #d9c8a0;
+  --ember: #b84c1a;
+  --steel-blue: #4a7a9b;
+  --teal: #5ba3b0;
+  --leather-dark: #111318;
+  --text-on-parchment: #2a1a08;
+  --text-dim: #6b4e2a;
+  --shadow-deep: rgba(0,0,0,0.85);
+  --shadow-mid: rgba(0,0,0,0.55);
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  cursor: default;
+}
+
+/* ── DESK LAYER ── */
+.app {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Crimson Text', serif;
+}
+
+.desk {
+  position: absolute;
+  inset: 0;
+  background: url('assets/desk.png') center/cover no-repeat;
+  /* Fallback if image missing */
+  background-color: #1a0e06;
+}
+
+/* Vignette overlay */
+.desk::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 40% 50%, transparent 30%, rgba(0,0,0,0.55) 100%);
+  pointer-events: none;
+}
+
+/* ── SCENE LAYER (parchment center) ── */
+.scene {
+  position: absolute;
+  top: 50%;
+  left: 55%;
+  transform: translate(-50%, -50%) rotate(-0.8deg);  /* was -58% */
+  z-index: 10;
+  transition: opacity 0.4s ease;
+}
+
+.scene.fading { opacity: 0; }
+
+.parchment {
+  position: relative;
+  width: 900px;
+  min-height: 540px;
+  /* No background here - we use the img tag overlay */
+  background: transparent;
+  filter: drop-shadow(0 24px 48px rgba(0,0,0,0.75)) drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Parchment texture image sits behind content */
+.parchment-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* All direct children of parchment sit above the bg image */
+.parchment > *:not(.parchment-bg) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Content area with safe inset away from torn edges */
+.parchment-content {
+  position: relative;
+  z-index: 1;
+  padding: 100px 150px 120px 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 900px;
+}
+
+/* Scene label (e.g. "Scene 1 · Trollskull Alley") */
+.scene-label {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+/* Scene title */
+.scene-title {
+  font-family: 'Cinzel', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+/* Location subtitle */
+.scene-location {
+  font-family: 'Crimson Text', serif;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--parchment-dark);
+}
+
+/* Main column: prose, ritual, choices, … + fill keeps Continue at parchment foot */
+.parchment-main {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.parchment-fill {
+  flex: 1 1 auto;
+  min-height: 12px;
+}
+
+/* Prose text */
+.scene-prose {
+  font-family: 'Crimson Text', serif;
+  font-size: 16px;
+  line-height: 1.72;
+  color: var(--text-on-parchment);
+  margin-bottom: 24px;
+  flex: 0 0 auto;
+}
+
+.scene-prose p + p { margin-top: 12px; }
+
+.scene-prose em {
+  color: var(--ink);
+  font-style: italic;
+}
+
+/* Choices */
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.choice-btn {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(42, 26, 8, 0.07);
+  border: 1px solid rgba(42, 26, 8, 0.18);
+  border-left: 3px solid var(--gold-dim);
+  padding: 10px 14px;
+  cursor: pointer;
+  font-family: 'Crimson Text', serif;
+  font-size: 15px;
+  color: var(--text-on-parchment);
+  text-align: left;
+  transition: all 0.2s ease;
+  line-height: 1.4;
+}
+
+.choice-btn:hover {
+  background: rgba(201, 164, 92, 0.15);
+  border-left-color: var(--gold);
+  color: var(--ink);
+  transform: translateX(2px);
+}
+
+.choice-btn:active { transform: translateX(4px); }
+
+.choice-num {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gold-dim);
+  letter-spacing: 1px;
+  padding-top: 2px;
+  min-width: 20px;
+}
+
+/* Manual dice input row */
+.dice-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: rgba(42,26,8,0.06);
+  border: 1px solid rgba(42,26,8,0.15);
+}
+
+.dice-label {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  flex: 1;
+}
+
+.dice-label strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.dice-number-input {
+  width: 56px;
+  padding: 6px 8px;
+  background: rgba(242,232,208,0.8);
+  border: 1px solid var(--gold-dim);
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: center;
+  outline: none;
+}
+
+.dice-submit-btn {
+  padding: 7px 14px;
+  background: var(--gold-dim);
+  border: none;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #1a120a;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dice-submit-btn:hover { background: var(--gold); }
+
+/* LLM response area */
+.llm-response {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: rgba(42,26,8,0.06);
+  border-left: 3px solid var(--gold);
+  font-family: 'Crimson Text', serif;
+  font-size: 15px;
+  font-style: italic;
+  color: var(--text-on-parchment);
+  line-height: 1.6;
+  display: none;
+}
+
+.llm-response.visible { display: block; }
+
+.llm-response.loading::after {
+  content: '▋';
+  animation: blink 0.8s step-end infinite;
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Continue button */
+.continue-btn {
+  margin-top: 16px;
+  align-self: flex-end;
+  padding: 9px 22px;
+  background: transparent;
+  border: 1px solid var(--gold-dim);
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--gold-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: none;
+}
+
+.continue-btn:hover {
+  background: rgba(201,164,92,0.12);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.continue-btn.visible { display: block; }
+
+/* ── RIGHT PANEL ── */
+.right-panel {
+  position: absolute;
+  right: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 340px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Chronicle panel */
+.chronicle {
+  position: relative;
+  background: url('assets/leather-black.png') center/110% 110% no-repeat;
+  background-color: #111318;
+  padding: 50px 50px 60px;
+  min-height: 320px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.5);
+  border: 1px solid rgba(201,164,92,0.25);
+  overflow: hidden;
+}
+
+.chronicle-title {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(201,164,92,0.3);
+}
+
+.chronicle-section {
+  margin-bottom: 14px;
+}
+
+.chronicle-section-label {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 6px;
+}
+
+/* Tags */
+.tags-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Crimson Text', serif;
+  font-size: 13px;
+  color: rgba(242,232,208,0.75);
+  line-height: 1.3;
+}
+
+.tag-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(201,164,92,0.35);
+  flex-shrink: 0;
+}
+
+.tag.earned .tag-dot { background: var(--gold); }
+.tag.earned { color: rgba(242,232,208,0.95); }
+.tag.bad .tag-dot { background: var(--ember); }
+.tag.bad { color: rgba(232,160,120,0.9); }
+
+/* Clues */
+.clue {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-family: 'Crimson Text', serif;
+  font-size: 13px;
+  color: rgba(242,232,208,0.5);
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.clue.found { color: rgba(242,232,208,0.9); }
+.clue-letter {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  color: var(--gold-dim);
+  padding-top: 1px;
+  min-width: 14px;
+}
+.clue.found .clue-letter { color: var(--gold); }
+
+/* Session indicator */
+.session-indicator {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--gold-dim);
+  text-align: center;
+  padding: 6px;
+  border: 1px solid rgba(201,164,92,0.2);
+}
+
+/* ── CRITICAL CHECK PANEL (ritual) — square tile, centered on parchment ── */
+.ritual {
+  position: relative;
+  box-sizing: border-box;
+  width: min(100%, 550px);
+  aspect-ratio: 1 / 1;
+  flex: 0 0 auto;
+  margin: 8px auto 28px;
+  padding: 90px 80px 110px;
+  background: url('assets/leather-blue.png') center/115% 115% no-repeat;
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.ritual.visible {
+  display: flex;
+}
+
+.ritual-header {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 6px;
+}
+
+.ritual-name {
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: rgba(242,232,208,0.95);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.ritual-desc {
+  font-family: 'Crimson Text', serif;
+  font-size: 13px;
+  font-style: italic;
+  color: rgba(242,232,208,0.6);
+  margin-bottom: 0;
+  line-height: 1.4;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.ritual-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.ritual-dc {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--teal);
+  line-height: 1;
+}
+
+.ritual-dc-label {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--gold-dim);
+  margin-top: 2px;
+}
+
+.ritual-roll-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+  border: none;
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.ritual-roll-btn:hover {
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+}
+
+.ritual-roll-btn:active { transform: translateY(0); }
+
+.ritual-roll-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Dice animation */
+.dice-roll-display {
+  font-family: 'Cinzel', serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--gold-bright);
+  text-align: center;
+  padding: 8px 0;
+  display: none;
+  text-shadow: 0 0 20px rgba(232,200,122,0.6);
+}
+
+.dice-roll-display.visible { display: block; }
+
+@keyframes diceRoll {
+  0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+  60% { transform: scale(1.2) rotate(3deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.dice-roll-display.rolling {
+  animation: diceRoll 0.5s ease forwards;
+}
+
+/* ── TITLE SCREEN ── */
+.title-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.6);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+.title-card {
+  text-align: center;
+  padding: 64px 80px;
+  background: url('assets/leather-black.png') center/110% 110% no-repeat;
+  background-color: rgba(17,19,24,0.97);
+  border: 1px solid rgba(201,164,92,0.3);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.9);
+  max-width: 560px;
+  overflow: hidden;
+}
+
+.title-eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--gold-dim);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.title-main {
+  font-family: 'Cinzel', serif;
+  font-size: 52px;
+  font-weight: 700;
+  color: rgba(242,232,208,0.97);
+  line-height: 1.1;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 20px rgba(201,164,92,0.3);
+}
+
+.title-sub {
+  font-family: 'Crimson Text', serif;
+  font-size: 17px;
+  font-style: italic;
+  color: rgba(242,232,208,0.5);
+  margin-bottom: 40px;
+  line-height: 1.5;
+}
+
+.title-divider {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  margin: 0 auto 32px;
+}
+
+.title-session-info {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--gold-dim);
+  margin-bottom: 32px;
+}
+
+.title-btn {
+  padding: 14px 36px;
+  background: transparent;
+  border: 1px solid var(--gold-dim);
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--gold);
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.title-btn:hover {
+  background: rgba(201,164,92,0.12);
+  border-color: var(--gold);
+  letter-spacing: 4px;
+}
+
+.title-btn.secondary {
+  color: rgba(242,232,208,0.4);
+  border-color: rgba(242,232,208,0.15);
+  font-size: 10px;
+}
+
+.title-btn.secondary:hover {
+  background: rgba(255,255,255,0.04);
+  color: rgba(242,232,208,0.6);
+}
+
+/* ── CLIFFHANGER SCREEN ── */
+.cliffhanger-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.75);
+}
+
+.cliffhanger-screen.visible { display: flex; }
+
+.cliffhanger-card {
+  text-align: center;
+  padding: 56px 64px;
+  background: url('assets/leather-black.png') center/110% 110% no-repeat;
+  background-color: rgba(17,19,24,0.98);
+  border: 1px solid rgba(201,164,92,0.25);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.9);
+  max-width: 520px;
+}
+
+.cliffhanger-label {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--ember);
+  margin-bottom: 20px;
+}
+
+.cliffhanger-title {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  color: rgba(242,232,208,0.9);
+  margin-bottom: 16px;
+}
+
+.cliffhanger-prose {
+  font-family: 'Crimson Text', serif;
+  font-size: 16px;
+  font-style: italic;
+  color: rgba(242,232,208,0.65);
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+
+/* ── TOAST / NOTIFICATION ── */
+.toast {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: rgba(17,19,24,0.97);
+  border: 1px solid var(--gold-dim);
+  padding: 12px 24px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  z-index: 200;
+  transition: transform 0.4s ease;
+  white-space: nowrap;
+}
+
+.toast.visible { transform: translateX(-50%) translateY(0); }
+
+/* ── SCROLLBAR ── */
+.parchment-content::-webkit-scrollbar { width: 4px; }
+.parchment-content::-webkit-scrollbar-track { background: transparent; }
+.parchment-content::-webkit-scrollbar-thumb { background: var(--parchment-dark); }
+
+/* Overflow handling for tall scenes */
+.parchment-content {
+  max-height: 88vh;
+  overflow-y: auto;
+}
+
+/* Beat-to-beat transitions (within a scene) */
+.parchment-content.fading {
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+.parchment-content.entering {
+  opacity: 1;
+  transition: opacity 0.22s ease;
+}
+
+/* ── FADE TRANSITION ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translate(-58%, -48%) rotate(-0.8deg); }
+  to { opacity: 1; transform: translate(-58%, -50%) rotate(-0.8deg); }
+}
+
+.scene.entering { animation: fadeIn 0.5s ease forwards; }
+
+/* ── SCENE ILLUSTRATION (image generation) ── */
+.scene-illustration {
+  position: relative;
+  width: 100%;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--parchment-dark);
+  overflow: hidden;
+  display: none; /* hidden until image loads */
+}
+
+.scene-illustration.visible { display: block; }
+
+/* Full scene in-page (matches 1792×1024 generations; no hard crop) */
+.scene-illustration-expand {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: rgba(42,26,8,0.06);
+  cursor: zoom-in;
+  position: relative;
+  font: inherit;
+  text-align: left;
+}
+
+.scene-illustration-expand:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.scene-illustration-expand img {
+  width: 100%;
+  height: auto;
+  max-height: min(48vh, 440px);
+  object-fit: contain;
+  object-position: center center;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.scene-illustration-expand img.loaded { opacity: 1; }
+
+.scene-illustration-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(42,26,8,0.45);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Parchment-style vignette over the image */
+.scene-illustration::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(242,228,192,0.15) 0%, transparent 30%, transparent 70%, rgba(242,228,192,0.4) 100%),
+    linear-gradient(to right, rgba(242,228,192,0.2) 0%, transparent 15%, transparent 85%, rgba(242,228,192,0.2) 100%);
+  pointer-events: none;
+}
+
+.scene-illustration-loading {
+  aspect-ratio: 1792 / 1024;
+  max-height: min(48vh, 440px);
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(42,26,8,0.04);
+}
+
+.scene-illustration-loading span {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  animation: ttPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes ttPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* Image toggle switch */
+.image-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(17,19,24,0.85);
+  border: 1px solid rgba(201,164,92,0.2);
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.image-toggle:hover { border-color: rgba(201,164,92,0.5); }
+
+.image-toggle-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(201,164,92,0.3);
+  transition: background 0.2s;
+}
+
+.image-toggle.on .image-toggle-dot { background: var(--gold); }
+
+.image-toggle-label {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: rgba(242,232,208,0.4);
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.image-toggle.on .image-toggle-label { color: var(--gold-dim); }
+
+/* Full-screen illustration (click thumbnail or open from hint) */
+.illustration-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  background: rgba(8, 6, 4, 0.94);
+  cursor: zoom-out;
+}
+
+.illustration-lightbox.open {
+  display: flex;
+}
+
+.illustration-lightbox img {
+  max-width: 100%;
+  max-height: 92vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  cursor: default;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.55);
+}
+
+.illustration-lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(201, 164, 92, 0.35);
+  background: rgba(17, 19, 24, 0.75);
+  color: var(--gold-dim);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 1;
+  font-family: inherit;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.illustration-lightbox-close:hover {
+  border-color: rgba(201, 164, 92, 0.6);
+  color: var(--gold);
+}
+
+/* ── SKETCH PARCHMENT (critical-check scene art, left of main parchment) ── */
+.sketch-parchment {
+  position: absolute;
+  right: 52%;
+  top: 50%;
+  transform: translateY(-44%) rotate(-5deg);
+  width: 320px;
+  height: 320px;
+  z-index: 8;
+  cursor: pointer;
+  filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.7));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.sketch-parchment:hover {
+  transform: translateY(-46%) rotate(-5deg) scale(1.02);
+  filter: drop-shadow(0 16px 40px rgba(0, 0, 0, 0.8));
+}
+
+.sketch-parchment-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.sketch-parchment-content {
+  position: absolute;
+  inset: 20px 24px 24px 24px;
+  z-index: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sketch-parchment-loading {
+  display: none;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  background: rgba(42, 26, 8, 0.06);
+}
+
+.sketch-parchment-loading.active {
+  display: flex;
+}
+
+.sketch-parchment-loading span {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  animation: ttPulse 1.5s ease-in-out infinite;
+}
+
+.sketch-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  filter: grayscale(100%) contrast(1.4) brightness(0.9) sepia(20%);
+  transition: opacity 0.4s ease;
+  opacity: 0;
+}
+
+.sketch-image.loaded {
+  opacity: 1;
+}
+
+/* Inline parchment banner retired — scene art lives on sketch parchment only */
+#sceneIllustration {
+  display: none !important;
+}

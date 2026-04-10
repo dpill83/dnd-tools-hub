@@ -138,6 +138,8 @@ All interactive elements are real HTML layered over visual assets.
 /state.js
 ```
 
+`index.html` loads `styles.css` and, in order, `state.js`, `scenes.js`, and `app.js` via classic `<script src>` tags (no modules, no bundler).
+
 ---
 
 ## Key Systems
