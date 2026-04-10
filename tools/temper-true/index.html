@@ -542,6 +542,7 @@ html, body {
   align-items: center;
   justify-content: center;
   background: rgba(0,0,0,0.6);
+  -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
 }
 
@@ -711,6 +712,17 @@ html, body {
   overflow-y: auto;
 }
 
+/* Beat-to-beat transitions (within a scene) */
+.parchment-content.fading {
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+.parchment-content.entering {
+  opacity: 1;
+  transition: opacity 0.22s ease;
+}
+
 /* ── FADE TRANSITION ── */
 @keyframes fadeIn {
   from { opacity: 0; transform: translate(-58%, -48%) rotate(-0.8deg); }
@@ -731,17 +743,50 @@ html, body {
 
 .scene-illustration.visible { display: block; }
 
-.scene-illustration img {
+/* Full scene in-page (matches 1792×1024 generations; no hard crop) */
+.scene-illustration-expand {
+  display: block;
   width: 100%;
-  height: 200px;
-  object-fit: cover;
-  object-position: center 30%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: rgba(42,26,8,0.06);
+  cursor: zoom-in;
+  position: relative;
+  font: inherit;
+  text-align: left;
+}
+
+.scene-illustration-expand:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.scene-illustration-expand img {
+  width: 100%;
+  height: auto;
+  max-height: min(48vh, 440px);
+  object-fit: contain;
+  object-position: center center;
   display: block;
   opacity: 0;
   transition: opacity 0.6s ease;
 }
 
-.scene-illustration img.loaded { opacity: 1; }
+.scene-illustration-expand img.loaded { opacity: 1; }
+
+.scene-illustration-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(42,26,8,0.45);
+  pointer-events: none;
+  z-index: 2;
+}
 
 /* Parchment-style vignette over the image */
 .scene-illustration::after {
@@ -755,7 +800,9 @@ html, body {
 }
 
 .scene-illustration-loading {
-  height: 200px;
+  aspect-ratio: 1792 / 1024;
+  max-height: min(48vh, 440px);
+  min-height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -813,6 +860,55 @@ html, body {
 }
 
 .image-toggle.on .image-toggle-label { color: var(--gold-dim); }
+
+/* Full-screen illustration (click thumbnail or open from hint) */
+.illustration-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  background: rgba(8, 6, 4, 0.94);
+  cursor: zoom-out;
+}
+
+.illustration-lightbox.open {
+  display: flex;
+}
+
+.illustration-lightbox img {
+  max-width: 100%;
+  max-height: 92vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  cursor: default;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.55);
+}
+
+.illustration-lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(201, 164, 92, 0.35);
+  background: rgba(17, 19, 24, 0.75);
+  color: var(--gold-dim);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 1;
+  font-family: inherit;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.illustration-lightbox-close:hover {
+  border-color: rgba(201, 164, 92, 0.6);
+  color: var(--gold);
+}
 </style>
 </head>
 <body>
@@ -938,6 +1034,11 @@ html, body {
   </div>
   <div class="toast" id="toast"></div>
 
+</div>
+
+<div class="illustration-lightbox" id="illustrationLightbox" role="dialog" aria-modal="true" aria-label="Full scene illustration" hidden>
+  <button type="button" class="illustration-lightbox-close" id="illustrationLightboxClose" aria-label="Close">&times;</button>
+  <img src="" alt="Scene illustration full size" id="illustrationLightboxImg">
 </div>
 
 <script>
@@ -1625,6 +1726,46 @@ function showToast(msg, duration = 2500) {
   setTimeout(() => t.classList.remove('visible'), duration);
 }
 
+function getParchmentScroller() {
+  return document.querySelector('.parchment-content');
+}
+
+function scrollSheetToTop() {
+  const scroller = getParchmentScroller();
+  if (scroller) scroller.scrollTop = 0;
+}
+
+function transitionSheet(updateFn) {
+  const scroller = getParchmentScroller();
+  if (!scroller) {
+    updateFn?.();
+    return;
+  }
+
+  // Fade out quickly, swap content, fade in, and keep the view at top.
+  scroller.classList.add('fading');
+  scroller.classList.remove('entering');
+
+  setTimeout(() => {
+    updateFn?.();
+    scrollSheetToTop();
+    scroller.classList.remove('fading');
+    scroller.classList.add('entering');
+    setTimeout(() => scroller.classList.remove('entering'), 260);
+  }, 180);
+}
+
+function resetSheetUI() {
+  document.getElementById('sceneProse').innerHTML = '';
+  document.getElementById('choices').innerHTML = '';
+  document.getElementById('llmResponse').classList.remove('visible', 'loading');
+  document.getElementById('llmResponse').textContent = '';
+  document.getElementById('continueSceneBtn').classList.remove('visible');
+  document.getElementById('diceInputRow').style.display = 'none';
+  setRitualPanel(false);
+  pendingContinue = null;
+}
+
 // ── IMAGE GENERATION (OPT-IN) ──────────────────────────────────────────────
 
 const IMAGE_STYLE = 'oil painting illustration, dark fantasy, Waterdeep city, candlelit, noir atmosphere, detailed, cinematic composition, warm amber and deep navy palette, no text';
@@ -1721,18 +1862,46 @@ function showIllustrationLoading() {
   el.classList.add('visible');
 }
 
+function openIllustrationLightbox(url) {
+  const lb = document.getElementById('illustrationLightbox');
+  const lbImg = document.getElementById('illustrationLightboxImg');
+  if (!lb || !lbImg) return;
+  lbImg.src = url;
+  lb.classList.add('open');
+  lb.removeAttribute('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeIllustrationLightbox() {
+  const lb = document.getElementById('illustrationLightbox');
+  const lbImg = document.getElementById('illustrationLightboxImg');
+  if (!lb) return;
+  lb.classList.remove('open');
+  lb.setAttribute('hidden', '');
+  document.body.style.overflow = '';
+  if (lbImg) lbImg.removeAttribute('src');
+}
+
 function displaySceneImage(url) {
   const el = document.getElementById('sceneIllustration');
   if (!el) return;
-  el.innerHTML = `<img src="${url}" alt="Scene illustration">`;
+  el.innerHTML =
+    '<button type="button" class="scene-illustration-expand" aria-label="View illustration full size">' +
+    '<img src="" alt="Scene illustration">' +
+    '<span class="scene-illustration-hint">Click to enlarge</span>' +
+    '</button>';
   el.classList.add('visible');
+  const btn = el.querySelector('.scene-illustration-expand');
   const img = el.querySelector('img');
-  if (!img) return;
+  if (!btn || !img) return;
+  img.src = url;
   img.onload = () => img.classList.add('loaded');
   if (img.complete) img.classList.add('loaded');
+  btn.addEventListener('click', () => openIllustrationLightbox(url));
 }
 
 function hideIllustration() {
+  closeIllustrationLightbox();
   const el = document.getElementById('sceneIllustration');
   if (!el) return;
   el.classList.remove('visible');
@@ -1813,14 +1982,9 @@ function renderScene(sceneIndex) {
   document.getElementById('sceneLabel').textContent = sceneData.label;
   document.getElementById('sceneTitle').textContent = sceneData.title;
   document.getElementById('sceneLocation').textContent = sceneData.location;
-  document.getElementById('sceneProse').innerHTML = '';
-  document.getElementById('choices').innerHTML = '';
-  document.getElementById('llmResponse').classList.remove('visible');
-  document.getElementById('llmResponse').textContent = '';
-  document.getElementById('continueSceneBtn').classList.remove('visible');
-  document.getElementById('diceInputRow').style.display = 'none';
-  setRitualPanel(false);
+  resetSheetUI();
   updateChronicle();
+  scrollSheetToTop();
 
   // Start with first beat
   processBeat(sceneIndex, 0);
@@ -1840,26 +2004,39 @@ function processBeat(sceneIndex, beatIndex) {
   const beat = sceneData.beats[beatIndex];
 
   if (beat.type === 'prose') {
-    appendProse(beat.text, sceneData, () => {
-      processBeat(sceneIndex, beatIndex + 1);
+    transitionSheet(() => {
+      resetSheetUI();
+      renderProse(beat.text, () => {
+        processBeat(sceneIndex, beatIndex + 1);
+      });
     });
   } else if (beat.type === 'manual-check') {
-    showManualCheck(beat, sceneData, () => {
-      processBeat(sceneIndex, beatIndex + 1);
+    transitionSheet(() => {
+      resetSheetUI();
+      showManualCheck(beat, sceneData, () => {
+        processBeat(sceneIndex, beatIndex + 1);
+      });
     });
   } else if (beat.type === 'critical-check') {
-    showCriticalCheck(beat, sceneData, () => {
-      processBeat(sceneIndex, beatIndex + 1);
+    transitionSheet(() => {
+      resetSheetUI();
+      showCriticalCheck(beat, sceneData, () => {
+        processBeat(sceneIndex, beatIndex + 1);
+      });
     });
   } else if (beat.type === 'choices') {
-    showChoices(beat, sceneData, () => {
-      processBeat(sceneIndex, beatIndex + 1);
+    transitionSheet(() => {
+      resetSheetUI();
+      showChoices(beat, sceneData, () => {
+        processBeat(sceneIndex, beatIndex + 1);
+      });
     });
   }
 }
 
-function appendProse(textArray, sceneData, onDone) {
+function renderProse(textArray, onDone) {
   const proseEl = document.getElementById('sceneProse');
+  proseEl.innerHTML = '';
   textArray.forEach(t => {
     const resolved = typeof t === 'function' ? t(state) : t;
     if (!resolved) return;
@@ -1885,6 +2062,14 @@ function showManualCheck(beat, sceneData, onDone) {
   const dcMod = getDCMod();
   const adjustedDC = Math.max(8, beat.baseDC + dcMod);
 
+  // Present the check as the current "sheet" content (no old prose above).
+  const proseEl = document.getElementById('sceneProse');
+  proseEl.innerHTML = '';
+  const p = document.createElement('p');
+  p.style.fontStyle = 'italic';
+  p.textContent = `Check: ${beat.skill}. Enter your roll to resolve.`;
+  proseEl.appendChild(p);
+
   const row = document.getElementById('diceInputRow');
   document.getElementById('diceSkill').textContent = beat.skill;
   document.getElementById('diceDC').textContent = adjustedDC;
@@ -1903,7 +2088,10 @@ function showManualCheck(beat, sceneData, onDone) {
     updateChronicle();
 
     const responseText = success ? beat.successText : beat.failText;
-    showLLMResponse(responseText, sceneData, () => onDone());
+    transitionSheet(() => {
+      resetSheetUI();
+      showLLMResponse(responseText, sceneData, () => onDone());
+    });
 
     if (success) showToast('✓ Success');
     else showToast('✗ Failure — carry on');
@@ -1914,6 +2102,14 @@ function showCriticalCheck(beat, sceneData, onDone) {
   const dcMod = getDCMod();
   const adjustedDC = Math.max(8, beat.baseDC + dcMod);
 
+  // Present the check as the current "sheet" content (no old prose above).
+  const proseEl = document.getElementById('sceneProse');
+  proseEl.innerHTML = '';
+  const p = document.createElement('p');
+  p.style.fontStyle = 'italic';
+  p.textContent = `Critical Check: ${beat.name}. Roll to resolve.`;
+  proseEl.appendChild(p);
+
   setRitualPanel(true, beat.name, beat.desc, adjustedDC, (rolled) => {
     const success = rolled >= adjustedDC;
     if (success && beat.onSuccess) beat.onSuccess(state);
@@ -1922,16 +2118,18 @@ function showCriticalCheck(beat, sceneData, onDone) {
     updateChronicle();
     setRitualPanel(false);
 
-    const proseEl = document.getElementById('sceneProse');
-    const p = document.createElement('p');
-    p.style.fontStyle = 'italic';
-    p.style.color = success ? '#2a4a1a' : '#5a1a0a';
-    p.textContent = success
-      ? `The dice favor you. (Rolled ${rolled} vs DC ${adjustedDC})`
-      : `The dice do not. (Rolled ${rolled} vs DC ${adjustedDC})`;
-    proseEl.appendChild(p);
-
-    onDone();
+    transitionSheet(() => {
+      resetSheetUI();
+      const proseEl2 = document.getElementById('sceneProse');
+      const p2 = document.createElement('p');
+      p2.style.fontStyle = 'italic';
+      p2.style.color = success ? '#2a4a1a' : '#5a1a0a';
+      p2.textContent = success
+        ? `The dice favor you. (Rolled ${rolled} vs DC ${adjustedDC})`
+        : `The dice do not. (Rolled ${rolled} vs DC ${adjustedDC})`;
+      proseEl2.appendChild(p2);
+      showContinueBtn(onDone);
+    });
   });
 }
 
@@ -1957,7 +2155,10 @@ function showChoices(beat, sceneData, onDone) {
       updateChronicle();
 
       // Get LLM reaction to choice
-      callLLM(sceneData, item.label, item.text, () => onDone());
+      transitionSheet(() => {
+        resetSheetUI();
+        callLLM(sceneData, item.label, item.text, () => onDone());
+      });
     };
     choicesEl.appendChild(btn);
   });
@@ -1965,34 +2166,33 @@ function showChoices(beat, sceneData, onDone) {
 
 function showEndProse(sceneIndex) {
   const sceneData = SCENES[sceneIndex];
-  const proseEl = document.getElementById('sceneProse');
+  transitionSheet(() => {
+    resetSheetUI();
+    const proseEl = document.getElementById('sceneProse');
 
-  if (sceneData.endProse) {
-    const divider = document.createElement('div');
-    divider.style.cssText = 'height:1px;background:linear-gradient(90deg,transparent,#d9c8a0,transparent);margin:16px 0;';
-    proseEl.appendChild(divider);
+    if (sceneData.endProse) {
+      sceneData.endProse.forEach(t => {
+        const resolved = typeof t === 'function' ? t(state) : t;
+        if (!resolved) return;
+        const p = document.createElement('p');
+        p.style.fontStyle = 'italic';
+        p.textContent = resolved;
+        proseEl.appendChild(p);
+      });
+    }
 
-    sceneData.endProse.forEach(t => {
-      const resolved = typeof t === 'function' ? t(state) : t;
-      if (!resolved) return;
-      const p = document.createElement('p');
-      p.style.fontStyle = 'italic';
-      p.textContent = resolved;
-      proseEl.appendChild(p);
-    });
-  }
-
-  if (sceneData.isCliffhanger) {
-    showContinueBtn(() => {
-      document.getElementById('cliffhangerScreen').classList.add('visible');
-    });
-  } else if (sceneData.isFinal) {
-    showFinalScreen();
-  } else {
-    showContinueBtn(() => {
-      advanceScene();
-    });
-  }
+    if (sceneData.isCliffhanger) {
+      showContinueBtn(() => {
+        document.getElementById('cliffhangerScreen').classList.add('visible');
+      });
+    } else if (sceneData.isFinal) {
+      showFinalScreen();
+    } else {
+      showContinueBtn(() => {
+        advanceScene();
+      });
+    }
+  });
 }
 
 function advanceScene() {
@@ -2158,6 +2358,24 @@ if (!hasSave) {
 
 loadImageToggleState();
 updateChronicle();
+
+(function initIllustrationLightbox() {
+  const lb = document.getElementById('illustrationLightbox');
+  const closeBtn = document.getElementById('illustrationLightboxClose');
+  if (!lb || !closeBtn) return;
+  lb.addEventListener('click', (e) => {
+    if (e.target === lb) closeIllustrationLightbox();
+  });
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeIllustrationLightbox();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (!lb.classList.contains('open')) return;
+    closeIllustrationLightbox();
+  });
+})();
 </script>
 </body>
 </html>
