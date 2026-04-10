@@ -1829,16 +1829,19 @@ function toggleImageGeneration() {
   if (!imageGenerationEnabled) hideIllustration();
 }
 
-async function generateSceneImage(sceneId) {
+async function generateSceneImage(sceneId, opts = {}) {
   if (!imageGenerationEnabled) return;
 
   const config = SCENE_IMAGE_PROMPTS[sceneId];
   if (!config) return; // key moments only
 
-  const cached = localStorage.getItem(config.cacheKey);
-  if (cached) {
-    displaySceneImage(cached);
-    return;
+  const bypassCache = !!opts.bypassCache;
+  if (!bypassCache) {
+    const cached = localStorage.getItem(config.cacheKey);
+    if (cached) {
+      displaySceneImage(cached, sceneId);
+      return;
+    }
   }
 
   showIllustrationLoading();
@@ -1870,12 +1873,13 @@ async function generateSceneImage(sceneId) {
     }
 
     try {
+      // OpenAI image URLs are short-lived signed links; stale entries 403 until refetched (see displaySceneImage onerror).
       localStorage.setItem(config.cacheKey, imageUrl);
     } catch {
       // localStorage full — skip caching
     }
 
-    displaySceneImage(imageUrl);
+    displaySceneImage(imageUrl, sceneId);
   } catch (err) {
     console.warn('Image generation error:', err);
     hideIllustration();
@@ -1909,7 +1913,7 @@ function closeIllustrationLightbox() {
   if (lbImg) lbImg.removeAttribute('src');
 }
 
-function displaySceneImage(url) {
+function displaySceneImage(url, sceneId) {
   const el = document.getElementById('sceneIllustration');
   if (!el) return;
   el.innerHTML =
@@ -1921,8 +1925,25 @@ function displaySceneImage(url) {
   const btn = el.querySelector('.scene-illustration-expand');
   const img = el.querySelector('img');
   if (!btn || !img) return;
-  img.src = url;
   img.onload = () => img.classList.add('loaded');
+  img.onerror = () => {
+    img.onerror = null;
+    if (!sceneId) {
+      hideIllustration();
+      return;
+    }
+    const cfg = SCENE_IMAGE_PROMPTS[sceneId];
+    if (cfg) {
+      try {
+        localStorage.removeItem(cfg.cacheKey);
+      } catch {
+        /* ignore */
+      }
+    }
+    console.warn('Scene image URL expired or blocked; fetching a new one.');
+    generateSceneImage(sceneId, { bypassCache: true });
+  };
+  img.src = url;
   if (img.complete) img.classList.add('loaded');
   btn.addEventListener('click', () => openIllustrationLightbox(url));
 }
