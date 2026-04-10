@@ -928,9 +928,10 @@ html, body {
 }
 
 /* ── SKETCH PARCHMENT (critical-check scene art, left of main parchment) ── */
+/* Layout: add ?pinSketch=1 (or ?pinCritical=1) to the page URL, reload, then tune right/top/transform here. Larger `right` % = further left on screen. */
 .sketch-parchment {
   position: absolute;
-  right: 52%;
+  right: 62%;
   top: 50%;
   transform: translateY(-44%) rotate(-5deg);
   width: 320px;

@@ -90,7 +90,7 @@ function toggleImageGeneration() {
 }
 
 async function generateSceneImage(sceneId, opts = {}) {
-  if (!imageGenerationEnabled) return;
+  if (!imageGenerationEnabled && !opts.layoutPreview) return;
 
   const config = SCENE_IMAGE_PROMPTS[sceneId];
   if (!config) return; // key moments only
@@ -297,7 +297,9 @@ function setRitualPanel(visible, name = '', desc = '', dc = '', onRoll = null) {
 }
 
 /**
- * Layout/CSS: append ?pinCritical=1 to this page’s URL, reload, then tweak .ritual on the parchment.
+ * Layout/CSS: append ?pinCritical=1 and/or ?pinSketch=1 to this page’s URL, reload, then tweak CSS.
+ * - pinCritical: .ritual on the main parchment.
+ * - pinSketch: .sketch-parchment (left scene illustration) in styles.css — uses layoutPreview so images run even if the illustrations toggle is off.
  * Skips the title, shows Scene 2 + the Public Narrative critical check. Does not save game state.
  * Roll does not advance the story (preview only). Remove the query param when finished.
  */
@@ -312,7 +314,7 @@ function applyCriticalCheckLayoutPreview() {
   if (ch) ch.classList.remove('visible');
 
   hideIllustration();
-  generateSceneImage(sceneData.id);
+  generateSceneImage(sceneData.id, { layoutPreview: true });
   document.getElementById('sceneLabel').textContent = sceneData.label;
   document.getElementById('sceneTitle').textContent = sceneData.title;
   document.getElementById('sceneLocation').textContent = sceneData.location;
@@ -724,7 +726,8 @@ const imageToggle = document.getElementById('imageToggle');
 if (imageToggle) imageToggle.addEventListener('click', toggleImageGeneration);
 updateChronicle();
 
-if (new URLSearchParams(window.location.search).has('pinCritical')) {
+const _layoutParams = new URLSearchParams(window.location.search);
+if (_layoutParams.has('pinCritical') || _layoutParams.has('pinSketch')) {
   applyCriticalCheckLayoutPreview();
 }
 
