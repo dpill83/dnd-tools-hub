@@ -143,6 +143,19 @@ html, body {
   border-bottom: 1px solid var(--parchment-dark);
 }
 
+/* Main column: prose, ritual, choices, … + fill keeps Continue at parchment foot */
+.parchment-main {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.parchment-fill {
+  flex: 1 1 auto;
+  min-height: 12px;
+}
+
 /* Prose text */
 .scene-prose {
   font-family: 'Crimson Text', serif;
@@ -150,7 +163,7 @@ html, body {
   line-height: 1.72;
   color: var(--text-on-parchment);
   margin-bottom: 24px;
-  flex: 1;
+  flex: 0 0 auto;
 }
 
 .scene-prose p + p { margin-top: 12px; }
@@ -416,23 +429,30 @@ html, body {
   border: 1px solid rgba(201,164,92,0.2);
 }
 
-/* ── CRITICAL CHECK PANEL (ritual) ── */
+/* ── CRITICAL CHECK PANEL (ritual) — square tile, centered on parchment ── */
 .ritual {
   position: relative;
-  background: url('assets/leather-blue.png') center/110% 110% no-repeat;
-  background-color: #1a2535;
-  padding: 24px 22px 22px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-  border: 1px solid rgba(91,163,176,0.25);
+  box-sizing: border-box;
+  width: min(100%, 550px);
+  aspect-ratio: 1 / 1;
+  flex: 0 0 auto;
+  margin: 8px auto 28px;
+  padding: 90px 80px 110px;
+  background: url('assets/leather-blue.png') center/115% 115% no-repeat;
   overflow: hidden;
   display: none;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
 }
 
-.ritual.visible { display: block; }
+.ritual.visible {
+  display: flex;
+}
 
 .ritual-header {
   font-family: 'Cinzel', serif;
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--teal);
@@ -441,10 +461,10 @@ html, body {
 
 .ritual-name {
   font-family: 'Cinzel', serif;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 600;
   color: rgba(242,232,208,0.95);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   line-height: 1.3;
 }
 
@@ -453,8 +473,11 @@ html, body {
   font-size: 13px;
   font-style: italic;
   color: rgba(242,232,208,0.6);
-  margin-bottom: 16px;
+  margin-bottom: 0;
   line-height: 1.4;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .ritual-footer {
@@ -462,6 +485,9 @@ html, body {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 12px;
 }
 
 .ritual-dc {
@@ -956,16 +982,34 @@ html, body {
         <div class="scene-label" id="sceneLabel"></div>
         <div class="scene-title" id="sceneTitle"></div>
         <div class="scene-location" id="sceneLocation"></div>
-        <div class="scene-prose" id="sceneProse"></div>
-        <div class="choices" id="choices"></div>
-        <div class="dice-input-row" id="diceInputRow" style="display:none">
-          <div class="dice-label">
-            Roll <strong id="diceSkill"></strong> — DC <strong id="diceDC"></strong>
+        <div class="parchment-main">
+          <div class="scene-prose" id="sceneProse"></div>
+          <div class="ritual" id="ritual">
+            <div class="ritual-header">⚡ Critical Check</div>
+            <div class="ritual-name" id="ritualName"></div>
+            <div class="ritual-desc" id="ritualDesc"></div>
+            <div class="ritual-footer">
+              <div>
+                <div class="ritual-dc" id="ritualDC"></div>
+                <div class="ritual-dc-label">DC</div>
+              </div>
+              <div>
+                <div class="dice-roll-display" id="diceDisplay"></div>
+                <button class="ritual-roll-btn" id="ritualRollBtn">Roll</button>
+              </div>
+            </div>
           </div>
-          <input type="number" class="dice-number-input" id="diceValue" min="1" max="30" placeholder="—">
-          <button class="dice-submit-btn" id="diceSubmitBtn">Resolve</button>
+          <div class="choices" id="choices"></div>
+          <div class="dice-input-row" id="diceInputRow" style="display:none">
+            <div class="dice-label">
+              Roll <strong id="diceSkill"></strong> — DC <strong id="diceDC"></strong>
+            </div>
+            <input type="number" class="dice-number-input" id="diceValue" min="1" max="30" placeholder="—">
+            <button class="dice-submit-btn" id="diceSubmitBtn">Resolve</button>
+          </div>
+          <div class="llm-response" id="llmResponse"></div>
+          <div class="parchment-fill" aria-hidden="true"></div>
         </div>
-        <div class="llm-response" id="llmResponse"></div>
         <button class="continue-btn" id="continueSceneBtn">Continue →</button>
       </div>
     </div>
@@ -1006,23 +1050,6 @@ html, body {
       </div>
 
       <div class="session-indicator" id="sessionIndicator">Session One</div>
-    </div>
-
-    <!-- Critical Check Panel -->
-    <div class="ritual" id="ritual">
-      <div class="ritual-header">⚡ Critical Check</div>
-      <div class="ritual-name" id="ritualName"></div>
-      <div class="ritual-desc" id="ritualDesc"></div>
-      <div class="ritual-footer">
-        <div>
-          <div class="ritual-dc" id="ritualDC"></div>
-          <div class="ritual-dc-label">DC</div>
-        </div>
-        <div>
-          <div class="dice-roll-display" id="diceDisplay"></div>
-          <button class="ritual-roll-btn" id="ritualRollBtn">Roll</button>
-        </div>
-      </div>
     </div>
 
   </div>
@@ -1965,6 +1992,38 @@ function setRitualPanel(visible, name = '', desc = '', dc = '', onRoll = null) {
   currentCriticalResolve = onRoll;
 }
 
+/**
+ * Layout/CSS: append ?pinCritical=1 to this page’s URL, reload, then tweak .ritual on the parchment.
+ * Skips the title, shows Scene 2 + the Public Narrative critical check. Does not save game state.
+ * Roll does not advance the story (preview only). Remove the query param when finished.
+ */
+function applyCriticalCheckLayoutPreview() {
+  const sceneIx = 1;
+  const sceneData = SCENES[sceneIx];
+  const beat = sceneData && sceneData.beats && sceneData.beats[1];
+  if (!beat || beat.type !== 'critical-check') return;
+
+  document.getElementById('titleScreen').style.display = 'none';
+  const ch = document.getElementById('cliffhangerScreen');
+  if (ch) ch.classList.remove('visible');
+
+  hideIllustration();
+  generateSceneImage(sceneData.id);
+  document.getElementById('sceneLabel').textContent = sceneData.label;
+  document.getElementById('sceneTitle').textContent = sceneData.title;
+  document.getElementById('sceneLocation').textContent = sceneData.location;
+  resetSheetUI();
+
+  const proseEl = document.getElementById('sceneProse');
+  const p = document.createElement('p');
+  p.style.fontStyle = 'italic';
+  p.textContent = `Critical Check: ${beat.name}. Roll to resolve.`;
+  proseEl.appendChild(p);
+
+  const adjustedDC = Math.max(8, beat.baseDC + getDCMod());
+  setRitualPanel(true, beat.name, beat.desc, String(adjustedDC), null);
+}
+
 // ── SCENE RENDERING ───────────────────────────────────────────────────────
 
 function renderScene(sceneIndex) {
@@ -2358,6 +2417,10 @@ if (!hasSave) {
 
 loadImageToggleState();
 updateChronicle();
+
+if (new URLSearchParams(window.location.search).has('pinCritical')) {
+  applyCriticalCheckLayoutPreview();
+}
 
 (function initIllustrationLightbox() {
   const lb = document.getElementById('illustrationLightbox');
