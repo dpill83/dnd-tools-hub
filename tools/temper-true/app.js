@@ -72,6 +72,26 @@ const SCENE_IMAGE_PROMPTS = {
   },
 };
 
+/** Static preview when running on localhost so layout/CSS work without OPENAI_API_KEY. Production is unchanged. */
+const TT_LOCAL_SKETCH_PLACEHOLDER_SVG =
+  'data:image/svg+xml;charset=utf-8,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="896" height="512" viewBox="0 0 896 512">' +
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1a1510"/><stop offset="100%" stop-color="#2d2418"/></linearGradient></defs>' +
+      '<rect width="896" height="512" fill="url(#g)"/>' +
+      '<text x="448" y="232" fill="#b8a078" font-family="Georgia,serif" font-size="20" text-anchor="middle">Sketch — local preview</text>' +
+      '<text x="448" y="268" fill="#7a6a50" font-family="Georgia,serif" font-size="13" text-anchor="middle">No image API on localhost (prod uses OpenAI)</text>' +
+      '</svg>'
+  );
+
+function useOpenAiSketchApi() {
+  try {
+    if (new URLSearchParams(window.location.search).has('forceSketchApi')) return true;
+  } catch (_) {}
+  const h = window.location.hostname;
+  return h !== 'localhost' && h !== '127.0.0.1' && h !== '[::1]';
+}
+
 let imageGenerationEnabled = false;
 
 /** DevTools: filter by "Temper-True AI" to see when narration/images run and why they might skip or fail. */
@@ -111,6 +131,16 @@ async function generateSceneImage(sceneId, opts = {}) {
   const config = SCENE_IMAGE_PROMPTS[sceneId];
   if (!config) {
     logTemperAI('info', 'image:skipped', { sceneId, reason: 'no_illustration_for_this_scene' });
+    return;
+  }
+
+  if (!useOpenAiSketchApi()) {
+    logTemperAI('info', 'image:local_placeholder', {
+      sceneId,
+      reason: 'localhost_static_preview',
+      hint: 'Real images: deploy to Pages, or add ?forceSketchApi=1 with OPENAI_API_KEY in .dev.vars.',
+    });
+    displaySketchParchment(TT_LOCAL_SKETCH_PLACEHOLDER_SVG, sceneId);
     return;
   }
 
@@ -154,6 +184,9 @@ async function generateSceneImage(sceneId, opts = {}) {
         sceneId,
         httpStatus: response.status,
         error: data.error ?? data,
+        ...(response.status === 503 && {
+          hint: 'Local wrangler: add OPENAI_API_KEY=sk-... (or ADVENTURE_LOG_BUILDER_PROD) to .dev.vars in the repo root, restart pages dev.',
+        }),
       });
       hideIllustration();
       return;
@@ -342,6 +375,7 @@ function setRitualPanel(visible, name = '', desc = '', dc = '', onRoll = null) {
  * Layout/CSS: append ?pinCritical=1 and/or ?pinSketch=1 to this page’s URL, reload, then tweak CSS.
  * - pinCritical: .ritual on the main parchment.
  * - pinSketch: .sketch-parchment (left scene illustration) in styles.css — uses layoutPreview so images run even if the illustrations toggle is off.
+ *   On localhost, a static placeholder is used (no API key). Use ?forceSketchApi=1 + .dev.vars to call OpenAI locally.
  * Skips the title, shows Scene 2 + the Public Narrative critical check. Does not save game state.
  * Roll does not advance the story (preview only). Remove the query param when finished.
  */

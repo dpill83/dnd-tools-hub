@@ -928,23 +928,44 @@ html, body {
 }
 
 /* ── SKETCH PARCHMENT (critical-check scene art, left of main parchment) ── */
-/* Layout: add ?pinSketch=1 (or ?pinCritical=1) to the page URL, reload, then tune right/top/transform here. Larger `right` % = further left on screen. */
+/* Layout: ?pinSketch=1 — tune right/top. Larger `right` % = further left. translateX: + tucks under main sheet, − slides out on hover. */
 .sketch-parchment {
   position: absolute;
-  right: 75%;       /* push it further left */
-  top: 55%;         /* drop it lower on the desk */
-  transform: translateY(-44%) rotate(-5deg);
+  right: 60%;       /* push it further left */
+  top: 50%;         /* drop it lower on the desk */
+  transform-origin: 90% 45%;
+  transform: translateX(20px) translateY(-44%) rotate(-24deg);
   width: 320px;
   height: 320px;
+  /* Below .scene (10) so the main parchment stays visually in front. */
   z-index: 8;
-  cursor: pointer;
+  /* Pointer hits only on ::before + .sketch-parchment-content (not the naked wrapper) so .scene doesn’t lose events outside this card. */
+  pointer-events: none;
+  cursor: default;
   filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.7));
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), filter 0.32s ease;
 }
 
+/*
+ * Invisible hit pad — extra width mostly past the right edge (toward the main parchment).
+ * Shift more right: make `right` more negative. Widen both sides equally: match |left| to |right|.
+ */
+.sketch-parchment::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: -88px;
+  bottom: -6px;
+  left: -20px;
+  z-index: 0;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* Slide out from under the main parchment + gentle straighten. */
 .sketch-parchment:hover {
-  transform: translateY(-46%) rotate(-5deg) scale(1.02);
-  filter: drop-shadow(0 16px 40px rgba(0, 0, 0, 0.8));
+  transform: translateX(-32px) translateY(-46%) rotate(-10deg) scale(1.03);
+  filter: drop-shadow(0 18px 44px rgba(0, 0, 0, 0.82));
 }
 
 .sketch-parchment-bg {
@@ -953,18 +974,20 @@ html, body {
   width: 100%;
   height: 100%;
   object-fit: fill;
-  z-index: 0;
+  z-index: 1;
   pointer-events: none;
 }
 
 .sketch-parchment-content {
   position: absolute;
   inset: 20px 24px 24px 24px;
-  z-index: 1;
+  z-index: 2;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 .sketch-parchment-loading {

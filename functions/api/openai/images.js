@@ -2,9 +2,14 @@
  * POST /api/openai/images
  * Proxies to https://api.openai.com/v1/images/generations with the server-side API key.
  * Requires: OPENAI_API_KEY (Pages project secret / env).
+ * Local dev: same keys as other OpenAI routes — see root README (.dev.vars).
  */
 
 const OPENAI_URL = 'https://api.openai.com/v1/images/generations';
+
+function getOpenAiKey(env) {
+  return env.OPENAI_API_KEY || env.ADVENTURE_LOG_BUILDER_PROD || env.ADVENTURE_LOG_BUILDER_PREV;
+}
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -22,13 +27,19 @@ export async function onRequestOptions() {
 
 export async function onRequestPost(context) {
   const { env, request } = context;
-  const apiKey = env.OPENAI_API_KEY;
+  const apiKey = getOpenAiKey(env);
 
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: 'OPENAI_API_KEY not configured' }), {
-      status: 503,
-      headers: withCors({ 'Content-Type': 'application/json' }),
-    });
+    return new Response(
+      JSON.stringify({
+        error:
+          'No OpenAI API key: set OPENAI_API_KEY (or ADVENTURE_LOG_BUILDER_PROD / ADVENTURE_LOG_BUILDER_PREV) in Pages env or .dev.vars for local dev.',
+      }),
+      {
+        status: 503,
+        headers: withCors({ 'Content-Type': 'application/json' }),
+      }
+    );
   }
 
   let body;
