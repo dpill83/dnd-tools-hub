@@ -74,6 +74,15 @@ const SCENE_IMAGE_PROMPTS = {
 
 let imageGenerationEnabled = false;
 
+/** DevTools: filter by "Temper-True AI" to see when narration/images run and why they might skip or fail. */
+function logTemperAI(level, event, detail) {
+  const prefix = '[Temper-True AI]';
+  const line = `${prefix} ${event}`;
+  if (level === 'error') console.error(line, detail ?? '');
+  else if (level === 'warn') console.warn(line, detail ?? '');
+  else console.info(line, detail ?? '');
+}
+
 function loadImageToggleState() {
   imageGenerationEnabled = localStorage.getItem('temper_true_images') === 'on';
   const toggle = document.getElementById('imageToggle');
@@ -90,21 +99,41 @@ function toggleImageGeneration() {
 }
 
 async function generateSceneImage(sceneId, opts = {}) {
-  if (!imageGenerationEnabled && !opts.layoutPreview) return;
+  if (!imageGenerationEnabled && !opts.layoutPreview) {
+    logTemperAI('info', 'image:skipped', {
+      sceneId,
+      reason: 'illustrations_toggle_off',
+      hint: 'Enable “Scene illustrations” in the header or use ?pinSketch=1 for layout preview.',
+    });
+    return;
+  }
 
   const config = SCENE_IMAGE_PROMPTS[sceneId];
-  if (!config) return; // key moments only
+  if (!config) {
+    logTemperAI('info', 'image:skipped', { sceneId, reason: 'no_illustration_for_this_scene' });
+    return;
+  }
 
   const bypassCache = !!opts.bypassCache;
   if (!bypassCache) {
     const cached = localStorage.getItem(config.cacheKey);
     if (cached) {
+      logTemperAI('info', 'image:cache_hit', { sceneId, cacheKey: config.cacheKey });
       displaySketchParchment(cached, sceneId);
       return;
     }
+  } else {
+    logTemperAI('info', 'image:cache_bypass', { sceneId });
   }
 
   showSketchParchmentLoading();
+
+  const t0 = performance.now();
+  logTemperAI('info', 'image:request_start', {
+    sceneId,
+    model: 'dall-e-3',
+    layoutPreview: !!opts.layoutPreview,
+  });
 
   try {
     const response = await fetch('/api/openai/images', {
@@ -121,13 +150,18 @@ async function generateSceneImage(sceneId, opts = {}) {
     const data = await response.json();
 
     if (!response.ok || data.error) {
-      console.warn('Image generation failed:', data.error || response.status);
+      logTemperAI('warn', 'image:request_failed', {
+        sceneId,
+        httpStatus: response.status,
+        error: data.error ?? data,
+      });
       hideIllustration();
       return;
     }
 
     const imageUrl = data.data?.[0]?.url;
     if (!imageUrl) {
+      logTemperAI('warn', 'image:no_url_in_response', { sceneId, keys: data ? Object.keys(data) : [] });
       hideIllustration();
       return;
     }
@@ -137,11 +171,16 @@ async function generateSceneImage(sceneId, opts = {}) {
       localStorage.setItem(config.cacheKey, imageUrl);
     } catch {
       // localStorage full — skip caching
+      logTemperAI('warn', 'image:cache_write_failed', { sceneId });
     }
 
+    logTemperAI('info', 'image:request_ok', {
+      sceneId,
+      ms: Math.round(performance.now() - t0),
+    });
     displaySketchParchment(imageUrl, sceneId);
   } catch (err) {
-    console.warn('Image generation error:', err);
+    logTemperAI('error', 'image:network_or_parse_error', { sceneId, message: err?.message ?? String(err) });
     hideIllustration();
   }
 }
@@ -202,7 +241,10 @@ function displaySketchParchment(url, sceneId) {
         /* ignore */
       }
     }
-    console.warn('Scene image URL expired or blocked; fetching a new one.');
+    logTemperAI('warn', 'image:load_failed_refetch', {
+      sceneId,
+      reason: 'url_expired_or_blocked',
+    });
     generateSceneImage(sceneId, { bypassCache: true });
   };
 
@@ -612,6 +654,13 @@ async function callLLM(sceneData, choiceLabel, choiceText, onDone) {
 
   const userPrompt = `Scene context: ${context}\n\nGeorge chose: "${choiceLabel}" — ${choiceText}\n\nWrite a short reactive narration (2-4 sentences, second person) describing the immediate consequence of this choice in the world. Focus on sensory detail and NPC reaction. Do not summarize the choice back.`;
 
+  const t0 = performance.now();
+  logTemperAI('info', 'narration:request_start', {
+    scene: sceneData.id,
+    choice: choiceLabel,
+    model: 'claude-sonnet-4-20250514',
+  });
+
   try {
     const response = await fetch('/api/anthropic/messages', {
       method: 'POST',
@@ -625,11 +674,37 @@ async function callLLM(sceneData, choiceLabel, choiceText, onDone) {
     });
 
     const data = await response.json();
+
+    if (!response.ok) {
+      logTemperAI('warn', 'narration:request_failed', {
+        scene: sceneData.id,
+        httpStatus: response.status,
+        error: data.error ?? data,
+      });
+      responseEl.classList.remove('loading');
+      responseEl.textContent = 'The story continues...';
+      showContinueBtn(onDone);
+      return;
+    }
+
     const text = data.content?.[0]?.text || '';
+    if (!text) {
+      logTemperAI('warn', 'narration:empty_text', { scene: sceneData.id, raw: data });
+    } else {
+      logTemperAI('info', 'narration:request_ok', {
+        scene: sceneData.id,
+        ms: Math.round(performance.now() - t0),
+        chars: text.length,
+      });
+    }
     responseEl.classList.remove('loading');
-    responseEl.textContent = text;
+    responseEl.textContent = text || 'The story continues...';
     showContinueBtn(onDone);
   } catch (err) {
+    logTemperAI('error', 'narration:network_or_parse_error', {
+      scene: sceneData.id,
+      message: err?.message ?? String(err),
+    });
     responseEl.classList.remove('loading');
     responseEl.textContent = 'The story continues...';
     showContinueBtn(onDone);
