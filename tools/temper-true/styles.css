@@ -428,7 +428,7 @@ html, body {
   aspect-ratio: 1 / 1;
   flex: 0 0 auto;
   margin: 8px auto 28px;
-  padding: 90px 80px 110px;
+  padding: 86px 64px 104px;
   background: url('assets/leather-blue.png') center/115% 115% no-repeat;
   overflow: hidden;
   display: none;
@@ -443,32 +443,33 @@ html, body {
 
 .ritual-header {
   font-family: 'Cinzel', serif;
-  font-size: 12px;
-  letter-spacing: 3px;
+  font-size: 14px;
+  letter-spacing: 2.5px;
   text-transform: uppercase;
   color: var(--teal);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .ritual-name {
   font-family: 'Cinzel', serif;
-  font-size: 18px;
+  font-size: 23px;
   font-weight: 600;
-  color: rgba(242,232,208,0.95);
-  margin-bottom: 8px;
-  line-height: 1.3;
+  color: rgba(242,232,208,0.98);
+  margin-bottom: 10px;
+  line-height: 1.25;
 }
 
 .ritual-desc {
   font-family: 'Crimson Text', serif;
-  font-size: 13px;
+  font-size: 17px;
   font-style: italic;
-  color: rgba(242,232,208,0.6);
+  color: rgba(245, 238, 220, 0.92);
   margin-bottom: 0;
-  line-height: 1.4;
+  line-height: 1.5;
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 .ritual-footer {
@@ -491,18 +492,18 @@ html, body {
 
 .ritual-dc-label {
   font-family: 'Cinzel', serif;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 2px;
-  color: var(--gold-dim);
+  color: var(--gold-bright);
   margin-top: 2px;
 }
 
 .ritual-roll-btn {
-  padding: 10px 20px;
+  padding: 10px 22px;
   background: linear-gradient(135deg, var(--gold-dim), var(--gold));
   border: none;
   font-family: 'Cinzel', serif;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 2px;
   color: var(--ink);

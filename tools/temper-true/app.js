@@ -797,24 +797,36 @@ document.getElementById('ritualRollBtn').addEventListener('click', () => {
   const display = document.getElementById('diceDisplay');
 
   btn.disabled = true;
+  display.classList.add('visible');
+  display.classList.remove('rolling');
 
-  // Animate through random numbers
-  let ticks = 0;
-  const maxTicks = 12;
-  const interval = setInterval(() => {
-    display.classList.add('visible');
-    display.textContent = Math.floor(Math.random() * 20) + 1;
-    ticks++;
-    if (ticks >= maxTicks) {
-      clearInterval(interval);
-      const finalRoll = Math.floor(Math.random() * 20) + 1;
-      display.textContent = finalRoll;
-      display.classList.add('rolling');
-      if (currentCriticalResolve) {
-        setTimeout(() => currentCriticalResolve(finalRoll), 600);
-      }
+  const finalRoll = Math.floor(Math.random() * 20) + 1;
+  /** How many random d20 flashes before the long pause + final reveal */
+  const tickCount = 26;
+
+  function delayMs(i) {
+    const t = tickCount <= 1 ? 1 : i / (tickCount - 1);
+    return 36 + t * t * t * 580;
+  }
+
+  let i = 0;
+  function tick() {
+    if (i < tickCount) {
+      display.textContent = Math.floor(Math.random() * 20) + 1;
+      setTimeout(tick, delayMs(i));
+      i += 1;
+    } else {
+      setTimeout(() => {
+        display.textContent = finalRoll;
+        display.classList.add('rolling');
+        if (currentCriticalResolve) {
+          setTimeout(() => currentCriticalResolve(finalRoll), 700);
+        }
+      }, 620);
     }
-  }, 80);
+  }
+
+  tick();
 });
 
 // ── CONTINUE BUTTON ───────────────────────────────────────────────────────
