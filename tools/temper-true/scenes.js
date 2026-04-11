@@ -191,7 +191,7 @@ const SCENES = [
       'As the last daylight fades, the chamber grows darker at the corners. Wessalen does not light more lanterns. He lets the room become honest.',
       '"Thresholds reveal people. You are most yourself when no one is watching. The city will test you by watching."',
     ],
-    llmContext: (state) => `George met with Prelate Wessalen at the Radiant Heart Chapterhouse. He ${state.tags.letter ? 'accepted the cloak and has Wessalen\'s formal backing' : 'refused the cloak and walks without institutional support'}. His narrative tag is ${state.tags.narrative}. He chose Branch ${state.choices.scene3 || 'none'}.`,
+    llmContext: (state) => `George met with Prelate Wessalen (he/him) at the Radiant Heart Chapterhouse. George ${state.tags.letter ? 'accepted the cloak and has Wessalen\'s formal backing' : 'refused the cloak and walks without institutional support'}. George's narrative tag is ${state.tags.narrative}. George chose Branch ${state.choices.scene3 || 'none'}.`,
   },
 
   // ── SCENE 4: Harbor Magister's Office ──

@@ -737,6 +737,10 @@ function showFinalScreen() {
 
 // ── LLM INTEGRATION ───────────────────────────────────────────────────────
 
+/** Pronouns for recurring NPCs so narration does not misgender (system prompt). */
+const LLM_NPC_PRONOUN_ROSTER =
+  'Key NPC pronouns — use consistently in narration: Prelate Wessalen (he/him); Embric (he/him); Avi (she/her); Captain Staget (he/him); Mulgor of Tyr (he/him). The player character is George Ward (he/him).';
+
 async function callLLM(sceneData, choiceLabel, choiceText, onDone) {
   const responseEl = document.getElementById('llmResponse');
   responseEl.classList.add('visible', 'loading');
@@ -745,7 +749,7 @@ async function callLLM(sceneData, choiceLabel, choiceText, onDone) {
   const context = typeof sceneData.llmContext === 'function' ? sceneData.llmContext(state) : '';
   const dcMod = getDCMod();
 
-  const systemPrompt = `You are the narrator of Temper-True, a solo D&D adventure set in Waterdeep for George Ward, a Twilight Domain Cleric. Your prose is grounded, atmospheric, and morally weighted. You write in second person. Keep responses to 2-4 sentences. Never explain mechanics. React to the choice made and the current consequence tags. ${state.tags.narrative === 'sour' ? 'The city is watching with suspicion. NPCs are cooler.' : 'The city is listening. NPCs are cautiously respectful.'} ${state.tags.trust === 'up' ? 'Steam and Steel trust George.' : ''} ${state.tags.letter ? 'George carries Wessalen\'s formal backing.' : ''} DC modifier in effect: ${dcMod > 0 ? '+' + dcMod + ' (reputation friction)' : dcMod < 0 ? dcMod + ' (earned trust)' : 'none'}.`;
+  const systemPrompt = `You are the narrator of Temper-True, a solo D&D adventure set in Waterdeep for George Ward, a Twilight Domain Cleric. ${LLM_NPC_PRONOUN_ROSTER} Your prose is grounded, atmospheric, and morally weighted. You write in second person. Keep responses to 2-4 sentences. Never explain mechanics. React to the choice made and the current consequence tags. ${state.tags.narrative === 'sour' ? 'The city is watching with suspicion. NPCs are cooler.' : 'The city is listening. NPCs are cautiously respectful.'} ${state.tags.trust === 'up' ? 'Steam and Steel trust George.' : ''} ${state.tags.letter ? 'George carries Wessalen\'s formal backing.' : ''} DC modifier in effect: ${dcMod > 0 ? '+' + dcMod + ' (reputation friction)' : dcMod < 0 ? dcMod + ' (earned trust)' : 'none'}.`;
 
   const userPrompt = `Scene context: ${context}\n\nGeorge chose: "${choiceLabel}" — ${choiceText}\n\nWrite a short reactive narration (2-4 sentences, second person) describing the immediate consequence of this choice in the world. Focus on sensory detail and NPC reaction. Do not summarize the choice back.`;
 
