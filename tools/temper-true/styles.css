@@ -931,7 +931,7 @@ html, body {
 /* Layout: add ?pinSketch=1 (or ?pinCritical=1) to the page URL, reload, then tune right/top/transform here. Larger `right` % = further left on screen. */
 .sketch-parchment {
   position: absolute;
-  right: 56%;       /* push it further left */
+  right: 42%;       /* push it further left */
   top: 55%;         /* drop it lower on the desk */
   transform: translateY(-44%) rotate(-5deg);
   width: 320px;
