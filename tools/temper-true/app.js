@@ -94,6 +94,9 @@ function useOpenAiSketchApi() {
 
 let imageGenerationEnabled = false;
 
+/** In-flight image fetches by scene id (dedupe prefetch vs renderScene; await + cache read for second caller). */
+const imageFetchPromises = new Map();
+
 /** DevTools: filter by "Temper-True AI" to see when narration/images run and why they might skip or fail. */
 function logTemperAI(level, event, detail) {
   const prefix = '[Temper-True AI]';
@@ -118,6 +121,13 @@ function toggleImageGeneration() {
   if (!imageGenerationEnabled) hideIllustration();
 }
 
+function prefetchIllustratedScenes() {
+  if (!imageGenerationEnabled) return;
+  ['scene2', 'scene4', 'scene7'].forEach((sceneId) => {
+    generateSceneImage(sceneId, { prefetchOnly: true });
+  });
+}
+
 async function generateSceneImage(sceneId, opts = {}) {
   if (!imageGenerationEnabled && !opts.layoutPreview) {
     logTemperAI('info', 'image:skipped', {
@@ -135,6 +145,7 @@ async function generateSceneImage(sceneId, opts = {}) {
   }
 
   if (!useOpenAiSketchApi()) {
+    if (opts.prefetchOnly) return;
     logTemperAI('info', 'image:local_placeholder', {
       sceneId,
       reason: 'localhost_static_preview',
@@ -156,65 +167,92 @@ async function generateSceneImage(sceneId, opts = {}) {
     logTemperAI('info', 'image:cache_bypass', { sceneId });
   }
 
-  showSketchParchmentLoading();
+  const pending = imageFetchPromises.get(sceneId);
+  if (pending && !bypassCache) {
+    if (opts.prefetchOnly) return;
+    await pending;
+    if (!bypassCache) {
+      const cachedAfter = localStorage.getItem(config.cacheKey);
+      if (cachedAfter) {
+        logTemperAI('info', 'image:cache_hit_after_await', { sceneId, cacheKey: config.cacheKey });
+        displaySketchParchment(cachedAfter, sceneId);
+        return;
+      }
+    }
+  }
 
-  const t0 = performance.now();
-  logTemperAI('info', 'image:request_start', {
-    sceneId,
-    model: 'dall-e-3',
-    layoutPreview: !!opts.layoutPreview,
-  });
+  const performFetch = async () => {
+    const t0 = performance.now();
+    if (!opts.prefetchOnly) showSketchParchmentLoading();
 
-  try {
-    const response = await fetch('/api/openai/images', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'dall-e-3',
-        prompt: config.prompt,
-        size: '1792x1024',
-        quality: 'standard',
-      }),
+    logTemperAI('info', 'image:request_start', {
+      sceneId,
+      model: 'dall-e-3',
+      layoutPreview: !!opts.layoutPreview,
+      prefetchOnly: !!opts.prefetchOnly,
     });
-
-    const data = await response.json();
-
-    if (!response.ok || data.error) {
-      logTemperAI('warn', 'image:request_failed', {
-        sceneId,
-        httpStatus: response.status,
-        error: data.error ?? data,
-        ...(response.status === 503 && {
-          hint: 'Local wrangler: add OPENAI_API_KEY=sk-... (or ADVENTURE_LOG_BUILDER_PROD) to .dev.vars in the repo root, restart pages dev.',
-        }),
-      });
-      hideIllustration();
-      return;
-    }
-
-    const imageUrl = data.data?.[0]?.url;
-    if (!imageUrl) {
-      logTemperAI('warn', 'image:no_url_in_response', { sceneId, keys: data ? Object.keys(data) : [] });
-      hideIllustration();
-      return;
-    }
 
     try {
-      // OpenAI image URLs are short-lived signed links; stale entries 403 until refetched (see displaySketchParchment onerror).
-      localStorage.setItem(config.cacheKey, imageUrl);
-    } catch {
-      // localStorage full — skip caching
-      logTemperAI('warn', 'image:cache_write_failed', { sceneId });
-    }
+      const response = await fetch('/api/openai/images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'dall-e-3',
+          prompt: config.prompt,
+          size: '1792x1024',
+          quality: 'standard',
+        }),
+      });
 
-    logTemperAI('info', 'image:request_ok', {
-      sceneId,
-      ms: Math.round(performance.now() - t0),
-    });
-    displaySketchParchment(imageUrl, sceneId);
-  } catch (err) {
-    logTemperAI('error', 'image:network_or_parse_error', { sceneId, message: err?.message ?? String(err) });
-    hideIllustration();
+      const data = await response.json();
+
+      if (!response.ok || data.error) {
+        logTemperAI('warn', 'image:request_failed', {
+          sceneId,
+          httpStatus: response.status,
+          error: data.error ?? data,
+          ...(response.status === 503 && {
+            hint: 'Local wrangler: add OPENAI_API_KEY=sk-... (or ADVENTURE_LOG_BUILDER_PROD) to .dev.vars in the repo root, restart pages dev.',
+          }),
+        });
+        if (!opts.prefetchOnly) hideIllustration();
+        return;
+      }
+
+      const imageUrl = data.data?.[0]?.url;
+      if (!imageUrl) {
+        logTemperAI('warn', 'image:no_url_in_response', { sceneId, keys: data ? Object.keys(data) : [] });
+        if (!opts.prefetchOnly) hideIllustration();
+        return;
+      }
+
+      try {
+        // OpenAI image URLs are short-lived signed links; stale entries 403 until refetched (see displaySketchParchment onerror).
+        localStorage.setItem(config.cacheKey, imageUrl);
+      } catch {
+        // localStorage full — skip caching
+        logTemperAI('warn', 'image:cache_write_failed', { sceneId });
+      }
+
+      logTemperAI('info', 'image:request_ok', {
+        sceneId,
+        ms: Math.round(performance.now() - t0),
+      });
+      if (!opts.prefetchOnly) displaySketchParchment(imageUrl, sceneId);
+    } catch (err) {
+      logTemperAI('error', 'image:network_or_parse_error', { sceneId, message: err?.message ?? String(err) });
+      if (!opts.prefetchOnly) hideIllustration();
+    } finally {
+      if (!bypassCache) imageFetchPromises.delete(sceneId);
+    }
+  };
+
+  if (!bypassCache) {
+    const p = performFetch();
+    imageFetchPromises.set(sceneId, p);
+    await p;
+  } else {
+    await performFetch();
   }
 }
 
@@ -793,6 +831,7 @@ document.getElementById('continueSceneBtn').addEventListener('click', () => {
 
 document.getElementById('newGameBtn').addEventListener('click', () => {
   resetState();
+  prefetchIllustratedScenes();
   document.getElementById('titleScreen').style.display = 'none';
   renderScene(0);
 });
