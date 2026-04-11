@@ -497,11 +497,13 @@ function processBeat(sceneIndex, beatIndex) {
       });
     });
   } else if (beat.type === 'critical-check') {
+    const nextBeat = sceneData.beats[beatIndex + 1];
+    const mergeChoices = nextBeat && nextBeat.type === 'choices' ? nextBeat : null;
     transitionSheet(() => {
       resetSheetUI();
       showCriticalCheck(beat, sceneData, () => {
-        processBeat(sceneIndex, beatIndex + 1);
-      });
+        processBeat(sceneIndex, beatIndex + (mergeChoices ? 2 : 1));
+      }, mergeChoices);
     });
   } else if (beat.type === 'choices') {
     transitionSheet(() => {
@@ -577,7 +579,7 @@ function showManualCheck(beat, sceneData, onDone) {
   };
 }
 
-function showCriticalCheck(beat, sceneData, onDone) {
+function showCriticalCheck(beat, sceneData, onDone, choicesBeat = null) {
   const dcMod = getDCMod();
   const adjustedDC = Math.max(8, beat.baseDC + dcMod);
 
@@ -603,11 +605,32 @@ function showCriticalCheck(beat, sceneData, onDone) {
       const p2 = document.createElement('p');
       p2.style.fontStyle = 'italic';
       p2.style.color = success ? '#2a4a1a' : '#5a1a0a';
-      p2.textContent = success
-        ? `The dice favor you. (Rolled ${rolled} vs DC ${adjustedDC})`
-        : `The dice do not. (Rolled ${rolled} vs DC ${adjustedDC})`;
+      p2.style.marginBottom = '18px';
+      const outcomeLines = {
+        'Public Narrative': {
+          success: 'The alley hears you. The right version of the story takes hold.',
+          fail: 'The rumor moves faster than your words. The wrong version is already spreading.',
+        },
+        'Push for the Source': {
+          success: 'The magister hesitates. You have what you came for.',
+          fail: 'He gives you nothing. The source of the hold stays buried — for now.',
+        },
+        'The Steel Trial': {
+          success: 'The steel rings true. Avi nods once. The work can begin.',
+          fail: 'Something is wrong with the steel. Avi sets down the bar without a word.',
+        },
+      };
+
+      const lines = outcomeLines[beat.name];
+      p2.textContent = lines
+        ? (success ? lines.success : lines.fail)
+        : (success ? 'The moment resolves in your favor.' : 'The moment does not resolve as you hoped.');
       proseEl2.appendChild(p2);
-      showContinueBtn(onDone);
+      if (choicesBeat) {
+        showChoices(choicesBeat, sceneData, onDone);
+      } else {
+        showContinueBtn(onDone);
+      }
     });
   });
 }
