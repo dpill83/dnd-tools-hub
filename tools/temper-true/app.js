@@ -737,9 +737,13 @@ function showFinalScreen() {
 
 // ── LLM INTEGRATION ───────────────────────────────────────────────────────
 
-/** Pronouns for recurring NPCs so narration does not misgender (system prompt). */
-const LLM_NPC_PRONOUN_ROSTER =
-  'Key NPC pronouns — use consistently in narration: Prelate Wessalen (he/him); Embric (he/him); Avi (she/her); Captain Staget (he/him); Mulgor of Tyr (he/him). The player character is George Ward (he/him).';
+/** Relationship + pronouns for recurring NPCs (LLM system prompt). */
+const LLM_NPC_ROSTER = `Key NPCs and their relationship to George Ward:
+- Wessalen (he/him): George's prelate at the Radiant Heart Chapterhouse. Stern, measured, mentor-like. Trusts George but holds him to a high standard.
+- Embric (he/him): Blacksmith at Steam and Steel. Guarded initially, warming to George over the course of the adventure.
+- Avi (she/her): Blacksmith at Steam and Steel. Direct, principled, deeply respects George's commitment to doing things clean.
+- Staget (he/him): City Watch captain. A trusted friend and ally to George. Cooperative and collegial — not suspicious or adversarial.
+- Mulgor (he/him): Tyr's fee collector. Neutral and procedural. Not an antagonist.`;
 
 async function callLLM(sceneData, choiceLabel, choiceText, onDone) {
   const responseEl = document.getElementById('llmResponse');
@@ -749,7 +753,11 @@ async function callLLM(sceneData, choiceLabel, choiceText, onDone) {
   const context = typeof sceneData.llmContext === 'function' ? sceneData.llmContext(state) : '';
   const dcMod = getDCMod();
 
-  const systemPrompt = `You are the narrator of Temper-True, a solo D&D adventure set in Waterdeep for George Ward, a Twilight Domain Cleric. ${LLM_NPC_PRONOUN_ROSTER} Your prose is grounded, atmospheric, and morally weighted. You write in second person. Keep responses to 2-4 sentences. Never explain mechanics. React to the choice made and the current consequence tags. ${state.tags.narrative === 'sour' ? 'The city is watching with suspicion. NPCs are cooler.' : 'The city is listening. NPCs are cautiously respectful.'} ${state.tags.trust === 'up' ? 'Steam and Steel trust George.' : ''} ${state.tags.letter ? 'George carries Wessalen\'s formal backing.' : ''} DC modifier in effect: ${dcMod > 0 ? '+' + dcMod + ' (reputation friction)' : dcMod < 0 ? dcMod + ' (earned trust)' : 'none'}.`;
+  const systemPrompt = `You are the narrator of Temper-True, a solo D&D adventure set in Waterdeep for George Ward, a Twilight Domain Cleric.
+
+${LLM_NPC_ROSTER}
+
+Your prose is grounded, atmospheric, and morally weighted. You write in second person. Keep responses to 2-4 sentences. Never explain mechanics. React to the choice made and the current consequence tags. ${state.tags.narrative === 'sour' ? 'The city is watching with suspicion. NPCs are cooler.' : 'The city is listening. NPCs are cautiously respectful.'} ${state.tags.trust === 'up' ? 'Steam and Steel trust George.' : ''} ${state.tags.letter ? 'George carries Wessalen\'s formal backing.' : ''} DC modifier in effect: ${dcMod > 0 ? '+' + dcMod + ' (reputation friction)' : dcMod < 0 ? dcMod + ' (earned trust)' : 'none'}.`;
 
   const userPrompt = `Scene context: ${context}\n\nGeorge chose: "${choiceLabel}" — ${choiceText}\n\nWrite a short reactive narration (2-4 sentences, second person) describing the immediate consequence of this choice in the world. Focus on sensory detail and NPC reaction. Do not summarize the choice back.`;
 
