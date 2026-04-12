@@ -175,9 +175,17 @@ export function playSfx(name) {
 function updateToggleUi() {
   const btn = document.getElementById('btn-audio-toggle');
   if (!btn) return;
-  btn.setAttribute('aria-pressed', enabled ? 'true' : 'false');
-  btn.textContent = enabled ? 'Sound: on' : 'Sound: off';
+  btn.setAttribute('aria-checked', enabled ? 'true' : 'false');
+  btn.setAttribute('aria-label', enabled ? 'Sound on. Press to mute.' : 'Sound off. Press to turn sound on.');
   btn.title = enabled ? 'Turn sound off' : 'Turn sound on';
+  const on = btn.querySelector('.rogue-audio-svg-on');
+  const off = btn.querySelector('.rogue-audio-svg-off');
+  if (on && off) {
+    on.toggleAttribute('hidden', !enabled);
+    off.toggleAttribute('hidden', enabled);
+    return;
+  }
+  btn.textContent = enabled ? '🔊' : '🔇';
 }
 
 export function bindAudioToggle() {

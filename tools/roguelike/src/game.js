@@ -432,6 +432,15 @@ function setHelpVisible(visible) {
   else wrap?.focus();
 }
 
+function setGameMenuVisible(visible) {
+  const menu = document.getElementById('rogue-game-menu');
+  if (!menu) return;
+  menu.hidden = !visible;
+  const wrap = document.getElementById('rogue-wrap');
+  if (visible) document.getElementById('rogue-game-menu-close')?.focus();
+  else wrap?.focus();
+}
+
 function startGame(state) {
   state.player = initPlayer();
   state.floor = 1;
@@ -466,11 +475,13 @@ function main() {
   renderToElement(canvas, state);
   wrap.focus();
 
-  const focusHint = document.getElementById('focus-hint');
-
   document.getElementById('rogue-help-close')?.addEventListener('click', () => setHelpVisible(false));
   document.getElementById('rogue-help')?.addEventListener('click', (e) => {
     if (e.target?.id === 'rogue-help') setHelpVisible(false);
+  });
+
+  document.getElementById('rogue-game-menu')?.addEventListener('click', (e) => {
+    if (e.target?.id === 'rogue-game-menu') setGameMenuVisible(false);
   });
 
   const render = () => renderToElement(canvas, state);
@@ -480,6 +491,14 @@ function main() {
     const h = helpEl();
     return !!(h && !h.hidden);
   };
+
+  const menuEl = () => document.getElementById('rogue-game-menu');
+  const menuOpen = () => {
+    const m = menuEl();
+    return !!(m && !m.hidden);
+  };
+
+  const blockedByOverlay = () => helpOpen() || menuOpen();
 
   const bindButton = (id, handler) => {
     const el = document.getElementById(id);
@@ -510,6 +529,83 @@ function main() {
     });
   };
 
+  /** Hold to repeat moves (same idea as holding a movement key on desktop). */
+  const bindMoveHold = (id, dx, dy) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    const REPEAT_MS = 115;
+    const INITIAL_DELAY_MS = 340;
+    let repeatTimer = 0;
+    let initialDelayTimer = 0;
+    let lastPointerDownAt = 0;
+    let suppressClickUntil = 0;
+
+    const clearTimers = () => {
+      if (repeatTimer) {
+        clearInterval(repeatTimer);
+        repeatTimer = 0;
+      }
+      if (initialDelayTimer) {
+        clearTimeout(initialDelayTimer);
+        initialDelayTimer = 0;
+      }
+    };
+
+    const tryStep = () => {
+      if (blockedByOverlay() || state.gameOver) {
+        clearTimers();
+        return;
+      }
+      tryMove(state, dx, dy);
+      render();
+    };
+
+    const endHold = () => {
+      clearTimers();
+      suppressClickUntil = performance.now() + 400;
+    };
+
+    el.addEventListener(
+      'pointerdown',
+      (e) => {
+        e.preventDefault();
+        lastPointerDownAt = performance.now();
+        wrap.focus();
+        try {
+          el.setPointerCapture(e.pointerId);
+        } catch {
+          /* ignore */
+        }
+        clearTimers();
+        tryStep();
+        initialDelayTimer = window.setTimeout(() => {
+          initialDelayTimer = 0;
+          repeatTimer = window.setInterval(tryStep, REPEAT_MS);
+        }, INITIAL_DELAY_MS);
+      },
+      { passive: false }
+    );
+
+    el.addEventListener('pointerup', endHold);
+    el.addEventListener('pointercancel', endHold);
+    el.addEventListener('lostpointercapture', endHold);
+
+    el.addEventListener('click', (e) => {
+      if (performance.now() < suppressClickUntil) {
+        e.preventDefault();
+        return;
+      }
+      if (performance.now() - lastPointerDownAt < 500) {
+        e.preventDefault();
+        return;
+      }
+      e.preventDefault();
+      wrap.focus();
+      tryStep();
+    });
+  };
+
   const doWait = () => {
     playSfx('wait');
     monsterTurns(state);
@@ -522,52 +618,35 @@ function main() {
     setHelpVisible(helpEl()?.hidden ?? true);
   };
 
-  const setFocused = (focused) => {
-    if (!focusHint) return;
-    focusHint.hidden = focused;
-  };
-  wrap.addEventListener('focus', () => setFocused(true));
-  wrap.addEventListener('blur', () => setFocused(false));
-  setFocused(document.activeElement === wrap);
-
-  // Touch controls (mobile-friendly); mirrors keyboard semantics.
-  bindButton('btn-move-up', () => {
-    if (helpOpen() || state.gameOver) return;
-    tryMove(state, 0, -1);
-    render();
-  });
-  bindButton('btn-move-down', () => {
-    if (helpOpen() || state.gameOver) return;
-    tryMove(state, 0, 1);
-    render();
-  });
-  bindButton('btn-move-left', () => {
-    if (helpOpen() || state.gameOver) return;
-    tryMove(state, -1, 0);
-    render();
-  });
-  bindButton('btn-move-right', () => {
-    if (helpOpen() || state.gameOver) return;
-    tryMove(state, 1, 0);
-    render();
-  });
+  // Touch controls (mobile-friendly); hold D-pad to repeat moves like keyboard repeat.
+  bindMoveHold('btn-move-up', 0, -1);
+  bindMoveHold('btn-move-down', 0, 1);
+  bindMoveHold('btn-move-left', -1, 0);
+  bindMoveHold('btn-move-right', 1, 0);
   bindButton('btn-act-use', () => {
-    if (helpOpen() || state.gameOver) return;
+    if (blockedByOverlay() || state.gameOver) return;
     useInteract(state);
     render();
   });
   bindButton('btn-act-wait', () => {
-    if (helpOpen() || state.gameOver) return;
+    if (blockedByOverlay() || state.gameOver) return;
     doWait();
     render();
   });
-  bindButton('btn-act-help', () => {
+  bindButton('btn-act-menu', () => {
+    setGameMenuVisible(!menuOpen());
+  });
+  bindButton('btn-menu-help', () => {
+    setGameMenuVisible(false);
     toggleHelp();
   });
-  bindButton('btn-act-restart', () => {
-    if (helpOpen()) return;
+  bindButton('btn-menu-restart', () => {
+    setGameMenuVisible(false);
     startGame(state);
     render();
+  });
+  bindButton('rogue-game-menu-close', () => {
+    setGameMenuVisible(false);
   });
 
   wrap.addEventListener('keydown', (e) => {
@@ -575,7 +654,16 @@ function main() {
 
     if (k === '?') {
       e.preventDefault();
+      if (menuOpen()) setGameMenuVisible(false);
       toggleHelp();
+      return;
+    }
+
+    if (menuOpen()) {
+      if (k === 'Escape') {
+        e.preventDefault();
+        setGameMenuVisible(false);
+      }
       return;
     }
 

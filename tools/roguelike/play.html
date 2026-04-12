@@ -20,10 +20,33 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="stylesheet" href="./rogue.css" />
   </head>
-  <body>
+  <body class="rogue-play">
     <div id="rogue-wrap" tabindex="0">
       <div id="rogue-stats">
-        <button id="btn-audio-toggle" class="rogue-btn rogue-btn-audio" type="button" aria-pressed="true" aria-label="Toggle sound">Sound: on</button>
+        <button
+          id="btn-audio-toggle"
+          class="rogue-btn rogue-btn-audio"
+          type="button"
+          role="switch"
+          aria-checked="true"
+          aria-label="Sound on. Press to mute."
+          title="Turn sound off"
+        >
+          <span class="rogue-audio-svg rogue-audio-svg-on" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path
+                d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
+              />
+            </svg>
+          </span>
+          <span class="rogue-audio-svg rogue-audio-svg-off" aria-hidden="true" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path
+                d="M16.5 12A4.5 4.5 0 0 0 14 7.97v2.21l2.45 2.45c.03-.2.05-.41.05-.63zM19 12c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.53 8.53 0 0 0 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"
+              />
+            </svg>
+          </span>
+        </button>
         <div>HP: <span class="s-hp" id="s-hp">10/10</span></div>
         <div>ATK: <span id="s-atk">3</span></div>
         <div>DEF: <span id="s-def">0</span></div>
@@ -34,43 +57,45 @@
       </div>
       <div id="rogue-canvas" aria-label="Dungeon view" role="img"></div>
       <div id="rogue-controls" aria-label="Touch controls">
-        <div id="rogue-dpad" role="group" aria-label="Move">
-          <button id="btn-move-up" class="rogue-btn" type="button" aria-label="Move up">▲</button>
-          <div id="rogue-dpad-mid">
-            <button id="btn-move-left" class="rogue-btn" type="button" aria-label="Move left">◀</button>
-            <button id="btn-move-down" class="rogue-btn" type="button" aria-label="Move down">▼</button>
-            <button id="btn-move-right" class="rogue-btn" type="button" aria-label="Move right">▶</button>
-          </div>
-        </div>
         <div id="rogue-actions" role="group" aria-label="Actions">
           <button id="btn-act-use" class="rogue-btn rogue-btn-wide" type="button" aria-label="Grab items, or descend when on stairs or amulet">Use</button>
           <button id="btn-act-wait" class="rogue-btn rogue-btn-wide" type="button" aria-label="Wait a turn">Wait</button>
-          <button id="btn-act-help" class="rogue-btn rogue-btn-wide" type="button" aria-label="Toggle help">Help</button>
-          <button id="btn-act-restart" class="rogue-btn rogue-btn-wide" type="button" aria-label="Restart game">Restart</button>
+          <button id="btn-act-menu" class="rogue-btn rogue-btn-wide" type="button" aria-label="Open game menu">Menu</button>
+        </div>
+        <div id="rogue-dpad" role="group" aria-label="Move">
+          <button id="btn-move-up" class="rogue-btn rogue-dpad-btn" type="button" aria-label="Move up">↑</button>
+          <button id="btn-move-left" class="rogue-btn rogue-dpad-btn" type="button" aria-label="Move left">←</button>
+          <button id="btn-move-right" class="rogue-btn rogue-dpad-btn" type="button" aria-label="Move right">→</button>
+          <button id="btn-move-down" class="rogue-btn rogue-dpad-btn" type="button" aria-label="Move down">↓</button>
         </div>
       </div>
       <div id="rogue-log"><span id="log-text">You descend into the dungeon...</span></div>
-      <div id="rogue-keys">
-        Arrow keys / WASD to move &nbsp;|&nbsp; g = grab &nbsp;|&nbsp; e/Enter = stairs
-        &nbsp;|&nbsp; . = wait &nbsp;|&nbsp; ? = help &nbsp;|&nbsp; touch: Use = grab or stairs
-        <span id="focus-hint" hidden>&nbsp;|&nbsp; Click/tap the game to focus</span>
-      </div>
     </div>
 
     <div id="rogue-help" hidden>
       <div id="rogue-help-inner" role="dialog" aria-modal="true" aria-label="Help">
         <div id="rogue-help-title">Help</div>
         <div id="rogue-help-body">
-          <div><b>Move</b>: Arrow keys / WASD (also hjkl)</div>
-          <div><b>Wait</b>: <code>.</code></div>
-          <div><b>Grab</b>: <code>g</code> &nbsp;|&nbsp; <b>Descend</b>: <code>e</code> / <code>Enter</code> (also <code>&gt;</code>)</div>
-          <div><b>Touch</b>: <b>Use</b> — grab / pick up on items; descend when standing on stairs or the amulet.</div>
-          <div><b>Restart</b>: <code>R</code></div>
-          <div><b>Toggle help</b>: <code>?</code></div>
+          <div><b>Keyboard</b>: Arrow keys or <code>WASD</code> to move (also <code>hjkl</code>). <code>g</code> = grab. <code>e</code> / <code>Enter</code> / <code>&gt;</code> = stairs. <code>.</code> or <code>5</code> = wait. <code>?</code> = this help. <code>R</code> = restart run.</div>
+          <div><b>Touch</b>: <b>Use</b> — grab / pick up on items; descend when on stairs or the amulet. <b>Wait</b> skips a turn. <b>Menu</b> — help and restart.</div>
+          <div><b>Focus</b>: Click or tap the game area so the keyboard works.</div>
           <div><b>Modes</b>: <b>Story</b> — find the Amulet on floor 5. <b>Endless</b> — stairs forever; how deep can you go?</div>
         </div>
         <div id="rogue-help-footer">
           <button id="rogue-help-close" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="rogue-game-menu" hidden>
+      <div id="rogue-game-menu-inner" role="dialog" aria-modal="true" aria-label="Game menu">
+        <div id="rogue-game-menu-title">Menu</div>
+        <div id="rogue-game-menu-actions">
+          <button id="btn-menu-help" class="rogue-btn rogue-btn-wide" type="button">Help</button>
+          <button id="btn-menu-restart" class="rogue-btn rogue-btn-wide" type="button">Restart</button>
+        </div>
+        <div id="rogue-game-menu-footer">
+          <button id="rogue-game-menu-close" type="button">Close</button>
         </div>
       </div>
     </div>
