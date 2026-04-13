@@ -40,49 +40,13 @@ export const COLS = Object.freeze({
   trap: '#b07070',
 });
 
-/** Brighter tiles and glyphs for comfort=1; fog < seen < lit floor/wall ordering preserved. */
-export const COMFORT_COLS = Object.freeze({
-  floor: '#4d4d68',
-  wall: '#3a3a52',
-  player: '#f2f2e6',
-  orc: '#7cdb7c',
-  goblin: '#5cc55c',
-  rat: '#c09860',
-  troll: '#a080d8',
-  dragon: '#f08080',
-  gold: '#f0e860',
-  stairs: '#7cc8f0',
-  potion: '#f080c8',
-  sword: '#b0d0f0',
-  shield: '#d8b888',
-  amulet: '#f0d830',
-  seen: '#2e2e44',
-  fog: '#222232',
-  door: '#a0a0b8',
-  trap: '#c88888',
-});
-
 /**
  * On narrow screens, nudge only unexplored fog + “memory” (seen) so OLEDs stay readable.
  * Lit tiles keep COLS.floor / COLS.wall so FoW stays: darkest unexplored < dim memory < bright LOS.
- * Comfort mode uses COMFORT_COLS; on narrow viewports, fog/seen are nudged slightly brighter still.
  */
 export function getRenderPalette() {
   if (typeof window === 'undefined' || !window.matchMedia) return COLS;
-  const comfort =
-    typeof document !== 'undefined' && document.documentElement.classList.contains('rogue-comfort');
   const narrow = window.matchMedia('(max-width: 520px)').matches;
-
-  if (comfort) {
-    if (narrow) {
-      return {
-        ...COMFORT_COLS,
-        fog: '#282838',
-        seen: '#383852',
-      };
-    }
-    return COMFORT_COLS;
-  }
 
   if (narrow) {
     return {

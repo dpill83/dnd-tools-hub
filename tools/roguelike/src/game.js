@@ -6,6 +6,41 @@ import { renderToElement } from './render.js';
 import { idxOf, inBounds, rnd } from './util.js';
 import { bindAudioToggle, playSfx, setupAudioUnlock } from './audio.js';
 
+const LS_DISPLAY_BRIGHTNESS_PCT = 'roguelike-display-brightness-pct';
+const LS_DISPLAY_CONTRAST_PCT = 'roguelike-display-contrast-pct';
+
+/** Refreshes Menu → Display sliders from storage (called when opening the game menu). */
+let refreshGameMenuDisplaySliders = () => {};
+
+function readBrightnessPct() {
+  try {
+    const raw = localStorage.getItem(LS_DISPLAY_BRIGHTNESS_PCT);
+    const n = raw === null || raw === '' ? 100 : Number(raw);
+    if (!Number.isFinite(n)) return 100;
+    return Math.min(130, Math.max(70, Math.round(n)));
+  } catch {
+    return 100;
+  }
+}
+
+function readContrastPct() {
+  try {
+    const raw = localStorage.getItem(LS_DISPLAY_CONTRAST_PCT);
+    const n = raw === null || raw === '' ? 100 : Number(raw);
+    if (!Number.isFinite(n)) return 100;
+    return Math.min(145, Math.max(75, Math.round(n)));
+  } catch {
+    return 100;
+  }
+}
+
+function applyDisplaySettings() {
+  const b = readBrightnessPct() / 100;
+  const c = readContrastPct() / 100;
+  document.documentElement.style.setProperty('--rogue-display-brightness', String(b));
+  document.documentElement.style.setProperty('--rogue-display-contrast', String(c));
+}
+
 function makeState() {
   const gridType = new Uint8Array(W * H);
   const gridVisible = new Uint8Array(W * H);
@@ -45,13 +80,42 @@ function resetLookupTables(state) {
   }
 }
 
+function syncLogMarquee(clip, body) {
+  if (!clip || !body) return;
+  clip.classList.remove('rogue-log-marquee');
+  clip.style.removeProperty('--rogue-marquee-dist');
+  clip.style.removeProperty('--rogue-marquee-dur');
+  if (!body.textContent) return;
+
+  const measure = () => {
+    const overflow = body.scrollWidth > clip.clientWidth + 1;
+    if (!overflow) return;
+    const dist = body.scrollWidth - clip.clientWidth;
+    clip.style.setProperty('--rogue-marquee-dist', `${dist}px`);
+    const dur = Math.min(36, Math.max(10, dist / 22));
+    clip.style.setProperty('--rogue-marquee-dur', `${dur}s`);
+    clip.classList.add('rogue-log-marquee');
+  };
+
+  requestAnimationFrame(() => requestAnimationFrame(measure));
+}
+
 function setLogHtml(state) {
-  const el = document.getElementById('log-text');
-  if (!el) return;
-  el.innerHTML = state.log
-    .slice(0, 3)
-    .map((l) => `<span class="${l.cls || ''}">${l.msg}</span>`)
-    .join(' &nbsp; ');
+  const clip = document.getElementById('log-text');
+  const body = document.getElementById('log-text-body');
+  if (!clip || !body) return;
+  const latest = state.log[0];
+  if (!latest) {
+    body.textContent = '';
+    body.className = 'rogue-log-body';
+    clip.classList.remove('rogue-log-marquee');
+    clip.style.removeProperty('--rogue-marquee-dist');
+    clip.style.removeProperty('--rogue-marquee-dur');
+    return;
+  }
+  body.className = `rogue-log-body ${latest.cls || ''}`.trim();
+  body.textContent = latest.msg;
+  syncLogMarquee(clip, body);
 }
 
 function addLog(state, msg, cls) {
@@ -61,7 +125,25 @@ function addLog(state, msg, cls) {
 }
 
 function updateStats(state) {
-  document.getElementById('s-hp').textContent = `${state.player.hp}/${state.player.maxHp}`;
+  const hp = state.player.hp;
+  const maxHp = state.player.maxHp;
+  const hpPct = maxHp > 0 ? Math.min(100, (100 * hp) / maxHp) : 0;
+
+  const hpLabel = document.getElementById('s-hp');
+  if (hpLabel) hpLabel.textContent = `${hp}/${maxHp}`;
+
+  const hpFill = document.getElementById('s-hp-fill');
+  if (hpFill) hpFill.style.width = `${hpPct}%`;
+
+  const hpBar = document.getElementById('s-hp-bar');
+  if (hpBar) {
+    hpBar.setAttribute('aria-valuenow', String(hp));
+    hpBar.setAttribute('aria-valuemax', String(maxHp));
+    hpBar.setAttribute('aria-valuetext', `${hp} of ${maxHp} hit points`);
+    hpBar.classList.toggle('rogue-hp-low', hpPct > 0 && hpPct < 35);
+    hpBar.classList.toggle('rogue-hp-critical', hpPct > 0 && hpPct < 15);
+  }
+
   document.getElementById('s-atk').textContent = String(state.player.atk);
   document.getElementById('s-def').textContent = String(state.player.def);
   document.getElementById('s-lvl').textContent = String(state.player.level);
@@ -437,8 +519,10 @@ function setGameMenuVisible(visible) {
   if (!menu) return;
   menu.hidden = !visible;
   const wrap = document.getElementById('rogue-wrap');
-  if (visible) document.getElementById('rogue-game-menu-close')?.focus();
-  else wrap?.focus();
+  if (visible) {
+    refreshGameMenuDisplaySliders();
+    document.getElementById('rogue-game-menu-close')?.focus();
+  } else wrap?.focus();
 }
 
 function startGame(state) {
@@ -474,6 +558,81 @@ function main() {
   startGame(state);
   renderToElement(canvas, state);
   wrap.focus();
+
+  refreshGameMenuDisplaySliders = () => {
+    const br = document.getElementById('rogue-opt-brightness');
+    const cr = document.getElementById('rogue-opt-contrast');
+    const bv = document.getElementById('rogue-opt-brightness-val');
+    const cv = document.getElementById('rogue-opt-contrast-val');
+    const bp = readBrightnessPct();
+    const cp = readContrastPct();
+    if (br) {
+      br.value = String(bp);
+      br.setAttribute('aria-valuetext', `${bp} percent`);
+    }
+    if (cr) {
+      cr.value = String(cp);
+      cr.setAttribute('aria-valuetext', `${cp} percent`);
+    }
+    if (bv) bv.textContent = `${bp}%`;
+    if (cv) cv.textContent = `${cp}%`;
+  };
+
+  const wireDisplayOptions = () => {
+    const br = document.getElementById('rogue-opt-brightness');
+    const cr = document.getElementById('rogue-opt-contrast');
+    const bv = document.getElementById('rogue-opt-brightness-val');
+    const cv = document.getElementById('rogue-opt-contrast-val');
+    const reset = document.getElementById('rogue-opt-display-reset');
+
+    const onBright = () => {
+      if (!br) return;
+      const next = Math.min(130, Math.max(70, Math.round(br.valueAsNumber)));
+      try {
+        localStorage.setItem(LS_DISPLAY_BRIGHTNESS_PCT, String(next));
+      } catch {
+        /* ignore */
+      }
+      applyDisplaySettings();
+      if (bv) bv.textContent = `${next}%`;
+      br.setAttribute('aria-valuetext', `${next} percent`);
+    };
+
+    const onContrast = () => {
+      if (!cr) return;
+      const next = Math.min(145, Math.max(75, Math.round(cr.valueAsNumber)));
+      try {
+        localStorage.setItem(LS_DISPLAY_CONTRAST_PCT, String(next));
+      } catch {
+        /* ignore */
+      }
+      applyDisplaySettings();
+      if (cv) cv.textContent = `${next}%`;
+      cr.setAttribute('aria-valuetext', `${next} percent`);
+    };
+
+    br?.addEventListener('input', onBright);
+    cr?.addEventListener('input', onContrast);
+    reset?.addEventListener('click', () => {
+      try {
+        localStorage.removeItem(LS_DISPLAY_BRIGHTNESS_PCT);
+        localStorage.removeItem(LS_DISPLAY_CONTRAST_PCT);
+      } catch {
+        /* ignore */
+      }
+      if (br) br.value = '100';
+      if (cr) cr.value = '100';
+      applyDisplaySettings();
+      if (bv) bv.textContent = '100%';
+      if (cv) cv.textContent = '100%';
+      br?.setAttribute('aria-valuetext', '100 percent');
+      cr?.setAttribute('aria-valuetext', '100 percent');
+    });
+  };
+
+  applyDisplaySettings();
+  refreshGameMenuDisplaySliders();
+  wireDisplayOptions();
 
   document.getElementById('rogue-help-close')?.addEventListener('click', () => setHelpVisible(false));
   document.getElementById('rogue-help')?.addEventListener('click', (e) => {
@@ -721,6 +880,7 @@ function main() {
     resizeRaf = requestAnimationFrame(() => {
       resizeRaf = 0;
       render();
+      setLogHtml(state);
     });
   });
 }

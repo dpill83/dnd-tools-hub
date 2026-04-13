@@ -37,7 +37,7 @@ function itemGlyphAndColor(item, P) {
   }
 }
 
-/** Monsters store spawn-time hex colors; remap by glyph so comfort palette applies. */
+/** Monsters store spawn-time hex colors; remap by glyph for render palette. */
 function monsterPaletteColor(m, P) {
   switch (m.g) {
     case 'r':
