@@ -1018,7 +1018,7 @@ var InputFunctions = {
             return;
         }
         setPresetLoading(true);
-        $.getJSON("https://api.open5e.com/monsters/" + slug, function (jsonArr) {
+        $.getJSON("https://api.open5e.com/v1/monsters/" + slug, function (jsonArr) {
             monsterPresetCache.set(slug, jsonArr);
             GetVariablesFunctions.SetPreset(jsonArr);
             FormFunctions.SetForms();
@@ -2116,8 +2116,8 @@ var MonsterPresets = (function () {
     var CACHE_KEY = "open5e-monster-list-v2";
     var CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
     var CUSTOM_STORAGE_KEY = "statblock-custom-presets";
-    var SRD_URL = "https://api.open5e.com/monsters/?format=json&fields=slug,name,challenge_rating&limit=1000&document__slug=wotc-srd";
-    var TOB_URL = "https://api.open5e.com/monsters/?format=json&fields=slug,name,challenge_rating&limit=1000&document__slug=tob";
+    var SRD_URL = "https://api.open5e.com/v1/monsters/?format=json&fields=slug,name,challenge_rating&limit=1000&document__slug=wotc-srd";
+    var TOB_URL = "https://api.open5e.com/v1/monsters/?format=json&fields=slug,name,challenge_rating&limit=1000&document__slug=tob";
 
     var customMonsterCatalog = {};
     var customMonsterCatalogLoaded = false;
