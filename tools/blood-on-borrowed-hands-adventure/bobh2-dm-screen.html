@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blood on Borrowed Hands 2 — DM Screen</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/dm-screen.css">
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-eyebrow">The Shattered Watch Campaign</div>
+    <div class="header-title">Blood on Borrowed Hands 2</div>
+  </div>
+  <div class="header-divider"></div>
+  <div class="header-hint">Select a scene from the flowchart to view details</div>
+  <div class="header-divider"></div>
+  <button class="npc-btn" onclick="showScene('npcs')">⚔ NPCs</button>
+  <button class="npc-btn loc-btn" onclick="showScene('locations')">🗺 Locations</button>
+  <div class="header-divider"></div>
+  <button class="ccp-popout" id="tv-btn" onclick="openDisplay()" style="white-space:nowrap;">📺 Open TV</button>
+</header>
+
+<div class="main">
+
+  <!-- SIDEBAR FLOWCHART -->
+  <aside class="sidebar">
+    <svg id="flowchart" viewBox="0 0 340 580" xmlns="http://www.w3.org/2000/svg" style="width:340px;display:block;">
+      <defs>
+        <marker id="arr" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="5" markerHeight="5" orient="auto">
+          <path d="M1 1L7 4L1 7" fill="none" stroke="#8B6914" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+      <style>
+        .fc-node { cursor:pointer; }
+        .fc-node rect { transition: all 0.18s; }
+        .fc-node:hover rect { filter: brightness(1.3); }
+        .fc-node.active rect { stroke-width: 2.5; filter: brightness(1.5); }
+        .fc-label { font-family: Cinzel, serif; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; pointer-events: none; }
+        .fc-sub { font-family: Georgia, serif; font-size: 9.5px; font-style: italic; fill: #A09070; pointer-events: none; }
+        .fc-line { stroke: #8B6914; stroke-width: 1.2; fill: none; stroke-opacity: 0.6; marker-end: url(#arr); }
+        .fc-dash { stroke: #8B6914; stroke-width: 1; fill: none; stroke-opacity: 0.35; stroke-dasharray: 3 2; }
+      </style>
+
+      <!-- STRONG START -->
+      <g class="fc-node" data-scene="start" onclick="fcClick('start')">
+        <rect x="14" y="6" width="312" height="34" rx="5" fill="#2E2010" stroke="#665522" stroke-width="1"/>
+        <text class="fc-label" x="170" y="19" text-anchor="middle" fill="#C49A2A">Strong Start</text>
+        <text class="fc-sub" x="170" y="31" text-anchor="middle">Viktor receives George's note</text>
+      </g>
+      <line class="fc-line" x1="124" y1="40" x2="124" y2="50"/>
+
+      <!-- SCENE 1 ARRIVAL -->
+      <g class="fc-node" data-scene="scene1" onclick="fcClick('scene1')">
+        <rect x="14" y="52" width="312" height="34" rx="5" fill="#1A1040" stroke="#2A2060" stroke-width="1"/>
+        <text class="fc-label" x="170" y="65" text-anchor="middle" fill="#C49A2A">Scene 1 — Arrival</text>
+        <text class="fc-sub" x="170" y="77" text-anchor="middle">Watch tape, Staget outside</text>
+      </g>
+
+      <!-- Staget branches left, main goes straight down -->
+      <path class="fc-dash" d="M 50 86 Q 20 86 20 100 L 20 114"/>
+      <line class="fc-line" x1="215" y1="86" x2="215" y2="116"/>
+
+      <!-- STAGET small node left -->
+      <g class="fc-node" data-scene="staget" onclick="fcClick('staget')">
+        <rect x="2" y="114" width="76" height="26" rx="4" fill="#0A2A2A" stroke="#1A5A5A" stroke-width="1"/>
+        <text class="fc-label" x="40" y="124" text-anchor="middle" fill="#60B0B0">Staget</text>
+        <text class="fc-sub" x="40" y="133" text-anchor="middle" font-size="8.5">optional</text>
+      </g>
+      <!-- Staget rejoins to portal -->
+      <path class="fc-dash" d="M 20 140 Q 20 152 90 152"/>
+
+      <!-- SCENE 2 YAWNING PORTAL -->
+      <g class="fc-node" data-scene="portal" onclick="fcClick('portal')">
+        <rect x="88" y="118" width="238" height="34" rx="5" fill="#1A1040" stroke="#2A2060" stroke-width="1"/>
+        <text class="fc-label" x="207" y="131" text-anchor="middle" fill="#C49A2A">Scene 2 — Portal</text>
+        <text class="fc-sub" x="207" y="143" text-anchor="middle">Durnan, clues, sinister smile</text>
+      </g>
+      <line class="fc-line" x1="170" y1="152" x2="170" y2="164"/>
+
+      <!-- SCENE 3 MIRA -->
+      <g class="fc-node" data-scene="scene3" onclick="fcClick('scene3')">
+        <rect x="14" y="166" width="312" height="34" rx="5" fill="#1A1040" stroke="#2A2060" stroke-width="1"/>
+        <text class="fc-label" x="170" y="179" text-anchor="middle" fill="#C49A2A">Scene 3 — Mira's Workshop</text>
+        <text class="fc-sub" x="170" y="191" text-anchor="middle">Crime scene, reagents, stone-eye jelly</text>
+      </g>
+      <line class="fc-line" x1="170" y1="200" x2="170" y2="212"/>
+
+      <!-- SCENE 4 CINDERFANG -->
+      <g class="fc-node" data-scene="stakeout" onclick="fcClick('stakeout')">
+        <rect x="14" y="214" width="312" height="34" rx="5" fill="#0A2A2A" stroke="#1A4A4A" stroke-width="1"/>
+        <text class="fc-label" x="170" y="227" text-anchor="middle" fill="#60B0B0">Scene 4 — Cinderfang</text>
+        <text class="fc-sub" x="170" y="239" text-anchor="middle">Stake out, wait for the kids</text>
+      </g>
+      <line class="fc-line" x1="170" y1="248" x2="170" y2="260"/>
+
+      <!-- SCENE 5 KIDS -->
+      <g class="fc-node" data-scene="scene4" onclick="fcClick('scene4')">
+        <rect x="14" y="262" width="312" height="34" rx="5" fill="#1A1040" stroke="#2A2060" stroke-width="1"/>
+        <text class="fc-label" x="170" y="275" text-anchor="middle" fill="#C49A2A">Scene 5 — Kids Arrive</text>
+        <text class="fc-sub" x="170" y="287" text-anchor="middle">Three children attempt the theft</text>
+      </g>
+
+      <!-- Three branches -->
+      <path class="fc-dash" d="M 124 296 L 124 308 M 40 308 L 208 308"/>
+      <line class="fc-dash" x1="40" y1="308" x2="40" y2="320"/>
+      <line class="fc-dash" x1="124" y1="308" x2="124" y2="320"/>
+      <line class="fc-dash" x1="208" y1="308" x2="208" y2="320"/>
+
+      <!-- GRAB / FOLLOW / SPOOK -->
+      <g class="fc-node" data-scene="grab" onclick="fcClick('grab')">
+        <rect x="4" y="320" width="72" height="22" rx="4" fill="#0A2A2A" stroke="#1A5A5A" stroke-width="1"/>
+        <text class="fc-label" x="40" y="334" text-anchor="middle" fill="#60B0B0">Grab</text>
+      </g>
+      <g class="fc-node" data-scene="follow" onclick="fcClick('follow')">
+        <rect x="88" y="320" width="72" height="22" rx="4" fill="#0A2A2A" stroke="#1A5A5A" stroke-width="1"/>
+        <text class="fc-label" x="124" y="334" text-anchor="middle" fill="#60B0B0">Follow</text>
+      </g>
+      <g class="fc-node" data-scene="spook" onclick="fcClick('spook')">
+        <rect x="172" y="320" width="72" height="22" rx="4" fill="#0A2A2A" stroke="#1A5A5A" stroke-width="1"/>
+        <text class="fc-label" x="208" y="334" text-anchor="middle" fill="#60B0B0">Spook</text>
+      </g>
+
+      <!-- Converge -->
+      <path class="fc-dash" d="M 40 342 L 40 356 L 124 356"/>
+      <line class="fc-dash" x1="124" y1="342" x2="124" y2="356"/>
+      <path class="fc-dash" d="M 208 342 L 208 356 L 124 356"/>
+      <line class="fc-line" x1="170" y1="356" x2="170" y2="366"/>
+
+      <!-- SCENE 6 COPPEL -->
+      <g class="fc-node" data-scene="coppel" onclick="fcClick('coppel')">
+        <rect x="14" y="368" width="312" height="34" rx="5" fill="#0A2A2A" stroke="#1A4A4A" stroke-width="1"/>
+        <text class="fc-label" x="170" y="381" text-anchor="middle" fill="#60B0B0">Scene 6 — Coppel &amp; Sons</text>
+        <text class="fc-sub" x="170" y="393" text-anchor="middle">Ezrin, the device, truth comes out</text>
+      </g>
+      <line class="fc-line" x1="170" y1="402" x2="170" y2="414"/>
+
+      <!-- SCENE 7 CLIMAX -->
+      <g class="fc-node" data-scene="climax" onclick="fcClick('climax')">
+        <rect x="14" y="416" width="312" height="34" rx="5" fill="#2A0A0A" stroke="#5A1A1A" stroke-width="1"/>
+        <text class="fc-label" x="170" y="429" text-anchor="middle" fill="#B02020">Scene 7 — Brahm &amp; Joss</text>
+        <text class="fc-sub" x="170" y="441" text-anchor="middle">Sella runs. Fight or chase.</text>
+      </g>
+      <line class="fc-line" x1="170" y1="450" x2="170" y2="462"/>
+
+      <!-- END -->
+      <g class="fc-node" data-scene="end" onclick="fcClick('end')">
+        <rect x="14" y="464" width="312" height="34" rx="5" fill="#2E2010" stroke="#665522" stroke-width="1"/>
+        <text class="fc-label" x="170" y="477" text-anchor="middle" fill="#C49A2A">End — Coded Note</text>
+        <text class="fc-sub" x="170" y="489" text-anchor="middle">The Fishbone thread</text>
+      </g>
+    </svg>
+  </aside>
+
+  <!-- DETAIL PANEL -->
+  <main class="detail" id="detail">
+    <div class="detail-empty">
+      <div class="detail-empty-icon">⚔</div>
+      <div class="detail-empty-text">Select a scene to begin</div>
+    </div>
+  </main>
+
+</div>
+
+<script src="js/portraits.js"></script>
+<script src="js/scenes-data.js"></script>
+<script src="js/stakeout-random.js"></script>
+<script src="js/display-bridge.js"></script>
+<script src="js/dm-render.js"></script>
+<script>
+showScene('start');
+</script>
+</body>
+</html>

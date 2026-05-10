@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Token Forge — RPG Token Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cormorant+Garamond:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #0e0c08;
+    --bg-surface: #18130d;
+    --bg-elevated: #221a12;
+    --border: #3a2f22;
+    --border-bright: #5a4a32;
+    --text: #e8dcc4;
+    --text-muted: #8a7d68;
+    --text-dim: #5a4e3a;
+    --gold: #c9a961;
+    --gold-bright: #e8c878;
+    --crimson: #8b2c2c;
+    --crimson-bright: #b84545;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg-deep);
+    color: var(--text);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  body {
+    background-image:
+      radial-gradient(ellipse at top, rgba(139, 44, 44, 0.08), transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(201, 169, 97, 0.05), transparent 60%);
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 24px 32px;
+    background: linear-gradient(to bottom, var(--bg-surface), transparent);
+  }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: 0.15em;
+    color: var(--gold-bright);
+    text-transform: uppercase;
+  }
+
+  h1::before { content: "✦ "; color: var(--crimson); }
+
+  .subtitle {
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 4px;
+    font-size: 16px;
+  }
+
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 32px;
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 40px;
+  }
+
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; padding: 24px 16px; gap: 24px; }
+  }
+
+  .stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .canvas-frame {
+    position: relative;
+    background:
+      repeating-conic-gradient(var(--bg-elevated) 0 90deg, var(--bg-surface) 90deg 180deg) 0 0/24px 24px;
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 8px;
+    box-shadow:
+      inset 0 0 40px rgba(0,0,0,0.5),
+      0 8px 24px rgba(0,0,0,0.6);
+  }
+
+  canvas#preview {
+    display: block;
+    width: 512px;
+    height: 512px;
+    max-width: 100%;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  canvas#preview.dragging { cursor: grabbing; }
+
+  @media (max-width: 900px) {
+    canvas#preview { width: calc(100vw - 64px); height: calc(100vw - 64px); }
+  }
+
+  .canvas-hint {
+    color: var(--text-dim);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+
+  .panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-self: start;
+  }
+
+  .panel-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .panel-section + .panel-section {
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+  }
+
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+  }
+
+  .btn {
+    background: var(--bg-elevated);
+    color: var(--text);
+    border: 1px solid var(--border-bright);
+    padding: 10px 14px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    font-weight: 500;
+    display: block;
+    width: 100%;
+  }
+
+  .btn:hover {
+    background: var(--border);
+    border-color: var(--gold);
+    color: var(--gold-bright);
+  }
+
+  .btn-primary {
+    background: linear-gradient(to bottom, #6e2020, #4a1414);
+    border-color: var(--crimson-bright);
+    color: var(--gold-bright);
+    font-family: 'Cinzel', serif;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 14px;
+    padding: 14px;
+    font-weight: 700;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(to bottom, #8b2c2c, #5a1919);
+    color: #fff;
+    border-color: var(--gold-bright);
+  }
+
+  input[type="file"] { display: none; }
+
+  .slider-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .slider-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .slider-value {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--gold);
+    font-size: 13px;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--gold);
+    border: 1px solid var(--gold-bright);
+    cursor: pointer;
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: var(--gold);
+    border: 1px solid var(--gold-bright);
+    cursor: pointer;
+    border-radius: 0;
+  }
+
+  select {
+    background: var(--bg-elevated);
+    color: var(--text);
+    border: 1px solid var(--border-bright);
+    padding: 8px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .select-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .drop-overlay {
+    position: absolute;
+    inset: 8px;
+    border: 2px dashed var(--gold);
+    background: rgba(201, 169, 97, 0.1);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    font-family: 'Cinzel', serif;
+    color: var(--gold-bright);
+    letter-spacing: 0.1em;
+  }
+
+  .canvas-frame.drag-over .drop-overlay { display: flex; }
+
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-dim);
+    font-size: 14px;
+    font-style: italic;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  .border-gallery-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .border-filter {
+    background: var(--bg-elevated);
+    color: var(--text);
+    border: 1px solid var(--border-bright);
+    padding: 8px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    width: 100%;
+  }
+
+  .border-filter::placeholder {
+    color: var(--text-dim);
+  }
+
+  .border-gallery-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .border-gallery-meta.border-gallery-error {
+    color: var(--crimson-bright);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+  }
+
+  .border-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+    gap: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding: 4px;
+    background: var(--bg-deep);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+  }
+
+  .border-thumb {
+    position: relative;
+    aspect-ratio: 1;
+    padding: 0;
+    border: 2px solid var(--border);
+    background: var(--bg-elevated);
+    cursor: pointer;
+    border-radius: 2px;
+    overflow: hidden;
+    transition: border-color 0.12s, box-shadow 0.12s;
+  }
+
+  .border-thumb:hover {
+    border-color: var(--gold);
+  }
+
+  .border-thumb.selected {
+    border-color: var(--gold-bright);
+    box-shadow: 0 0 0 1px var(--gold);
+  }
+
+  .border-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Token Forge</h1>
+  <div class="subtitle">A craftsman's tool for the virtual tabletop</div>
+</header>
+
+<main>
+  <div class="stage">
+    <div class="canvas-frame" id="canvas-frame">
+      <canvas id="preview" width="512" height="512"></canvas>
+      <div class="drop-overlay">Drop image to load portrait</div>
+    </div>
+    <div class="canvas-hint">drag to position · scroll to zoom · drop image to load</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-section">
+      <div class="section-label">Portrait</div>
+      <label for="portrait-input" class="btn">Load Portrait</label>
+      <input type="file" id="portrait-input" accept="image/*">
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">Border</div>
+      <label for="border-input" class="btn">Load Border</label>
+      <input type="file" id="border-input" accept="image/*">
+      <button class="btn" id="reset-border">Use Sample Border</button>
+      <div class="border-gallery-wrap" id="border-gallery-wrap">
+        <input type="search" class="border-filter" id="border-filter" placeholder="Filter preloaded borders…" autocomplete="off" disabled aria-label="Filter preloaded borders">
+        <div class="border-gallery-meta" id="border-gallery-meta">Loading border list…</div>
+        <div class="border-grid" id="border-grid" aria-label="Preloaded borders"></div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">Adjust</div>
+      <div class="slider-row">
+        <div class="slider-label">
+          <span>Scale</span>
+          <span class="slider-value" id="scale-val">1.00x</span>
+        </div>
+        <input type="range" id="scale" min="0.1" max="5" step="0.01" value="1">
+      </div>
+      <div class="slider-row">
+        <div class="slider-label">
+          <span>Rotation</span>
+          <span class="slider-value" id="rotation-val">0°</span>
+        </div>
+        <input type="range" id="rotation" min="-180" max="180" step="1" value="0">
+      </div>
+      <button class="btn" id="reset-transform">Reset Position</button>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">Export</div>
+      <div class="select-row">
+        <select id="export-size">
+          <option value="512">512 px</option>
+          <option value="768">768 px</option>
+          <option value="1024" selected>1024 px</option>
+          <option value="2048">2048 px</option>
+        </select>
+        <select id="export-format">
+          <option value="png">PNG</option>
+          <option value="webp">WebP</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="export-btn">Forge Token</button>
+    </div>
+  </div>
+</main>
+
+<footer>Single-file build · No tracking · Your images never leave your device</footer>
+
+<script>
+(() => {
+  const canvas = document.getElementById('preview');
+  const ctx = canvas.getContext('2d');
+  const CANVAS_SIZE = 512;
+
+  const BORDER_MANIFEST_URL = new URL('borders/manifest.json', document.baseURI || window.location.href).href;
+  const BORDER_BASE = new URL('borders/', document.baseURI || window.location.href).href;
+  const BORDER_PREVIEW_LIMIT = 48;
+
+  const borderFilterEl = document.getElementById('border-filter');
+  const borderGridEl = document.getElementById('border-grid');
+  const borderGalleryMetaEl = document.getElementById('border-gallery-meta');
+
+  /** @type {string[]} */
+  let borderManifest = [];
+  /** @type {string | null} */
+  let selectedPreloadedBorder = null;
+
+  // ---------- State ----------
+  const state = {
+    portrait: null,   // HTMLImageElement
+    border: null,     // HTMLImageElement or HTMLCanvasElement
+    offsetX: 0,
+    offsetY: 0,
+    scale: 1.0,
+    rotation: 0,      // degrees
+  };
+
+  // ---------- Sample border generator ----------
+  // Drawn at high res so it stays crisp at any export size.
+  function generateSampleBorder(size = 2048) {
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const g = c.getContext('2d');
+    const cx = size / 2, cy = size / 2;
+    const outerR = size * 0.5 - 12;
+    const innerR = size * 0.42;
+
+    // dark outer rim
+    g.fillStyle = '#1a1208';
+    g.beginPath();
+    g.arc(cx, cy, outerR, 0, Math.PI * 2);
+    g.fill();
+
+    // metallic gold band
+    const grad = g.createRadialGradient(cx, cy * 0.6, innerR * 0.4, cx, cy, outerR);
+    grad.addColorStop(0, '#f0d488');
+    grad.addColorStop(0.4, '#c9a961');
+    grad.addColorStop(0.78, '#7a5828');
+    grad.addColorStop(1, '#3a2810');
+    g.fillStyle = grad;
+    g.beginPath();
+    g.arc(cx, cy, outerR - 8, 0, Math.PI * 2);
+    g.fill();
+
+    // inner dark accent ring
+    g.fillStyle = '#1a1208';
+    g.beginPath();
+    g.arc(cx, cy, innerR + 8, 0, Math.PI * 2);
+    g.fill();
+
+    // punch the inner hole (true transparency)
+    g.globalCompositeOperation = 'destination-out';
+    g.beginPath();
+    g.arc(cx, cy, innerR, 0, Math.PI * 2);
+    g.fill();
+    g.globalCompositeOperation = 'source-over';
+
+    // four crimson studs at cardinal points
+    const studR = (outerR + innerR) / 2;
+    for (let i = 0; i < 4; i++) {
+      const a = (i * Math.PI) / 2 - Math.PI / 2;
+      const x = cx + Math.cos(a) * studR;
+      const y = cy + Math.sin(a) * studR;
+
+      // dark setting
+      g.fillStyle = '#2a1810';
+      g.beginPath();
+      g.arc(x, y, size * 0.024, 0, Math.PI * 2);
+      g.fill();
+
+      // gem
+      const sg = g.createRadialGradient(
+        x - size * 0.004, y - size * 0.004, 1,
+        x, y, size * 0.02
+      );
+      sg.addColorStop(0, '#c84545');
+      sg.addColorStop(0.6, '#8b2c2c');
+      sg.addColorStop(1, '#3a0e0e');
+      g.fillStyle = sg;
+      g.beginPath();
+      g.arc(x, y, size * 0.02, 0, Math.PI * 2);
+      g.fill();
+    }
+
+    return c;
+  }
+
+  state.border = generateSampleBorder(2048);
+
+  // ---------- Rendering ----------
+  function render(targetCtx = ctx, size = CANVAS_SIZE) {
+    const cx = size / 2;
+    const cy = size / 2;
+    const sf = size / CANVAS_SIZE; // scale offsets to target
+
+    targetCtx.clearRect(0, 0, size, size);
+
+    if (state.portrait) {
+      targetCtx.save();
+      // circle clip slightly larger than inner ring so no seam shows
+      targetCtx.beginPath();
+      targetCtx.arc(cx, cy, size * 0.48, 0, Math.PI * 2);
+      targetCtx.clip();
+
+      targetCtx.translate(cx + state.offsetX * sf, cy + state.offsetY * sf);
+      targetCtx.rotate((state.rotation * Math.PI) / 180);
+      targetCtx.scale(state.scale, state.scale);
+
+      // cover-fit the portrait to canvas at scale=1
+      const iw = state.portrait.naturalWidth;
+      const ih = state.portrait.naturalHeight;
+      const fit = Math.max(size / iw, size / ih);
+      const dw = iw * fit;
+      const dh = ih * fit;
+      targetCtx.drawImage(state.portrait, -dw / 2, -dh / 2, dw, dh);
+      targetCtx.restore();
+    } else {
+      // placeholder
+      targetCtx.save();
+      targetCtx.fillStyle = 'rgba(232, 220, 196, 0.3)';
+      targetCtx.font = `italic ${size * 0.045}px 'Cormorant Garamond', Georgia, serif`;
+      targetCtx.textAlign = 'center';
+      targetCtx.textBaseline = 'middle';
+      targetCtx.fillText('Load a portrait', cx, cy - size * 0.02);
+      targetCtx.fillText('to begin', cx, cy + size * 0.05);
+      targetCtx.restore();
+    }
+
+    // border drawn on top — its own alpha controls cutouts
+    if (state.border) {
+      targetCtx.drawImage(state.border, 0, 0, size, size);
+    }
+  }
+
+  // ---------- File loading ----------
+  function loadImageFile(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error('decode failed'));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error('read failed'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function borderAssetUrl(filename) {
+    return new URL(filename, BORDER_BASE).href;
+  }
+
+  function loadImageFromUrl(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('decode failed'));
+      img.src = url;
+    });
+  }
+
+  function filterBorderManifest(query) {
+    const q = query.trim().toLowerCase();
+    if (!q) return borderManifest;
+    return borderManifest.filter((name) => name.toLowerCase().includes(q));
+  }
+
+  function refreshBorderGallery() {
+    borderGridEl.replaceChildren();
+    const q = borderFilterEl.value;
+    const matches = filterBorderManifest(q);
+    const slice = matches.slice(0, BORDER_PREVIEW_LIMIT);
+    const extra = matches.length - slice.length;
+
+    for (const name of slice) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'border-thumb' + (selectedPreloadedBorder === name ? ' selected' : '');
+      btn.title = name;
+      const img = document.createElement('img');
+      img.alt = '';
+      img.loading = 'lazy';
+      img.src = borderAssetUrl(name);
+      btn.appendChild(img);
+      btn.addEventListener('click', async () => {
+        selectedPreloadedBorder = name;
+        refreshBorderGallery();
+        try {
+          state.border = await loadImageFromUrl(borderAssetUrl(name));
+          render();
+        } catch {
+          alert('Could not load that border.');
+        }
+      });
+      borderGridEl.appendChild(btn);
+    }
+
+    if (borderManifest.length === 0) return;
+    let meta = `Showing ${slice.length} of ${matches.length} match${matches.length === 1 ? '' : 'es'}`;
+    if (extra > 0) meta += ` · Narrow the filter for ${extra} more`;
+    borderGalleryMetaEl.textContent = meta;
+    borderGalleryMetaEl.classList.remove('border-gallery-error');
+  }
+
+  async function initBorderGallery() {
+    try {
+      const res = await fetch(BORDER_MANIFEST_URL);
+      if (!res.ok) throw new Error(String(res.status));
+      borderManifest = await res.json();
+      if (!Array.isArray(borderManifest)) throw new Error('bad manifest');
+    } catch {
+      borderManifest = [];
+      borderFilterEl.disabled = true;
+      borderGalleryMetaEl.classList.add('border-gallery-error');
+      borderGalleryMetaEl.textContent =
+        'Could not load borders/manifest.json (fetch often fails on file:// — open via a local HTTP server or deploy). Load Border still works.';
+      return;
+    }
+
+    borderFilterEl.disabled = false;
+    borderGalleryMetaEl.classList.remove('border-gallery-error');
+    refreshBorderGallery();
+  }
+
+  let borderFilterDebounce = 0;
+  borderFilterEl.addEventListener('input', () => {
+    window.clearTimeout(borderFilterDebounce);
+    borderFilterDebounce = window.setTimeout(refreshBorderGallery, 120);
+  });
+
+  async function setPortraitFromFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    try {
+      state.portrait = await loadImageFile(file);
+      render();
+    } catch (err) {
+      alert('Could not load that image.');
+    }
+  }
+
+  document.getElementById('portrait-input').addEventListener('change', (e) => {
+    setPortraitFromFile(e.target.files[0]);
+  });
+
+  document.getElementById('border-input').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      selectedPreloadedBorder = null;
+      refreshBorderGallery();
+      state.border = await loadImageFile(file);
+      render();
+    } catch (err) {
+      alert('Could not load that border.');
+    }
+  });
+
+  document.getElementById('reset-border').addEventListener('click', () => {
+    selectedPreloadedBorder = null;
+    refreshBorderGallery();
+    state.border = generateSampleBorder(2048);
+    render();
+  });
+
+  // ---------- Sliders ----------
+  const scaleSlider = document.getElementById('scale');
+  const rotationSlider = document.getElementById('rotation');
+  const scaleVal = document.getElementById('scale-val');
+  const rotationVal = document.getElementById('rotation-val');
+
+  scaleSlider.addEventListener('input', () => {
+    state.scale = parseFloat(scaleSlider.value);
+    scaleVal.textContent = state.scale.toFixed(2) + 'x';
+    render();
+  });
+
+  rotationSlider.addEventListener('input', () => {
+    state.rotation = parseInt(rotationSlider.value, 10);
+    rotationVal.textContent = state.rotation + '°';
+    render();
+  });
+
+  document.getElementById('reset-transform').addEventListener('click', () => {
+    state.offsetX = 0;
+    state.offsetY = 0;
+    state.scale = 1.0;
+    state.rotation = 0;
+    scaleSlider.value = 1;
+    rotationSlider.value = 0;
+    scaleVal.textContent = '1.00x';
+    rotationVal.textContent = '0°';
+    render();
+  });
+
+  // ---------- Drag / zoom on canvas ----------
+  let dragging = false;
+  let lastX = 0, lastY = 0;
+
+  function toLogical(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    const x = ((clientX - rect.left) / rect.width) * CANVAS_SIZE;
+    const y = ((clientY - rect.top) / rect.height) * CANVAS_SIZE;
+    return [x, y];
+  }
+
+  canvas.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    canvas.classList.add('dragging');
+    canvas.setPointerCapture(e.pointerId);
+    const [x, y] = toLogical(e.clientX, e.clientY);
+    lastX = x; lastY = y;
+  });
+
+  canvas.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const [x, y] = toLogical(e.clientX, e.clientY);
+    state.offsetX += x - lastX;
+    state.offsetY += y - lastY;
+    lastX = x; lastY = y;
+    render();
+  });
+
+  function endDrag(e) {
+    if (!dragging) return;
+    dragging = false;
+    canvas.classList.remove('dragging');
+    try { canvas.releasePointerCapture(e.pointerId); } catch {}
+  }
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', endDrag);
+
+  canvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const factor = e.deltaY > 0 ? 0.92 : 1.087;
+    state.scale = Math.max(0.1, Math.min(5, state.scale * factor));
+    scaleSlider.value = state.scale;
+    scaleVal.textContent = state.scale.toFixed(2) + 'x';
+    render();
+  }, { passive: false });
+
+  // ---------- Drag-drop portrait onto canvas ----------
+  const frame = document.getElementById('canvas-frame');
+  ['dragenter', 'dragover'].forEach(ev => {
+    frame.addEventListener(ev, (e) => {
+      e.preventDefault();
+      frame.classList.add('drag-over');
+    });
+  });
+  ['dragleave', 'drop'].forEach(ev => {
+    frame.addEventListener(ev, (e) => {
+      e.preventDefault();
+      if (ev === 'dragleave' && e.target !== frame) return;
+      frame.classList.remove('drag-over');
+    });
+  });
+  frame.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) setPortraitFromFile(file);
+  });
+
+  // ---------- Export ----------
+  document.getElementById('export-btn').addEventListener('click', () => {
+    const size = parseInt(document.getElementById('export-size').value, 10);
+    const fmt = document.getElementById('export-format').value;
+
+    const out = document.createElement('canvas');
+    out.width = out.height = size;
+    const outCtx = out.getContext('2d');
+    render(outCtx, size);
+
+    const mime = fmt === 'webp' ? 'image/webp' : 'image/png';
+    const quality = fmt === 'webp' ? 0.95 : undefined;
+
+    out.toBlob((blob) => {
+      if (!blob) { alert('Export failed.'); return; }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `token_${size}.${fmt}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }, mime, quality);
+  });
+
+  // ---------- Boot ----------
+  render();
+  initBorderGallery();
+})();
+</script>
+
+</body>
+</html>

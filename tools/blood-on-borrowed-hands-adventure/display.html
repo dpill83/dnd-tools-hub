@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blood on Borrowed Hands 2 — Player Display</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/display-shell.css">
+<link rel="stylesheet" href="css/stakeout-clock.css">
+</head>
+<body>
+
+<div id="idle-layer">
+  <img src="images/bobh2-page-title-landscape.png" alt="Blood on Borrowed Hands 2" style="max-width:100%;max-height:100%;object-fit:contain;">
+</div>
+
+<div id="stakeout-host"></div>
+
+<div id="shell-image-overlay" class="shell-image-overlay" onclick="BoBH2Display.dismissClick()">
+  <img id="shell-image" src="" alt="">
+  <div class="shell-image-dismiss">Click anywhere to dismiss</div>
+</div>
+
+<template id="tmpl-stakeout">
+<!-- TITLE CARD (default display before clock starts) -->
+<div id="title-card" style="position:fixed;inset:0;z-index:100;background:#060610;display:flex;align-items:center;justify-content:center;">
+  <img src="images/bobh2-page-title-landscape.png" alt="Blood on Borrowed Hands 2" style="max-width:100%;max-height:100%;object-fit:contain;">
+</div>
+
+<!-- SKY -->
+<canvas id="sky"></canvas>
+
+<!-- STARS -->
+<div class="stars" id="stars"></div>
+
+<!-- MOON -->
+<div class="moon" id="moon"></div>
+
+<!-- WATER -->
+<div class="water">
+  <div class="water-shimmer"></div>
+  <div class="water-shimmer"></div>
+  <div class="water-shimmer"></div>
+</div>
+
+<!-- CITYLINE SVG -->
+<svg class="cityline" viewBox="0 0 1440 300" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+  <!-- Waterdeep Dock Ward silhouette -->
+  <path d="M0,300 L0,200 L30,200 L30,160 L50,160 L50,140 L70,140 L70,160 L90,160 L90,120 L110,120 L110,160 L130,160 L130,180 L160,180 L160,100 L180,100 L180,80 L200,80 L200,100 L220,100 L220,180 L250,180 L250,160 L270,130 L290,130 L290,160 L310,160 L310,200 L340,200 L340,150 L360,150 L360,130 L380,130 L380,110 L400,110 L400,130 L420,130 L420,150 L440,150 L440,170 L480,170 L480,140 L500,140 L500,120 L510,110 L520,120 L520,140 L540,140 L540,170 L570,170 L570,190 L600,190 L600,160 L620,160 L620,140 L640,140 L640,120 L660,120 L660,100 L680,100 L680,120 L700,120 L700,140 L720,140 L720,190 L750,190 L750,170 L780,170 L780,150 L800,130 L820,150 L820,170 L850,170 L850,190 L880,190 L880,160 L900,140 L920,140 L920,160 L950,160 L950,180 L980,180 L980,160 L1000,160 L1000,140 L1020,130 L1040,140 L1040,160 L1060,160 L1060,180 L1090,180 L1090,200 L1120,200 L1120,170 L1140,170 L1140,150 L1160,150 L1160,130 L1180,130 L1180,150 L1200,150 L1200,170 L1230,170 L1230,190 L1260,190 L1260,200 L1300,200 L1300,180 L1320,180 L1320,160 L1340,160 L1340,180 L1360,180 L1360,200 L1400,200 L1400,220 L1440,220 L1440,300 Z" fill="#060610"/>
+  <!-- Warehouse rooftops detail -->
+  <path d="M160,100 L170,85 L180,80 L190,85 L200,100" fill="#060610"/>
+  <path d="M380,110 L390,95 L400,110" fill="#060610"/>
+  <path d="M640,120 L650,105 L660,100 L670,105 L680,120" fill="#060610"/>
+  <!-- Mast/crane -->
+  <line x1="550" y1="110" x2="550" y2="50" stroke="#060610" stroke-width="3"/>
+  <line x1="550" y1="60" x2="580" y2="75" stroke="#060610" stroke-width="2"/>
+  <line x1="850" y1="130" x2="850" y2="60" stroke="#060610" stroke-width="3"/>
+  <line x1="850" y1="70" x2="820" y2="85" stroke="#060610" stroke-width="2"/>
+</svg>
+
+<!-- TORCHES -->
+<div class="torch" style="bottom:19%;left:11%"><div class="torch-glow"></div><div class="torch-flame"></div></div>
+<div class="torch" style="bottom:19%;left:27%"><div class="torch-glow"></div><div class="torch-flame"></div></div>
+<div class="torch" style="bottom:21%;left:44%"><div class="torch-glow"></div><div class="torch-flame"></div></div>
+<div class="torch" style="bottom:19%;left:62%"><div class="torch-glow"></div><div class="torch-flame"></div></div>
+<div class="torch" style="bottom:20%;left:78%"><div class="torch-glow"></div><div class="torch-flame"></div></div>
+<div class="torch" style="bottom:19%;left:91%"><div class="torch-glow"></div><div class="torch-flame"></div></div>
+
+<!-- WATCHMAN -->
+<div class="watchman" id="watchman">
+  <div class="watchman-lantern-glow"></div>
+  <svg class="watchman-svg" viewBox="0 0 36 72" xmlns="http://www.w3.org/2000/svg">
+    <!-- Body silhouette -->
+    <ellipse cx="18" cy="12" rx="6" ry="7" fill="#0a0810"/>
+    <!-- Cloak -->
+    <path d="M8 18 Q6 35 5 55 L12 55 L14 35 L18 58 L22 35 L24 55 L31 55 Q30 35 28 18 Q23 22 18 22 Q13 22 8 18Z" fill="#0a0810"/>
+    <!-- Left arm with lantern -->
+    <path d="M8 22 Q2 32 4 42" stroke="#0a0810" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <!-- Lantern -->
+    <rect x="0" y="38" width="8" height="10" rx="1" fill="#1a1208" stroke="#c4a96a" stroke-width="0.5"/>
+    <rect x="2" y="40" width="4" height="6" rx="0.5" fill="rgba(255,160,40,0.6)"/>
+    <!-- Lantern handle -->
+    <line x1="4" y1="38" x2="4" y2="36" stroke="#c4a96a" stroke-width="0.5"/>
+    <!-- Hood detail -->
+    <path d="M11 10 Q12 5 18 4 Q24 5 25 10" fill="#0a0810"/>
+    <!-- Legs (animated) -->
+    <g id="watchman-legs">
+      <line id="leg-l" x1="14" y1="55" x2="12" y2="70" stroke="#0a0810" stroke-width="4" stroke-linecap="round"/>
+      <line id="leg-r" x1="22" y1="55" x2="24" y2="70" stroke="#0a0810" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </svg>
+</div>
+
+<!-- WATCHMAN ALERT -->
+<div class="watchman-alert" id="watchman-alert">
+  <div class="watchman-alert-title">The Watchman Approaches</div>
+  <div class="watchman-alert-sub">DC 12 Stealth — or invoke Watch authority</div>
+</div>
+
+<!-- LOCATION HEADER -->
+<div class="location-header">
+  <div class="location-name">Cinderfang Warehouse</div>
+  <div class="location-sub">Dock Ward, Waterdeep — The Long Watch</div>
+</div>
+
+<!-- MAIN UI -->
+<div class="ui">
+  <div class="clock-wrap">
+    <div class="bell-label" id="bell-label">The Watch Begins</div>
+
+    <div class="clock-face">
+      <svg class="clock-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outer ring -->
+        <circle cx="150" cy="150" r="145" fill="none" stroke="#2a2010" stroke-width="2"/>
+        <circle cx="150" cy="150" r="138" fill="none" stroke="#c4a96a" stroke-width="0.5" stroke-opacity="0.3"/>
+        <!-- Inner background -->
+        <circle cx="150" cy="150" r="135" fill="rgba(4,4,8,0.7)"/>
+        <!-- Decorative inner ring -->
+        <circle cx="150" cy="150" r="120" fill="none" stroke="#3a2810" stroke-width="1"/>
+
+        <!-- Hour markers (10pm through 6am = 9 bells) -->
+        <!-- We'll draw them with JS -->
+        <g id="hour-markers"></g>
+
+        <!-- Progress arc -->
+        <circle id="progress-arc" cx="150" cy="150" r="128"
+          fill="none" stroke="#c4a96a" stroke-width="3" stroke-opacity="0.6"
+          stroke-dasharray="0 804"
+          stroke-linecap="round"
+          transform="rotate(-90 150 150)"/>
+
+        <!-- Center ornament -->
+        <circle cx="150" cy="150" r="8" fill="#2a1f0e" stroke="#c4a96a" stroke-width="1" stroke-opacity="0.5"/>
+        <circle cx="150" cy="150" r="3" fill="#c4a96a" fill-opacity="0.6"/>
+
+        <!-- Hour hand -->
+        <line id="hour-hand" x1="150" y1="150" x2="150" y2="50"
+          stroke="#e8dfc4" stroke-width="2.5" stroke-linecap="round"
+          transform="rotate(0 150 150)"/>
+
+        <!-- Minute hand -->
+        <line id="minute-hand" x1="150" y1="150" x2="150" y2="35"
+          stroke="#c4a96a" stroke-width="1.5" stroke-linecap="round"
+          stroke-opacity="0.7"
+          transform="rotate(0 150 150)"/>
+      </svg>
+    </div>
+
+    <div class="bell-count" id="bell-count">—</div>
+    <div class="bell-name" id="bell-name">Waiting to begin</div>
+  </div>
+</div>
+
+<!-- NIGHT PROGRESS BAR -->
+<div class="night-bar-wrap">
+  <div class="night-bar-label">
+    <span>10th Bell — Nightfall</span>
+    <span>6th Bell — Dawn</span>
+  </div>
+  <div class="night-bar-bg">
+    <div class="night-bar-fill" id="night-fill" style="width:0%"></div>
+    <div class="night-bar-ticks" id="bar-ticks"></div>
+  </div>
+</div>
+
+<!-- BELL RING OVERLAY -->
+<div class="bell-ring" id="bell-ring">
+  <div class="bell-ring-icon">🔔</div>
+  <div class="bell-ring-text" id="bell-ring-text">The Bell Tolls</div>
+</div>
+
+<!-- DAWN OVERLAY -->
+<div class="dawn-overlay" id="dawn-overlay"></div>
+
+<!-- PAUSED OVERLAY -->
+<div class="paused-overlay" id="paused-overlay">
+  <div class="paused-text">— Paused —</div>
+</div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div><span class="status-dot" id="status-dot"></span><span id="status-text">Awaiting command</span></div>
+  <div id="status-right">Open DM Screen to control</div>
+</div>
+</template>
+
+<script src="js/stakeout-clock.js"></script>
+<script src="js/display.js"></script>
+</body>
+</html>

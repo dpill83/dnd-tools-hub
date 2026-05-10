@@ -30,7 +30,8 @@
         'tools/tetra-dnd/dnd-reference.html',
         'tools/tetra-dnd/dnd-char-gen.html',
         'tools/tetra-dnd/dnd-magic-items.html',
-        'tools/tetra-dnd/dnd-statblock.html'
+        'tools/tetra-dnd/dnd-statblock.html',
+        'tools/token-forge/token-forge.html'
     ];
 
     // Build once: order tools were added (from initial HTML). Last in list = newest.

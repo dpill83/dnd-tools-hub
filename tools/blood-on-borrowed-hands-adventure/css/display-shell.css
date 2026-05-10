@@ -1,0 +1,58 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #060610; font-family: Cinzel, serif; user-select: none; }
+
+/* display shell: full-screen media from DM */
+.shell-image-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(4,4,8,0.96);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.shell-image-overlay.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+.shell-image-overlay img {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 0 60px rgba(0,0,0,0.8);
+}
+.shell-image-dismiss {
+  position: absolute;
+  bottom: 32px;
+  font-family: Cinzel, serif;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: #504030;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.shell-image-dismiss:hover { color: #c4a96a; }
+#idle-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: #060610;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#idle-layer.hidden { display: none; }
+#stakeout-host {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: none;
+}
+#stakeout-host.visible { display: block; }
+
