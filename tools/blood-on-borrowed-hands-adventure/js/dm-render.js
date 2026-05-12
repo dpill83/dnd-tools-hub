@@ -1,3 +1,25 @@
+function escHtml(str) {
+  if (str == null || str === '') return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function escJsQ(str) {
+  return String(str)
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/\r/g, '\\r')
+    .replace(/\n/g, '\\n');
+}
+
+function imageSrc(filename) {
+  var p = String(filename || '').replace(/^images\//, '');
+  return encodeURI('images/' + p);
+}
+
 function fcClick(id) {
   // Update SVG active state
   document.querySelectorAll('#flowchart .fc-node').forEach(n => n.classList.remove('active'));
@@ -12,87 +34,90 @@ function showScene(id) {
   // SVG active
   document.querySelectorAll('#flowchart .fc-node').forEach(n => n.classList.remove('active'));
   document.querySelectorAll(`#flowchart [data-scene="${id}"]`).forEach(n => n.classList.add('active'));
-  document.querySelector('.npc-btn').classList.toggle('active', id === 'npcs');
-  document.querySelector('.loc-btn').classList.toggle('active', id === 'locations');
+  var hdrNpcs = document.getElementById('hdr-btn-npcs');
+  var hdrLocs = document.getElementById('hdr-btn-locations');
+  if (hdrNpcs) hdrNpcs.classList.toggle('active', id === 'npcs');
+  if (hdrLocs) hdrLocs.classList.toggle('active', id === 'locations');
 
   const scene = SCENES[id];
   if (!scene) return;
 
   let html = `<div class="detail-content">`;
   html += `<div class="detail-header">`;
-  html += `<div class="detail-eyebrow">${scene.eyebrow}</div>`;
-  html += `<div class="detail-title">${scene.title}</div>`;
-  html += `<div class="detail-subtitle">${scene.subtitle}</div>`;
+  html += `<div class="detail-eyebrow">${escHtml(scene.eyebrow)}</div>`;
+  html += `<div class="detail-title">${escHtml(scene.title)}</div>`;
+  html += `<div class="detail-subtitle">${escHtml(scene.subtitle)}</div>`;
   html += `</div>`;
 
   for (const s of scene.sections) {
     if (s.type === 'section-title') {
-      html += `<div class="section"><div class="section-title">${s.text}</div></div>`;
+      html += `<div class="section"><div class="section-title">${escHtml(s.text)}</div></div>`;
     } else if (s.type === 'body') {
-      html += `<p class="body-text">${s.content}</p>`;
+      html += `<p class="body-text">${escHtml(s.content)}</p>`;
     } else if (s.type === 'read-aloud') {
-      html += `<div class="section"><div class="read-aloud"><p>${s.text}</p>`;
-      if (s.wtyd) html += `<div class="wtyd"><span class="wtyd-label">What do you do?</span><span class="wtyd-text">${s.wtyd}</span></div>`;
+      html += `<div class="section"><div class="read-aloud"><p>${escHtml(s.text)}</p>`;
+      if (s.wtyd) html += `<div class="wtyd"><span class="wtyd-label">What do you do?</span><span class="wtyd-text">${escHtml(s.wtyd)}</span></div>`;
       html += `</div></div>`;
     } else if (s.type === 'ifthen') {
       html += `<div class="section"><div class="ifthen-list">`;
       for (const item of s.items) {
-        html += `<div class="ifthen"><span class="ifthen-if">IF</span><div><div class="ifthen-condition">${item.condition}</div><div class="ifthen-result">→ ${item.result}</div></div></div>`;
+        html += `<div class="ifthen"><span class="ifthen-if">IF</span><div><div class="ifthen-condition">${escHtml(item.condition)}</div><div class="ifthen-result">→ ${escHtml(item.result)}</div></div></div>`;
       }
       html += `</div></div>`;
     } else if (s.type === 'npc') {
       const portrait = PORTRAITS[s.name];
+      const picUrl = portrait ? imageSrc(portrait) : '';
       const portraitHtml = portrait
         ? `<div class="npc-portrait-wrap">
             ${portrait.endsWith('.webm')
-              ? `<video class="npc-portrait" autoplay loop muted playsinline><source src="images/${portrait}" type="video/webm"></video>`
-              : `<img class="npc-portrait" src="images/${portrait}" alt="${s.name}">`
+              ? `<video class="npc-portrait" autoplay loop muted playsinline><source src="${escHtml(picUrl)}" type="video/webm"></video>`
+              : `<img class="npc-portrait" src="${escHtml(picUrl)}" alt="${escHtml(s.name)}">`
             }
-            <button class="npc-copy-btn" onclick="displayOnTV('images/${portrait}')" title="Display on TV">▶ Display</button>
+            <button type="button" class="npc-copy-btn" onclick="displayOnTV('${escJsQ(picUrl)}')" title="Display on TV">▶ Display</button>
           </div>`
         : '';
       html += `<div class="section"><div class="npc-card npc-card-portrait" style="cursor:default">
         ${portraitHtml}
         <div class="npc-card-info">
-          <div class="npc-name">${s.name}</div>
-          <div class="npc-role">${s.role}</div>
-          <div class="npc-want"><strong>Wants:</strong> ${s.want}</div>
-          <div class="npc-voice"><strong>Voice:</strong> ${s.voice}</div>
-          <div class="npc-keyline">"${s.keyline}"</div>
+          <div class="npc-name">${escHtml(s.name)}</div>
+          <div class="npc-role">${escHtml(s.role)}</div>
+          <div class="npc-want"><strong>Wants:</strong> ${escHtml(s.want)}</div>
+          <div class="npc-voice"><strong>Voice:</strong> ${escHtml(s.voice)}</div>
+          <div class="npc-keyline">"${escHtml(s.keyline)}"</div>
         </div>
       </div></div>`;
     } else if (s.type === 'checks') {
       html += `<div class="section"><div class="checks">`;
       for (const c of s.items) {
-        html += `<div class="check"><span class="check-dc">${c.dc}</span><span class="check-desc">${c.desc}</span></div>`;
+        html += `<div class="check"><span class="check-dc">${escHtml(c.dc)}</span><span class="check-desc">${escHtml(c.desc)}</span></div>`;
       }
       html += `</div></div>`;
     } else if (s.type === 'clues') {
       html += `<div class="section"><div class="clues">`;
       s.items.forEach((item, i) => {
-        html += `<div class="clue"><span class="clue-num">${i+1}.</span><span class="clue-text">${item}</span></div>`;
+        html += `<div class="clue"><span class="clue-num">${i+1}.</span><span class="clue-text">${escHtml(item)}</span></div>`;
       });
       html += `</div></div>`;
     } else if (s.type === 'location') {
       html += `<div class="section"><div class="clues">`;
       s.aspects.forEach((a, i) => {
         const icons = ['👁', '👂', '⚠'];
-        html += `<div class="clue"><span class="clue-num">${icons[i]||'•'}</span><span class="clue-text">${a}</span></div>`;
+        html += `<div class="clue"><span class="clue-num">${icons[i]||'•'}</span><span class="clue-text">${escHtml(a)}</span></div>`;
       });
       html += `</div></div>`;
     } else if (s.type === 'stat') {
       html += `<div class="section"><div class="stat-block">
         <div class="stat-block-header">
-          <span class="stat-block-name">${s.name}</span>
-          <span class="stat-block-cr">${s.cr}</span>
+          <span class="stat-block-name">${escHtml(s.name)}</span>
+          <span class="stat-block-cr">${escHtml(s.cr)}</span>
         </div>
         <div class="stat-block-body">
-          <div class="stat"><div class="stat-label">HP</div><div class="stat-value">${s.hp}</div></div>
-          <div class="stat"><div class="stat-label">AC</div><div class="stat-value">${s.ac}</div></div>
-          <div class="stat"><div class="stat-label">Attack</div><div class="stat-value">${s.atk}</div></div>
-          <div class="stat"><div class="stat-label">Damage</div><div class="stat-value">${s.dmg}</div></div>
+          <div class="stat"><div class="stat-label">HP</div><div class="stat-value">${escHtml(s.hp)}</div></div>
+          <div class="stat"><div class="stat-label">AC</div><div class="stat-value">${escHtml(s.ac)}</div></div>
+          <div class="stat"><div class="stat-label">Attack</div><div class="stat-value">${escHtml(s.atk)}</div></div>
+          <div class="stat"><div class="stat-label">Damage</div><div class="stat-value">${escHtml(s.dmg)}</div></div>
         </div>
-        <div class="stat-block-behavior">${s.behavior}</div>
+        <div class="stat-block-behavior">${escHtml(s.behavior)}</div>
       </div></div>`;
     } else if (s.type === 'skilltable') {
       html += `<div class="section"><table class="check-table">
@@ -103,31 +128,32 @@ function showScene(id) {
         </tr></thead>
         <tbody>
           ${s.rows.map(r => `<tr>
-            <td class="td-skill">${r.skill}</td>
-            <td class="td-dc">${r.dc}</td>
-            <td>${r.result}</td>
+            <td class="td-skill">${escHtml(r.skill)}</td>
+            <td class="td-dc">${escHtml(r.dc)}</td>
+            <td>${escHtml(r.result)}</td>
           </tr>`).join('')}
         </tbody>
       </table></div>`;
     } else if (s.type === 'scene-image') {
+      const sceneImgUrl = imageSrc(s.src);
       html += `<div class="section">
         <div style="position:relative;display:inline-block;width:50%;margin:0 auto;display:block;">
-          <img src="images/${s.src}" alt="${s.src}" style="width:100%;border-radius:6px;border:1px solid rgba(196,154,42,0.2);box-shadow:0 4px 20px rgba(0,0,0,0.5);">
-          <button onclick="displayOnTV('images/${s.src}')" style="margin-top:6px;width:100%;font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;background:rgba(139,26,26,0.25);border:1px solid rgba(139,26,26,0.4);border-radius:3px;color:var(--gold-dim);padding:5px;cursor:pointer;">▶ Display on TV</button>
+          <img src="${escHtml(sceneImgUrl)}" alt="${escHtml(s.src)}" style="width:100%;border-radius:6px;border:1px solid rgba(196,154,42,0.2);box-shadow:0 4px 20px rgba(0,0,0,0.5);">
+          <button type="button" onclick="displayOnTV('${escJsQ(sceneImgUrl)}')" style="margin-top:6px;width:100%;font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;background:rgba(139,26,26,0.25);border:1px solid rgba(139,26,26,0.4);border-radius:3px;color:var(--gold-dim);padding:5px;cursor:pointer;">▶ Display on TV</button>
         </div>
       </div>`;
     } else if (s.type === 'strong-start-image') {
       html += `<div class="section">
         <div style="width:50%;margin:0 auto;">
           <img src="images/StrongStart.png" alt="Strong Start" style="width:100%;border-radius:6px;border:1px solid rgba(196,154,42,0.2);box-shadow:0 4px 20px rgba(0,0,0,0.5);">
-          <button onclick="displayOnTV('images/StrongStart.png')" style="margin-top:6px;width:100%;font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;background:rgba(139,26,26,0.25);border:1px solid rgba(139,26,26,0.4);border-radius:3px;color:var(--gold-dim);padding:5px;cursor:pointer;">▶ Display on TV</button>
+          <button type="button" onclick="displayOnTV('${escJsQ(imageSrc('StrongStart.png'))}')" style="margin-top:6px;width:100%;font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;background:rgba(139,26,26,0.25);border:1px solid rgba(139,26,26,0.4);border-radius:3px;color:var(--gold-dim);padding:5px;cursor:pointer;">▶ Display on TV</button>
         </div>
       </div>`;
     } else if (s.type === 'note-image') {
       html += `<div class="section">
         <div class="note-image-wrap">
           <img src="images/note.png" alt="George's Note" class="note-image">
-          <button class="note-copy-btn" onclick="displayOnTV('images/note.png')">▶ Display on TV</button>
+          <button type="button" class="note-copy-btn" onclick="displayOnTV('${escJsQ(imageSrc('note.png'))}')">▶ Display on TV</button>
         </div>
       </div>`;
     } else if (s.type === 'clockcontrol') {
@@ -135,13 +161,13 @@ function showScene(id) {
         <div class="clock-control-panel">
           <div class="ccp-header">
             <span class="ccp-title">⏱ The Night Clock</span>
-            <button class="ccp-popout" onclick="openDisplay('stakeout')">Open on TV ↗</button>
+            <button type="button" class="ccp-popout" onclick="openDisplay('stakeout')">Open on TV ↗</button>
           </div>
           <div class="ccp-row">
-            <button class="ccp-btn ccp-start" onclick="clockCmd('start')">▶ Start</button>
-            <button class="ccp-btn ccp-pause" onclick="clockCmd('pause')">⏸ Pause</button>
-            <button class="ccp-btn ccp-resume" onclick="clockCmd('resume')">▶ Resume</button>
-            <button class="ccp-btn ccp-reset" onclick="clockCmd('reset')">↺ Reset</button>
+            <button type="button" class="ccp-btn ccp-start" onclick="clockCmd('start')">▶ Start</button>
+            <button type="button" class="ccp-btn ccp-pause" onclick="clockCmd('pause')">⏸ Pause</button>
+            <button type="button" class="ccp-btn ccp-resume" onclick="clockCmd('resume')">▶ Resume</button>
+            <button type="button" class="ccp-btn ccp-reset" onclick="clockCmd('reset')">↺ Reset</button>
           </div>
           <div class="ccp-row">
             <span class="ccp-label">Speed (game min/sec):</span>
@@ -155,11 +181,11 @@ function showScene(id) {
             </select>
           </div>
           <div class="ccp-row">
-            <button class="ccp-btn" onclick="dismissTV()" style="background:rgba(10,10,30,0.3);border-color:rgba(80,80,160,0.4);color:#8080C0;">✕ Dismiss Image</button>
+            <button type="button" class="ccp-btn" onclick="dismissTV()" style="background:rgba(10,10,30,0.3);border-color:rgba(80,80,160,0.4);color:#8080C0;">✕ Dismiss Image</button>
             <span class="ccp-label" style="font-size:10px;">clear TV display</span>
           </div>
           <div class="ccp-row">
-            <button class="ccp-btn" onclick="triggerWatchman()" style="background:rgba(60,40,10,0.3);border-color:rgba(180,120,20,0.4);color:#C0A060;">🕯 Watchman Patrol</button>
+            <button type="button" class="ccp-btn" onclick="triggerWatchman()" style="background:rgba(60,40,10,0.3);border-color:rgba(180,120,20,0.4);color:#C0A060;">🕯 Watchman Patrol</button>
             <span class="ccp-label" style="font-size:10px;">manually trigger his circuit</span>
           </div>
           <div class="ccp-row">
@@ -175,7 +201,7 @@ function showScene(id) {
               <option value="420">5th Bell</option>
               <option value="479">6th Bell (dawn)</option>
             </select>
-            <button class="ccp-btn" onclick="clockJump()" style="margin-left:8px;">Jump</button>
+            <button type="button" class="ccp-btn" onclick="clockJump()" style="margin-left:8px;">Jump</button>
           </div>
           <div class="ccp-note">Kids arrive: roll 1d4+1 secretly before the scene starts — that's the bell they show up on. Keep it hidden. Run the event table until you hit that bell, then the kids appear regardless of what else is happening.</div>
         </div>
@@ -191,14 +217,14 @@ function showScene(id) {
       html += `<div class="section">
     <div class="device-tracker" id="${trackerId}">
       <div class="dt-states">
-        ${states.map((st, i) => `<div class="dt-state ${i === 0 ? 'dt-active' : ''}" id="${trackerId}-${i}" style="--state-color:${st.color}" onclick="advanceDevice('${trackerId}',${i},${states.length})">
-          <div class="dt-name">${st.name}</div>
-          <div class="dt-desc">${st.desc}</div>
+        ${states.map((st, i) => `<div class="dt-state ${i === 0 ? 'dt-active' : ''}" id="${trackerId}-${i}" style="--state-color:${st.color}" onclick="advanceDevice('${escJsQ(trackerId)}',${i},${states.length})">
+          <div class="dt-name">${escHtml(st.name)}</div>
+          <div class="dt-desc">${escHtml(st.desc)}</div>
         </div>`).join('')}
       </div>
       <div class="dt-controls">
-        <button class="dt-btn dt-advance" onclick="advanceDeviceNext('${trackerId}',${states.length})">⚡ Advance</button>
-        <button class="dt-btn dt-reset" onclick="resetDevice('${trackerId}',${states.length})">↺ Reset</button>
+        <button type="button" class="dt-btn dt-advance" onclick="advanceDeviceNext('${escJsQ(trackerId)}',${states.length})">⚡ Advance</button>
+        <button type="button" class="dt-btn dt-reset" onclick="resetDevice('${escJsQ(trackerId)}',${states.length})">↺ Reset</button>
       </div>
     </div>
   </div>`;
@@ -221,14 +247,14 @@ function showScene(id) {
         <thead><tr><th>d8</th><th>What Happens</th><th>Effect</th></tr></thead>
         <tbody>
           ${ENV.map(h => `<tr>
-            <td class="td-dc" style="width:32px;">${h.roll}</td>
-            <td style="font-weight:600;color:var(--gold-dim);width:35%;">${h.what}</td>
-            <td>${h.effect}</td>
+            <td class="td-dc" style="width:32px;">${escHtml(h.roll)}</td>
+            <td style="font-weight:600;color:var(--gold-dim);width:35%;">${escHtml(h.what)}</td>
+            <td>${escHtml(h.effect)}</td>
           </tr>`).join('')}
         </tbody>
       </table>
       <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
-        <button class="st-roll-btn" style="width:auto;padding:6px 16px;" onclick="rollEnvHazard()">⚄ Roll d8 Hazard</button>
+        <button type="button" class="st-roll-btn" style="width:auto;padding:6px 16px;" onclick="rollEnvHazard()">⚄ Roll d8 Hazard</button>
         <div class="st-result" id="env-hazard-result" style="flex:1;min-height:auto;padding:6px 10px;">—</div>
       </div>
     </div>
@@ -244,58 +270,58 @@ function showScene(id) {
           <div class="st-grid">
             <div class="st-col">
               <div class="st-col-head">What (d6)</div>
-              ${WHAT.map((w,i) => `<div class="st-roll"><span class="st-num">${i+1}</span>${w}</div>`).join('')}
-              <button class="st-roll-btn" onclick="rollStakeout('what')">Roll What</button>
+              ${WHAT.map((w,i) => `<div class="st-roll"><span class="st-num">${i+1}</span>${escHtml(w)}</div>`).join('')}
+              <button type="button" class="st-roll-btn" onclick="rollStakeout('what')">Roll What</button>
               <div class="st-result" id="result-what">—</div>
             </div>
             <div class="st-col">
               <div class="st-col-head">Who (d6)</div>
-              ${WHO.map((w,i) => `<div class="st-roll"><span class="st-num">${i+1}</span>${w}</div>`).join('')}
-              <button class="st-roll-btn" onclick="rollStakeout('who')">Roll Who</button>
+              ${WHO.map((w,i) => `<div class="st-roll"><span class="st-num">${i+1}</span>${escHtml(w)}</div>`).join('')}
+              <button type="button" class="st-roll-btn" onclick="rollStakeout('who')">Roll Who</button>
               <div class="st-result" id="result-who">—</div>
             </div>
             <div class="st-col">
               <div class="st-col-head">Where (d6)</div>
-              ${WHERE.map((w,i) => `<div class="st-roll"><span class="st-num">${i+1}</span>${w}</div>`).join('')}
-              <button class="st-roll-btn" onclick="rollStakeout('where')">Roll Where</button>
+              ${WHERE.map((w,i) => `<div class="st-roll"><span class="st-num">${i+1}</span>${escHtml(w)}</div>`).join('')}
+              <button type="button" class="st-roll-btn" onclick="rollStakeout('where')">Roll Where</button>
               <div class="st-result" id="result-where">—</div>
             </div>
           </div>
-          <button class="st-roll-all-btn" onclick="rollAll()">⚄ Roll All Three</button>
+          <button type="button" class="st-roll-all-btn" onclick="rollAll()">⚄ Roll All Three</button>
         </div>
       </div>`;
     } else if (s.type === 'fullstat') {
-      const traitsHtml = (s.traits||[]).map(t => `<p class="fs-entry"><span class="fs-bold">${t.name}.</span> ${t.text}</p>`).join('');
-      const actionsHtml = (s.actions||[]).map(a => `<p class="fs-entry"><span class="fs-bold">${a.name}.</span> ${a.text}</p>`).join('');
-      const bonusHtml = (s.bonus||[]).length ? `<div class="fs-section-head">Bonus Actions</div>${(s.bonus||[]).map(a => `<p class="fs-entry"><span class="fs-bold">${a.name}.</span> ${a.text}</p>`).join('')}` : '';
-      const reactionsHtml = (s.reactions||[]).length ? `<div class="fs-section-head">Reactions</div>${(s.reactions||[]).map(r => `<p class="fs-entry"><span class="fs-bold">${r.name}.</span> ${r.text}</p>`).join('')}` : '';
+      const traitsHtml = (s.traits||[]).map(t => `<p class="fs-entry"><span class="fs-bold">${escHtml(t.name)}.</span> ${escHtml(t.text)}</p>`).join('');
+      const actionsHtml = (s.actions||[]).map(a => `<p class="fs-entry"><span class="fs-bold">${escHtml(a.name)}.</span> ${escHtml(a.text)}</p>`).join('');
+      const bonusHtml = (s.bonus||[]).length ? `<div class="fs-section-head">Bonus Actions</div>${(s.bonus||[]).map(a => `<p class="fs-entry"><span class="fs-bold">${escHtml(a.name)}.</span> ${escHtml(a.text)}</p>`).join('')}` : '';
+      const reactionsHtml = (s.reactions||[]).length ? `<div class="fs-section-head">Reactions</div>${(s.reactions||[]).map(r => `<p class="fs-entry"><span class="fs-bold">${escHtml(r.name)}.</span> ${escHtml(r.text)}</p>`).join('')}` : '';
       html += `<div class="section"><div class="fs-block">
         <div class="fs-header">
-          <div class="fs-name">${s.name}</div>
-          <div class="fs-meta">${s.meta}</div>
+          <div class="fs-name">${escHtml(s.name)}</div>
+          <div class="fs-meta">${escHtml(s.meta)}</div>
         </div>
         <div class="fs-rule"></div>
         <div class="fs-basics">
-          <p><strong>Armor Class</strong> ${s.ac}</p>
-          <p><strong>Hit Points</strong> ${s.hp}</p>
-          <p><strong>Speed</strong> ${s.speed}</p>
+          <p><strong>Armor Class</strong> ${escHtml(s.ac)}</p>
+          <p><strong>Hit Points</strong> ${escHtml(s.hp)}</p>
+          <p><strong>Speed</strong> ${escHtml(s.speed)}</p>
         </div>
         <div class="fs-rule"></div>
         <div class="fs-stats">
-          <div class="fs-stat"><div class="fs-stat-label">STR</div><div class="fs-stat-val">${s.stats.str}</div></div>
-          <div class="fs-stat"><div class="fs-stat-label">DEX</div><div class="fs-stat-val">${s.stats.dex}</div></div>
-          <div class="fs-stat"><div class="fs-stat-label">CON</div><div class="fs-stat-val">${s.stats.con}</div></div>
-          <div class="fs-stat"><div class="fs-stat-label">INT</div><div class="fs-stat-val">${s.stats.int}</div></div>
-          <div class="fs-stat"><div class="fs-stat-label">WIS</div><div class="fs-stat-val">${s.stats.wis}</div></div>
-          <div class="fs-stat"><div class="fs-stat-label">CHA</div><div class="fs-stat-val">${s.stats.cha}</div></div>
+          <div class="fs-stat"><div class="fs-stat-label">STR</div><div class="fs-stat-val">${escHtml(s.stats.str)}</div></div>
+          <div class="fs-stat"><div class="fs-stat-label">DEX</div><div class="fs-stat-val">${escHtml(s.stats.dex)}</div></div>
+          <div class="fs-stat"><div class="fs-stat-label">CON</div><div class="fs-stat-val">${escHtml(s.stats.con)}</div></div>
+          <div class="fs-stat"><div class="fs-stat-label">INT</div><div class="fs-stat-val">${escHtml(s.stats.int)}</div></div>
+          <div class="fs-stat"><div class="fs-stat-label">WIS</div><div class="fs-stat-val">${escHtml(s.stats.wis)}</div></div>
+          <div class="fs-stat"><div class="fs-stat-label">CHA</div><div class="fs-stat-val">${escHtml(s.stats.cha)}</div></div>
         </div>
         <div class="fs-rule"></div>
         <div class="fs-details">
-          ${s.saves ? `<p><strong>Saving Throws</strong> ${s.saves}</p>` : ''}
-          <p><strong>Skills</strong> ${s.skills}</p>
-          <p><strong>Senses</strong> ${s.senses}</p>
-          <p><strong>Languages</strong> ${s.languages}</p>
-          <p><strong>Challenge</strong> ${s.cr}</p>
+          ${s.saves ? `<p><strong>Saving Throws</strong> ${escHtml(s.saves)}</p>` : ''}
+          <p><strong>Skills</strong> ${escHtml(s.skills)}</p>
+          <p><strong>Senses</strong> ${escHtml(s.senses)}</p>
+          <p><strong>Languages</strong> ${escHtml(s.languages)}</p>
+          <p><strong>Challenge</strong> ${escHtml(s.cr)}</p>
         </div>
         <div class="fs-rule"></div>
         ${traitsHtml}
@@ -303,7 +329,7 @@ function showScene(id) {
         ${bonusHtml}
         ${reactionsHtml}
         <div class="fs-rule"></div>
-        <div class="fs-behavior"><span class="fs-bold">DM Note:</span> ${s.behavior}</div>
+        <div class="fs-behavior"><span class="fs-bold">DM Note:</span> ${escHtml(s.behavior)}</div>
       </div></div>`;
     }
   }
@@ -355,7 +381,7 @@ function rollEnvHazard() {
   const h = ENV[roll];
   const el = document.getElementById('env-hazard-result');
   if (el) {
-    el.innerHTML = `<strong style="color:var(--gold-dim)">[${roll + 1}] ${h.what}</strong><br><span style="color:#A09070;font-style:italic">${h.effect}</span>`;
+    el.innerHTML = `<strong style="color:var(--gold-dim)">[${roll + 1}] ${escHtml(h.what)}</strong><br><span style="color:#A09070;font-style:italic">${escHtml(h.effect)}</span>`;
     el.style.borderColor = 'var(--gold)';
     setTimeout(() => { el.style.borderColor = 'var(--red)'; }, 600);
   }

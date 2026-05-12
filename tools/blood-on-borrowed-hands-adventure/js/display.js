@@ -10,6 +10,7 @@
     watchman: 1,
   };
 
+  var lastCmdId = null;
   var lastCmdTs = -1;
   var stakeApi = null;
 
@@ -61,8 +62,13 @@
 
   function applyCmd(cmd) {
     if (!cmd || cmd.action === undefined || cmd.action === null) return;
-    if (cmd.ts != null && cmd.ts === lastCmdTs) return;
-    if (cmd.ts != null) lastCmdTs = cmd.ts;
+    if (cmd.id != null) {
+      if (cmd.id === lastCmdId) return;
+      lastCmdId = cmd.id;
+    } else if (cmd.ts != null && cmd.ts === lastCmdTs) {
+      return;
+    }
+    if (cmd.id == null && cmd.ts != null) lastCmdTs = cmd.ts;
 
     var action = cmd.action;
 
@@ -75,6 +81,7 @@
       return;
     }
     if (action === 'speed') {
+      mountStakeoutIfNeeded();
       if (stakeApi) stakeApi.applyCommand(cmd);
       return;
     }
@@ -91,6 +98,7 @@
       var raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_KEY);
       if (!raw) return;
       var cmd = JSON.parse(raw);
+      if (cmd.id != null) lastCmdId = cmd.id;
       if (cmd.ts != null) lastCmdTs = cmd.ts;
     } catch (e) {}
   }

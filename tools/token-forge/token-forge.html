@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cormorant+Garamond:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
+    color-scheme: dark;
     --bg-deep: #0e0c08;
     --bg-surface: #18130d;
     --bg-elevated: #221a12;
@@ -21,6 +22,32 @@
     --gold-bright: #e8c878;
     --crimson: #8b2c2c;
     --crimson-bright: #b84545;
+    --bg-glow-crimson: rgba(139, 44, 44, 0.08);
+    --bg-glow-gold: rgba(201, 169, 97, 0.05);
+    --canvas-frame-inset: rgba(0, 0, 0, 0.5);
+    --canvas-frame-drop: rgba(0, 0, 0, 0.6);
+    --drop-overlay-fill: rgba(201, 169, 97, 0.1);
+  }
+
+  html[data-theme="light"] {
+    color-scheme: light;
+    --bg-deep: #f2ebe0;
+    --bg-surface: #e8dfd2;
+    --bg-elevated: #ded4c6;
+    --border: #c9bba8;
+    --border-bright: #a89478;
+    --text: #1e1810;
+    --text-muted: #5a5248;
+    --text-dim: #7a7063;
+    --gold: #7a6228;
+    --gold-bright: #5c4a1a;
+    --crimson: #7a2424;
+    --crimson-bright: #9a3030;
+    --bg-glow-crimson: rgba(139, 44, 44, 0.06);
+    --bg-glow-gold: rgba(160, 120, 40, 0.12);
+    --canvas-frame-inset: rgba(0, 0, 0, 0.06);
+    --canvas-frame-drop: rgba(30, 24, 16, 0.14);
+    --drop-overlay-fill: rgba(122, 98, 40, 0.12);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,14 +63,41 @@
 
   body {
     background-image:
-      radial-gradient(ellipse at top, rgba(139, 44, 44, 0.08), transparent 50%),
-      radial-gradient(ellipse at bottom right, rgba(201, 169, 97, 0.05), transparent 60%);
+      radial-gradient(ellipse at top, var(--bg-glow-crimson), transparent 50%),
+      radial-gradient(ellipse at bottom right, var(--bg-glow-gold), transparent 60%);
   }
 
   header {
     border-bottom: 1px solid var(--border);
     padding: 24px 32px;
     background: linear-gradient(to bottom, var(--bg-surface), transparent);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px 24px;
+  }
+
+  .header-brand { min-width: 0; }
+
+  .theme-toggle {
+    flex-shrink: 0;
+    background: var(--bg-elevated);
+    color: var(--text);
+    border: 1px solid var(--border-bright);
+    padding: 8px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--gold);
+    color: var(--gold-bright);
+    background: var(--bg-surface);
   }
 
   h1 {
@@ -64,17 +118,25 @@
     font-size: 16px;
   }
 
-  main {
-    max-width: 1200px;
+  main.workspace {
+    max-width: 1760px;
     margin: 0 auto;
-    padding: 40px 32px;
+    padding: 28px 24px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-width: 0;
+  }
+
+  .workspace-top {
     display: grid;
-    grid-template-columns: 1fr 360px;
-    gap: 40px;
+    grid-template-columns: minmax(260px, 1fr) minmax(280px, 400px);
+    gap: 28px 36px;
+    align-items: start;
   }
 
   @media (max-width: 900px) {
-    main { grid-template-columns: 1fr; padding: 24px 16px; gap: 24px; }
+    .workspace-top { grid-template-columns: 1fr; }
   }
 
   .stage {
@@ -92,8 +154,8 @@
     border-radius: 4px;
     padding: 8px;
     box-shadow:
-      inset 0 0 40px rgba(0,0,0,0.5),
-      0 8px 24px rgba(0,0,0,0.6);
+      inset 0 0 40px var(--canvas-frame-inset),
+      0 8px 24px var(--canvas-frame-drop);
   }
 
   canvas#preview {
@@ -126,7 +188,7 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
-    align-self: start;
+    min-width: 0;
   }
 
   .panel-section {
@@ -260,7 +322,7 @@
     position: absolute;
     inset: 8px;
     border: 2px dashed var(--gold);
-    background: rgba(201, 169, 97, 0.1);
+    background: var(--drop-overlay-fill);
     display: none;
     align-items: center;
     justify-content: center;
@@ -282,24 +344,450 @@
     margin-top: 40px;
   }
 
-  .border-gallery-wrap {
+  .panel.panel-rail {
+    align-self: start;
+  }
+
+  .preloaded-border-compact {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    min-height: 72px;
+  }
+
+  .preloaded-thumb-wrap {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 4px;
+    border: 1px solid var(--border-bright);
+    overflow: hidden;
+    background:
+      repeating-conic-gradient(var(--bg-elevated) 0 90deg, var(--bg-surface) 90deg 180deg) 0 0/10px 10px;
+  }
+
+  .preloaded-thumb-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .preloaded-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.35;
+    word-break: break-all;
+    min-width: 0;
+  }
+
+  .btn-browse-borders {
+    font-family: 'Cinzel', serif;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 13px;
+  }
+
+  /* Large border browser modal */
+  .modal-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .modal-layer.is-open {
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .modal-layer.is-open .modal-backdrop {
+    opacity: 1;
+  }
+
+  .modal-dialog {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0.96);
+    width: min(1120px, 96vw);
+    max-height: min(900px, 92vh);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-bright);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
+    min-height: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .modal-layer.is-open .modal-dialog {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .border-browser-modal .modal-header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .border-browser-modal .modal-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold-bright);
+  }
+
+  .modal-close {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border-bright);
+    background: var(--bg-elevated);
+    color: var(--text);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .modal-close:hover {
+    border-color: var(--gold);
+    color: var(--gold-bright);
+  }
+
+  .border-modal-toolbar {
+    flex-shrink: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-elevated);
+  }
+
+  .border-modal-toolbar label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--gold);
+  }
+
+  .border-modal-toolbar select {
+    width: auto;
+    min-width: 120px;
+  }
+
+  .border-modal-toolbar .toolbar-field {
+    display: flex;
+    align-items: center;
     gap: 8px;
   }
 
-  .border-filter {
+  .border-modal-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 20px 16px;
+    overflow: hidden;
+  }
+
+  .border-modal-body .chip-groups {
+    flex-shrink: 0;
+    max-height: 28vh;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .border-modal-body .border-gallery-meta {
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .border-modal-body .border-grid {
+    flex: 1;
+    min-height: 200px;
+    max-height: min(48vh, 520px);
+  }
+
+  .border-modal-body .border-grid-hint {
+    flex-shrink: 0;
+  }
+
+  .border-modal-pagination {
+    flex-shrink: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px 20px;
+    padding: 12px 20px 18px;
+    border-top: 1px solid var(--border);
     background: var(--bg-elevated);
+  }
+
+  .border-modal-pagination button {
+    background: var(--bg-surface);
     color: var(--text);
     border: 1px solid var(--border-bright);
-    padding: 8px 10px;
+    padding: 8px 18px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .border-modal-pagination button:hover:not(:disabled) {
+    border-color: var(--gold);
+    color: var(--gold-bright);
+  }
+
+  .border-modal-pagination button:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .border-page-indicator {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .btn-drawer {
+    width: auto;
+    display: inline-block;
+    padding: 8px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .drawer-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .drawer-layer.is-open {
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  .drawer-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .drawer-layer.is-open .drawer-backdrop {
+    opacity: 1;
+  }
+
+  .drawer-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(440px, 94vw);
+    max-width: 100%;
+    background: var(--bg-surface);
+    border-left: 1px solid var(--border-bright);
+    box-shadow: -12px 0 40px rgba(0, 0, 0, 0.45);
+    transform: translateX(100%);
+    transition: transform 0.22s ease;
+    overflow-y: auto;
+    padding: 20px 22px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    outline: none;
+  }
+
+  .drawer-layer.is-open .drawer-panel {
+    transform: translateX(0);
+  }
+
+  .drawer-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 14px;
+  }
+
+  .drawer-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold-bright);
+  }
+
+  .drawer-close {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border-bright);
+    background: var(--bg-elevated);
+    color: var(--text);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .drawer-close:hover {
+    border-color: var(--gold);
+    color: var(--gold-bright);
+  }
+
+  .drawer-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .drawer-section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--gold);
+  }
+
+  .drawer-select {
     width: 100%;
   }
 
-  .border-filter::placeholder {
+  .drawer-hint {
+    font-size: 12px;
     color: var(--text-dim);
+    font-style: italic;
+    margin-top: auto;
+  }
+
+  .drawer-panel .theme-toggle {
+    width: 100%;
+  }
+
+  .chip-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .chip-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .chip-group-label {
+    font-family: 'Cinzel', serif;
+    font-weight: 500;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+  }
+
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+  }
+
+  .chip {
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.1s;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .chip:hover {
+    color: var(--text);
+    border-color: var(--border-bright);
+  }
+
+  .chip.active {
+    background: var(--gold);
+    color: var(--bg-deep);
+    border-color: var(--gold-bright);
+    font-weight: 500;
+  }
+
+  .chip .chip-count {
+    opacity: 0.6;
+    margin-left: 4px;
+    font-size: 9px;
+  }
+
+  .chip.active .chip-count {
+    opacity: 0.75;
+  }
+
+  .chip-clear {
+    background: transparent;
+    color: var(--crimson-bright);
+    border: 1px dashed var(--crimson);
+    padding: 2px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    cursor: pointer;
+    border-radius: 2px;
+    align-self: flex-start;
+  }
+
+  .chip-clear:hover {
+    background: rgba(139, 44, 44, 0.2);
   }
 
   .border-gallery-meta {
@@ -316,139 +804,333 @@
 
   .border-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
-    gap: 6px;
-    max-height: 220px;
-    overflow-y: auto;
-    padding: 4px;
+    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+    gap: 16px;
+    align-items: start;
+    justify-items: stretch;
+    min-height: 260px;
+    max-height: min(50vh, 680px);
+    overflow: auto;
+    padding: 14px;
     background: var(--bg-deep);
     border: 1px solid var(--border);
-    border-radius: 2px;
+    border-radius: 4px;
+    outline: none;
+  }
+
+  .border-grid:focus-visible {
+    box-shadow: 0 0 0 2px var(--gold);
   }
 
   .border-thumb {
     position: relative;
-    aspect-ratio: 1;
-    padding: 0;
+    display: block;
+    width: 100%;
+    height: 0;
+    padding: 0 0 100% 0;
     border: 2px solid var(--border);
     background: var(--bg-elevated);
     cursor: pointer;
-    border-radius: 2px;
+    border-radius: 8px;
     overflow: hidden;
-    transition: border-color 0.12s, box-shadow 0.12s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: border-color 0.12s, box-shadow 0.12s, transform 0.1s;
   }
 
   .border-thumb:hover {
     border-color: var(--gold);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  }
+
+  .border-thumb:focus {
+    outline: none;
+  }
+
+  .border-thumb-preview {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    bottom: 5px;
+    left: 5px;
+    border-radius: 4px;
+    background:
+      repeating-conic-gradient(var(--bg-elevated) 0 90deg, var(--bg-surface) 90deg 180deg) 0 0/14px 14px;
+    overflow: hidden;
+  }
+
+  .border-thumb-preview img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+    pointer-events: none;
+  }
+
+  .border-thumb:focus-visible {
+    border-color: var(--gold-bright);
+    box-shadow: 0 0 0 2px var(--gold), 0 4px 14px rgba(0, 0, 0, 0.35);
+    z-index: 1;
   }
 
   .border-thumb.selected {
     border-color: var(--gold-bright);
-    box-shadow: 0 0 0 1px var(--gold);
+    box-shadow: 0 0 0 2px var(--gold);
   }
 
-  .border-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    pointer-events: none;
+  .border-thumb.selected:focus-visible {
+    box-shadow: 0 0 0 2px var(--gold), 0 0 0 4px rgba(232, 200, 120, 0.35);
+  }
+
+  .border-grid-hint {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+    line-height: 1.35;
   }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Token Forge</h1>
-  <div class="subtitle">A craftsman's tool for the virtual tabletop</div>
+  <div class="header-brand">
+    <h1>Token Forge</h1>
+    <div class="subtitle">A craftsman's tool for the virtual tabletop</div>
+  </div>
 </header>
 
-<main>
-  <div class="stage">
-    <div class="canvas-frame" id="canvas-frame">
-      <canvas id="preview" width="512" height="512"></canvas>
-      <div class="drop-overlay">Drop image to load portrait</div>
-    </div>
-    <div class="canvas-hint">drag to position · scroll to zoom · drop image to load</div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-section">
-      <div class="section-label">Portrait</div>
-      <label for="portrait-input" class="btn">Load Portrait</label>
-      <input type="file" id="portrait-input" accept="image/*">
-    </div>
-
-    <div class="panel-section">
-      <div class="section-label">Border</div>
-      <label for="border-input" class="btn">Load Border</label>
-      <input type="file" id="border-input" accept="image/*">
-      <button class="btn" id="reset-border">Use Sample Border</button>
-      <div class="border-gallery-wrap" id="border-gallery-wrap">
-        <input type="search" class="border-filter" id="border-filter" placeholder="Filter preloaded borders…" autocomplete="off" disabled aria-label="Filter preloaded borders">
-        <div class="border-gallery-meta" id="border-gallery-meta">Loading border list…</div>
-        <div class="border-grid" id="border-grid" aria-label="Preloaded borders"></div>
+<main class="workspace">
+  <div class="workspace-top">
+    <div class="stage">
+      <div class="canvas-frame" id="canvas-frame">
+        <canvas id="preview" width="512" height="512"></canvas>
+        <div class="drop-overlay">Drop image to load portrait</div>
       </div>
+      <div class="canvas-hint">drag to position · scroll to zoom · drop image to load</div>
     </div>
 
-    <div class="panel-section">
-      <div class="section-label">Adjust</div>
-      <div class="slider-row">
-        <div class="slider-label">
-          <span>Scale</span>
-          <span class="slider-value" id="scale-val">1.00x</span>
+    <div class="panel panel-rail">
+      <div class="panel-section">
+        <div class="section-label">Portrait</div>
+        <label for="portrait-input" class="btn">Load Portrait</label>
+        <input type="file" id="portrait-input" accept="image/*">
+      </div>
+
+      <div class="panel-section">
+        <div class="section-label">Border file</div>
+        <label for="border-input" class="btn">Load Border</label>
+        <input type="file" id="border-input" accept="image/*">
+        <button class="btn" id="reset-border">Use Sample Border</button>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-label">Preloaded border</div>
+        <div class="preloaded-border-compact" id="preloaded-border-compact">
+          <div class="preloaded-thumb-wrap" id="preloaded-thumb-wrap" hidden>
+            <img id="preloaded-thumb-img" alt="" width="56" height="56" decoding="async">
+          </div>
+          <div class="preloaded-name" id="preloaded-border-name">Sample border</div>
         </div>
-        <input type="range" id="scale" min="0.1" max="5" step="0.01" value="1">
+        <button type="button" class="btn btn-browse-borders" id="border-modal-open" aria-haspopup="dialog" aria-controls="border-modal-dialog">Browse borders</button>
       </div>
-      <div class="slider-row">
-        <div class="slider-label">
-          <span>Rotation</span>
-          <span class="slider-value" id="rotation-val">0°</span>
-        </div>
-        <input type="range" id="rotation" min="-180" max="180" step="1" value="0">
-      </div>
-      <button class="btn" id="reset-transform">Reset Position</button>
-    </div>
 
-    <div class="panel-section">
-      <div class="section-label">Export</div>
-      <div class="select-row">
-        <select id="export-size">
-          <option value="512">512 px</option>
-          <option value="768">768 px</option>
-          <option value="1024" selected>1024 px</option>
-          <option value="2048">2048 px</option>
-        </select>
-        <select id="export-format">
-          <option value="png">PNG</option>
-          <option value="webp">WebP</option>
-        </select>
+      <div class="panel-section">
+        <div class="section-label">Appearance</div>
+        <button type="button" class="btn btn-drawer" id="drawer-open" aria-expanded="false" aria-controls="drawer-panel">Theme</button>
       </div>
-      <button class="btn btn-primary" id="export-btn">Forge Token</button>
+
+      <div class="panel-section">
+        <div class="section-label">Adjust</div>
+        <div class="slider-row">
+          <div class="slider-label">
+            <span>Scale</span>
+            <span class="slider-value" id="scale-val">1.00x</span>
+          </div>
+          <input type="range" id="scale" min="0.1" max="5" step="0.01" value="1" aria-label="Portrait scale">
+        </div>
+        <div class="slider-row">
+          <div class="slider-label">
+            <span>Rotation</span>
+            <span class="slider-value" id="rotation-val">0°</span>
+          </div>
+          <input type="range" id="rotation" min="-180" max="180" step="1" value="0" aria-label="Portrait rotation in degrees">
+        </div>
+        <button class="btn" id="reset-transform">Reset Position</button>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-label">Export</div>
+        <div class="select-row">
+          <select id="export-size" aria-label="Export width and height in pixels">
+            <option value="512">512 px</option>
+            <option value="768">768 px</option>
+            <option value="1024" selected>1024 px</option>
+            <option value="2048">2048 px</option>
+          </select>
+          <select id="export-format" aria-label="Export image format">
+            <option value="png">PNG</option>
+            <option value="webp">WebP</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="export-btn">Forge Token</button>
+      </div>
     </div>
   </div>
 </main>
+
+<div class="drawer-layer" id="drawer-layer" aria-hidden="true">
+  <div class="drawer-backdrop" id="drawer-backdrop" tabindex="-1"></div>
+  <div class="drawer-panel" id="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawer-title" tabindex="-1">
+    <div class="drawer-header">
+      <h2 class="drawer-title" id="drawer-title">Theme</h2>
+      <button type="button" class="drawer-close" id="drawer-close" aria-label="Close panel">×</button>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-label">Color theme</div>
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false">Light mode</button>
+    </div>
+    <p class="drawer-hint">Esc, backdrop, or ✕ to close.</p>
+  </div>
+</div>
+
+<div class="modal-layer" id="border-modal-layer" aria-hidden="true">
+  <div class="modal-backdrop" id="border-modal-backdrop" tabindex="-1"></div>
+  <div class="modal-dialog border-browser-modal" id="border-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="border-modal-title" tabindex="-1">
+    <div class="modal-header">
+      <h2 class="modal-title" id="border-modal-title">Browse borders</h2>
+      <button type="button" class="modal-close" id="border-modal-close" aria-label="Close border browser">×</button>
+    </div>
+    <div class="border-modal-toolbar">
+      <div class="toolbar-field">
+        <label for="border-page-size">Per page</label>
+        <select id="border-page-size" class="drawer-select" title="Borders per page" aria-label="Borders per page">
+          <option value="60">60</option>
+          <option value="120" selected>120</option>
+          <option value="240">240</option>
+        </select>
+      </div>
+      <div class="toolbar-field">
+        <label for="border-sort">Sort</label>
+        <select id="border-sort" class="drawer-select" title="Sort order for preloaded borders" aria-label="Sort borders">
+          <option value="manifest">Manifest order</option>
+          <option value="az">File name A–Z</option>
+          <option value="za">File name Z–A</option>
+        </select>
+      </div>
+    </div>
+    <div class="border-modal-body">
+      <div class="chip-groups" id="chip-groups"></div>
+      <div class="border-gallery-meta" id="border-gallery-meta">Loading border list…</div>
+      <div class="border-grid" id="border-grid" role="region" aria-label="Preloaded borders on this page" aria-describedby="border-grid-hint" tabindex="0"></div>
+      <div class="border-grid-hint" id="border-grid-hint">Each cell shows the full ring (letterboxed). Focus the grid, then arrow keys to move within this page.</div>
+    </div>
+    <div class="border-modal-pagination">
+      <button type="button" id="border-page-prev" aria-label="Previous page">Previous</button>
+      <span class="border-page-indicator" id="border-page-indicator" aria-live="polite"></span>
+      <button type="button" id="border-page-next" aria-label="Next page">Next</button>
+    </div>
+  </div>
+</div>
 
 <footer>Single-file build · No tracking · Your images never leave your device</footer>
 
 <script>
 (() => {
+  const THEME_STORAGE_KEY = 'token-forge-theme';
+  const BORDER_SORT_STORAGE_KEY = 'token-forge-border-sort';
+
+  /** @type {'manifest' | 'az' | 'za'} */
+  let borderSortOrder = 'manifest';
+  try {
+    const bs = localStorage.getItem(BORDER_SORT_STORAGE_KEY);
+    if (bs === 'manifest' || bs === 'az' || bs === 'za') borderSortOrder = bs;
+  } catch {}
+
+  function getStoredTheme() {
+    try {
+      const v = localStorage.getItem(THEME_STORAGE_KEY);
+      if (v === 'light' || v === 'dark') return v;
+    } catch {}
+    return null;
+  }
+
+  function resolveInitialTheme() {
+    const stored = getStoredTheme();
+    if (stored) return stored;
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  }
+
+  function applyTheme(theme) {
+    const root = document.documentElement;
+    const btn = document.getElementById('theme-toggle');
+    const isLight = theme === 'light';
+    if (isLight) {
+      root.dataset.theme = 'light';
+    } else {
+      delete root.dataset.theme;
+    }
+    if (btn) {
+      btn.textContent = isLight ? 'Dark mode' : 'Light mode';
+      btn.setAttribute('aria-pressed', isLight ? 'true' : 'false');
+      btn.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
+    }
+  }
+
+  applyTheme(resolveInitialTheme());
+
+  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    applyTheme(next);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, next);
+    } catch {}
+  });
+
   const canvas = document.getElementById('preview');
   const ctx = canvas.getContext('2d');
   const CANVAS_SIZE = 512;
 
   const BORDER_MANIFEST_URL = new URL('borders/manifest.json', document.baseURI || window.location.href).href;
   const BORDER_BASE = new URL('borders/', document.baseURI || window.location.href).href;
-  const BORDER_PREVIEW_LIMIT = 48;
+  const BORDER_PAGE_SIZE_STORAGE_KEY = 'token-forge-border-page-size';
 
-  const borderFilterEl = document.getElementById('border-filter');
+  /** @type {60 | 120 | 240} */
+  let borderPageSize = 120;
+  try {
+    const ps = localStorage.getItem(BORDER_PAGE_SIZE_STORAGE_KEY);
+    if (ps === '60' || ps === '120' || ps === '240') borderPageSize = parseInt(ps, 10);
+  } catch {}
+
+  /** 0-based page index into filtered + sorted list */
+  let borderPageIndex = 0;
+
+  const chipGroupsEl = document.getElementById('chip-groups');
   const borderGridEl = document.getElementById('border-grid');
   const borderGalleryMetaEl = document.getElementById('border-gallery-meta');
 
-  /** @type {string[]} */
-  let borderManifest = [];
+  /** Category order in the chip UI */
+  const CHIP_CATEGORIES = ['theme', 'mood', 'color', 'shape'];
+
+  /** @type {{borders: Array<{file:string, themes:string[], moods:string[], color:string, shape:string}>, chips: Record<string, Array<[string, number]>>}} */
+  let borderManifest = { borders: [], chips: {} };
+
+  /** Active filter tags per category. Within a category: OR. Across categories: AND. */
+  const activeFilters = {
+    theme: new Set(),
+    mood:  new Set(),
+    color: new Set(),
+    shape: new Set(),
+  };
+
   /** @type {string | null} */
   let selectedPreloadedBorder = null;
+
+  /** Keyboard / browse index into the current visible border thumb list */
+  let borderNavIndex = 0;
 
   // ---------- State ----------
   const state = {
@@ -458,7 +1140,21 @@
     offsetY: 0,
     scale: 1.0,
     rotation: 0,      // degrees
+    /** Basename (no extension) of last loaded portrait file — used for export filename */
+    portraitStem: 'token',
   };
+
+  /** Safe stem from a File.name for download (no path chars, no extension). */
+  function portraitStemFromFileName(name) {
+    if (!name || typeof name !== 'string') return 'token';
+    let s = name.replace(/[/\\?%*:|"<>]/g, '_').trim();
+    const lastDot = s.lastIndexOf('.');
+    if (lastDot > 0) s = s.slice(0, lastDot);
+    s = s.replace(/\s+/g, ' ').trim();
+    if (!s) return 'token';
+    if (s.length > 120) s = s.slice(0, 120);
+    return s;
+  }
 
   // ---------- Sample border generator ----------
   // Drawn at high res so it stays crisp at any export size.
@@ -532,6 +1228,86 @@
 
   state.border = generateSampleBorder(2048);
 
+  /** Alpha below this counts as transparent for flood + mask (same as flood pass-through). */
+  const BORDER_TRANSPARENT_ALPHA = 8;
+
+  /** @type {WeakMap<object, Map<number, HTMLCanvasElement>>} */
+  const portraitMaskCache = new WeakMap();
+
+  /**
+   * Flood-fill from canvas edges through transparent pixels of the border (alpha < 8).
+   * Reachable pixels are "outside" the token; the inner hole stays unreachable and keeps the portrait.
+   * @param {CanvasImageSource} borderSource
+   * @param {number} size
+   */
+  function getPortraitMaskCanvas(borderSource, size) {
+    let bySize = portraitMaskCache.get(borderSource);
+    if (bySize) {
+      const hit = bySize.get(size);
+      if (hit) return hit;
+    } else {
+      bySize = new Map();
+      portraitMaskCache.set(borderSource, bySize);
+    }
+
+    const w = size;
+    const h = size;
+    const temp = document.createElement('canvas');
+    temp.width = w;
+    temp.height = h;
+    const tctx = temp.getContext('2d');
+    tctx.drawImage(borderSource, 0, 0, w, h);
+    const { data } = tctx.getImageData(0, 0, w, h);
+    const n = w * h;
+    const visited = new Uint8Array(n);
+    const queue = new Uint32Array(n);
+    let qt = 0;
+
+    const isTransp = (i) => data[i * 4 + 3] < BORDER_TRANSPARENT_ALPHA;
+    const push = (i) => {
+      if (!isTransp(i) || visited[i]) return;
+      visited[i] = 1;
+      queue[qt++] = i;
+    };
+
+    for (let x = 0; x < w; x++) {
+      push(x);
+      push((h - 1) * w + x);
+    }
+    for (let y = 1; y < h - 1; y++) {
+      push(y * w);
+      push(y * w + (w - 1));
+    }
+
+    for (let qh = 0; qh < qt; qh++) {
+      const i = queue[qh];
+      const x = i % w;
+      const y = (i / w) | 0;
+      if (x > 0) push(i - 1);
+      if (x + 1 < w) push(i + 1);
+      if (y > 0) push(i - w);
+      if (y + 1 < h) push(i + w);
+    }
+
+    const mask = document.createElement('canvas');
+    mask.width = w;
+    mask.height = h;
+    const mctx = mask.getContext('2d');
+    const maskImg = mctx.createImageData(w, h);
+    const md = maskImg.data;
+    for (let i = 0; i < n; i++) {
+      const a = isTransp(i) && !visited[i] ? 255 : 0;
+      const p = i * 4;
+      md[p] = 255;
+      md[p + 1] = 255;
+      md[p + 2] = 255;
+      md[p + 3] = a;
+    }
+    mctx.putImageData(maskImg, 0, 0);
+    bySize.set(size, mask);
+    return mask;
+  }
+
   // ---------- Rendering ----------
   function render(targetCtx = ctx, size = CANVAS_SIZE) {
     const cx = size / 2;
@@ -542,11 +1318,6 @@
 
     if (state.portrait) {
       targetCtx.save();
-      // circle clip slightly larger than inner ring so no seam shows
-      targetCtx.beginPath();
-      targetCtx.arc(cx, cy, size * 0.48, 0, Math.PI * 2);
-      targetCtx.clip();
-
       targetCtx.translate(cx + state.offsetX * sf, cy + state.offsetY * sf);
       targetCtx.rotate((state.rotation * Math.PI) / 180);
       targetCtx.scale(state.scale, state.scale);
@@ -559,6 +1330,14 @@
       const dh = ih * fit;
       targetCtx.drawImage(state.portrait, -dw / 2, -dh / 2, dw, dh);
       targetCtx.restore();
+
+      if (state.border) {
+        const maskCanvas = getPortraitMaskCanvas(state.border, size);
+        targetCtx.save();
+        targetCtx.globalCompositeOperation = 'destination-in';
+        targetCtx.drawImage(maskCanvas, 0, 0, size, size);
+        targetCtx.restore();
+      }
     } else {
       // placeholder
       targetCtx.save();
@@ -605,79 +1384,296 @@
     });
   }
 
-  function filterBorderManifest(query) {
-    const q = query.trim().toLowerCase();
-    if (!q) return borderManifest;
-    return borderManifest.filter((name) => name.toLowerCase().includes(q));
+  async function applyPreloadedBorderByName(name) {
+    selectedPreloadedBorder = name;
+    updateBorderGallerySelection();
+    try {
+      state.border = await loadImageFromUrl(borderAssetUrl(name));
+      render();
+      updatePreloadedCompactPreview();
+    } catch {
+      alert('Could not load that border.');
+    }
+  }
+
+  function getFilteredOrderedBorders() {
+    return orderedBorderEntries(filterBorderManifest());
+  }
+
+  function clampBorderPageIndex(total) {
+    const pageCount = Math.max(1, Math.ceil(total / borderPageSize) || 1);
+    const maxIdx = pageCount - 1;
+    if (borderPageIndex > maxIdx) borderPageIndex = maxIdx;
+    if (borderPageIndex < 0) borderPageIndex = 0;
+  }
+
+  function syncBorderPageToSelection() {
+    const full = getFilteredOrderedBorders();
+    const total = full.length;
+    if (!selectedPreloadedBorder || total === 0) {
+      borderPageIndex = 0;
+      clampBorderPageIndex(total);
+      return;
+    }
+    const idx = full.findIndex((e) => e.file === selectedPreloadedBorder);
+    if (idx < 0) {
+      borderPageIndex = 0;
+    } else {
+      borderPageIndex = Math.floor(idx / borderPageSize);
+    }
+    clampBorderPageIndex(total);
+  }
+
+  function updatePreloadedCompactPreview() {
+    const wrap = document.getElementById('preloaded-thumb-wrap');
+    const img = document.getElementById('preloaded-thumb-img');
+    const nameEl = document.getElementById('preloaded-border-name');
+    if (!wrap || !img || !nameEl) return;
+    if (selectedPreloadedBorder) {
+      wrap.hidden = false;
+      img.src = borderAssetUrl(selectedPreloadedBorder);
+      nameEl.textContent = selectedPreloadedBorder;
+    } else {
+      wrap.hidden = true;
+      img.removeAttribute('src');
+      const isSample = state.border && typeof state.border.getContext === 'function';
+      nameEl.textContent = isSample ? 'Sample border' : 'Custom border file';
+    }
+  }
+
+  function gridColumnCount(thumbs) {
+    if (thumbs.length < 2) return 1;
+    const y0 = thumbs[0].offsetTop;
+    let c = 0;
+    for (const t of thumbs) {
+      if (t.offsetTop === y0) c++;
+      else break;
+    }
+    return Math.max(1, c);
+  }
+
+  function tagsForCategory(entry, category) {
+    if (category === 'theme') return entry.themes || [];
+    if (category === 'mood')  return entry.moods  || [];
+    if (category === 'color') return entry.color ? [entry.color] : [];
+    if (category === 'shape') return entry.shape ? [entry.shape] : [];
+    return [];
+  }
+
+  function matchesFilters(entry) {
+    for (const cat of CHIP_CATEGORIES) {
+      const active = activeFilters[cat];
+      if (active.size === 0) continue;
+      const tags = tagsForCategory(entry, cat);
+      let hit = false;
+      for (const t of tags) {
+        if (active.has(t)) { hit = true; break; }
+      }
+      if (!hit) return false;
+    }
+    return true;
+  }
+
+  function filterBorderManifest() {
+    return borderManifest.borders.filter(matchesFilters);
+  }
+
+  function orderedBorderEntries(matches) {
+    const arr = matches.slice();
+    if (borderSortOrder === 'az') {
+      arr.sort((a, b) => a.file.localeCompare(b.file, undefined, { sensitivity: 'base', numeric: true }));
+    } else if (borderSortOrder === 'za') {
+      arr.sort((a, b) => b.file.localeCompare(a.file, undefined, { sensitivity: 'base', numeric: true }));
+    }
+    return arr;
+  }
+
+  function activeFilterCount() {
+    let n = 0;
+    for (const cat of CHIP_CATEGORIES) n += activeFilters[cat].size;
+    return n;
+  }
+
+  function renderChips() {
+    chipGroupsEl.replaceChildren();
+    const chips = borderManifest.chips || {};
+
+    for (const cat of CHIP_CATEGORIES) {
+      const items = chips[cat] || [];
+      if (items.length === 0) continue;
+
+      const group = document.createElement('div');
+      group.className = 'chip-group';
+
+      const label = document.createElement('div');
+      label.className = 'chip-group-label';
+      label.textContent = cat;
+      group.appendChild(label);
+
+      const row = document.createElement('div');
+      row.className = 'chip-row';
+
+      for (const [name, count] of items) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'chip' + (activeFilters[cat].has(name) ? ' active' : '');
+        btn.dataset.category = cat;
+        btn.dataset.tag = name;
+        btn.innerHTML = `${name}<span class="chip-count">${count}</span>`;
+        row.appendChild(btn);
+      }
+
+      group.appendChild(row);
+      chipGroupsEl.appendChild(group);
+    }
+
+    if (activeFilterCount() > 0) {
+      const clear = document.createElement('button');
+      clear.type = 'button';
+      clear.className = 'chip-clear';
+      clear.id = 'chip-clear';
+      clear.textContent = '✕ Clear filters';
+      chipGroupsEl.appendChild(clear);
+    }
+  }
+
+  function updateBorderGallerySelection() {
+    for (const btn of borderGridEl.querySelectorAll('.border-thumb')) {
+      const name = btn.title;
+      btn.classList.toggle('selected', selectedPreloadedBorder === name);
+    }
   }
 
   function refreshBorderGallery() {
+    const preserveErrorMeta = borderGalleryMetaEl.classList.contains('border-gallery-error');
     borderGridEl.replaceChildren();
-    const q = borderFilterEl.value;
-    const matches = filterBorderManifest(q);
-    const slice = matches.slice(0, BORDER_PREVIEW_LIMIT);
-    const extra = matches.length - slice.length;
+    const full = getFilteredOrderedBorders();
+    const total = full.length;
+    clampBorderPageIndex(total);
+    const start = borderPageIndex * borderPageSize;
+    const slice = full.slice(start, start + borderPageSize);
+    const endIdx = start + slice.length;
 
-    for (const name of slice) {
+    for (const entry of slice) {
+      const name = entry.file;
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'border-thumb' + (selectedPreloadedBorder === name ? ' selected' : '');
       btn.title = name;
+      btn.tabIndex = -1;
       const img = document.createElement('img');
       img.alt = '';
       img.loading = 'lazy';
+      img.decoding = 'async';
       img.src = borderAssetUrl(name);
-      btn.appendChild(img);
+      const preview = document.createElement('span');
+      preview.className = 'border-thumb-preview';
+      preview.appendChild(img);
+      btn.appendChild(preview);
       btn.addEventListener('click', async () => {
-        selectedPreloadedBorder = name;
-        refreshBorderGallery();
-        try {
-          state.border = await loadImageFromUrl(borderAssetUrl(name));
-          render();
-        } catch {
-          alert('Could not load that border.');
-        }
+        const thumbs = [...borderGridEl.querySelectorAll('.border-thumb')];
+        borderNavIndex = Math.max(0, thumbs.indexOf(btn));
+        borderGridEl.focus({ preventScroll: true });
+        await applyPreloadedBorderByName(name);
       });
       borderGridEl.appendChild(btn);
     }
 
-    if (borderManifest.length === 0) return;
-    let meta = `Showing ${slice.length} of ${matches.length} match${matches.length === 1 ? '' : 'es'}`;
-    if (extra > 0) meta += ` · Narrow the filter for ${extra} more`;
-    borderGalleryMetaEl.textContent = meta;
-    borderGalleryMetaEl.classList.remove('border-gallery-error');
+    if (!preserveErrorMeta) {
+      if (total === 0) {
+        borderGalleryMetaEl.textContent = 'Showing 0 of 0 borders';
+      } else if (slice.length === 0) {
+        borderGalleryMetaEl.textContent = `Showing 0 of ${total} borders`;
+      } else {
+        borderGalleryMetaEl.textContent = `Showing ${start + 1}-${endIdx} of ${total} borders`;
+      }
+    }
+
+    const thumbs = [...borderGridEl.querySelectorAll('.border-thumb')];
+    thumbs.forEach((t) => { t.tabIndex = -1; });
+    if (thumbs.length === 0) {
+      borderNavIndex = 0;
+    } else {
+      if (borderNavIndex >= thumbs.length) borderNavIndex = thumbs.length - 1;
+      let preferred = -1;
+      if (selectedPreloadedBorder) {
+        preferred = thumbs.findIndex((t) => t.title === selectedPreloadedBorder);
+      }
+      if (preferred >= 0) borderNavIndex = preferred;
+      else if (borderNavIndex < 0 || borderNavIndex >= thumbs.length) borderNavIndex = 0;
+    }
+
+    const pageCount = Math.max(1, Math.ceil(total / borderPageSize) || 1);
+    const pageIndicator = document.getElementById('border-page-indicator');
+    const prevBtn = document.getElementById('border-page-prev');
+    const nextBtn = document.getElementById('border-page-next');
+    if (pageIndicator) {
+      pageIndicator.textContent = total === 0 ? 'Page 1 of 1' : `Page ${borderPageIndex + 1} of ${pageCount}`;
+    }
+    if (prevBtn) prevBtn.disabled = borderPageIndex <= 0;
+    if (nextBtn) nextBtn.disabled = total === 0 || borderPageIndex >= pageCount - 1;
   }
 
   async function initBorderGallery() {
     try {
       const res = await fetch(BORDER_MANIFEST_URL);
       if (!res.ok) throw new Error(String(res.status));
-      borderManifest = await res.json();
-      if (!Array.isArray(borderManifest)) throw new Error('bad manifest');
+      const data = await res.json();
+      if (data && typeof data === 'object' && data.version === 2 && Array.isArray(data.borders)) {
+        borderManifest = { borders: data.borders, chips: data.chips || {} };
+      } else if (Array.isArray(data)) {
+        // legacy v1 array: filenames only, no tags
+        borderManifest = {
+          borders: data.map(f => ({ file: f, themes: [], moods: [], color: 'mixed', shape: 'round' })),
+          chips: {},
+        };
+      } else {
+        throw new Error('unrecognized manifest format');
+      }
     } catch {
-      borderManifest = [];
-      borderFilterEl.disabled = true;
+      borderManifest = { borders: [], chips: {} };
       borderGalleryMetaEl.classList.add('border-gallery-error');
       borderGalleryMetaEl.textContent =
         'Could not load borders/manifest.json (fetch often fails on file:// — open via a local HTTP server or deploy). Load Border still works.';
+      renderChips();
+      borderPageIndex = 0;
+      refreshBorderGallery();
+      updatePreloadedCompactPreview();
       return;
     }
 
-    borderFilterEl.disabled = false;
     borderGalleryMetaEl.classList.remove('border-gallery-error');
+    renderChips();
+    syncBorderPageToSelection();
     refreshBorderGallery();
+    updatePreloadedCompactPreview();
   }
 
-  let borderFilterDebounce = 0;
-  borderFilterEl.addEventListener('input', () => {
-    window.clearTimeout(borderFilterDebounce);
-    borderFilterDebounce = window.setTimeout(refreshBorderGallery, 120);
+  // Chip click delegation
+  chipGroupsEl.addEventListener('click', (e) => {
+    const target = e.target.closest('.chip, .chip-clear');
+    if (!target) return;
+
+    if (target.classList.contains('chip-clear')) {
+      for (const cat of CHIP_CATEGORIES) activeFilters[cat].clear();
+    } else {
+      const cat = target.dataset.category;
+      const tag = target.dataset.tag;
+      if (!cat || !tag || !activeFilters[cat]) return;
+      if (activeFilters[cat].has(tag)) activeFilters[cat].delete(tag);
+      else activeFilters[cat].add(tag);
+    }
+
+    borderPageIndex = 0;
+    renderChips();
+    refreshBorderGallery();
   });
 
   async function setPortraitFromFile(file) {
     if (!file || !file.type.startsWith('image/')) return;
     try {
       state.portrait = await loadImageFile(file);
+      state.portraitStem = portraitStemFromFileName(file.name);
       render();
     } catch (err) {
       alert('Could not load that image.');
@@ -696,6 +1692,7 @@
       refreshBorderGallery();
       state.border = await loadImageFile(file);
       render();
+      updatePreloadedCompactPreview();
     } catch (err) {
       alert('Could not load that border.');
     }
@@ -706,6 +1703,7 @@
     refreshBorderGallery();
     state.border = generateSampleBorder(2048);
     render();
+    updatePreloadedCompactPreview();
   });
 
   // ---------- Sliders ----------
@@ -823,12 +1821,164 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `token_${size}.${fmt}`;
+      const stem = state.portrait ? state.portraitStem : 'token';
+      a.download = `${stem}_${size}.${fmt}`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }, mime, quality);
+  });
+
+  // ---------- Drawer, border modal, pagination ----------
+  const drawerLayer = document.getElementById('drawer-layer');
+  const drawerBackdrop = document.getElementById('drawer-backdrop');
+  const drawerCloseBtn = document.getElementById('drawer-close');
+  const drawerOpenBtn = document.getElementById('drawer-open');
+  const borderModalLayer = document.getElementById('border-modal-layer');
+  const borderModalBackdrop = document.getElementById('border-modal-backdrop');
+  const borderModalClose = document.getElementById('border-modal-close');
+  const borderModalOpen = document.getElementById('border-modal-open');
+  const borderPageSizeEl = document.getElementById('border-page-size');
+  const borderSortEl = document.getElementById('border-sort');
+  const borderPagePrevBtn = document.getElementById('border-page-prev');
+  const borderPageNextBtn = document.getElementById('border-page-next');
+
+  borderSortEl.value = borderSortOrder;
+  borderPageSizeEl.value = String(borderPageSize);
+
+  function syncBodyScrollLock() {
+    document.body.style.overflow = (isDrawerOpen() || isBorderModalOpen()) ? 'hidden' : '';
+  }
+
+  function isDrawerOpen() {
+    return drawerLayer.classList.contains('is-open');
+  }
+
+  function isBorderModalOpen() {
+    return borderModalLayer.classList.contains('is-open');
+  }
+
+  function setDrawerOpen(open) {
+    drawerLayer.classList.toggle('is-open', open);
+    drawerLayer.setAttribute('aria-hidden', open ? 'false' : 'true');
+    drawerOpenBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    syncBodyScrollLock();
+    if (open) {
+      drawerCloseBtn.focus();
+    } else {
+      const ae = document.activeElement;
+      if (ae && drawerLayer.contains(ae)) drawerOpenBtn.focus();
+    }
+  }
+
+  function setBorderModalOpen(open) {
+    borderModalLayer.classList.toggle('is-open', open);
+    borderModalLayer.setAttribute('aria-hidden', open ? 'false' : 'true');
+    borderModalOpen.setAttribute('aria-expanded', open ? 'true' : 'false');
+    syncBodyScrollLock();
+    if (open) {
+      syncBorderPageToSelection();
+      refreshBorderGallery();
+      requestAnimationFrame(() => {
+        borderGridEl.focus({ preventScroll: true });
+      });
+    } else {
+      const ae = document.activeElement;
+      if (ae && borderModalLayer.contains(ae)) borderModalOpen.focus();
+    }
+  }
+
+  drawerOpenBtn.addEventListener('click', () => setDrawerOpen(true));
+  drawerCloseBtn.addEventListener('click', () => setDrawerOpen(false));
+  drawerBackdrop.addEventListener('click', () => setDrawerOpen(false));
+
+  borderModalOpen.addEventListener('click', () => setBorderModalOpen(true));
+  borderModalClose.addEventListener('click', () => setBorderModalOpen(false));
+  borderModalBackdrop.addEventListener('click', () => setBorderModalOpen(false));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (isBorderModalOpen()) {
+      e.preventDefault();
+      setBorderModalOpen(false);
+      return;
+    }
+    if (isDrawerOpen()) {
+      e.preventDefault();
+      setDrawerOpen(false);
+    }
+  });
+
+  borderSortEl.addEventListener('change', () => {
+    const v = borderSortEl.value;
+    if (v === 'manifest' || v === 'az' || v === 'za') borderSortOrder = v;
+    try {
+      localStorage.setItem(BORDER_SORT_STORAGE_KEY, borderSortOrder);
+    } catch {}
+    borderPageIndex = 0;
+    refreshBorderGallery();
+  });
+
+  borderPageSizeEl.addEventListener('change', () => {
+    const prevSize = borderPageSize;
+    const v = parseInt(borderPageSizeEl.value, 10);
+    if (v !== 60 && v !== 120 && v !== 240) return;
+    const first = borderPageIndex * prevSize;
+    borderPageSize = /** @type {60 | 120 | 240} */ (v);
+    try {
+      localStorage.setItem(BORDER_PAGE_SIZE_STORAGE_KEY, String(borderPageSize));
+    } catch {}
+    const total = getFilteredOrderedBorders().length;
+    borderPageIndex = Math.floor(first / borderPageSize);
+    clampBorderPageIndex(total);
+    refreshBorderGallery();
+  });
+
+  borderPagePrevBtn.addEventListener('click', () => {
+    if (borderPageIndex <= 0) return;
+    borderPageIndex--;
+    borderNavIndex = 0;
+    refreshBorderGallery();
+    borderGridEl.scrollTop = 0;
+    borderGridEl.focus({ preventScroll: true });
+  });
+
+  borderPageNextBtn.addEventListener('click', () => {
+    const total = getFilteredOrderedBorders().length;
+    const pageCount = Math.max(1, Math.ceil(total / borderPageSize) || 1);
+    if (borderPageIndex >= pageCount - 1) return;
+    borderPageIndex++;
+    borderNavIndex = 0;
+    refreshBorderGallery();
+    borderGridEl.scrollTop = 0;
+    borderGridEl.focus({ preventScroll: true });
+  });
+
+  borderGridEl.addEventListener('keydown', async (e) => {
+    if (e.key === ' ' && document.activeElement === borderGridEl) {
+      e.preventDefault();
+      return;
+    }
+    const navKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
+    if (!navKeys.includes(e.key)) return;
+    if (document.activeElement !== borderGridEl) return;
+    const thumbs = [...borderGridEl.querySelectorAll('.border-thumb')];
+    if (thumbs.length === 0) return;
+    e.preventDefault();
+    const cols = gridColumnCount(thumbs);
+    let i = borderNavIndex;
+    if (e.key === 'Home') i = 0;
+    else if (e.key === 'End') i = thumbs.length - 1;
+    else if (e.key === 'ArrowRight') i = Math.min(thumbs.length - 1, i + 1);
+    else if (e.key === 'ArrowLeft') i = Math.max(0, i - 1);
+    else if (e.key === 'ArrowDown') i = Math.min(thumbs.length - 1, i + cols);
+    else if (e.key === 'ArrowUp') i = Math.max(0, i - cols);
+    if (i === borderNavIndex) return;
+    borderNavIndex = i;
+    const name = thumbs[borderNavIndex].title;
+    await applyPreloadedBorderByName(name);
+    thumbs[borderNavIndex].scrollIntoView({ block: 'nearest', inline: 'nearest' });
   });
 
   // ---------- Boot ----------

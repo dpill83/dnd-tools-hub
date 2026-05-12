@@ -1,15 +1,15 @@
 const PORTRAITS = {
-  "Captain Hyustus Staget": "Captain-Hyustus-Staget.png",
+  "Captain Hyustus Staget": "CaptainStaget.png",
   "Durnan": "Durnan.png",
-  "Mira Coppervan": "Mira_Coppervane.png",
-  "Ezrin Voss": "Ezrin_Voss.png",
+  "Mira Coppervan": "MiraCoppervane.png",
+  "Ezrin Voss": "EzrinVoss.png",
   "Brin": "Brin.png",
   "Sal": "Sal.png",
   "Patch": "Patch.png",
-  "Brahm": "Bram_Tolliver.png",
-  "Joss": "Joss_Fenrick.png",
+  "Brahm": "BramTolliver.png",
+  "Joss": "JossFenrick.png",
   "Sella": "Sella.png",
   "George Ward (absent)": "note.png",
-  "Brahm, Sella's Hammer": "Bram_Tolliver.png",
-  "Joss, Sella's Knife": "Joss_Fenrick.png"
+  "Brahm, Sella's Hammer": "BramTolliver.png",
+  "Joss, Sella's Knife": "JossFenrick.png"
 };

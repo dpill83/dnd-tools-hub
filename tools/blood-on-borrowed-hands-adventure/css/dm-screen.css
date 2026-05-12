@@ -149,7 +149,7 @@ header {
 
 .node-label {
   font-family: 'Cinzel', serif;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -162,7 +162,7 @@ header {
 .type-climax .node-label { color: var(--red-light); }
 
 .node-sub {
-  font-size: 16px;
+  font-size: 18px;
   color: #A09070;
   font-style: italic;
   line-height: 1.3;
@@ -194,7 +194,7 @@ header {
   padding: 6px 8px;
   cursor: pointer;
   transition: all 0.2s;
-  font-size: 14px;
+  font-size: 16px;
   color: #60A0A0;
   text-align: center;
   font-style: italic;

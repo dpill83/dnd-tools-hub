@@ -1,9 +1,10 @@
 var DISPLAY_STORAGE_KEY = 'bobh2-display-cmd';
 
 var displayWindow = null;
+var displayCmdSeq = 0;
 
 function pushDisplayCmd(cmd) {
-  cmd.ts = Date.now();
+  cmd.id = 'cmd-' + Date.now() + '-' + (++displayCmdSeq);
   var json = JSON.stringify(cmd);
   try {
     localStorage.setItem(DISPLAY_STORAGE_KEY, json);

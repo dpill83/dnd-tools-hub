@@ -17,8 +17,8 @@
   <div class="header-divider"></div>
   <div class="header-hint">Select a scene from the flowchart to view details</div>
   <div class="header-divider"></div>
-  <button class="npc-btn" onclick="showScene('npcs')">⚔ NPCs</button>
-  <button class="npc-btn loc-btn" onclick="showScene('locations')">🗺 Locations</button>
+  <button type="button" class="npc-btn" id="hdr-btn-npcs" onclick="showScene('npcs')">⚔ NPCs</button>
+  <button type="button" class="npc-btn loc-btn" id="hdr-btn-locations" onclick="showScene('locations')">🗺 Locations</button>
   <div class="header-divider"></div>
   <button class="ccp-popout" id="tv-btn" onclick="openDisplay()" style="white-space:nowrap;">📺 Open TV</button>
 </header>
@@ -38,8 +38,8 @@
         .fc-node rect { transition: all 0.18s; }
         .fc-node:hover rect { filter: brightness(1.3); }
         .fc-node.active rect { stroke-width: 2.5; filter: brightness(1.5); }
-        .fc-label { font-family: Cinzel, serif; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; pointer-events: none; }
-        .fc-sub { font-family: Georgia, serif; font-size: 9.5px; font-style: italic; fill: #A09070; pointer-events: none; }
+        .fc-label { font-family: Cinzel, serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; pointer-events: none; }
+        .fc-sub { font-family: Georgia, serif; font-size: 11.5px; font-style: italic; fill: #A09070; pointer-events: none; }
         .fc-line { stroke: #8B6914; stroke-width: 1.2; fill: none; stroke-opacity: 0.6; marker-end: url(#arr); }
         .fc-dash { stroke: #8B6914; stroke-width: 1; fill: none; stroke-opacity: 0.35; stroke-dasharray: 3 2; }
       </style>

@@ -155,7 +155,8 @@ const SCENES = {
         aspects: [
           "The great well in the center of the floor, rope and darkness, ignored by regulars who stopped finding it remarkable years ago.",
           "Noise of a hundred conversations, clinking tankards, a fight that almost happened in the corner an hour ago and hasn't quite settled.",
-          "Durnan behind the bar, wiping a tankard he's wiped a hundred times, watching everything without appearing to watch anything."
+          "Durnan behind the bar, wiping a tankard he's wiped a hundred times, watching everything without appearing to watch anything.",
+          "Near the hearth, Alden Cross picks at his lute for a half-listening crowd — the melody cuts through the noise. Viktor knows it before the first verse lands: the song he has to sing to call his dragon."
         ]
       },
       {
@@ -846,14 +847,6 @@ const SCENES = {
         want: "Deliver for Riker. Disappear before anyone can stop her. She cannot be told about the stone-eye jelly.",
         voice: "Composed and gracious until she isn't. Sinister smile that arrives a half-second too late, like it's practiced. Never raises her voice.",
         keyline: "I'm afraid I can't stay. But it was lovely to see you again."
-      },
-      {
-        type: "npc",
-        name: "George Ward (absent)",
-        role: "Twilight Cleric, Party Member — present only via letter",
-        want: "Protect his friends. Unravel the Radiant Watch corruption. Not get killed doing it.",
-        voice: "Measured and careful. Chooses words because he knows some walls have ears.",
-        keyline: "Walk in the light."
       }
     ]
   }
