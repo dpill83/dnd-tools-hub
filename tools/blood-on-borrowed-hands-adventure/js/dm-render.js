@@ -54,6 +54,8 @@ function showScene(id) {
       html += `<div class="section"><div class="section-title">${escHtml(s.text)}</div></div>`;
     } else if (s.type === 'body') {
       html += `<p class="body-text">${escHtml(s.content)}</p>`;
+    } else if (s.type === 'dm-note') {
+      html += `<div class="section"><div class="dm-note"><div class="dm-note-label">DM EYES ONLY</div><p class="dm-note-text">${escHtml(s.content)}</p></div></div>`;
     } else if (s.type === 'read-aloud') {
       html += `<div class="section"><div class="read-aloud"><p>${escHtml(s.text)}</p>`;
       if (s.wtyd) html += `<div class="wtyd"><span class="wtyd-label">What do you do?</span><span class="wtyd-text">${escHtml(s.wtyd)}</span></div>`;
@@ -150,10 +152,12 @@ function showScene(id) {
         </div>
       </div>`;
     } else if (s.type === 'note-image') {
+      const noteFile = s.src || 'note.png';
+      const noteImgUrl = imageSrc(noteFile);
       html += `<div class="section">
         <div class="note-image-wrap">
-          <img src="images/note.png" alt="George's Note" class="note-image">
-          <button type="button" class="note-copy-btn" onclick="displayOnTV('${escJsQ(imageSrc('note.png'))}')">▶ Display on TV</button>
+          <img src="${escHtml(noteImgUrl)}" alt="${escHtml(s.alt || noteFile)}" class="note-image">
+          <button type="button" class="note-copy-btn" onclick="displayOnTV('${escJsQ(noteImgUrl)}')">▶ Display on TV</button>
         </div>
       </div>`;
     } else if (s.type === 'clockcontrol') {

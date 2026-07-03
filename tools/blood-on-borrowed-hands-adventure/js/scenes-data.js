@@ -150,6 +150,7 @@ const SCENES = {
     title: "The Yawning Portal",
     subtitle: "Common room — Dock Ward",
     sections: [
+      { type: "scene-image", src: "scene2.png" },
       {
         type: "location",
         aspects: [
@@ -281,7 +282,6 @@ const SCENES = {
     title: "Cinderfang Warehouse",
     subtitle: "South side, Dock Ward — stake out",
     sections: [
-      { type: "scene-image", src: "CinderfangWarehouse.png" },
       {
         type: "location",
         aspects: [
@@ -335,6 +335,7 @@ const SCENES = {
     title: "The Kids Arrive",
     subtitle: "Cinderfang Warehouse — side entrance",
     sections: [
+      { type: "scene-image", src: "scene5.png" },
       {
         type: "read-aloud",
         text: "Movement in the alley to the east. Three figures, small, moving quietly along the wall. They stop at the side entrance. One of them looks up and down the street. Another crouches at the door. The third hangs back, holding something.",
@@ -481,6 +482,8 @@ const SCENES = {
     title: "Coppel & Sons",
     subtitle: "Three Daggers Alley — the back room",
     sections: [
+      { type: "scene-image", src: "scene6a.png" },
+      { type: "scene-image", src: "scene6b.png" },
       {
         type: "location",
         aspects: [
@@ -547,6 +550,7 @@ const SCENES = {
     title: "Brahm & Joss Arrive",
     subtitle: "Coppel & Sons — the door opens",
     sections: [
+      { type: "scene-image", src: "scene7.png" },
       {
         type: "read-aloud",
         text: "The door opens. Brahm fills the frame first, Joss a half-step behind. Both of them take in the room — the party, Ezrin, the device. Brahm's hand moves to his weapon.",
@@ -720,16 +724,79 @@ const SCENES = {
     subtitle: "Found on Brahm or Joss after the fight",
     sections: [
       {
-        type: "body",
-        content: "After the fight, searching Brahm or Joss turns up a folded note, sealed with plain wax. Heavy paper. The cipher is unfamiliar — most of the content appears to be a delivery confirmation: quantities, a drop location, a date. Then one line that doesn't match the tone of the rest."
+        type: "section-title",
+        text: "Closing Read-Aloud"
       },
       {
         type: "read-aloud",
-        text: "The jelly goes to the Fishbone marker. Separate from the rest. Do not mention this to S."
+        text: "The hum stops. Whatever Ezrin built, it no longer hums. The blue-green light fades to almost nothing — just a dim glow from the device, cooling. The warehouse is quiet except for the sound of your own breathing and the distant creak of the building settling. Somewhere out in the Dock Ward a bell rings. The night is not over. But this part of it is.",
+        wtyd: "What do you do?"
+      },
+      {
+        type: "section-title",
+        text: "The Coded Note"
+      },
+      {
+        type: "scene-image",
+        src: "code.png"
       },
       {
         type: "body",
-        content: "The party cannot fully decode the note this session. The cipher key will surface between adventures. For now it's a thread they can't pull yet."
+        content: "Found on Brahm or Joss after the fight. Folded twice, sealed with plain wax. The wax seal has a faint impression — a sunburst eye. The Radiant Watch seal. The same mark from the envelope on Riker's coat."
+      },
+      {
+        type: "dm-note",
+        content: "Plaintext if decoded: SHIPMENT SEVEN CONFIRMED / SULPHUR SALTS TWO CRATES / VITRIOL SIX VIALS / DRAGONTHORN FOUR BUNDLES / DROP POINT ANCHOR LANE BEFORE FOURTH BELL / STONE EYE JELLY GOES TO FISHBONE MARKER / SEPARATE FROM REST / DO NOT MENTION TO S / BURN THIS"
+      },
+      {
+        type: "skilltable",
+        rows: [
+          {
+            skill: "Investigation",
+            dc: "12",
+            result: "The seal is plain wax, pressed with something small and precise. Not a thumb. A signet."
+          },
+          {
+            skill: "Investigation",
+            dc: "15",
+            result: "The impression in the wax is a sunburst eye. Whoever sealed this note used a signet ring or stamp — this wasn't improvised."
+          },
+          {
+            skill: "History / Religion",
+            dc: "14",
+            result: "The sunburst eye is the symbol of the Radiant Watch. An order within the Church of Lathander. Viktor knows this symbol. George Ward wears it."
+          },
+          {
+            skill: "Arcana",
+            dc: "13",
+            result: "The cipher uses a structured substitution pattern — not random. Someone trained in codes wrote this. It's solvable with the right key."
+          }
+        ]
+      },
+      {
+        type: "section-title",
+        text: "Ezrin — What Now?"
+      },
+      {
+        type: "body",
+        content: "This question will come up. Have an answer ready for each path."
+      },
+      {
+        type: "ifthen",
+        items: [
+          { condition: "They turn him over to Staget", result: "Staget takes custody, professional and careful. He's not cruel — Ezrin will be questioned, not punished. Staget tells the party quietly that he'll see the boy is looked after. This is probably the safest outcome for Ezrin." },
+          { condition: "They take him with them", result: "Ezrin follows without resistance. He has nowhere else to go. He doesn't speak much on the walk. He keeps looking at his hands. This opens a significant ongoing thread — a thirteen-year-old genius in the party's care who just found out he built a weapon." },
+          { condition: "They leave him at Coppel and Sons", result: "He sits down on the floor next to the device and doesn't argue. If pressed he says he'll be fine. He won't be fine. This will come back." },
+          { condition: "They try to find him a real family or the orphanage", result: "Crestfall Orphanage is where he came from. He knows the matron. It's not much but it's something. DC 13 Persuasion to convince him to go back — he's ashamed. On a success he goes. On a failure he disappears into the Dock Ward before dawn." }
+        ]
+      },
+      {
+        type: "section-title",
+        text: "Magic Items"
+      },
+      {
+        type: "body",
+        content: "This is a reward moment — treat it like one. Take a breath, let the fight settle, then bring out the loot pack app. One pack per player. If someone did something particularly memorable this session — protected Ezrin, landed the killing blow, made a choice that cost them something — give them a second pull."
       },
       {
         type: "section-title",
@@ -738,11 +805,11 @@ const SCENES = {
       {
         type: "clues",
         items: [
-          "Staget owes them. Future Watch interactions go more smoothly.",
-          "Ezrin is safe, for now. What happens to him is an open question.",
+          "Staget owes them. Future Watch interactions go more smoothly — he'll remember this favor.",
+          "Ezrin is safe, for now. What happens to him is an open question the party gets to answer.",
           "Sella escaped again. The party knows her face. Next time won't be a surprise.",
           "The coded note: the Fishbone marker, Javowitz, and something Sella was never supposed to know about.",
-          "Magic item packs — distribute via the app after the session."
+          "The lab is still out there. Whatever Riker was building, the components were going somewhere."
         ]
       },
       {
@@ -754,10 +821,18 @@ const SCENES = {
         items: [
           "Riker is still out there. The lab where components were being assembled is still operating.",
           "Sella escaped. She now knows the party is actively hunting Riker's operation.",
-          "The Fishbone marker and Javowitz — a dead warlock's bargain still being honored.",
-          "Ezrin Voss. What happens to a thirteen-year-old genius who just built a bomb by accident?",
-          "The Radiant Watch seal. George's subplot continues in the background."
+          "The Fishbone marker and Javowitz — a dead warlock's bargain still being honored by people who are afraid of what happens if they stop.",
+          "Ezrin Voss. What happens to a thirteen-year-old genius who just built a bomb by accident and found out the person he trusted most used him?",
+          "The Radiant Watch seal. George's subplot continues in the background — he said two weeks. That clock is running."
         ]
+      },
+      {
+        type: "section-title",
+        text: "DM: Before Next Session"
+      },
+      {
+        type: "body",
+        content: "Three things to decide before you prep again. First: what did Ezrin build exactly, and where were the finished components going? The lab location is your next adventure's anchor. Second: the cipher key — where does the party find it and what does the full note say? Third: George said two weeks. When he shows up, what has he learned about the Radiant Watch corruption and who does he trust enough to tell?"
       }
     ]
   }

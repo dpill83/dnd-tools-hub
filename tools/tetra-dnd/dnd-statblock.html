@@ -33,6 +33,7 @@
                 <div class="toolbar-row toolbar-actions">
                     <button type="button" class="toolbar-btn-icon" onclick="TrySaveFile()" title="Save current statblock" aria-label="Save"><i class="bi bi-floppy"></i></button>
                     <button type="button" class="toolbar-btn-icon" onclick="document.getElementById('file-upload').click()" title="Load saved statblock" aria-label="Load"><i class="bi bi-upload"></i></button>
+                    <button type="button" class="toolbar-btn-icon" onclick="OpenPasteJsonModal()" title="Paste JSON to load" aria-label="Paste JSON"><i class="bi bi-clipboard"></i></button>
                     <button type="button" class="toolbar-btn-icon" onclick="TryPrint()" title="Print" aria-label="Print"><i class="bi bi-printer"></i></button>
                     <button type="button" class="toolbar-btn-icon" onclick="TryImage()" title="Export as PNG" aria-label="PNG"><i class="bi bi-image"></i></button>
                     <button type="button" class="toolbar-btn-icon" onclick="TryMarkdown()" title="View Markdown" aria-label="Markdown"><i class="bi bi-filetype-md"></i></button>
@@ -676,6 +677,27 @@
         </div>
     </div>
 
+    <!-- Paste JSON to load .monster file -->
+    <div class="modal fade" id="paste-json-modal" tabindex="-1" aria-labelledby="paste-json-title" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paste-json-title">Paste JSON to load .monster file</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-2">Paste a .monster JSON block below and click Load.</p>
+                    <textarea id="paste-json-input" class="form-control font-monospace small" rows="18" style="font-size: 0.8rem;" aria-label="Monster JSON"></textarea>
+                    <div id="paste-json-error" class="text-danger small mt-2" role="alert" style="display: none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="TryLoadFromPaste()">Load</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- AI instructions: image/markdown to .monster file -->
     <div class="modal fade" id="ai-monster-instructions-modal" tabindex="-1" aria-labelledby="ai-monster-instructions-title" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -702,7 +724,7 @@
         })();
         // Sync aria-hidden with modal visibility so focused modal content is not hidden from assistive tech
         (function () {
-            var $modals = $("#ai-monster-instructions-modal, #manage-presets-modal");
+            var $modals = $("#paste-json-modal, #ai-monster-instructions-modal, #manage-presets-modal");
             $modals.on("show.bs.modal", function () { this.setAttribute("aria-hidden", "false"); });
             $modals.on("hidden.bs.modal", function () { this.setAttribute("aria-hidden", "true"); });
         })();

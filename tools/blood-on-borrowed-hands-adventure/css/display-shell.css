@@ -7,10 +7,6 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #060610; f
   inset: 0;
   z-index: 200;
   background: rgba(4,4,8,0.96);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s ease;
@@ -20,15 +16,20 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #060610; f
   pointer-events: all;
 }
 .shell-image-overlay img {
-  max-width: 90vw;
-  max-height: 85vh;
-  object-fit: contain;
-  border-radius: 6px;
-  box-shadow: 0 0 60px rgba(0,0,0,0.8);
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+  box-shadow: none;
 }
 .shell-image-dismiss {
   position: absolute;
   bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
   font-family: Cinzel, serif;
   font-size: 11px;
   letter-spacing: 0.3em;
@@ -43,9 +44,13 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #060610; f
   inset: 0;
   z-index: 50;
   background: #060610;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+}
+#idle-layer > img,
+#title-card > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 #idle-layer.hidden { display: none; }
 #stakeout-host {

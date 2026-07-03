@@ -90,6 +90,34 @@ var TryLoadFile = () => {
     SavedData.RetrieveFromFile();
 }
 
+var OpenPasteJsonModal = () => {
+    let errorEl = document.getElementById("paste-json-error");
+    if (errorEl) {
+        errorEl.textContent = "";
+        errorEl.style.display = "none";
+    }
+    $("#paste-json-modal").modal("show");
+}
+
+var TryLoadFromPaste = () => {
+    let textarea = document.getElementById("paste-json-input");
+    let errorEl = document.getElementById("paste-json-error");
+    if (!textarea) return;
+    try {
+        SavedData.LoadFromText(textarea.value);
+        if (errorEl) {
+            errorEl.textContent = "";
+            errorEl.style.display = "none";
+        }
+        $("#paste-json-modal").modal("hide");
+    } catch (e) {
+        if (errorEl) {
+            errorEl.textContent = e.message || "Invalid JSON.";
+            errorEl.style.display = "";
+        }
+    }
+}
+
 // Print function
 function TryPrint() {
     let printWindow = window.open();
@@ -142,18 +170,28 @@ var SavedData = {
             mon = JSON.parse(savedData);
     },
 
+    LoadFromText: function (text) {
+        let parsed;
+        try {
+            parsed = JSON.parse(text);
+        } catch (e) {
+            throw new Error("Invalid JSON: " + (e.message || "could not parse"));
+        }
+        loadedFromFile = true;
+        mon = parsed;
+        if (mon.cr != null && mon.cr !== "*" && typeof data !== "undefined" && data.crs && data.crs[mon.cr] == null) {
+            mon.cr = CrFunctions.getCrKey();
+        }
+        Populate();
+        updateAddButtonVisibility();
+    },
+
     RetrieveFromFile: function () {
         let file = $("#file-upload").prop("files")[0],
             reader = new FileReader();
 
         reader.onload = function (e) {
-            loadedFromFile = true;
-            mon = JSON.parse(reader.result);
-            if (mon.cr != null && mon.cr !== "*" && typeof data !== "undefined" && data.crs && data.crs[mon.cr] == null) {
-                mon.cr = CrFunctions.getCrKey();
-            }
-            Populate();
-            updateAddButtonVisibility();
+            SavedData.LoadFromText(reader.result);
         };
 
         reader.readAsText(file);

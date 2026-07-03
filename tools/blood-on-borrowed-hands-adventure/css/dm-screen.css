@@ -316,6 +316,34 @@ header {
   line-height: 1.7;
 }
 
+/* DM-only private context */
+.dm-note {
+  background: rgba(8, 6, 4, 0.85);
+  border: 1px solid rgba(196, 154, 42, 0.45);
+  border-left: 3px solid var(--gold-dim);
+  border-radius: 4px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+
+.dm-note-label {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(196, 154, 42, 0.75);
+  margin-bottom: 8px;
+}
+
+.dm-note-text {
+  font-size: 14px;
+  font-style: italic;
+  color: rgba(240, 232, 206, 0.72);
+  line-height: 1.65;
+  margin: 0;
+}
+
 .wtyd {
   margin-top: 10px;
   padding-top: 10px;
