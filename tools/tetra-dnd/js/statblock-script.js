@@ -170,6 +170,17 @@ var SavedData = {
             mon = JSON.parse(savedData);
     },
 
+    NormalizeArmor: function () {
+        let name = mon.armorName;
+        let known = typeof data !== "undefined" && data.armors && Object.prototype.hasOwnProperty.call(data.armors, name);
+        if (name === "other")
+            return;
+        if (!name || !known) {
+            let desc = mon.otherArmorDesc != null ? String(mon.otherArmorDesc).trim() : "";
+            mon.armorName = (desc && desc !== "10 (armor)") ? "other" : "none";
+        }
+    },
+
     LoadFromText: function (text) {
         let parsed;
         try {
@@ -182,6 +193,7 @@ var SavedData = {
         if (mon.cr != null && mon.cr !== "*" && typeof data !== "undefined" && data.crs && data.crs[mon.cr] == null) {
             mon.cr = CrFunctions.getCrKey();
         }
+        SavedData.NormalizeArmor();
         Populate();
         updateAddButtonVisibility();
     },
@@ -318,6 +330,10 @@ function UpdateStatblock(moveSeparationPoint) {
 
     // Show or hide the separator input depending on how many columns there are
     FormFunctions.ShowHideSeparatorInput();
+
+    if (typeof DiceRoller !== "undefined") {
+        DiceRoller.decorate(document.getElementById("stat-block"));
+    }
 }
 
 // Function used by UpdateStatblock for abilities
@@ -1817,6 +1833,8 @@ var StringFunctions = {
 
     // Add a shield to the string if the monster has one
     GetArmorString: function (name, ac) {
+        if (!name)
+            return mon.shieldBonus > 0 ? ac + " (shield)" : String(ac);
         if (mon.shieldBonus > 0)
             return ac + " (" + name + ", shield)";
         return ac + " (" + name + ")"
