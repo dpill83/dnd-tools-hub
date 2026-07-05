@@ -152,11 +152,12 @@ var DiceRoller = {
             if (match.index > lastIndex) {
                 parts.push({ type: "text", value: text.slice(lastIndex, match.index) });
             }
-            var handled = matchHandler(match, parts);
+            var handled = matchHandler.call(this, match, parts);
             if (!handled) {
                 parts.push({ type: "text", value: match[0] });
             }
-            lastIndex = regex.lastIndex;
+            lastIndex = regex.global ? regex.lastIndex : match.index + match[0].length;
+            if (!regex.global) break;
         }
 
         if (parts.length === 0) return false;
