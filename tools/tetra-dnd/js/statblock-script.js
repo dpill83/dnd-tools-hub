@@ -1,4 +1,5 @@
 var data;
+var PAGE_TITLE_SUFFIX = " - D&D 5e Statblock Generator";
 
 var mon = {
     name: "Monster",
@@ -242,6 +243,7 @@ function UpdateStatblock(moveSeparationPoint) {
 
     // Name and type
     $("#monster-name").html(StringFunctions.RemoveHtmlTags(mon.name));
+    document.title = StringFunctions.RemoveHtmlTags(mon.name) + PAGE_TITLE_SUFFIX;
     $("#monster-type").html(StringFunctions.StringCapitalize(StringFunctions.RemoveHtmlTags(mon.size) + " " + mon.type +
         (mon.tag == "" ? ", " : " (" + mon.tag + "), ") + mon.alignment));
 
