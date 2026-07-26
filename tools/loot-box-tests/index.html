@@ -117,6 +117,7 @@
 <a href="dm" id="dm-link" title="DM Dashboard" aria-label="DM Dashboard">DM ↗</a>
 
 <script src="assets/js/loot-constants.js"></script>
+<script src="assets/js/loot-gsb-import.js"></script>
 <script src="assets/js/loot-display.js"></script>
 <script src="assets/js/loot-audio.js"></script>
 <script src="assets/js/loot-animation.js"></script>
@@ -219,7 +220,10 @@
     cardModal.style.borderColor = rm.color;
     cardModal.style.boxShadow = `0 0 30px ${rm.glow}, 0 0 60px rgba(0,0,0,0.4)`;
 
-    const desc = (item.properties || item.description || '').replace(/</g, '&lt;').replace(/\n/g, '<br>');
+    const descSrc = (window.LootGsbImport && window.LootGsbImport.itemBodyText)
+      ? window.LootGsbImport.itemBodyText(item)
+      : (item.properties || item.description || '');
+    const desc = String(descSrc || '').replace(/</g, '&lt;').replace(/\n/g, '<br>');
     const descBlock = desc
       ? `<div class="card-modal-desc-divider"></div><div class="card-modal-desc">${desc}</div>`
       : '';

@@ -39,7 +39,10 @@
     cardFrontElement.style.backgroundImage = frameUrl ? frameUrl + ', linear-gradient(160deg, #1c1200 0%, #0d0900 100%)' : '';
     cardFrontElement.style.borderColor = rm.color;
     cardFrontElement.style.boxShadow = '0 0 40px ' + rm.glow + ', 0 0 100px ' + rm.glow.replace('0.8', '0.3') + ', inset 0 0 40px ' + rm.glow.replace('0.8', '0.08');
-    var desc = item.properties || item.description || '';
+    var descFn = window.LootGsbImport && window.LootGsbImport.itemBodyText;
+    var desc = descFn ? descFn(item) : (item.properties || item.description || '');
+    if (Array.isArray(desc)) desc = desc.join('\n');
+    desc = String(desc || '');
     var truncDesc = desc.length > 140 ? desc.slice(0, 137) + '…' : desc;
     var descBlock = truncDesc
       ? '<div class="card-desc-divider"></div><div class="card-item-desc">' + truncDesc.replace(/\n/g, '<br>') + '</div>'

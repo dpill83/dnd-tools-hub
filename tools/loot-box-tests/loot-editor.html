@@ -327,6 +327,8 @@ th.sort-desc::after { content: '▼'; }
       <input type="search" id="q" placeholder="Filter by name…" autocomplete="off">
     </div>
     <button type="button" id="btn-add">Add row</button>
+    <button type="button" id="btn-import">Import JSON</button>
+    <input type="file" id="import-file" accept="application/json,.json" class="hidden" aria-hidden="true">
     <button type="button" id="btn-save" class="primary">Save to R2</button>
   </div>
   <p id="status" class="status" aria-live="polite"></p>
@@ -343,7 +345,7 @@ th.sort-desc::after { content: '▼'; }
           <th data-sort="description" scope="col">Description</th>
           <th class="narrow" data-sort="weight" scope="col">Weight</th>
           <th data-sort="properties" scope="col">Properties</th>
-          <th data-sort="requirement" scope="col">Requirement</th>
+          <th data-sort="requirements" scope="col">Requirements</th>
           <th data-sort="author" scope="col">Author</th>
           <th class="actions" scope="col"> </th>
         </tr>
@@ -416,8 +418,8 @@ th.sort-desc::after { content: '▼'; }
               <textarea id="add-properties" rows="4" placeholder="Optional"></textarea>
             </div>
             <div class="modal-field">
-              <label for="add-requirement">Requirement</label>
-              <input type="text" id="add-requirement" autocomplete="off" placeholder="Optional">
+              <label for="add-requirements">Requirements</label>
+              <input type="text" id="add-requirements" autocomplete="off" placeholder="Optional">
             </div>
             <div class="modal-field">
               <label for="add-author">Author</label>
@@ -434,6 +436,7 @@ th.sort-desc::after { content: '▼'; }
   </div>
 </div>
 
+<script src="assets/js/loot-gsb-import.js"></script>
 <script>
 (function () {
   'use strict';
@@ -443,6 +446,7 @@ th.sort-desc::after { content: '▼'; }
   var CATEGORIES = [
     'Adventuring Gear', 'Armor', 'Book', 'Potion', 'Quest Hook', 'Ring', 'Treasure', 'Weapon', 'Wondrous Item'
   ];
+  var Imp = window.LootGsbImport;
 
   /** Full document from GET (items + optional by_tier, meta). */
   var doc = { items: [] };
@@ -578,11 +582,23 @@ th.sort-desc::after { content: '▼'; }
       case 'category':
       case 'description':
       case 'properties':
-      case 'requirement':
+      case 'requirements':
       case 'author':
       case 'icon':
-        av = String(a[key] || '').toLowerCase();
-        bv = String(b[key] || '').toLowerCase();
+        av = String(
+          key === 'properties' && Imp
+            ? Imp.formatPropertiesForEditor(a.properties)
+            : key === 'requirements'
+              ? a.requirements || ''
+              : a[key] || ''
+        ).toLowerCase();
+        bv = String(
+          key === 'properties' && Imp
+            ? Imp.formatPropertiesForEditor(b.properties)
+            : key === 'requirements'
+              ? b.requirements || ''
+              : b[key] || ''
+        ).toLowerCase();
         return av < bv ? -1 : av > bv ? 1 : 0;
       default:
         return 0;
@@ -649,6 +665,20 @@ th.sort-desc::after { content: '▼'; }
     return max + 1;
   }
 
+  function propsDisplay(properties) {
+    return Imp ? Imp.formatPropertiesForEditor(properties) : String(properties || '');
+  }
+
+  /** Keep array properties as arrays when edited; plain text stays a string. */
+  function parsePropertiesInput(text, previous) {
+    var t = text == null ? '' : String(text);
+    if (Array.isArray(previous)) {
+      var lines = t.split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+      return lines.length ? lines : undefined;
+    }
+    return t;
+  }
+
   function setStatus(msg, kind) {
     var el = $('status');
     el.textContent = msg || '';
@@ -690,8 +720,8 @@ th.sort-desc::after { content: '▼'; }
         '<td class="narrow"><input type="number" data-f="value" step="any" value="' + (it.value != null ? it.value : 0) + '"></td>' +
         '<td><input type="text" data-f="description" value="' + String(it.description || '').replace(/"/g, '&quot;') + '"></td>' +
         '<td class="narrow"><input type="number" data-f="weight" step="any" value="' + (it.weight != null && it.weight !== '' ? it.weight : '') + '"></td>' +
-        '<td><input type="text" data-f="properties" value="' + String(it.properties || '').replace(/"/g, '&quot;') + '"></td>' +
-        '<td><input type="text" data-f="requirement" value="' + String(it.requirement || '').replace(/"/g, '&quot;') + '"></td>' +
+        '<td><input type="text" data-f="properties" value="' + propsDisplay(it.properties).replace(/"/g, '&quot;').replace(/\n/g, ' · ') + '"></td>' +
+        '<td><input type="text" data-f="requirements" value="' + String(it.requirements || '').replace(/"/g, '&quot;') + '"></td>' +
         '<td><input type="text" data-f="author" value="' + String(it.author || '').replace(/"/g, '&quot;') + '"></td>' +
         '<td class="actions"><button type="button" class="btn-del" data-del-id="' + rid + '">Delete</button></td>' +
         '</tr>'
@@ -715,15 +745,23 @@ th.sort-desc::after { content: '▼'; }
             if (inp.value !== '' && Number.isNaN(w)) return;
             if (w === null) delete row.weight;
             else row.weight = w;
-          } else if (f === 'properties') row.properties = inp.value;
-          else if (f === 'requirement') row.requirement = inp.value;
-          else if (f === 'author') row.author = inp.value;
+          } else if (f === 'properties') {
+            var parsed = parsePropertiesInput(inp.value.replace(/ · /g, '\n'), row.properties);
+            if (parsed === undefined || parsed === '') delete row.properties;
+            else row.properties = parsed;
+            delete row.requirement;
+          } else if (f === 'requirements') {
+            var rq = (inp.value || '').trim();
+            if (rq) row.requirements = rq;
+            else delete row.requirements;
+            delete row.requirement;
+          } else if (f === 'author') row.author = inp.value;
           else if (f === 'icon') {
             if (!inp.value.trim()) delete row.icon;
             else row.icon = inp.value;
           }
         }
-        if (f === 'name' || f === 'value' || f === 'description' || f === 'properties' || f === 'requirement' || f === 'author' || f === 'weight' || f === 'icon') inp.addEventListener('input', sync);
+        if (f === 'name' || f === 'value' || f === 'description' || f === 'properties' || f === 'requirements' || f === 'author' || f === 'weight' || f === 'icon') inp.addEventListener('input', sync);
         inp.addEventListener('change', sync);
       });
       var delBtn = tr.querySelector('[data-del-id]');
@@ -786,7 +824,7 @@ th.sort-desc::after { content: '▼'; }
     $('add-weight').value = '';
     $('add-description').value = '';
     $('add-properties').value = '';
-    $('add-requirement').value = '';
+    $('add-requirements').value = '';
     $('add-author').value = '';
     updateAddModalPreview();
     $('add-modal-dim').classList.remove('hidden');
@@ -811,8 +849,8 @@ th.sort-desc::after { content: '▼'; }
     $('add-value').value = it.value != null ? String(it.value) : '0';
     $('add-weight').value = it.weight != null && it.weight !== '' ? String(it.weight) : '';
     $('add-description').value = it.description || '';
-    $('add-properties').value = it.properties || '';
-    $('add-requirement').value = it.requirement || '';
+    $('add-properties').value = propsDisplay(it.properties);
+    $('add-requirements').value = it.requirements || '';
     $('add-author').value = it.author || '';
     updateAddModalPreview();
     $('add-modal-dim').classList.remove('hidden');
@@ -825,6 +863,52 @@ th.sort-desc::after { content: '▼'; }
 
   $('btn-add').addEventListener('click', function () {
     openAddModal();
+  });
+
+  $('btn-import').addEventListener('click', function () {
+    $('import-file').click();
+  });
+
+  $('import-file').addEventListener('change', function () {
+    var file = this.files && this.files[0];
+    this.value = '';
+    if (!file) return;
+    if (!Imp || typeof Imp.mergeImportIntoDoc !== 'function') {
+      setStatus('Import module failed to load', 'err');
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function () {
+      var text = reader.result;
+      var payload;
+      try {
+        payload = JSON.parse(text);
+      } catch (err) {
+        setStatus('Import failed: invalid JSON', 'err');
+        return;
+      }
+      var result = Imp.mergeImportIntoDoc(doc, payload);
+      if (!result.ok) {
+        var detail = (result.errors && result.errors.length)
+          ? result.errors.slice(0, 5).join('; ')
+          : result.error;
+        setStatus('Import failed: ' + detail, 'err');
+        return;
+      }
+      var msg =
+        'Added: ' + result.added +
+        '. Skipped duplicates: ' + result.skipped + '.';
+      if (result.errors && result.errors.length) {
+        msg += ' (' + result.errors.length + ' row warning(s))';
+      }
+      setStatus(msg, 'ok');
+      pageIndex = Number.MAX_SAFE_INTEGER;
+      render();
+    };
+    reader.onerror = function () {
+      setStatus('Import failed: could not read file', 'err');
+    };
+    reader.readAsText(file);
   });
 
   $('add-modal-cancel').addEventListener('click', function () {
@@ -873,8 +957,8 @@ th.sort-desc::after { content: '▼'; }
     var category = $('add-category').value;
     var value = Number($('add-value').value) || 0;
     var description = $('add-description').value || '';
-    var properties = $('add-properties').value || '';
-    var requirement = $('add-requirement').value || '';
+    var propertiesRaw = $('add-properties').value || '';
+    var requirements = ($('add-requirements').value || '').trim();
     var author = $('add-author').value || '';
     var wv = String($('add-weight').value || '').trim();
     var ic = ($('add-icon').value || '').trim();
@@ -890,8 +974,12 @@ th.sort-desc::after { content: '▼'; }
       row.category = category;
       row.value = value;
       row.description = description;
-      row.properties = properties;
-      row.requirement = requirement;
+      var propsParsed = parsePropertiesInput(propertiesRaw, row.properties);
+      if (propsParsed === undefined || propsParsed === '') delete row.properties;
+      else row.properties = propsParsed;
+      if (requirements) row.requirements = requirements;
+      else delete row.requirements;
+      delete row.requirement;
       row.author = author;
       if (wv !== '') {
         var nw = Number(wv);
@@ -913,11 +1001,11 @@ th.sort-desc::after { content: '▼'; }
       category: category,
       value: value,
       description: description,
-      properties: properties,
-      requirement: requirement,
       author: author,
       tier: 1
     };
+    if (propertiesRaw.trim()) item.properties = propertiesRaw;
+    if (requirements) item.requirements = requirements;
     if (wv !== '') {
       var nw2 = Number(wv);
       if (!Number.isNaN(nw2)) item.weight = nw2;

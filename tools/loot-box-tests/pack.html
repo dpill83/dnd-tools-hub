@@ -500,6 +500,7 @@
 <a href="dm" id="dm-link" title="DM Dashboard">DM ↗</a>
 
 <script src="assets/js/loot-constants.js"></script>
+<script src="assets/js/loot-gsb-import.js"></script>
 <script src="assets/js/loot-display.js"></script>
 <script src="assets/js/loot-audio.js"></script>
 <script src="assets/js/loot-animation.js"></script>
@@ -564,7 +565,9 @@
       '- ' + (item.name || '(unnamed)') + ' — ' + (item.rarity || '') + (cat ? ' — ' + cat : '') + idPart,
       '  Value: ' + itemValueStr(item)
     ];
-    var desc = (item.properties || item.description || '');
+    var desc = (window.LootGsbImport && window.LootGsbImport.itemBodyText)
+      ? window.LootGsbImport.itemBodyText(item)
+      : (item.properties || item.description || '');
     if (desc) lines.push('  ' + normalizeForClipboard(desc));
     if (item.requirements) lines.push('  Requirements: ' + normalizeForClipboard(item.requirements));
     if (item.author != null && String(item.author).trim()) lines.push('  Author: ' + normalizeForClipboard(item.author));
@@ -812,7 +815,10 @@
     cardModal.style.borderColor = rm.color;
     cardModal.style.boxShadow = `0 0 30px ${rm.glow}, 0 0 60px rgba(0,0,0,0.4)`;
 
-    const desc = (item.properties || item.description || '').replace(/</g, '&lt;').replace(/\n/g, '<br>');
+    const descSrc = (window.LootGsbImport && window.LootGsbImport.itemBodyText)
+      ? window.LootGsbImport.itemBodyText(item)
+      : (item.properties || item.description || '');
+    const desc = String(descSrc || '').replace(/</g, '&lt;').replace(/\n/g, '<br>');
     const descBlock = desc
       ? `<div class="card-modal-desc-divider"></div><div class="card-modal-desc">${desc}</div>`
       : '';
@@ -895,7 +901,9 @@
     var rarityStyle = rm && rarityRaw ? ' style="color:' + rm.color + '"' : '';
     var rarityHtml = rarityRaw ? escapeHtml(rarityRaw) : noData(null);
 
-    var rawDesc = item.properties || item.description || '';
+    var rawDesc = (window.LootGsbImport && window.LootGsbImport.itemBodyText)
+      ? window.LootGsbImport.itemBodyText(item)
+      : (item.properties || item.description || '');
     var descStr = rawDesc != null ? String(rawDesc) : '';
     var descTrim = descStr.trim();
     var descBody = descTrim
