@@ -1051,6 +1051,11 @@ th.sort-desc::after { content: '▼'; }
     var btn = this;
     btn.disabled = true;
     setStatus('Saving…', '');
+    var repaired = 0;
+    if (Imp && typeof Imp.repairMissingValues === 'function') {
+      var stats = Imp.repairMissingValues(doc);
+      repaired = stats && stats.repaired ? stats.repaired : 0;
+    }
     fetch(API, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -1063,7 +1068,12 @@ th.sort-desc::after { content: '▼'; }
           setStatus('Save failed: ' + err, 'err');
           return;
         }
-        setStatus('Saved (' + (x.body.itemCount != null ? x.body.itemCount + ' items' : 'ok') + ').', 'ok');
+        var countPart = x.body.itemCount != null ? x.body.itemCount + ' items' : 'ok';
+        var msg = 'Saved (' + countPart + ').';
+        if (repaired > 0) {
+          msg += ' Repaired ' + repaired + ' legacy missing values to 0 gp.';
+        }
+        setStatus(msg, 'ok');
       })
       .catch(function () {
         setStatus('Save failed: network error', 'err');

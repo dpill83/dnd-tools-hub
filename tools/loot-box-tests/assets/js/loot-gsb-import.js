@@ -386,6 +386,56 @@
     return String(properties);
   }
 
+  /**
+   * Set value to 0 only when missing, null, or blank string.
+   * Leaves nonblank invalid values alone for the API validator to reject.
+   * @returns {{ repaired: number, missing: number, nullish: number, blank: number, skippedInvalid: number }}
+   */
+  function repairMissingValues(doc) {
+    var stats = {
+      repaired: 0,
+      missing: 0,
+      nullish: 0,
+      blank: 0,
+      skippedInvalid: 0,
+    };
+    var items = Array.isArray(doc && doc.items) ? doc.items : [];
+
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      if (!item || typeof item !== 'object') continue;
+
+      var hasValue = Object.prototype.hasOwnProperty.call(item, 'value');
+      if (!hasValue) {
+        item.value = 0;
+        stats.missing++;
+        stats.repaired++;
+        continue;
+      }
+
+      if (item.value === null || item.value === undefined) {
+        item.value = 0;
+        stats.nullish++;
+        stats.repaired++;
+        continue;
+      }
+
+      if (typeof item.value === 'string' && item.value.trim() === '') {
+        item.value = 0;
+        stats.blank++;
+        stats.repaired++;
+        continue;
+      }
+
+      // Nonblank but still invalid for the validator (boolean, NaN, object, etc.)
+      if (typeof item.value === 'boolean' || Number.isNaN(Number(item.value))) {
+        stats.skippedInvalid++;
+      }
+    }
+
+    return stats;
+  }
+
   var api = {
     ALLOWED_RARITIES: ALLOWED_RARITIES,
     RARITY_TO_TIER: RARITY_TO_TIER,
@@ -398,6 +448,7 @@
     maxItemId: maxItemId,
     rebuildMeta: rebuildMeta,
     mergeImportIntoDoc: mergeImportIntoDoc,
+    repairMissingValues: repairMissingValues,
     itemBodyText: itemBodyText,
     formatPropertiesForEditor: formatPropertiesForEditor,
   };

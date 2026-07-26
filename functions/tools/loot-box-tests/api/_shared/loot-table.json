@@ -81,7 +81,8 @@
       "tier": 1,
       "weight": "1 lb",
       "category": "Adventuring Gear",
-      "author": "Uberbeard"
+      "author": "Uberbeard",
+      "value": 0
     },
     {
       "id": 7,
@@ -114,7 +115,8 @@
       "description": "Exploding gold coins (Looks legit. Should avoid contact with real gold coins for safety...)",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Adventuring Gear"
+      "category": "Adventuring Gear",
+      "value": 0
     },
     {
       "id": 10,
@@ -135,7 +137,8 @@
       "tier": 1,
       "weight": "n/a",
       "category": "Adventuring Gear",
-      "author": "Uberbeard"
+      "author": "Uberbeard",
+      "value": 0
     },
     {
       "id": 12,
@@ -168,7 +171,8 @@
       "tier": 0,
       "weight": "n/a",
       "category": "Adventuring Gear",
-      "author": "PHB"
+      "author": "PHB",
+      "value": 0
     },
     {
       "id": 15,
@@ -263,7 +267,8 @@
       "rarity": "Common",
       "tier": 1,
       "weight": "1/2 lb",
-      "category": "Adventuring Gear"
+      "category": "Adventuring Gear",
+      "value": 0
     },
     {
       "id": 23,
@@ -271,7 +276,8 @@
       "description": "Key chain with multiple types of ‘skeleton keys’",
       "rarity": "Common",
       "tier": 1,
-      "category": "Adventuring Gear"
+      "category": "Adventuring Gear",
+      "value": 0
     },
     {
       "id": 24,
@@ -291,7 +297,8 @@
       "description": "Smugglers boots – great for hiding a concealed backup dagger or wand",
       "rarity": "Common",
       "tier": 1,
-      "category": "Adventuring Gear"
+      "category": "Adventuring Gear",
+      "value": 0
     },
     {
       "id": 26,
@@ -300,7 +307,8 @@
       "rarity": "Common",
       "tier": 1,
       "weight": "5 lb",
-      "category": "Adventuring Gear"
+      "category": "Adventuring Gear",
+      "value": 0
     },
     {
       "id": 27,
@@ -357,7 +365,8 @@
       "description": "Wand Chamber – fashioned to look like a scroll case, it contains 1d12 slots to hold wands – think of it as a circular bandolier for your everyday wizard",
       "rarity": "Common",
       "tier": 1,
-      "category": "Adventuring Gear"
+      "category": "Adventuring Gear",
+      "value": 0
     },
     {
       "id": 32,
@@ -527,7 +536,8 @@
       "category": "Armor",
       "properties": "Plate Armor",
       "requirements": "Requires Attunement",
-      "author": "DMG"
+      "author": "DMG",
+      "value": 0
     },
     {
       "id": 45,
@@ -563,7 +573,8 @@
       "tier": 5,
       "weight": "40 - 60",
       "category": "Armor",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 48,
@@ -573,7 +584,8 @@
       "tier": 5,
       "weight": "40 - 60",
       "category": "Armor",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 49,
@@ -583,7 +595,8 @@
       "tier": 5,
       "weight": "40 - 60",
       "category": "Armor",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 50,
@@ -620,7 +633,8 @@
       "tier": 3,
       "weight": "6 lb",
       "category": "Armor",
-      "properties": "For one round, all allies gain +1 AC."
+      "properties": "For one round, all allies gain +1 AC.",
+      "value": 0
     },
     {
       "id": 53,
@@ -720,7 +734,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "weight": "60 lb",
-      "category": "Armor"
+      "category": "Armor",
+      "value": 0
     },
     {
       "id": 61,
@@ -728,7 +743,8 @@
       "description": "A large copper shield, embossed with a copper dragon’s head. “Elvalynte” is inscribed on the interior in a flowing script. (34gp)",
       "rarity": "Common",
       "tier": 1,
-      "category": "Armor"
+      "category": "Armor",
+      "value": 0
     },
     {
       "id": 62,
@@ -739,7 +755,8 @@
       "weight": "80 lb",
       "category": "Armor",
       "properties": "Heavy Armor | AC 20 | Str 20 | Stealth: Disadvantage",
-      "author": "u/giratina2648"
+      "author": "u/giratina2648",
+      "value": 0
     },
     {
       "id": 63,
@@ -747,7 +764,8 @@
       "description": "Utility belt of flasks",
       "rarity": "Common",
       "tier": 1,
-      "category": "Armor"
+      "category": "Armor",
+      "value": 0
     },
     {
       "id": 64,
@@ -768,7 +786,8 @@
       "description": "The curse of the gauntlets was that no magic would ever help you, beneficial or baneful and anything you were in contact with would lose its magical properties while you're touching it. found out the contact one when visiting flying mage's tower. I was no longer welcome there, but with certain classes the gloves are pretty sweet even considering the downside. Oh also the curse had a very specific trigger, the gauntlets could only be removed if you cast remove curse on them and then had a chaotic neutral halfling pull them off of you with the intention of stealing them. even if you hacked your arms off and then had regeneration cast on you your hands would grow back with the gauntlets on them.",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Armor"
+      "category": "Armor",
+      "value": 0
     },
     {
       "id": 66,
@@ -802,7 +821,8 @@
       "description": "Description needed.",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Armor"
+      "category": "Armor",
+      "value": 0
     },
     {
       "id": 69,
@@ -813,7 +833,8 @@
       "weight": "20 lb",
       "category": "Armor",
       "properties": "Light, Medium or Heavy",
-      "requirements": "Requires Attunement\nLawful Good"
+      "requirements": "Requires Attunement\nLawful Good",
+      "value": 0
     },
     {
       "id": 70,
@@ -1086,7 +1107,8 @@
       "rarity": "Rare",
       "tier": 3,
       "weight": "5 lb",
-      "category": "Armor"
+      "category": "Armor",
+      "value": 0
     },
     {
       "id": 91,
@@ -1174,7 +1196,8 @@
       "tier": 2,
       "category": "Armor",
       "properties": "They give a +1 to stealth movement.",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 98,
@@ -1505,7 +1528,8 @@
       "rarity": "Rare",
       "tier": 3,
       "weight": "n/a",
-      "category": "Book"
+      "category": "Book",
+      "value": 0
     },
     {
       "id": 124,
@@ -1514,7 +1538,8 @@
       "rarity": "Rare",
       "tier": 3,
       "weight": "n/a",
-      "category": "Book"
+      "category": "Book",
+      "value": 0
     },
     {
       "id": 125,
@@ -1642,7 +1667,8 @@
       "rarity": "Rare",
       "tier": 3,
       "weight": "1 lb",
-      "category": "Potion"
+      "category": "Potion",
+      "value": 0
     },
     {
       "id": 135,
@@ -1663,7 +1689,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "category": "Potion",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 137,
@@ -1696,7 +1723,8 @@
       "rarity": "Common",
       "tier": 1,
       "category": "Potion",
-      "properties": "small vial of liquid that when drunk makes the drinker continuously giggle for 1 hour. When that wears off they hiccup for 1 hour"
+      "properties": "small vial of liquid that when drunk makes the drinker continuously giggle for 1 hour. When that wears off they hiccup for 1 hour",
+      "value": 0
     },
     {
       "id": 140,
@@ -1704,7 +1732,8 @@
       "description": "http://www.dandwiki.com/wiki/Grog_of_Susbtantial_Whimsy_%283.5e_Equipment%29",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Potion"
+      "category": "Potion",
+      "value": 0
     },
     {
       "id": 141,
@@ -1810,7 +1839,8 @@
       "rarity": "Rare",
       "tier": 3,
       "category": "Potion",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 150,
@@ -1911,7 +1941,8 @@
       "weight": "n/a",
       "category": "Potion",
       "properties": "Teleport to a random spot up to 50 feet away. One use only.",
-      "author": "D&D Wiki"
+      "author": "D&D Wiki",
+      "value": 0
     },
     {
       "id": 158,
@@ -1921,7 +1952,8 @@
       "tier": 5,
       "weight": "n/a",
       "category": "Potion",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 159,
@@ -2008,7 +2040,8 @@
       "tier": 4,
       "weight": "n/a",
       "category": "Quest Hook",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 166,
@@ -2018,7 +2051,8 @@
       "tier": 2,
       "weight": "30 lb",
       "category": "Quest Hook",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 167,
@@ -2028,7 +2062,8 @@
       "tier": 2,
       "weight": "n/a",
       "category": "Quest Hook",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 168,
@@ -2059,7 +2094,8 @@
       "description": "Within a rotten pouch found upon the body of a long dead soldier is a parchment with an unbroken seal. If the seal is broken and the message read, it warns its would-be recipient to guard against an eminent betrayal.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Quest Hook"
+      "category": "Quest Hook",
+      "value": 0
     },
     {
       "id": 171,
@@ -2069,7 +2105,8 @@
       "tier": 4,
       "weight": "n/a",
       "category": "Quest Hook",
-      "author": "DangerousPuhson"
+      "author": "DangerousPuhson",
+      "value": 0
     },
     {
       "id": 172,
@@ -2078,7 +2115,8 @@
       "rarity": "Common",
       "tier": 1,
       "weight": "n/a",
-      "category": "Quest Hook"
+      "category": "Quest Hook",
+      "value": 0
     },
     {
       "id": 173,
@@ -2087,7 +2125,8 @@
       "rarity": "Mundane",
       "tier": 0,
       "weight": "n/a",
-      "category": "Quest Hook"
+      "category": "Quest Hook",
+      "value": 0
     },
     {
       "id": 174,
@@ -2097,7 +2136,8 @@
       "tier": 1,
       "weight": "n/a",
       "category": "Quest Hook",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 175,
@@ -2105,7 +2145,8 @@
       "description": "Piece of Legendary weapon & map with possible locations for other pieces",
       "rarity": "Common",
       "tier": 1,
-      "category": "Quest Hook"
+      "category": "Quest Hook",
+      "value": 0
     },
     {
       "id": 176,
@@ -2113,7 +2154,8 @@
       "description": "A peg leg inscribed with a pirate’s treasure map. The map is either false or its treasure has long since been plundered. If you wish to provide the PCs with a true map, then one may be found in the hollow compartment within the leg.",
       "rarity": "Common",
       "tier": 1,
-      "category": "Quest Hook"
+      "category": "Quest Hook",
+      "value": 0
     },
     {
       "id": 177,
@@ -2121,7 +2163,8 @@
       "description": "Water damaged ledger – hidden location",
       "rarity": "Common",
       "tier": 1,
-      "category": "Quest Hook"
+      "category": "Quest Hook",
+      "value": 0
     },
     {
       "id": 178,
@@ -2152,7 +2195,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "weight": "n/a",
-      "category": "Ring"
+      "category": "Ring",
+      "value": 0
     },
     {
       "id": 181,
@@ -2232,7 +2276,8 @@
       "rarity": "Rare",
       "tier": 3,
       "weight": "n/a",
-      "category": "Ring"
+      "category": "Ring",
+      "value": 0
     },
     {
       "id": 188,
@@ -2241,7 +2286,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "weight": "n/a",
-      "category": "Ring"
+      "category": "Ring",
+      "value": 0
     },
     {
       "id": 189,
@@ -2263,7 +2309,8 @@
       "rarity": "Very Rare",
       "tier": 4,
       "weight": "n/a",
-      "category": "Ring"
+      "category": "Ring",
+      "value": 0
     },
     {
       "id": 191,
@@ -2272,7 +2319,8 @@
       "rarity": "Common",
       "tier": 1,
       "weight": "n/a",
-      "category": "Ring"
+      "category": "Ring",
+      "value": 0
     },
     {
       "id": 192,
@@ -2281,7 +2329,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "weight": "n/a",
-      "category": "Ring"
+      "category": "Ring",
+      "value": 0
     },
     {
       "id": 193,
@@ -2739,7 +2788,8 @@
       "tier": 2,
       "weight": "n/a",
       "category": "Treasure",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 231,
@@ -3052,7 +3102,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "weight": "40 lb",
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 258,
@@ -3540,7 +3591,8 @@
       "tier": 4,
       "weight": "1 lb",
       "category": "Treasure",
-      "properties": "If a creature focuses on the item for at least 30 seconds,  the creature sees a glimpse of a historical event in extraplanar history and takes 1d4 Int (psychic) damage. The image changes every 30 seconds of concentration and the creature takes 1d4 Int (psychic damage) for every event seen."
+      "properties": "If a creature focuses on the item for at least 30 seconds,  the creature sees a glimpse of a historical event in extraplanar history and takes 1d4 Int (psychic) damage. The image changes every 30 seconds of concentration and the creature takes 1d4 Int (psychic damage) for every event seen.",
+      "value": 0
     },
     {
       "id": 300,
@@ -3726,7 +3778,8 @@
       "description": "The remnants of a massive door of stone which has been smashed into rubble. A magic mouth which had once adorned the door remains intact. As the PCs draw near it will issue its warning: “Disturb not this chamber, lest the world suffer.” Whatever the mouth was set to guard is gone – the chamber beyond the broken door is empty.",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 316,
@@ -3963,7 +4016,8 @@
       "description": "A large, ornate field tent such as a lord would have, room for 12 persons",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 337,
@@ -4064,7 +4118,8 @@
       "description": "Half-full flask of nightmare ale – 1 sip = 1d4 hours fear check per hour; full measure = 1d4 hours horrifying hallucinations vs DC save for early retirement",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 346,
@@ -4072,7 +4127,8 @@
       "description": "A pair of steel flasks, sealed with wax bearing the symbol of St. Cuthbert. (Holy water, 25 gp each)",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 347,
@@ -4219,7 +4275,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "weight": "2 lb",
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 360,
@@ -4420,7 +4477,8 @@
       "description": "A quiver of golden arrows, They are devoid of supernatural properties, but despite their unusual composition will perform as normal arrows would.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 377,
@@ -4460,7 +4518,8 @@
       "description": "A tablet of pure gold, inscribed with the core rites and beliefs of a venerable religion. Careful study of this tablet, however, will reveal subtle – but important – differences between these ancient practices and the current practices of the religion in question.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 381,
@@ -4468,7 +4527,8 @@
       "description": "Silver hand sized harp",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 382,
@@ -4511,7 +4571,8 @@
       "description": "A small, heart-shaped token carved out of rose-colored sandstone, holding the mad soul of a princess who was trapped there by a sorcerer many centuries ago. Her body remains in the hidden royal sepulchers of her homeland, perfectly preserved by ancient magic.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 386,
@@ -4519,7 +4580,8 @@
       "description": "Potpourri with demon blood – invigorating & entrancing",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 387,
@@ -4549,7 +4611,8 @@
       "description": "These start getting made after the party does something particularly heroic. Little cloth dolls that look like party members, when squeezed, the caster spouts illusionary flames, the cleric spouts prayers \"Praise Avandra!\", the fighter has kung-fu action where he swings his sword.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 390,
@@ -4591,7 +4654,8 @@
       "description": "The holy symbol of a god long thought dead and gone.",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 394,
@@ -4754,7 +4818,8 @@
       "description": "A small sack containing 32 carved ivory mice",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 408,
@@ -4811,7 +4876,8 @@
       "rarity": "Common",
       "tier": 1,
       "weight": "35 lb",
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 413,
@@ -4852,7 +4918,8 @@
       "description": "A telescope of jade and banded with bloodstone. A character looking through the telescope sees not the world around them, but a strange, alien panorama which – nonetheless – follows the motions of the telescope.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 417,
@@ -4908,7 +4975,8 @@
       "description": "Jewel encrusted sarcophagus – mummy inside",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 422,
@@ -4917,7 +4985,8 @@
       "rarity": "Common",
       "tier": 1,
       "weight": "60 lb",
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 423,
@@ -5009,7 +5078,8 @@
       "description": "A large snow globe, with a study base of polished oak, depicting a small farmhouse in the midst of a forest clearing. Shaking the globe causes the snow to gently fall, and as it does miniature figures exit the house and begin performing chores about the farmyard. The figures return to the house as the last flake falls.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 431,
@@ -5017,7 +5087,8 @@
       "description": "Rocks stuffed with lava",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 432,
@@ -5083,7 +5154,8 @@
       "description": "Pulsating organ of leviathan (is sack/cloth)",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 438,
@@ -5092,7 +5164,8 @@
       "rarity": "Common",
       "tier": 1,
       "weight": "2 lb",
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 439,
@@ -5237,7 +5310,8 @@
       "description": "With an elegant hinged case of black onyx, the characters find a set of masterwork gaming darts. Although useless for combat, the darts will give a +2 skill check bonus to anyone using them to play a game of darts (due to their superb balance and construction).",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 452,
@@ -5418,7 +5492,8 @@
       "description": "An obsidian figurine of a dolphin which is always wet to the touch.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 468,
@@ -5627,7 +5702,8 @@
       "tier": 1,
       "weight": "n/a",
       "category": "Treasure",
-      "author": "Uberbeard"
+      "author": "Uberbeard",
+      "value": 0
     },
     {
       "id": 486,
@@ -5648,7 +5724,8 @@
       "rarity": "Common",
       "tier": 1,
       "weight": "2 lb",
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 488,
@@ -5681,7 +5758,8 @@
       "description": "A piglet.",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 491,
@@ -5725,7 +5803,8 @@
       "description": "One hundred and sixteen 3” white porcelain discs, each has a 1 ounce knob of electrum embedded in its center",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 495,
@@ -5746,7 +5825,8 @@
       "rarity": "Common",
       "tier": 1,
       "weight": "25 lb",
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 497,
@@ -5765,7 +5845,8 @@
       "description": "In a worn and decaying wall of mud bricks, a single black brick – polished and perfectly preserved – stands out in stark contrast. If the brick is pried out and broken open, it will reveal a quicksilver core.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 499,
@@ -5773,7 +5854,8 @@
       "description": "A lucky rabbit’s foot which hangs from a golden chain. Although separated from the rest of the rabbit, the foot magically lives on: It will respond to touch, bleed if injured, and so forth.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 500,
@@ -5794,7 +5876,8 @@
       "description": "Random monster taxidermy",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 502,
@@ -5802,7 +5885,8 @@
       "description": "A pair of pole mounted fans made of giant raven feathers",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 503,
@@ -5831,7 +5915,8 @@
       "description": "Reversible, finely crafted robes",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 506,
@@ -5934,7 +6019,8 @@
       "description": "Silver pan/satyr pipes/flute",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 515,
@@ -5977,7 +6063,8 @@
       "description": "Nigh-indestructible scroll case – leviathan ivory, jewel encrusted, demon paintings on side – scraps of scroll inside",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 519,
@@ -5986,7 +6073,8 @@
       "rarity": "Common",
       "tier": 1,
       "weight": "4 lb",
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 520,
@@ -6217,7 +6305,8 @@
       "description": "Two six-fingered gloves, along with a matching seven-fingered glove. The set is made of supple black leather, and stitched with fine, silver thread.",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 540,
@@ -6271,7 +6360,8 @@
       "description": "A long, narrow wooden box containing forty, ½ lb rolls of quality smoking leaf.",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 545,
@@ -6279,7 +6369,8 @@
       "description": "A six foot long smoking pipe made of ivory, possibly a narwhal horn, carved to look like a twisting serpent.",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 546,
@@ -6442,7 +6533,8 @@
       "description": "Thirty storm giant minted gold coins, each is the size of a dinner plate and weighs 17 lbs. The image stuck on the coins shows a giant hand flicking a human off a table.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 560,
@@ -6461,7 +6553,8 @@
       "description": "A stuffed falcon, tattered with age, with black onyx eyes. (Onyx value: 5gp each)",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 562,
@@ -6516,7 +6609,8 @@
       "description": "A well-sealed cake box with intact cake",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 567,
@@ -6524,7 +6618,8 @@
       "description": "Ritualistic tattooing kit",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 568,
@@ -6545,7 +6640,8 @@
       "rarity": "Common",
       "tier": 1,
       "weight": "1 lb",
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 570,
@@ -6648,7 +6744,8 @@
       "description": "Box of ‘Top Secret Battle Monkeys’",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 579,
@@ -6668,7 +6765,8 @@
       "description": "A pinewood totem pole of the northern barbarians, bearing six faces (from top to bottom): a hawk, a demon, an elk, a man, a fox, and a white dragon. The hawk has a silver feather on the left side of its face (8gp), the demon has a gold nose-ring (6gp), the elk has copper antlers (4gp), the man has electrum eyes (3gp each), the fox has a black onyx nose (15gp), and the dragon has ivory teeth (30 teeth worth 1gp each). The pole is fifteen feet tall and weighs 200 pounds. (4.57m, 90.7kg)",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 581,
@@ -6720,7 +6818,8 @@
       "description": "An oboe-like musical instrument made from a troll’s femur.",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 586,
@@ -6763,7 +6862,8 @@
       "description": "Underworld Currency – lead coins; purple rocks/crystals, fairy dust, dragon scales, dna globules (rocks/capsules with runic understanding of specific creatures), tally bones, soul traps/crystals",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 590,
@@ -6783,7 +6883,8 @@
       "description": "A set of panpipes carved from the bones of a unicorn. When played, they do not make the slightest sound.",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 592,
@@ -6859,7 +6960,8 @@
       "description": "Box with runic markings for destroy/to be destroyed containing cursed object",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 599,
@@ -6972,7 +7074,8 @@
       "rarity": "Common",
       "tier": 1,
       "weight": "2 lb",
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 609,
@@ -6980,7 +7083,8 @@
       "description": "A small ball of white marble – roughly three inches across – which hovers in the air until it is touched or disturbed, at which point it falls to the floor and ceases to exhibit any supernatural properties.",
       "rarity": "Common",
       "tier": 1,
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 610,
@@ -7001,7 +7105,8 @@
       "rarity": "Mundane",
       "tier": 0,
       "weight": "n/a",
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 612,
@@ -7102,7 +7207,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "weight": "n/a",
-      "category": "Treasure"
+      "category": "Treasure",
+      "value": 0
     },
     {
       "id": 621,
@@ -7246,7 +7352,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "category": "Weapon",
-      "properties": "crimson red axe that deals 1d6 slashing damage and 1d6 bludgeoning damage. Each hit restores +1 hp to wielding regardless of damage dealt"
+      "properties": "crimson red axe that deals 1d6 slashing damage and 1d6 bludgeoning damage. Each hit restores +1 hp to wielding regardless of damage dealt",
+      "value": 0
     },
     {
       "id": 633,
@@ -7257,7 +7364,8 @@
       "weight": "1 lb",
       "category": "Weapon",
       "properties": "1d4 Piercing - Finesse, Light, Range, Thrown - 20/60",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 634,
@@ -7281,7 +7389,8 @@
       "weight": "7 lb",
       "category": "Weapon",
       "properties": "Damage? Will determine cost.",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 636,
@@ -7320,7 +7429,8 @@
       "category": "Weapon",
       "properties": "Cursed. \nSee DMG page 155.",
       "requirements": "Requires Attunement",
-      "author": "DMG"
+      "author": "DMG",
+      "value": 0
     },
     {
       "id": 639,
@@ -7381,7 +7491,8 @@
       "tier": 3,
       "weight": "n/a",
       "category": "Weapon",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 644,
@@ -7390,7 +7501,8 @@
       "rarity": "Rare",
       "tier": 3,
       "weight": "4 lb",
-      "category": "Weapon"
+      "category": "Weapon",
+      "value": 0
     },
     {
       "id": 645,
@@ -7413,7 +7525,8 @@
       "tier": 3,
       "weight": "1 lb",
       "category": "Weapon",
-      "properties": "1d4 Piercing | Finesse, Light"
+      "properties": "1d4 Piercing | Finesse, Light",
+      "value": 0
     },
     {
       "id": 647,
@@ -7593,7 +7706,8 @@
       "tier": 3,
       "weight": "1 lb",
       "category": "Weapon",
-      "properties": "1d4 Piercing; Finesse, Light, Range, Thrown"
+      "properties": "1d4 Piercing; Finesse, Light, Range, Thrown",
+      "value": 0
     },
     {
       "id": 661,
@@ -7814,7 +7928,8 @@
       "tier": 3,
       "category": "Weapon",
       "properties": "1d8 Bludgeoning - Two-Handed",
-      "author": "Scribnibbler21"
+      "author": "Scribnibbler21",
+      "value": 0
     },
     {
       "id": 678,
@@ -7984,7 +8099,8 @@
       "tier": 2,
       "weight": "4 lb",
       "category": "Weapon",
-      "properties": "1d4 Bludgeoning\nAttack with advantage and 1d10 against undead enemies"
+      "properties": "1d4 Bludgeoning\nAttack with advantage and 1d10 against undead enemies",
+      "value": 0
     },
     {
       "id": 691,
@@ -8073,7 +8189,8 @@
       "description": "Thunder Hammer – deafening or stunned, DC save, 40’ radius",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Weapon"
+      "category": "Weapon",
+      "value": 0
     },
     {
       "id": 698,
@@ -8186,7 +8303,8 @@
       "tier": 3,
       "weight": "2 lb",
       "category": "Weapon",
-      "properties": "1d6 Piercing - Simple - Thrown - Range: 30/120"
+      "properties": "1d6 Piercing - Simple - Thrown - Range: 30/120",
+      "value": 0
     },
     {
       "id": 707,
@@ -8288,7 +8406,8 @@
       "weight": "5 lb",
       "category": "Weapon",
       "properties": "1d8+2 Slashing - Versatile (1d10+2)",
-      "requirements": "Martial Weapon Expertise"
+      "requirements": "Martial Weapon Expertise",
+      "value": 0
     },
     {
       "id": 715,
@@ -8327,7 +8446,8 @@
       "category": "Weapon",
       "properties": "1d8 Slashing - Versatile (1d10)",
       "requirements": "Martial Weapon Expertise",
-      "author": "Uberbeard"
+      "author": "Uberbeard",
+      "value": 0
     },
     {
       "id": 718,
@@ -8373,7 +8493,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "category": "Weapon",
-      "properties": "This blade can switching between piecing, slashing and bludgeoning damage as a bonus action."
+      "properties": "This blade can switching between piecing, slashing and bludgeoning damage as a bonus action.",
+      "value": 0
     },
     {
       "id": 722,
@@ -8613,7 +8734,8 @@
       "description": "Ricochet-sling – up to 4 targets (d4 for targets, attack roll each; first attack fail causes ricochet to end [unless a tie, in the case of a tie to AC the ricochet continues])",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Weapon"
+      "category": "Weapon",
+      "value": 0
     },
     {
       "id": 741,
@@ -8663,7 +8785,8 @@
       "tier": 3,
       "category": "Weapon",
       "properties": "When running to a target from at least 20 feet. The target must make a Constitution saving throw of 14 or be knocked prone. Following attacks would then have advantage.",
-      "author": "Brendan M"
+      "author": "Brendan M",
+      "value": 0
     },
     {
       "id": 745,
@@ -8895,7 +9018,8 @@
       "weight": "3 lb",
       "category": "Weapon",
       "properties": "Acts as a +1 sword vs any creature speaking with poor grammar construction. On a successful hit, the creature must save or begin using immaculate grammar (spelling gets a bump too), after which the sword attacks the creature as a mundane weapon. Shocks the wielder for 1 hp damage each time he or she uses poor grammar.",
-      "author": "Jeff C"
+      "author": "Jeff C",
+      "value": 0
     },
     {
       "id": 763,
@@ -8903,7 +9027,8 @@
       "description": "Monster presence detecting weapon (Hobbit – Sting, Orcs/Goblins)",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Weapon"
+      "category": "Weapon",
+      "value": 0
     },
     {
       "id": 764,
@@ -8911,7 +9036,8 @@
       "description": "Battle Fury-grants the feat Cleave",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Weapon"
+      "category": "Weapon",
+      "value": 0
     },
     {
       "id": 765,
@@ -8921,7 +9047,8 @@
       "tier": 3,
       "category": "Weapon",
       "properties": "The creature must a Constitution saving throw of 14 or take an addition 1d6. The creature makes this check every turn until succeeded",
-      "author": "Brendan M"
+      "author": "Brendan M",
+      "value": 0
     },
     {
       "id": 766,
@@ -8929,7 +9056,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "category": "Weapon",
-      "properties": "1d6 slashing damage, 1d6 chill damage. Freezes/Slows enemies hit, upon death enemy turns to ice and shatters, damaging all nearby enemies for 1d4 chill damage. No effect on fire or ice enemies"
+      "properties": "1d6 slashing damage, 1d6 chill damage. Freezes/Slows enemies hit, upon death enemy turns to ice and shatters, damaging all nearby enemies for 1d4 chill damage. No effect on fire or ice enemies",
+      "value": 0
     },
     {
       "id": 767,
@@ -8978,7 +9106,8 @@
       "tier": 5,
       "weight": "10 lb",
       "category": "Weapon",
-      "author": "Scribnibbler21"
+      "author": "Scribnibbler21",
+      "value": 0
     },
     {
       "id": 771,
@@ -8987,7 +9116,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "category": "Weapon",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 772,
@@ -9074,7 +9204,8 @@
       "description": "If the user of this throwing axe manages a critical hit, it will sever an appendage. – critical = appendage severed",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Weapon"
+      "category": "Weapon",
+      "value": 0
     },
     {
       "id": 779,
@@ -9134,7 +9265,8 @@
       "description": "Triple ‘barreled’ crossbow",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Weapon"
+      "category": "Weapon",
+      "value": 0
     },
     {
       "id": 784,
@@ -9143,7 +9275,8 @@
       "rarity": "Rare",
       "tier": 3,
       "category": "Weapon",
-      "properties": "Cursed"
+      "properties": "Cursed",
+      "value": 0
     },
     {
       "id": 785,
@@ -9153,7 +9286,8 @@
       "tier": 2,
       "weight": "1 lb",
       "category": "Weapon",
-      "properties": "1d4 Piercing - Finesse, Light - Range: 20/60"
+      "properties": "1d4 Piercing - Finesse, Light - Range: 20/60",
+      "value": 0
     },
     {
       "id": 786,
@@ -9430,7 +9564,8 @@
       "description": "Whenever an arrow is fired in the vicinity of this amulet’s wearer, it will strike the amulet wearer",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 808,
@@ -9489,7 +9624,8 @@
       "weight": "1 lb",
       "category": "Wondrous Item",
       "properties": "See DMG page 152.",
-      "author": "DMG"
+      "author": "DMG",
+      "value": 0
     },
     {
       "id": 813,
@@ -9571,7 +9707,8 @@
       "category": "Wondrous Item",
       "properties": "Renders the user invisible whilst the bagpipes are being played.",
       "requirements": "Requires Attunement",
-      "author": "/u/dustybullets"
+      "author": "/u/dustybullets",
+      "value": 0
     },
     {
       "id": 820,
@@ -9657,7 +9794,8 @@
       "rarity": "Common",
       "tier": 1,
       "category": "Wondrous Item",
-      "properties": "Cursed\nPutting on this belt causes the user to gain 200lb over the period of a short rest."
+      "properties": "Cursed\nPutting on this belt causes the user to gain 200lb over the period of a short rest.",
+      "value": 0
     },
     {
       "id": 827,
@@ -9778,7 +9916,8 @@
       "description": "A contract with blank parts. Can be modified into any sort of deal you wish. The first party to break the contract is blasted with a beam from above (d12, ignore armour) and the contract dissolves into shredded parchment.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 837,
@@ -9811,7 +9950,8 @@
       "rarity": "Rare",
       "tier": 3,
       "weight": "n/a",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 840,
@@ -9822,7 +9962,8 @@
       "weight": "n/a",
       "category": "Wondrous Item",
       "properties": "Any creature that touches the spoon must make a DC 12 Charisma save or be dominated by the spoon for 1d2 hours. The spoon then urges the creature to make the most delicious meal they can from the immediately available ingredients.",
-      "author": "/u/Bloka2au"
+      "author": "/u/Bloka2au",
+      "value": 0
     },
     {
       "id": 841,
@@ -9832,7 +9973,8 @@
       "tier": 2,
       "weight": "n/a",
       "category": "Wondrous Item",
-      "properties": "This amulet is constantly covered in blood. Any attempt to wash the blood off is unsuccessful, and the amulet must be wrapped in a waterproof cloth to prevent anything it is kept in frow slowly becoming drenched in blood."
+      "properties": "This amulet is constantly covered in blood. Any attempt to wash the blood off is unsuccessful, and the amulet must be wrapped in a waterproof cloth to prevent anything it is kept in frow slowly becoming drenched in blood.",
+      "value": 0
     },
     {
       "id": 842,
@@ -9878,7 +10020,8 @@
       "rarity": "Very Rare",
       "tier": 4,
       "weight": "3 lb",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 846,
@@ -9952,7 +10095,8 @@
       "rarity": "Common",
       "tier": 1,
       "category": "Wondrous Item",
-      "properties": "1d4 Bludgeoning - Simple"
+      "properties": "1d4 Bludgeoning - Simple",
+      "value": 0
     },
     {
       "id": 852,
@@ -9973,7 +10117,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "weight": "1 lb",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 854,
@@ -10132,7 +10277,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "category": "Wondrous Item",
-      "properties": "grants water-walking abilities, but requires concentration. Anything that disrupts a concentration spell disrupts the charm. 10 ft radius of ice"
+      "properties": "grants water-walking abilities, but requires concentration. Anything that disrupts a concentration spell disrupts the charm. 10 ft radius of ice",
+      "value": 0
     },
     {
       "id": 867,
@@ -10168,7 +10314,8 @@
       "weight": "2 lb",
       "category": "Wondrous Item",
       "properties": "1/ Day: Creatures within a 30 feet radius, including the user, are granted the effects of greater invisibility, and cannot be detected by Truesight and other means of reveal, e.g. Mordenkainen's Faithful Hound.\nCharges are restored at dusk.",
-      "author": "u/giratina2648"
+      "author": "u/giratina2648",
+      "value": 0
     },
     {
       "id": 870,
@@ -10236,7 +10383,8 @@
       "description": "Provides +2 AC when worn, but attracts the attention of crabs, who will come from nearby and cling to the wearer",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 876,
@@ -10255,7 +10403,8 @@
       "description": "Anything significant that happens to the doll happens to you, beneficial or harmful.",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 878,
@@ -10266,7 +10415,8 @@
       "weight": "n/a",
       "category": "Wondrous Item",
       "properties": "May attack the player while not connected. (The player has to lack at least one eye)",
-      "author": "asdf3011"
+      "author": "asdf3011",
+      "value": 0
     },
     {
       "id": 879,
@@ -10275,7 +10425,8 @@
       "rarity": "Rare",
       "tier": 3,
       "weight": "n/a",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 880,
@@ -10297,7 +10448,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "weight": "1 lb",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 882,
@@ -10319,7 +10471,8 @@
       "description": "Awakens any creature from sleep or unconsciousness, but they flail and scream in terror for a few seconds first. They have no memory of this afterwards.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 884,
@@ -10327,7 +10480,8 @@
       "description": "Three vicious little mollusks (1hp, Armour 1) that explode in a 2m blast (d8) when killed.",
       "rarity": "Common",
       "tier": 1,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 885,
@@ -10337,7 +10491,8 @@
       "tier": 4,
       "weight": "10 lb",
       "category": "Wondrous Item",
-      "author": "/u/SPYROHAWK"
+      "author": "/u/SPYROHAWK",
+      "value": 0
     },
     {
       "id": 886,
@@ -10345,7 +10500,8 @@
       "description": "Like a regular compass, except with multiple needles each pointing toward different useful things, such as: north, the nearest source of fresh water, the strongest nearby evil aura, nearest large concentration of gold, nearest civilization (exact definition of civilization may vary by user), and nearest storm. Needles lengthen and shorten as the object gets closer or further away.",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 887,
@@ -10353,7 +10509,8 @@
       "description": "Object of secret door detection/lay out visualization",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 888,
@@ -10361,7 +10518,8 @@
       "description": "Trained rat in wooden cage – sniffs out gold in exchange for treats. One trail ration per sniff.",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 889,
@@ -10382,7 +10540,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "weight": "1 lb",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 891,
@@ -10390,7 +10549,8 @@
       "description": "Once per day, give +10ft to movement, and +1 to attack and damage rolls to all allies.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 892,
@@ -10414,7 +10574,8 @@
       "tier": 2,
       "weight": "1 lb",
       "category": "Wondrous Item",
-      "author": "Uberbeard"
+      "author": "Uberbeard",
+      "value": 0
     },
     {
       "id": 894,
@@ -10434,7 +10595,8 @@
       "description": "Stack of 4, user covers 20ft radius in magic dust that shows anything that is hidden or dispellable.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 896,
@@ -10442,7 +10604,8 @@
       "description": "Magical dust that makes anyone cough and sneeze (combat)",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 897,
@@ -10450,7 +10613,8 @@
       "description": "stack of 4, user covers 20ft radius in magic dust that shows anything that is hidden or dispellable.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 898,
@@ -10459,7 +10623,8 @@
       "tier": 2,
       "weight": "2 lb",
       "category": "Wondrous Item",
-      "author": "Uberbeard"
+      "author": "Uberbeard",
+      "value": 0
     },
     {
       "id": 899,
@@ -10468,7 +10633,8 @@
       "rarity": "Common",
       "tier": 1,
       "weight": "1/4 lb",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 900,
@@ -10489,7 +10655,8 @@
       "description": "A prismatic crystal which echoes back – in a deep, melodious voice – every word which is said around it two seconds after it has been said.",
       "rarity": "Common",
       "tier": 1,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 902,
@@ -10509,7 +10676,8 @@
       "description": "Eldritch flint & steel – 10’ reach – blinding/minor burns",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 904,
@@ -10519,7 +10687,8 @@
       "tier": 2,
       "weight": "1 lb",
       "category": "Wondrous Item",
-      "author": "Uberbeard"
+      "author": "Uberbeard",
+      "value": 0
     },
     {
       "id": 905,
@@ -10565,7 +10734,8 @@
       "rarity": "Common",
       "tier": 1,
       "category": "Wondrous Item",
-      "properties": "Two coins, when flipped at close to the same time will always land the same way, no matter how far apart they are"
+      "properties": "Two coins, when flipped at close to the same time will always land the same way, no matter how far apart they are",
+      "value": 0
     },
     {
       "id": 909,
@@ -10574,7 +10744,8 @@
       "rarity": "Very Rare",
       "tier": 4,
       "weight": "2 lb",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 910,
@@ -10582,7 +10753,8 @@
       "description": "Exploding rations – breathe weapon 1d6 hours for 1 use of color theme type",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 911,
@@ -10590,7 +10762,8 @@
       "description": "Extra dimensional flask – holds 1 gallon",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 912,
@@ -10623,7 +10796,8 @@
       "rarity": "Rare",
       "tier": 3,
       "category": "Wondrous Item",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 915,
@@ -10631,7 +10805,8 @@
       "description": "This gem normally looks like quartz, but if allowed to absorb heat will change in color to resemble a bright orange garnet. When smashed against something, it is drained of color and will light that thing on fire",
       "rarity": "Common",
       "tier": 1,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 916,
@@ -10639,7 +10814,8 @@
       "description": "A sundial which runs backwards.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 917,
@@ -10673,7 +10849,8 @@
       "description": "Globe of Invulnerability (It's a snowglobe. Not even the gods themselves can destroy it.)",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 920,
@@ -10694,7 +10871,8 @@
       "rarity": "Common",
       "tier": 1,
       "weight": "n/a",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 922,
@@ -10704,7 +10882,8 @@
       "tier": 2,
       "weight": "1 lb",
       "category": "Wondrous Item",
-      "author": "Uberbeard"
+      "author": "Uberbeard",
+      "value": 0
     },
     {
       "id": 923,
@@ -10712,7 +10891,8 @@
       "description": "This paint provides no protection, but grants 10 to disguise. The only way it works, however, is if the wearer is wearing no clothes, and covered head to toe in the stuff. It's hilarious when a disguise check fails, and they realize they are staring at a naked Gnome.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 924,
@@ -10733,7 +10913,8 @@
       "tier": 5,
       "weight": "4 lb",
       "category": "Wondrous Item",
-      "properties": "Allows you to stop time. However, if you ever let go of the clock while time is stopped it will shatter, restoring time but freezing the user"
+      "properties": "Allows you to stop time. However, if you ever let go of the clock while time is stopped it will shatter, restoring time but freezing the user",
+      "value": 0
     },
     {
       "id": 926,
@@ -10782,7 +10963,8 @@
       "tier": 2,
       "weight": "1 lb",
       "category": "Wondrous Item",
-      "author": "Uberbeard"
+      "author": "Uberbeard",
+      "value": 0
     },
     {
       "id": 930,
@@ -10817,7 +10999,8 @@
       "tier": 3,
       "weight": "n/a",
       "category": "Wondrous Item",
-      "author": "Scribnibbler21"
+      "author": "Scribnibbler21",
+      "value": 0
     },
     {
       "id": 933,
@@ -10853,7 +11036,8 @@
       "tier": 3,
       "weight": "3 lb",
       "category": "Wondrous Item",
-      "properties": "Helm – cherubic infant embellishment, emits confusion spell at wil"
+      "properties": "Helm – cherubic infant embellishment, emits confusion spell at wil",
+      "value": 0
     },
     {
       "id": 936,
@@ -10890,7 +11074,8 @@
       "tier": 3,
       "weight": "4 lb",
       "category": "Wondrous Item",
-      "properties": "A 'God-Helmet' that explained the universe when you put it on. It usually just fried your brain though, small chance of enlightenment or instant death."
+      "properties": "A 'God-Helmet' that explained the universe when you put it on. It usually just fried your brain though, small chance of enlightenment or instant death.",
+      "value": 0
     },
     {
       "id": 939,
@@ -10899,7 +11084,8 @@
       "rarity": "Very Rare",
       "tier": 4,
       "weight": "n/a",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 940,
@@ -10907,7 +11093,8 @@
       "description": "Once per day this item grants one extra attack for it's user.",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 941,
@@ -10915,7 +11102,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "category": "Wondrous Item",
-      "properties": "a spinning top that causes all creatures that can see it, including the person spinning it, to become mesmerized by it and will do nothing but stand in place and stare at it until it stops spinning and falls. This effect is technically psionic"
+      "properties": "a spinning top that causes all creatures that can see it, including the person spinning it, to become mesmerized by it and will do nothing but stand in place and stare at it until it stops spinning and falls. This effect is technically psionic",
+      "value": 0
     },
     {
       "id": 942,
@@ -10924,7 +11112,8 @@
       "rarity": "Very Rare",
       "tier": 4,
       "weight": "n/a",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 943,
@@ -10932,7 +11121,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "category": "Wondrous Item",
-      "properties": "a bag that makes all coins in it appear as platinum. Coins revert to original form 5 minutes after being taken out of bag. Can not hold more than 50 coins. This means you do not actually gain any profit from using the bag, but you can trick people"
+      "properties": "a bag that makes all coins in it appear as platinum. Coins revert to original form 5 minutes after being taken out of bag. Can not hold more than 50 coins. This means you do not actually gain any profit from using the bag, but you can trick people",
+      "value": 0
     },
     {
       "id": 944,
@@ -10940,7 +11130,8 @@
       "description": "This flat iron rod has a button on one end. You can use an action to press the button, which causes the rod to become magically fixed in place. Until you or another creature uses an action to push the button again, the rod doesn't move, even if it is defying gravity. The rod can hold up to 8,000 pounds of weight. More weight causes the rod to deactivate and fall. A creature can use an action to make a DC 30 Strength check, moving the fixed rod up to 10 feet on a success.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 945,
@@ -10948,7 +11139,8 @@
       "description": "When this Kazoo is played, it grants +2 to Intimidation checks. A +3 if the player has a kazoo in the room.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 946,
@@ -10982,7 +11174,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "category": "Wondrous Item",
-      "requirements": "Requires Attunement"
+      "requirements": "Requires Attunement",
+      "value": 0
     },
     {
       "id": 949,
@@ -10991,7 +11184,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "weight": "3 lb",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 950,
@@ -10999,7 +11193,8 @@
       "description": "Litmus magic paper: This paper can be used as a standard action by rubbing it on an object. It either detects no magic and can be used again, or changed color and brightness to reflect the school(s) and strengths of magic on the object.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 951,
@@ -11007,7 +11202,8 @@
       "description": "Self-guided grappling hook - +10 to ranged attack roll for aiming",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 952,
@@ -11015,7 +11211,8 @@
       "description": "Near-Empty-Ever-Full One Arrow Quiver – always only 1 arrow, will reappear after being shot.",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 953,
@@ -11023,7 +11220,8 @@
       "description": "A stone table in the midst of the wilderness which is, nevertheless, always filled with a fresh meal whenever travelers come across it.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 954,
@@ -11043,7 +11241,8 @@
       "description": "Once per day, swift. remove AC of target granted by armor, last one turn. user takes penalty to AC equal to target for same duration.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 956,
@@ -11088,7 +11287,8 @@
       "description": "A staff that could change into a hammer and give him extra strength while it was in that mode.",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 960,
@@ -11134,7 +11334,8 @@
       "description": "A charm of twisted black obsidian. Touching the charm unleashes strange, ghostly visions from a strange and alien world – utterly different in every particular, but eerily similar to our own world in its broad scope and form.",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 964,
@@ -11155,7 +11356,8 @@
       "description": "Orb of venom-Applies to all of user attacks. Target takes an additional 1d4 poison damage on their next turn.",
       "rarity": "Common",
       "tier": 1,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 966,
@@ -11163,7 +11365,8 @@
       "description": "An owlbear costume. Gives the wearer a +10 to disguise when attempting to disguise as an Owlbear.",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 967,
@@ -11173,7 +11376,8 @@
       "tier": 4,
       "weight": "n/a",
       "category": "Wondrous Item",
-      "properties": "Can be wrung out infinitely to produce foul tasting water."
+      "properties": "Can be wrung out infinitely to produce foul tasting water.",
+      "value": 0
     },
     {
       "id": 968,
@@ -11182,7 +11386,8 @@
       "rarity": "Legendary",
       "tier": 5,
       "weight": "n/a",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 969,
@@ -11202,7 +11407,8 @@
       "description": "Ash of phoenix in necklace choker – instant revive to wearer (takes 10 rounds/1 minute)",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 971,
@@ -11224,7 +11430,8 @@
       "rarity": "Legendary",
       "tier": 5,
       "weight": "2 lb",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 973,
@@ -11248,7 +11455,8 @@
       "category": "Wondrous Item",
       "properties": "Grants +2 fort saves, +2 reflex saves, +2 will saves",
       "requirements": "Requires Attunement",
-      "author": "DOTA2"
+      "author": "DOTA2",
+      "value": 0
     },
     {
       "id": 975,
@@ -11256,7 +11464,8 @@
       "description": "The tiny figurine of a fertility goddess, carved from a rare, fist-sized pearl. Found deep beneath the surface of the earth, for two weeks after it is brought to the surface any woman touching the figurines will become pregnant. After the two week period has expired, the figure will never work again (or until returned to its original spot for 1d12 months).",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 976,
@@ -11266,7 +11475,8 @@
       "tier": 3,
       "weight": "n/a",
       "category": "Wondrous Item",
-      "author": "Scribnibbler21"
+      "author": "Scribnibbler21",
+      "value": 0
     },
     {
       "id": 977,
@@ -11287,7 +11497,8 @@
       "description": "An elegant puppet theater. Although its wood is brightly polished and the red of its satin curtains is bright and fresh, the hand-painted sign upon its front (reading “The Wondrous Show of Punch and Judy” in carnival lettering) is chipped and faded. If the curtains are opened (using a set of finely woven pulley ropes which lie inside the theater), the puppets – stored in a concealed compartment “backstage” – will come to life and perform elaborate shows of their own volition.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 979,
@@ -11296,7 +11507,8 @@
       "rarity": "Very Rare",
       "tier": 4,
       "weight": "30 lb",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 980,
@@ -11318,7 +11530,8 @@
       "description": "A pen made from a raven’s feather. Through some magical means it writes continuously from an inexhaustible supply of golden ink upon whatever piece of parchment may be near by.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 982,
@@ -11327,7 +11540,8 @@
       "rarity": "Very Rare",
       "tier": 4,
       "weight": "1 lb",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 983,
@@ -11338,7 +11552,8 @@
       "category": "Wondrous Item",
       "properties": "Cursed. Once attuned, the wearer of this ring cannot take it off and is forced to disagree with any idea, statement or action. On top of that, the wearer is also forced to resist any attempt to remove the curse.",
       "requirements": "Requires Attunement",
-      "author": "2nd Ed."
+      "author": "2nd Ed.",
+      "value": 0
     },
     {
       "id": 984,
@@ -11348,7 +11563,8 @@
       "category": "Wondrous Item",
       "properties": "A bronze ring that houses magical protection. It alerts the wearer of fire by etchings becoming red and glowing when fire is within a 10 foot radius, even behind walls",
       "requirements": "Requires Attunement",
-      "author": "Gooch_Ticklr"
+      "author": "Gooch_Ticklr",
+      "value": 0
     },
     {
       "id": 985,
@@ -11357,7 +11573,8 @@
       "rarity": "Rare",
       "tier": 3,
       "category": "Wondrous Item",
-      "requirements": "Requires Attunement"
+      "requirements": "Requires Attunement",
+      "value": 0
     },
     {
       "id": 986,
@@ -11365,7 +11582,8 @@
       "description": "Rust-dust Bomb – metallic eating dust",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 987,
@@ -11373,7 +11591,8 @@
       "description": "Salve of Silence – armor improving sound nullifier",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 988,
@@ -11381,7 +11600,8 @@
       "description": "When used (worn), this seemingly golden crown turns to sand and falls to the ground where it reforms into a crown. Any gold, silver, or copper item it is placed near will also gain this property. A coin would only turn to sand when it was being used (spent), etc",
       "rarity": "Common",
       "tier": 1,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 989,
@@ -11389,7 +11609,8 @@
       "description": "A quarry of 20 Screaming Arrows – intimidate/fear check",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 990,
@@ -11397,7 +11618,8 @@
       "description": "extra planar/dimensional transport/escape to pocket dimension with scrying/teleportation stone/orb",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 991,
@@ -11405,7 +11627,8 @@
       "description": "Shrunken head with command word – 1 ray spell per hour",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 992,
@@ -11438,7 +11661,8 @@
       "description": "One time use only, grants perfect hide and move silently rolls to all allies. effect is lost if moved within 10ft of enemy",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 995,
@@ -11446,7 +11670,8 @@
       "description": "A cursed fishing pole made of blackened ash. It will never catch a fish – although, if one attempts to use it unbaited, they will succeed in catching skeleton fish.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 996,
@@ -11454,7 +11679,8 @@
       "description": "Brass dungeon compass, runic markings, always points to nearest exit.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 997,
@@ -11472,7 +11698,8 @@
       "description": "Giant spider silk rope – sticks to most surfaces (including oiled gloves)",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 999,
@@ -11496,7 +11723,8 @@
       "category": "Wondrous Item",
       "properties": "Once per day, standard. lifts target into air for 3 rounds. \nEnemy can make a reflex save each round to get out DC 10+User level.",
       "requirements": "Requires Attunement\n\nBard, Cleric, Druid, Sorcerer, Warlock, or Wizard",
-      "author": "Aziraphale"
+      "author": "Aziraphale",
+      "value": 0
     },
     {
       "id": 1001,
@@ -11506,7 +11734,8 @@
       "tier": 2,
       "category": "Wondrous Item",
       "properties": "once per day, standard. push target 10 ft the direction they are facing. once per day. If target is pushed into another creature, they deal 1d20 damage. to each other. If target is pushed into object, they take 1d20. Target can make a fort save against the push, goes against users 1d20+will mod",
-      "requirements": "Requires Attunement\nBard, Cleric, Druid, Sorcerer, Warlock, or Wizard"
+      "requirements": "Requires Attunement\nBard, Cleric, Druid, Sorcerer, Warlock, or Wizard",
+      "value": 0
     },
     {
       "id": 1002,
@@ -11514,7 +11743,8 @@
       "description": "Pebble that transforms into whatever inorganic substance it last touched. Currently the leather of your pouch.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 1003,
@@ -11547,7 +11777,8 @@
       "description": "A horn fashioned from the translucent bone of a storm giant. Those who put their ear to the horn hear it whisper the sounds of an unknown village square. Whether the village which they hear is – or was – a real place is a mystery which may never be solved. (Twin horn in village square allows communication between the two).",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 1006,
@@ -11579,7 +11810,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "category": "Wondrous Item",
-      "properties": "Turns any liquid that is poured into this cup into Elven wine."
+      "properties": "Turns any liquid that is poured into this cup into Elven wine.",
+      "value": 0
     },
     {
       "id": 1009,
@@ -11587,7 +11819,8 @@
       "description": "Enchanted talking toad – polymorphed noble – knowledge of multiple regions, religions & other worldly strangeness",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 1010,
@@ -11622,7 +11855,8 @@
       "tier": 5,
       "weight": "10 lb",
       "category": "Wondrous Item",
-      "author": "PlatypusPal"
+      "author": "PlatypusPal",
+      "value": 0
     },
     {
       "id": 1013,
@@ -11632,7 +11866,8 @@
       "tier": 3,
       "weight": "20 lb",
       "category": "Wondrous Item",
-      "author": "Scribnibbler21"
+      "author": "Scribnibbler21",
+      "value": 0
     },
     {
       "id": 1014,
@@ -11640,7 +11875,8 @@
       "description": "A plain mirror with a frame of pale ashwood. Whenever someone looks in the mirror, however, they perceive an elven face in place of their own.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 1015,
@@ -11648,7 +11884,8 @@
       "description": "A famous (or forgotten) tapestry depicting the Fall of Erian. The figures upon the tapestry move and change, re-enacting – in an artistically abstracted form – the legendary battle over the course of half an hour.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 1016,
@@ -11710,7 +11947,8 @@
       "description": "The neverburning torch. A jet black torch, with an inscription in gold upon its side: “Only in your hour of darkest need will I light.” All attempts – magical or otherwise – to light the torch will fail, but if the character carrying the torch ever finds himself upon the brink of death, the torch will flare to life.",
       "rarity": "Common",
       "tier": 1,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 1021,
@@ -11718,7 +11956,8 @@
       "rarity": "Rare",
       "tier": 3,
       "category": "Wondrous Item",
-      "properties": "Rusty key ring containing 100 rusty keys, for any given lock, one of the keys will open said lock. You just have to keep going until you find it. 1d100 to figure out how many keys the player has to try before they succeed."
+      "properties": "Rusty key ring containing 100 rusty keys, for any given lock, one of the keys will open said lock. You just have to keep going until you find it. 1d100 to figure out how many keys the player has to try before they succeed.",
+      "value": 0
     },
     {
       "id": 1022,
@@ -11740,7 +11979,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "category": "Wondrous Item",
-      "properties": "All liquid poured into this cup drains from it as if there was a hole in the bottom."
+      "properties": "All liquid poured into this cup drains from it as if there was a hole in the bottom.",
+      "value": 0
     },
     {
       "id": 1024,
@@ -11759,7 +11999,8 @@
       "description": "When embedded in the hilt of a weapon. -deal and additional 1d6 lightning damage on attacks with an odd 1d20 roll",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 1026,
@@ -11767,7 +12008,8 @@
       "description": "A floating mass of swirling colours the size of a penny. It follows your every command and leaves a multicolour trail across any surface it touches. Cannot physically interact in any other way.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 1027,
@@ -11775,7 +12017,8 @@
       "description": "A token/key designed to deactivate all traps within the dungeon, requires activation at security box in secret depths of deepest part of dungeon",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 1028,
@@ -11784,7 +12027,8 @@
       "rarity": "Common",
       "tier": 1,
       "category": "Wondrous Item",
-      "properties": "When blown, any trolls within a mile or so will approach the players"
+      "properties": "When blown, any trolls within a mile or so will approach the players",
+      "value": 0
     },
     {
       "id": 1029,
@@ -11793,7 +12037,8 @@
       "rarity": "Common",
       "tier": 1,
       "weight": "4 lb",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 1030,
@@ -11802,7 +12047,8 @@
       "rarity": "Rare",
       "tier": 3,
       "category": "Wondrous Item",
-      "author": "DOTA"
+      "author": "DOTA",
+      "value": 0
     },
     {
       "id": 1031,
@@ -11811,7 +12057,8 @@
       "rarity": "Legendary",
       "tier": 5,
       "weight": "n/a",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 1032,
@@ -11831,7 +12078,8 @@
       "description": "A wand of eye poking, four charges. It will unerringly poke out the eye of a target creature within arm’s reach.",
       "rarity": "Uncommon",
       "tier": 2,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 1034,
@@ -11839,7 +12087,8 @@
       "rarity": "Common",
       "tier": 1,
       "category": "Wondrous Item",
-      "properties": "At any time, if the users says \"Floomp\" a pillow will magically appear. After the eighth pillow apparates, they start simply teleporting to the user in order."
+      "properties": "At any time, if the users says \"Floomp\" a pillow will magically appear. After the eighth pillow apparates, they start simply teleporting to the user in order.",
+      "value": 0
     },
     {
       "id": 1035,
@@ -11909,7 +12158,8 @@
       "description": "A small tortoise (STR 2, DEX 1, WIL 6, 1hp, Armour 1) that knows the way to anywhere you ask, but gets there very slowly.",
       "rarity": "Rare",
       "tier": 3,
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "id": 1041,
@@ -11918,7 +12168,8 @@
       "rarity": "Uncommon",
       "tier": 2,
       "weight": "4 lb",
-      "category": "Wondrous Item"
+      "category": "Wondrous Item",
+      "value": 0
     },
     {
       "name": "Adrenal Blades",
