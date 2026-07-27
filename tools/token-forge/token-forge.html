@@ -1945,13 +1945,12 @@
   borderModalClose.addEventListener('click', () => setBorderModalOpen(false));
 
   // Dismiss when clicking outside the panel, but keep the workspace (canvas + controls) interactive.
+  // Use composedPath so filter chip re-renders (replaceChildren) mid-click are not treated as outside.
   document.addEventListener('click', (e) => {
     if (!isBorderModalOpen()) return;
-    const t = e.target;
-    if (!(t instanceof Node)) return;
-    if (borderModalDialog.contains(t)) return;
-    if (borderModalOpen.contains(t)) return;
-    if (workspaceEl && workspaceEl.contains(t)) return;
+    const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
+    if (path.includes(borderModalDialog) || path.includes(borderModalOpen)) return;
+    if (workspaceEl && path.includes(workspaceEl)) return;
     setBorderModalOpen(false);
   });
 
