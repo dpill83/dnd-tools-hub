@@ -318,6 +318,21 @@
     gap: 8px;
   }
 
+  .export-filename {
+    width: 100%;
+    background: var(--bg-elevated);
+    color: var(--text);
+    border: 1px solid var(--border-bright);
+    padding: 8px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    outline: none;
+  }
+
+  .export-filename:focus {
+    border-color: var(--gold);
+  }
+
   .drop-overlay {
     position: absolute;
     inset: 8px;
@@ -393,7 +408,7 @@
     font-size: 13px;
   }
 
-  /* Large border browser modal */
+  /* Border browser — right-side panel (canvas stays visible) */
   .modal-layer {
     position: fixed;
     inset: 0;
@@ -403,46 +418,33 @@
   }
 
   .modal-layer.is-open {
-    pointer-events: auto;
     visibility: visible;
   }
 
-  .modal-backdrop {
+  .border-browser-panel {
     position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-
-  .modal-layer.is-open .modal-backdrop {
-    opacity: 1;
-  }
-
-  .modal-dialog {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) scale(0.96);
-    width: min(1120px, 96vw);
-    max-height: min(900px, 92vh);
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(640px, 94vw);
+    max-width: 100%;
     background: var(--bg-surface);
-    border: 1px solid var(--border-bright);
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
-    border-radius: 8px;
+    border-left: 1px solid var(--border-bright);
+    box-shadow: -12px 0 40px rgba(0, 0, 0, 0.45);
     display: flex;
     flex-direction: column;
     min-height: 0;
-    opacity: 0;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transform: translateX(100%);
+    transition: transform 0.22s ease;
+    pointer-events: auto;
+    outline: none;
   }
 
-  .modal-layer.is-open .modal-dialog {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+  .modal-layer.is-open .border-browser-panel {
+    transform: translateX(0);
   }
 
-  .border-browser-modal .modal-header {
+  .border-browser-panel .modal-header {
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -452,7 +454,7 @@
     border-bottom: 1px solid var(--border);
   }
 
-  .border-browser-modal .modal-title {
+  .border-browser-panel .modal-title {
     font-family: 'Cinzel', serif;
     font-weight: 700;
     font-size: 16px;
@@ -522,7 +524,7 @@
 
   .border-modal-body .chip-groups {
     flex-shrink: 0;
-    max-height: 28vh;
+    max-height: min(22vh, 180px);
     overflow-y: auto;
     padding-right: 4px;
   }
@@ -536,8 +538,8 @@
 
   .border-modal-body .border-grid {
     flex: 1;
-    min-height: 200px;
-    max-height: min(48vh, 520px);
+    min-height: 160px;
+    max-height: none;
   }
 
   .border-modal-body .border-grid-hint {
@@ -584,6 +586,15 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
     color: var(--text-muted);
+  }
+
+  .border-panel-hint {
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0 20px 14px;
+    font-size: 12px;
+    color: var(--text-dim);
+    font-style: italic;
   }
 
   .btn-drawer {
@@ -935,7 +946,7 @@
           </div>
           <div class="preloaded-name" id="preloaded-border-name">Sample border</div>
         </div>
-        <button type="button" class="btn btn-browse-borders" id="border-modal-open" aria-haspopup="dialog" aria-controls="border-modal-dialog">Browse borders</button>
+        <button type="button" class="btn btn-browse-borders" id="border-modal-open" aria-haspopup="dialog" aria-expanded="false" aria-controls="border-modal-dialog">Browse borders</button>
       </div>
 
       <div class="panel-section">
@@ -966,9 +977,9 @@
         <div class="section-label">Export</div>
         <div class="select-row">
           <select id="export-size" aria-label="Export width and height in pixels">
-            <option value="512">512 px</option>
+            <option value="512" selected>512 px</option>
             <option value="768">768 px</option>
-            <option value="1024" selected>1024 px</option>
+            <option value="1024">1024 px</option>
             <option value="2048">2048 px</option>
           </select>
           <select id="export-format" aria-label="Export image format">
@@ -976,6 +987,7 @@
             <option value="webp">WebP</option>
           </select>
         </div>
+        <input type="text" class="export-filename" id="export-filename" value="token_512.png" spellcheck="false" aria-label="Export file name" autocomplete="off">
         <button class="btn btn-primary" id="export-btn">Forge Token</button>
       </div>
     </div>
@@ -998,8 +1010,7 @@
 </div>
 
 <div class="modal-layer" id="border-modal-layer" aria-hidden="true">
-  <div class="modal-backdrop" id="border-modal-backdrop" tabindex="-1"></div>
-  <div class="modal-dialog border-browser-modal" id="border-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="border-modal-title" tabindex="-1">
+  <div class="border-browser-panel" id="border-modal-dialog" role="dialog" aria-modal="false" aria-labelledby="border-modal-title" tabindex="-1">
     <div class="modal-header">
       <h2 class="modal-title" id="border-modal-title">Browse borders</h2>
       <button type="button" class="modal-close" id="border-modal-close" aria-label="Close border browser">×</button>
@@ -1026,13 +1037,14 @@
       <div class="chip-groups" id="chip-groups"></div>
       <div class="border-gallery-meta" id="border-gallery-meta">Loading border list…</div>
       <div class="border-grid" id="border-grid" role="region" aria-label="Preloaded borders on this page" aria-describedby="border-grid-hint" tabindex="0"></div>
-      <div class="border-grid-hint" id="border-grid-hint">Each cell shows the full ring (letterboxed). Focus the grid, then arrow keys to move within this page.</div>
+      <div class="border-grid-hint" id="border-grid-hint">Each cell shows the full ring (letterboxed). Focus the grid, then arrow keys to move within this page. Token preview stays visible on the left.</div>
     </div>
     <div class="border-modal-pagination">
       <button type="button" id="border-page-prev" aria-label="Previous page">Previous</button>
       <span class="border-page-indicator" id="border-page-indicator" aria-live="polite"></span>
       <button type="button" id="border-page-next" aria-label="Next page">Next</button>
     </div>
+    <p class="border-panel-hint">Esc or ✕ to close · preview stays interactive</p>
   </div>
 </div>
 
@@ -1154,6 +1166,33 @@
     if (!s) return 'token';
     if (s.length > 120) s = s.slice(0, 120);
     return s;
+  }
+
+  const exportFilenameEl = document.getElementById('export-filename');
+  const exportSizeEl = document.getElementById('export-size');
+  const exportFormatEl = document.getElementById('export-format');
+
+  function defaultExportFilename() {
+    const size = exportSizeEl.value;
+    const fmt = exportFormatEl.value;
+    const stem = state.portrait ? state.portraitStem : 'token';
+    return `${stem}_${size}.${fmt}`;
+  }
+
+  function syncExportFilename() {
+    exportFilenameEl.value = defaultExportFilename();
+  }
+
+  /** Sanitize a user-edited download name; force extension to match export format. */
+  function sanitizeExportFilename(raw, fmt) {
+    let s = (raw || '').replace(/[/\\?%*:|"<>]/g, '_').trim();
+    s = s.replace(/\.+$/, '');
+    if (!s) s = defaultExportFilename();
+    const ext = `.${fmt}`;
+    const lastDot = s.lastIndexOf('.');
+    const base = (lastDot > 0 ? s.slice(0, lastDot) : s).trim() || 'token';
+    const clipped = base.length > 160 ? base.slice(0, 160) : base;
+    return `${clipped}${ext}`;
   }
 
   // ---------- Sample border generator ----------
@@ -1674,6 +1713,7 @@
     try {
       state.portrait = await loadImageFile(file);
       state.portraitStem = portraitStemFromFileName(file.name);
+      syncExportFilename();
       render();
     } catch (err) {
       alert('Could not load that image.');
@@ -1804,9 +1844,12 @@
   });
 
   // ---------- Export ----------
+  exportSizeEl.addEventListener('change', syncExportFilename);
+  exportFormatEl.addEventListener('change', syncExportFilename);
+
   document.getElementById('export-btn').addEventListener('click', () => {
-    const size = parseInt(document.getElementById('export-size').value, 10);
-    const fmt = document.getElementById('export-format').value;
+    const size = parseInt(exportSizeEl.value, 10);
+    const fmt = exportFormatEl.value;
 
     const out = document.createElement('canvas');
     out.width = out.height = size;
@@ -1815,14 +1858,15 @@
 
     const mime = fmt === 'webp' ? 'image/webp' : 'image/png';
     const quality = fmt === 'webp' ? 0.95 : undefined;
+    const downloadName = sanitizeExportFilename(exportFilenameEl.value, fmt);
+    exportFilenameEl.value = downloadName;
 
     out.toBlob((blob) => {
       if (!blob) { alert('Export failed.'); return; }
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const stem = state.portrait ? state.portraitStem : 'token';
-      a.download = `${stem}_${size}.${fmt}`;
+      a.download = downloadName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -1830,25 +1874,27 @@
     }, mime, quality);
   });
 
-  // ---------- Drawer, border modal, pagination ----------
+  // ---------- Drawer, border panel, pagination ----------
   const drawerLayer = document.getElementById('drawer-layer');
   const drawerBackdrop = document.getElementById('drawer-backdrop');
   const drawerCloseBtn = document.getElementById('drawer-close');
   const drawerOpenBtn = document.getElementById('drawer-open');
   const borderModalLayer = document.getElementById('border-modal-layer');
-  const borderModalBackdrop = document.getElementById('border-modal-backdrop');
+  const borderModalDialog = document.getElementById('border-modal-dialog');
   const borderModalClose = document.getElementById('border-modal-close');
   const borderModalOpen = document.getElementById('border-modal-open');
   const borderPageSizeEl = document.getElementById('border-page-size');
   const borderSortEl = document.getElementById('border-sort');
   const borderPagePrevBtn = document.getElementById('border-page-prev');
   const borderPageNextBtn = document.getElementById('border-page-next');
+  const workspaceEl = document.querySelector('main.workspace');
 
   borderSortEl.value = borderSortOrder;
   borderPageSizeEl.value = String(borderPageSize);
 
   function syncBodyScrollLock() {
-    document.body.style.overflow = (isDrawerOpen() || isBorderModalOpen()) ? 'hidden' : '';
+    // Only the Theme drawer locks page scroll; border panel leaves the stage interactive.
+    document.body.style.overflow = isDrawerOpen() ? 'hidden' : '';
   }
 
   function isDrawerOpen() {
@@ -1860,6 +1906,7 @@
   }
 
   function setDrawerOpen(open) {
+    if (open && isBorderModalOpen()) setBorderModalOpen(false);
     drawerLayer.classList.toggle('is-open', open);
     drawerLayer.setAttribute('aria-hidden', open ? 'false' : 'true');
     drawerOpenBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -1873,6 +1920,7 @@
   }
 
   function setBorderModalOpen(open) {
+    if (open && isDrawerOpen()) setDrawerOpen(false);
     borderModalLayer.classList.toggle('is-open', open);
     borderModalLayer.setAttribute('aria-hidden', open ? 'false' : 'true');
     borderModalOpen.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -1895,7 +1943,17 @@
 
   borderModalOpen.addEventListener('click', () => setBorderModalOpen(true));
   borderModalClose.addEventListener('click', () => setBorderModalOpen(false));
-  borderModalBackdrop.addEventListener('click', () => setBorderModalOpen(false));
+
+  // Dismiss when clicking outside the panel, but keep the workspace (canvas + controls) interactive.
+  document.addEventListener('click', (e) => {
+    if (!isBorderModalOpen()) return;
+    const t = e.target;
+    if (!(t instanceof Node)) return;
+    if (borderModalDialog.contains(t)) return;
+    if (borderModalOpen.contains(t)) return;
+    if (workspaceEl && workspaceEl.contains(t)) return;
+    setBorderModalOpen(false);
+  });
 
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
