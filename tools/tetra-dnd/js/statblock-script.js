@@ -161,15 +161,22 @@ function ResetSeparationPoint() {
     updateAddButtonVisibility();
 }
 
-// Smart Add button: only show when user has loaded a .monster file (so they can add it to the list)
+// Tracks whether the current mon was loaded from a .monster file / pasted JSON
 var loadedFromFile = false;
 
 function updateAddButtonVisibility() {
     var el = document.getElementById("monster-add-to-list");
     if (!el) return;
     var name = (mon.name || "").trim();
-    var show = loadedFromFile && name !== "";
+    var show = name !== "";
     el.style.display = show ? "" : "none";
+    if (!show) return;
+    var slug = MonsterPresets.slugFromName(name);
+    var exists = !!MonsterPresets.getCustomPreset(slug);
+    el.textContent = exists ? "Update preset" : "Save preset";
+    el.title = exists
+        ? "Overwrite custom preset for this name"
+        : "Save current statblock as a custom preset";
 }
 
 // Functions for saving/loading data
@@ -1131,7 +1138,12 @@ var InputFunctions = {
         GetVariablesFunctions.GetAllVariables();
         var name = (mon.name || "").trim();
         if (!name) return;
-        var slug = MonsterPresets.addCustomPreset(SavedData.GetSerializableMon());
+        var slug = MonsterPresets.slugFromName(name);
+        if (MonsterPresets.getCustomPreset(slug)) {
+            if (!confirm('Overwrite custom preset "' + name + '"?'))
+                return;
+        }
+        slug = MonsterPresets.addCustomPreset(SavedData.GetSerializableMon());
         if (slug) {
             loadedFromFile = false;
             var displayText = name + (mon.cr != null && mon.cr !== "" ? " (CR " + mon.cr + ")" : "") + " (custom)";
@@ -2504,6 +2516,7 @@ var MonsterPresets = (function () {
     }
 
     function slugFromName(name) {
+        // Name-derived key: rename orphans the old slug; distinct names can collide after slugify
         return (name || "").toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") || "custom";
     }
 
@@ -2633,6 +2646,7 @@ var MonsterPresets = (function () {
         getCustomPreset: getCustomPreset,
         getCustomMonsters: getCustomMonsters,
         getCustomFromStorage: getCustomFromStorage,
+        slugFromName: slugFromName,
         addCustomPreset: addCustomPreset,
         removeCustomPreset: removeCustomPreset,
         updateCustomPreset: updateCustomPreset,
