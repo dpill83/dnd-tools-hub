@@ -287,36 +287,246 @@
     outline-offset: 2px;
 }
 
-.dice-result-panel {
-    display: inline-block;
-    margin: 0 20px 1rem;
-    padding: 0.5rem 0.75rem;
-    max-width: 36rem;
-    text-align: left;
-    background: #e8e0d4;
-    border: 1px solid #a08b6e;
-    border-radius: 0.25rem;
+/* Dice roll log: sit just right of the centered 800px wide card when space allows */
+.dice-log {
+    --dice-log-width: 13.5rem;
+    position: fixed;
+    z-index: 1030;
+    bottom: 1rem;
+    left: max(0.5rem, min(calc(50% + 410px), calc(100vw - var(--dice-log-width) - 0.5rem)));
+    width: var(--dice-log-width);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.8rem;
     color: #522;
-    box-shadow: 0 0 0.5rem rgba(134, 116, 83, 0.35);
+    text-align: left;
+    pointer-events: none;
 }
 
-.dice-result-panel[hidden] {
+.dice-log > * {
+    pointer-events: auto;
+}
+
+.dice-log-live {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.dice-log-tab {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid #a08b6e;
+    border-radius: 0.35rem;
+    background: #e8e0d4;
+    color: #522;
+    box-shadow: 0 0.15rem 0.5rem rgba(82, 34, 34, 0.2);
+    cursor: pointer;
+}
+
+.dice-log-tab:hover,
+.dice-log-tab:focus-visible {
+    background: #c9a227;
+    color: #fff;
+    outline: none;
+}
+
+.dice-log[data-state="hidden"] .dice-log-tab {
+    display: inline-flex;
+}
+
+.dice-log[data-state="hidden"] .dice-log-panel {
     display: none;
 }
 
-.dice-result-label {
-    font-weight: 600;
-    margin-right: 0.35rem;
+.dice-log-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    width: 100%;
+    max-height: min(50vh, 22rem);
 }
 
-.dice-result-output {
-    font-family: "Noto Sans", sans-serif;
-    font-size: 0.95rem;
+.dice-log[data-state="expanded"] {
+    --dice-log-width: 16rem;
+}
+
+.dice-log[data-state="expanded"] .dice-log-panel {
+    max-height: min(70vh, 32rem);
+}
+
+.dice-log[data-state="expanded"] .dice-log-expand {
+    display: none;
+}
+
+.dice-log-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.dice-log-empty {
+    margin: 0;
+    padding: 0.6rem 0.75rem;
+    background: #e8e0d4;
+    border: 1px solid #a08b6e;
+    border-radius: 0.35rem;
+    color: #866;
+    box-shadow: 0 0.1rem 0.35rem rgba(82, 34, 34, 0.12);
+}
+
+.dice-log-entry {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas:
+        "time time reroll"
+        "label total reroll";
+    gap: 0.1rem 0.4rem;
+    align-items: center;
+    padding: 0.45rem 0.55rem;
+    background: #e8e0d4;
+    border: 1px solid #a08b6e;
+    border-radius: 0.35rem;
+    box-shadow: 0 0.1rem 0.35rem rgba(82, 34, 34, 0.15);
+}
+
+.dice-log-entry--expanded {
+    grid-template-areas:
+        "time time reroll"
+        "label total reroll"
+        "breakdown breakdown breakdown";
+}
+
+.dice-log-time {
+    grid-area: time;
+    font-size: 0.7rem;
+    color: #866;
+}
+
+.dice-log-label {
+    grid-area: label;
+    font-weight: 600;
+    line-height: 1.25;
     word-break: break-word;
 }
 
+.dice-log-breakdown {
+    grid-area: breakdown;
+    margin-top: 0.2rem;
+    font-size: 0.72rem;
+    color: #644;
+    word-break: break-word;
+}
+
+.dice-log-total {
+    grid-area: total;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #7a1f1f;
+    line-height: 1;
+}
+
+.dice-log-total--crit {
+    color: #1f6b3a;
+}
+
+.dice-log-total--fumble {
+    color: #7a1f1f;
+    text-decoration: underline;
+}
+
+.dice-log-reroll {
+    grid-area: reroll;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: 1px solid #a08b6e;
+    border-radius: 50%;
+    background: #f3ebe0;
+    color: #522;
+    cursor: pointer;
+}
+
+.dice-log-reroll:hover,
+.dice-log-reroll:focus-visible {
+    background: #c9a227;
+    color: #fff;
+    outline: none;
+}
+
+.dice-log-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    justify-content: flex-end;
+}
+
+.dice-log-ctrl {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-height: 1.85rem;
+    padding: 0.25rem 0.55rem;
+    border: 1px solid #a08b6e;
+    border-radius: 999px;
+    background: #e8e0d4;
+    color: #522;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    box-shadow: 0 0.1rem 0.3rem rgba(82, 34, 34, 0.12);
+}
+
+.dice-log-ctrl:hover,
+.dice-log-ctrl:focus-visible {
+    background: #c9a227;
+    color: #fff;
+    outline: none;
+}
+
+.dice-log-ctrl:disabled {
+    opacity: 0.45;
+    cursor: default;
+    background: #e8e0d4;
+    color: #522;
+}
+
+.dice-log-minimize,
+.dice-log-expand {
+    width: 1.85rem;
+    padding: 0;
+}
+
+@media (max-width: 1200px) {
+    .dice-log {
+        --dice-log-width: 12rem;
+        left: auto;
+        right: 0.5rem;
+    }
+}
+
 @media print {
-    .dice-result-panel {
+    .dice-log {
         display: none !important;
     }
 
