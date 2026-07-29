@@ -538,7 +538,7 @@ var DiceRoller = {
         var nodes = this.collectTextNodes(root);
         nodes.forEach(function (node) {
             if (this.isInsideDiceRoll(node)) return;
-            this.wrapRegexMatches(node, /\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+([+-]\d+)\b/g, function (match, parts) {
+            this.wrapRegexMatches(node, /\b([A-Z][a-z]+(?:\sof)?(?:\s[A-Z][a-z]+)?)\s+([+-]\d+)\b/g, function (match, parts) {
                 var name = match[1];
                 var mod = parseInt(match[2], 10);
                 parts.push({ type: "text", value: name + " " });
