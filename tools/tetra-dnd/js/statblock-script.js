@@ -174,11 +174,17 @@ function updateAddButtonVisibility() {
 
 // Functions for saving/loading data
 var SavedData = {
-    // Saving
+    // Saving — when not manually nudged, persist null so the break re-auto-balances on load
+    GetSerializableMon: function () {
+        let copy = JSON.parse(JSON.stringify(mon));
+        if (!separationPointManual)
+            copy.separationPoint = null;
+        return copy;
+    },
 
-    SaveToLocalStorage: () => localStorage.setItem("SavedData", JSON.stringify(mon)),
+    SaveToLocalStorage: () => localStorage.setItem("SavedData", JSON.stringify(SavedData.GetSerializableMon())),
 
-    SaveToFile: () => saveAs(new Blob([JSON.stringify(mon)], {
+    SaveToFile: () => saveAs(new Blob([JSON.stringify(SavedData.GetSerializableMon())], {
         type: "text/plain;charset=utf-8"
     }), mon.name.toLowerCase() + ".monster"),
 
@@ -210,7 +216,6 @@ var SavedData = {
         }
         loadedFromFile = true;
         mon = parsed;
-        separationPointManual = false;
         if (mon.cr != null && mon.cr !== "*" && typeof data !== "undefined" && data.crs && data.crs[mon.cr] == null) {
             mon.cr = CrFunctions.getCrKey();
         }
@@ -1126,7 +1131,7 @@ var InputFunctions = {
         GetVariablesFunctions.GetAllVariables();
         var name = (mon.name || "").trim();
         if (!name) return;
-        var slug = MonsterPresets.addCustomPreset(JSON.parse(JSON.stringify(mon)));
+        var slug = MonsterPresets.addCustomPreset(SavedData.GetSerializableMon());
         if (slug) {
             loadedFromFile = false;
             var displayText = name + (mon.cr != null && mon.cr !== "" ? " (CR " + mon.cr + ")" : "") + " (custom)";
@@ -2660,7 +2665,8 @@ $(function () {
 });
 
 function Populate() {
-    separationPointManual = false;
+    // null/undefined → auto; a concrete number (including 0) → treat as a persisted manual break
+    separationPointManual = mon.separationPoint != null;
     FormFunctions.SetLegendaryDescriptionForm();
     FormFunctions.SetMythicDescriptionForm();
     FormFunctions.SetLairDescriptionForm();
