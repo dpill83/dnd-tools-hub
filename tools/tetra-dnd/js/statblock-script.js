@@ -135,10 +135,29 @@ function TryImage() {
         });
 }
 
+// True after the user nudges << / >>; cleared on load, preset, or Reset Columns.
+var separationPointManual = false;
+
 // Update the main stat block from form variables
 function UpdateBlockFromVariables(moveSeparationPoint) {
+    let prevColumns = mon.doubleColumns;
     GetVariablesFunctions.GetAllVariables();
+
+    if (moveSeparationPoint !== undefined && moveSeparationPoint !== 0)
+        separationPointManual = true;
+    else if (mon.doubleColumns !== prevColumns && !separationPointManual)
+        mon.separationPoint = null;
+
     UpdateStatblock(moveSeparationPoint);
+    updateAddButtonVisibility();
+}
+
+// Rebalance columns: clear a fixed separationPoint (e.g. legacy :1) and auto-split.
+function ResetSeparationPoint() {
+    GetVariablesFunctions.GetAllVariables();
+    mon.separationPoint = null;
+    separationPointManual = false;
+    UpdateStatblock();
     updateAddButtonVisibility();
 }
 
@@ -191,6 +210,7 @@ var SavedData = {
         }
         loadedFromFile = true;
         mon = parsed;
+        separationPointManual = false;
         if (mon.cr != null && mon.cr !== "*" && typeof data !== "undefined" && data.crs && data.crs[mon.cr] == null) {
             mon.cr = CrFunctions.getCrKey();
         }
@@ -287,7 +307,7 @@ function UpdateStatblock(moveSeparationPoint) {
     // Abilities
     let traitsHTML = [];
 
-    if (mon.abilities.length > 0) AddToTraitList(traitsHTML, mon.abilities);
+    if (mon.abilities.length > 0) AddToTraitList(traitsHTML, mon.abilities, "<h3>Traits</h3>");
     if (mon.actions.length > 0) AddToTraitList(traitsHTML, mon.actions, "<h3>Actions</h3>");
     if (mon.bonusActions.length > 0) AddToTraitList(traitsHTML, mon.bonusActions, "<h3>Bonus Actions</h3>");
     if (mon.reactions.length > 0) AddToTraitList(traitsHTML, mon.reactions, "<h3>Reactions</h3>");
@@ -534,7 +554,7 @@ function BuildMarkdown(isV3Markdown) {
         PrintMarkdownProperty(isV3Markdown, "Challenge", mon.cr == "*" ? mon.customCr : CrFunctions.GetString()),
         "___");
 
-    AddMarkdownTraitSection(markdownLines, isV3Markdown, null, mon.abilities);
+    AddMarkdownTraitSection(markdownLines, isV3Markdown, "Traits", mon.abilities);
     AddMarkdownTraitSection(markdownLines, isV3Markdown, "Actions", mon.actions);
     AddMarkdownTraitSection(markdownLines, isV3Markdown, "Bonus Actions", mon.bonusActions);
     AddMarkdownTraitSection(markdownLines, isV3Markdown, "Reactions", mon.reactions);
@@ -800,6 +820,7 @@ var FormFunctions = {
     ShowHideSeparatorInput: function () {
         this.ShowHideHtmlElement("#left-separator-button", mon.doubleColumns);
         this.ShowHideHtmlElement("#right-separator-button", mon.doubleColumns);
+        this.ShowHideHtmlElement("#reset-separator-button", mon.doubleColumns);
     },
 
     ShowHideLegendaryCreature: function () {
@@ -1608,6 +1629,7 @@ var GetVariablesFunctions = {
             AbilityPresetLoop(regionalsPresetArr, "regionals");
 
         mon.separationPoint = undefined; // This will make the separation point be automatically calculated in UpdateStatblock
+        separationPointManual = false;
     },
 
     // Add stuff to arrays
@@ -2638,6 +2660,7 @@ $(function () {
 });
 
 function Populate() {
+    separationPointManual = false;
     FormFunctions.SetLegendaryDescriptionForm();
     FormFunctions.SetMythicDescriptionForm();
     FormFunctions.SetLairDescriptionForm();
