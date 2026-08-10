@@ -1022,41 +1022,46 @@ var FormFunctions = {
     }
 }
 
-// Per-monster API response cache (in-memory + localStorage, 7-day TTL, max 100 entries)
+// Per-monster API response cache (in-memory + localStorage, 7-day TTL, max 100 entries).
+// Keys are source-qualified: "srd:srd-2024_wererat", "srd:srd_wererat", "tob:wererat".
 var monsterPresetCache = (function () {
     var MEMORY = {};
-    var CACHE_KEY = "open5e-monster-cache-v1";
+    var CACHE_KEY = "open5e-monster-cache-v2";
     var TTL_MS = 7 * 24 * 60 * 60 * 1000;
     var MAX_ENTRIES = 100;
 
-    function get(slug) {
-        if (MEMORY[slug]) return MEMORY[slug];
+    function cacheId(source, slug) {
+        return (source || "srd") + ":" + slug;
+    }
+
+    function get(id) {
+        if (MEMORY[id]) return MEMORY[id];
         try {
             var raw = localStorage.getItem(CACHE_KEY);
             if (!raw) return null;
             var parsed = JSON.parse(raw);
             if (!parsed || !parsed.entries) return null;
-            var ent = parsed.entries[slug];
+            var ent = parsed.entries[id];
             if (!ent || !ent.data) return null;
             if (Date.now() - (ent.fetchedAt || 0) > TTL_MS) return null;
-            MEMORY[slug] = ent.data;
+            MEMORY[id] = ent.data;
             return ent.data;
         } catch (e) {
             return null;
         }
     }
 
-    function set(slug, data) {
-        MEMORY[slug] = data;
+    function set(id, data) {
+        MEMORY[id] = data;
         try {
             var raw = localStorage.getItem(CACHE_KEY);
             var parsed = raw ? JSON.parse(raw) : { entries: {}, order: [] };
             if (!parsed.entries) parsed.entries = {};
             if (!parsed.order) parsed.order = [];
-            parsed.entries[slug] = { data: data, fetchedAt: Date.now() };
-            var idx = parsed.order.indexOf(slug);
+            parsed.entries[id] = { data: data, fetchedAt: Date.now() };
+            var idx = parsed.order.indexOf(id);
             if (idx !== -1) parsed.order.splice(idx, 1);
-            parsed.order.push(slug);
+            parsed.order.push(id);
             while (parsed.order.length > MAX_ENTRIES) {
                 var old = parsed.order.shift();
                 delete parsed.entries[old];
@@ -1065,8 +1070,145 @@ var monsterPresetCache = (function () {
         } catch (e) { /* ignore */ }
     }
 
-    return { get: get, set: set };
+    return { get: get, set: set, cacheId: cacheId };
 })();
+
+// Map Open5e v2 creature JSON into the flat v1-like shape SetPreset expects.
+function normalizeOpen5eV2Creature(raw) {
+    if (!raw || typeof raw !== "object") return raw;
+
+    function nestName(val, fallback) {
+        if (val == null) return fallback || "";
+        if (typeof val === "string") return val;
+        if (typeof val === "object" && val.name) return String(val.name);
+        return fallback || "";
+    }
+
+    function deriveSave(ability) {
+        var saves = raw.saving_throws || {};
+        var mods = raw.modifiers || {};
+        if (!Object.prototype.hasOwnProperty.call(saves, ability)) return null;
+        if (saves[ability] !== mods[ability]) return saves[ability];
+        return null;
+    }
+
+    function formatActionName(action) {
+        var name = (action.name || "").trim();
+        if (action.limited_to_form)
+            name += " (" + action.limited_to_form + ")";
+        var limits = action.usage_limits;
+        if (limits && limits.type === "PER_DAY" && limits.param != null)
+            name += " (" + limits.param + "/Day)";
+        return name;
+    }
+
+    function mapActions(actionType) {
+        var list = Array.isArray(raw.actions) ? raw.actions.slice() : [];
+        list.sort(function (a, b) {
+            var ao = a.order_in_statblock != null ? a.order_in_statblock : 0;
+            var bo = b.order_in_statblock != null ? b.order_in_statblock : 0;
+            return ao - bo;
+        });
+        return list.filter(function (a) {
+            return a && a.action_type === actionType;
+        }).map(function (a) {
+            return { name: formatActionName(a), desc: a.desc || "" };
+        });
+    }
+
+    function buildSenses() {
+        var parts = [];
+        if (raw.blindsight_range)
+            parts.push("blindsight " + raw.blindsight_range + " ft.");
+        if (raw.darkvision_range)
+            parts.push("darkvision " + raw.darkvision_range + " ft.");
+        if (raw.tremorsense_range)
+            parts.push("tremorsense " + raw.tremorsense_range + " ft.");
+        if (raw.truesight_range)
+            parts.push("truesight " + raw.truesight_range + " ft.");
+        if (raw.passive_perception != null && raw.passive_perception !== "")
+            parts.push("passive Perception " + raw.passive_perception);
+        return parts.join(", ");
+    }
+
+    var scores = raw.ability_scores || {};
+    var ri = raw.resistances_and_immunities || {};
+    var speedSrc = raw.speed || {};
+    var speedAll = raw.speed_all || {};
+    var speed = {
+        walk: speedSrc.walk != null ? speedSrc.walk : 0
+    };
+    if (speedSrc.burrow) speed.burrow = speedSrc.burrow;
+    if (speedSrc.climb) speed.climb = speedSrc.climb;
+    if (speedSrc.fly) speed.fly = speedSrc.fly;
+    if (speedSrc.swim) speed.swim = speedSrc.swim;
+    if (speedAll.hover || speedSrc.hover) speed.hover = true;
+
+    var langs = "";
+    if (raw.languages) {
+        if (typeof raw.languages === "string") langs = raw.languages;
+        else if (raw.languages.as_string) langs = raw.languages.as_string;
+    }
+    langs = String(langs).replace(/;/g, ",");
+
+    var subtype = "";
+    if (raw.subtype) subtype = nestName(raw.subtype);
+    else if (raw.subcategory) subtype = nestName(raw.subcategory);
+
+    var traits = Array.isArray(raw.traits) ? raw.traits.map(function (t) {
+        return { name: (t.name || "").trim(), desc: t.desc || "" };
+    }) : [];
+
+    var actions = mapActions("ACTION");
+    var bonusActions = mapActions("BONUS_ACTION");
+    var reactions = mapActions("REACTION");
+    var legendaryActions = mapActions("LEGENDARY_ACTION");
+
+    return {
+        name: raw.name || "",
+        size: nestName(raw.size, "Medium"),
+        type: nestName(raw.type, "humanoid"),
+        subtype: subtype,
+        alignment: raw.alignment || "",
+        armor_class: raw.armor_class,
+        armor_desc: null,
+        hit_points: raw.hit_points,
+        hit_dice: raw.hit_dice || "1d8",
+        speed: speed,
+        strength: scores.strength,
+        dexterity: scores.dexterity,
+        constitution: scores.constitution,
+        intelligence: scores.intelligence,
+        wisdom: scores.wisdom,
+        charisma: scores.charisma,
+        strength_save: deriveSave("strength"),
+        dexterity_save: deriveSave("dexterity"),
+        constitution_save: deriveSave("constitution"),
+        intelligence_save: deriveSave("intelligence"),
+        wisdom_save: deriveSave("wisdom"),
+        charisma_save: deriveSave("charisma"),
+        skills: raw.skill_bonuses || {},
+        damage_vulnerabilities: ri.damage_vulnerabilities_display || "",
+        damage_resistances: ri.damage_resistances_display || "",
+        damage_immunities: ri.damage_immunities_display || "",
+        condition_immunities: ri.condition_immunities_display || "",
+        senses: buildSenses(),
+        languages: langs,
+        challenge_rating: raw.challenge_rating,
+        special_abilities: traits,
+        actions: actions,
+        bonusActions: bonusActions.length ? bonusActions : null,
+        reactions: reactions.length ? reactions : null,
+        legendary_actions: legendaryActions.length ? legendaryActions : null,
+        legendary_desc: raw.legendary_desc || null,
+        mythic_actions: null,
+        mythic_desc: null,
+        lair_actions: null,
+        lair_desc: null,
+        regional_actions: null,
+        regional_desc: null
+    };
+}
 
 function setPresetLoading(loading) {
     var btn = document.getElementById("monster-select-button");
@@ -1098,7 +1240,12 @@ var InputFunctions = {
                 return;
             }
         }
-        var cached = monsterPresetCache.get(slug);
+        var source = (typeof MonsterPresets !== "undefined" && MonsterPresets.getPresetSource)
+            ? MonsterPresets.getPresetSource(slug)
+            : "srd";
+        if (!source) source = "srd";
+        var cacheKey = monsterPresetCache.cacheId(source, slug);
+        var cached = monsterPresetCache.get(cacheKey);
         if (cached) {
             GetVariablesFunctions.SetPreset(cached);
             FormFunctions.SetForms();
@@ -1107,9 +1254,13 @@ var InputFunctions = {
             return;
         }
         setPresetLoading(true);
-        $.getJSON("https://api.open5e.com/v1/monsters/" + slug, function (jsonArr) {
-            monsterPresetCache.set(slug, jsonArr);
-            GetVariablesFunctions.SetPreset(jsonArr);
+        var detailUrl = source === "tob"
+            ? "https://api.open5e.com/v1/monsters/" + encodeURIComponent(slug)
+            : "https://api.open5e.com/v2/creatures/" + encodeURIComponent(slug) + "/";
+        $.getJSON(detailUrl, function (jsonArr) {
+            var preset = source === "tob" ? jsonArr : normalizeOpen5eV2Creature(jsonArr);
+            monsterPresetCache.set(cacheKey, preset);
+            GetVariablesFunctions.SetPreset(preset);
             FormFunctions.SetForms();
             UpdateStatblock();
             setPresetLoading(false);
@@ -2210,15 +2361,74 @@ var ArrayFunctions = {
 // --- Monster presets: Open5e API + local custom catalog (file + localStorage), with offline fallback ---
 // Tome of Beasts is third-party data (Kobold Press) via Open5e; may be subject to future removal or licensing changes.
 var MonsterPresets = (function () {
-    var CACHE_KEY = "open5e-monster-list-v2";
     var CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
     var CUSTOM_STORAGE_KEY = "statblock-custom-presets";
-    var SRD_URL = "https://api.open5e.com/v1/monsters/?format=json&fields=slug,name,challenge_rating&limit=1000&document__slug=wotc-srd";
+    var EDITION_STORAGE_KEY = "statblock-rules-edition";
     var TOB_URL = "https://api.open5e.com/v1/monsters/?format=json&fields=slug,name,challenge_rating&limit=1000&document__slug=tob";
 
     var customMonsterCatalog = {};
     var customMonsterCatalogLoaded = false;
     var slugToSourceMap = {};
+
+    function getEdition() {
+        try {
+            var v = localStorage.getItem(EDITION_STORAGE_KEY);
+            if (v === "2014" || v === "2024") return v;
+        } catch (e) { /* ignore */ }
+        return "2024";
+    }
+
+    function setEdition(edition) {
+        if (edition !== "2014" && edition !== "2024") return getEdition();
+        try { localStorage.setItem(EDITION_STORAGE_KEY, edition); } catch (e) { /* ignore */ }
+        return edition;
+    }
+
+    function listCacheKey(edition) {
+        return "open5e-monster-list-" + (edition || getEdition());
+    }
+
+    function srdDocumentKey(edition) {
+        return (edition || getEdition()) === "2014" ? "srd-2014" : "srd-2024";
+    }
+
+    function srdListUrl(edition) {
+        var doc = srdDocumentKey(edition);
+        return "https://api.open5e.com/v2/creatures/?document__key__in=" + encodeURIComponent(doc) +
+            "&fields=key,name,challenge_rating&limit=100";
+    }
+
+    function srdSectionLabel(edition) {
+        return (edition || getEdition()) === "2014"
+            ? "-SRD 5.1 (5e)-"
+            : "-SRD 5.2 (5.5e)-";
+    }
+
+    function syncEditionToggleUi() {
+        var edition = getEdition();
+        var btn5e = document.getElementById("edition-5e-btn");
+        var btn55e = document.getElementById("edition-55e-btn");
+        if (btn5e) btn5e.setAttribute("aria-pressed", edition === "2014" ? "true" : "false");
+        if (btn55e) btn55e.setAttribute("aria-pressed", edition === "2024" ? "true" : "false");
+    }
+
+    function onEditionChange(edition) {
+        if (edition !== "2014" && edition !== "2024") return;
+        if (edition === getEdition()) {
+            syncEditionToggleUi();
+            return;
+        }
+        setEdition(edition);
+        syncEditionToggleUi();
+        // Refresh list only — do not overwrite the currently edited statblock.
+        if (monsterSelectInstance) {
+            monsterSelectInstance.clear(true);
+            monsterSelectInstance.clearOptions();
+        }
+        var slugEl = document.getElementById("monster-select-slug");
+        if (slugEl) slugEl.value = "";
+        loadMonsterList(true);
+    }
 
     function getCustomFromStorage() {
         try {
@@ -2340,7 +2550,7 @@ var MonsterPresets = (function () {
 
     function getCachedList() {
         try {
-            var raw = localStorage.getItem(CACHE_KEY);
+            var raw = localStorage.getItem(listCacheKey());
             if (!raw) return null;
             var parsed = JSON.parse(raw);
             if (!parsed || !Array.isArray(parsed.list)) return null;
@@ -2353,7 +2563,7 @@ var MonsterPresets = (function () {
     function setCachedList(list, fetchedAt) {
         try {
             fetchedAt = fetchedAt || Date.now();
-            localStorage.setItem(CACHE_KEY, JSON.stringify({ fetchedAt: fetchedAt, list: list }));
+            localStorage.setItem(listCacheKey(), JSON.stringify({ fetchedAt: fetchedAt, list: list }));
         } catch (e) { /* ignore */ }
     }
 
@@ -2373,14 +2583,24 @@ var MonsterPresets = (function () {
                 customMonsterCatalogLoaded = true;
             }
         }
-        var pair = await Promise.all([fetchAllOpen5ePages(SRD_URL), fetchAllOpen5ePages(TOB_URL)]);
+        var edition = getEdition();
+        var pair = await Promise.all([fetchAllOpen5ePages(srdListUrl(edition)), fetchAllOpen5ePages(TOB_URL)]);
         var srdResults = pair[0] || [];
         var tobResults = pair[1] || [];
         var list = [];
-        list.push({ slug: "", name: "-5e SRD-", source: "srd" });
-        srdResults.forEach(function (m) { list.push({ slug: m.slug, name: m.name, source: "srd", challenge_rating: m.challenge_rating }); });
+        list.push({ slug: "", name: srdSectionLabel(edition), source: "srd" });
+        srdResults.forEach(function (m) {
+            list.push({
+                slug: m.key || m.slug,
+                name: m.name,
+                source: "srd",
+                challenge_rating: m.challenge_rating
+            });
+        });
         list.push({ slug: "", name: "-Tome of Beasts (Kobold Press)-", source: "tob" });
-        tobResults.forEach(function (m) { list.push({ slug: m.slug, name: m.name, source: "tob", challenge_rating: m.challenge_rating }); });
+        tobResults.forEach(function (m) {
+            list.push({ slug: m.slug, name: m.name, source: "tob", challenge_rating: m.challenge_rating });
+        });
         var customList = getCustomList();
         if (customList.length > 0) {
             list.push({ slug: "", name: "-Custom-", source: "custom" });
@@ -2499,10 +2719,19 @@ var MonsterPresets = (function () {
 
     function bindMonsterInput() {
         // Slug is synced via Tom Select onChange in populateDatalistFromList
+        syncEditionToggleUi();
+        var btn5e = document.getElementById("edition-5e-btn");
+        var btn55e = document.getElementById("edition-55e-btn");
+        if (btn5e) {
+            btn5e.addEventListener("click", function () { onEditionChange("2014"); });
+        }
+        if (btn55e) {
+            btn55e.addEventListener("click", function () { onEditionChange("2024"); });
+        }
     }
 
     function refreshList() {
-        try { localStorage.removeItem(CACHE_KEY); } catch (e) { /* ignore */ }
+        try { localStorage.removeItem(listCacheKey()); } catch (e) { /* ignore */ }
         loadMonsterList(true);
     }
 
@@ -2653,6 +2882,9 @@ var MonsterPresets = (function () {
         openManagePresets: openManagePresets,
         getSelectInstance: getSelectInstance,
         setSelection: setSelection,
+        getEdition: getEdition,
+        setEdition: setEdition,
+        onEditionChange: onEditionChange,
         CUSTOM_STORAGE_KEY: CUSTOM_STORAGE_KEY
     };
 })();

@@ -43,6 +43,10 @@
                     <button type="button" id="monster-manage-presets" class="toolbar-btn-icon" onclick="MonsterPresets.openManagePresets()" title="Edit or remove custom presets" aria-label="Manage presets"><i class="bi bi-gear"></i></button>
                 </div>
                 <div class="toolbar-row preset-group">
+                    <div class="edition-toggle" role="group" aria-label="Rules edition for presets">
+                        <button type="button" id="edition-5e-btn" class="edition-toggle-btn" data-edition="2014" title="SRD 5.1 (2014)" aria-pressed="false">5e</button>
+                        <button type="button" id="edition-55e-btn" class="edition-toggle-btn" data-edition="2024" title="SRD 5.2 (2024)" aria-pressed="true">5.5e</button>
+                    </div>
                     <label for="monster-select-input" class="toolbar-preset-label">Preset:</label>
                     <select id="monster-select-input" placeholder="Search monster…" autocomplete="off" aria-label="Monster preset search"><option value="">Search monster…</option></select>
                     <input type="hidden" id="monster-select-slug" value="" aria-hidden="true">

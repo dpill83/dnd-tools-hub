@@ -49,6 +49,45 @@
     white-space: nowrap;
 }
 
+.edition-toggle {
+    display: inline-flex;
+    border: 1px solid #a08b6e;
+    border-radius: 0.25rem;
+    overflow: hidden;
+    margin-right: 0.35rem;
+}
+
+.edition-toggle-btn {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: none;
+    border-right: 1px solid #a08b6e;
+    background: #e8e0d4;
+    color: #522;
+    cursor: pointer;
+    line-height: 1.2;
+}
+
+.edition-toggle-btn:last-child {
+    border-right: none;
+}
+
+.edition-toggle-btn:hover {
+    background: #ddd3c4;
+}
+
+.edition-toggle-btn[aria-pressed="true"] {
+    background: #c9a227;
+    border-color: #a8831e;
+    color: #fff;
+}
+
+.edition-toggle-btn[aria-pressed="true"]:hover {
+    background: #a8831e;
+    color: #fff;
+}
+
 .toolbar-btn {
     padding: 0.35rem 0.6rem;
     font-size: 0.9rem;
