@@ -1073,6 +1073,14 @@ input[type=range]::-webkit-slider-thumb:hover {
   color: var(--text);
 }
 
+.pack-row-player {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 .pack-row-mode {
   font-size: 14px;
   padding: 2px 9px;
@@ -2512,7 +2520,10 @@ async function renderPackList() {
   DISPLAY_PACKS = normalized;
 
   let filtered = normalized.filter(p => {
-    const matchSearch = !search || String(p.label || '').toLowerCase().includes(search);
+    const q = search;
+    const matchSearch = !q
+      || String(p.label || '').toLowerCase().includes(q)
+      || String(p.player_name || '').toLowerCase().includes(q);
     const matchStatus = activeFilter === 'all' || p.status === activeFilter;
     return matchSearch && matchStatus;
   });
@@ -2528,7 +2539,10 @@ async function renderPackList() {
 
   tbody.innerHTML = filtered.map(p => `
     <tr onclick="openPackModal('${p.id}')">
-      <td><span class="pack-row-label">${escapeHtml(p.label)}</span></td>
+      <td>
+        <span class="pack-row-label">${escapeHtml(p.label)}</span>
+        ${p.player_name ? `<span class="pack-row-player">${escapeHtml(p.player_name)}</span>` : ''}
+      </td>
       <td><span class="pack-row-mode ${p.kind === 'gambleBatch' ? 'gamble' : 'curated'}">${p.kind === 'gambleBatch' ? '⚄ Gamble' : '✦ Curated'}</span></td>
       <td>${p.cards}</td>
       <td>${p.opened}/${p.total}</td>
@@ -2581,7 +2595,8 @@ function openPackModal(id) {
         revealed: isPackHandedOutStored(pack.id),
       }];
   document.getElementById('modal-title').textContent = pack.label;
-  document.getElementById('modal-sub').textContent = `${isBatch ? '⚄ Gamble Batch' : '✦ Curated'} · ${cards} cards · Created ${formatDate(pack.created_at)}`;
+  const playerBit = (!isBatch && pack.player_name) ? ` · ${pack.player_name}` : '';
+  document.getElementById('modal-sub').textContent = `${isBatch ? '⚄ Gamble Batch' : '✦ Curated'}${playerBit} · ${cards} cards · Created ${formatDate(pack.created_at)}`;
   renderModalLinks(activeModalLinks);
   const linkRow = document.getElementById('modal-link-row');
   const modalInner = document.querySelector('#pack-modal > .pack-modal-inner');
@@ -2590,6 +2605,7 @@ function openPackModal(id) {
   document.getElementById('modal-stats').innerHTML   = `
     <span class="modal-stat-pill">${cards} cards</span>
     <span class="modal-stat-pill">${isBatch ? '⚄ Gamble' : '✦ Curated'}</span>
+    ${(!isBatch && pack.player_name) ? `<span class="modal-stat-pill">${escapeHtml(pack.player_name)}</span>` : ''}
     <span class="modal-stat-pill">${isBatch ? `Packs: ${pack.total}` : `Openings: ${pack.quantity ?? 0}`}</span>
     <span class="modal-stat-pill">Opened: ${pack.opened ?? 0}/${pack.total ?? pack.quantity ?? 0}</span>`;
 
