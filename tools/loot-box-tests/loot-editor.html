@@ -142,6 +142,20 @@ td input[type="text"], td input[type="number"], td select {
   min-width: 0;
 }
 td.narrow { width: 4rem; }
+td.col-value { width: 6.5rem; min-width: 6.5rem; }
+td.col-value input[type="number"] {
+  min-width: 5.5rem;
+  text-align: right;
+}
+input.no-spin {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+input.no-spin::-webkit-outer-spin-button,
+input.no-spin::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 td.actions { width: 5rem; white-space: nowrap; }
 .btn-del {
   padding: 0.25rem 0.5rem;
@@ -380,7 +394,7 @@ th.sort-desc::after { content: '▼'; }
           <th data-sort="icon" scope="col">Icon</th>
           <th data-sort="rarity" scope="col">Rarity</th>
           <th data-sort="category" scope="col">Category</th>
-          <th class="narrow" data-sort="value" scope="col">Value (gp)</th>
+          <th class="col-value" data-sort="value" scope="col">Value (gp)</th>
           <th data-sort="description" scope="col">Description</th>
           <th class="narrow" data-sort="weight" scope="col">Weight</th>
           <th data-sort="properties" scope="col">Properties</th>
@@ -440,11 +454,11 @@ th.sort-desc::after { content: '▼'; }
             </div>
             <div class="modal-field">
               <label for="add-value">Value (gp)</label>
-              <input type="number" id="add-value" step="any" value="0">
+              <input type="number" id="add-value" class="no-spin" step="any" value="0">
             </div>
             <div class="modal-field">
               <label for="add-weight">Weight</label>
-              <input type="number" id="add-weight" step="any" placeholder="Optional">
+              <input type="number" id="add-weight" class="no-spin" step="any" placeholder="Optional">
             </div>
           </div>
           <div class="add-modal-col">
@@ -840,9 +854,9 @@ th.sort-desc::after { content: '▼'; }
         '<td><input type="text" data-f="icon" placeholder="Image URL" value="' + String(it.icon || '').replace(/"/g, '&quot;') + '"></td>' +
         '<td><select data-f="rarity">' + rarityOptions(it.rarity || 'Common') + '</select></td>' +
         '<td><select data-f="category">' + categoryOptions(it.category || 'Adventuring Gear') + '</select></td>' +
-        '<td class="narrow"><input type="number" data-f="value" step="any" value="' + (it.value != null ? it.value : 0) + '"></td>' +
+        '<td class="col-value"><input type="number" class="no-spin" data-f="value" step="any" value="' + (it.value != null ? it.value : 0) + '"></td>' +
         '<td><input type="text" data-f="description" value="' + String(it.description || '').replace(/"/g, '&quot;') + '"></td>' +
-        '<td class="narrow"><input type="number" data-f="weight" step="any" value="' + (it.weight != null && it.weight !== '' ? it.weight : '') + '"></td>' +
+        '<td class="narrow"><input type="number" class="no-spin" data-f="weight" step="any" value="' + (it.weight != null && it.weight !== '' ? it.weight : '') + '"></td>' +
         '<td><input type="text" data-f="properties" value="' + propsDisplay(it.properties).replace(/"/g, '&quot;').replace(/\n/g, ' · ') + '"></td>' +
         '<td><input type="text" data-f="requirements" value="' + String(it.requirements || '').replace(/"/g, '&quot;') + '"></td>' +
         '<td><input type="text" data-f="author" value="' + String(it.author || '').replace(/"/g, '&quot;') + '"></td>' +
