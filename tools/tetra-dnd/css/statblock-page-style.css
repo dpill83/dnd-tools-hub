@@ -676,7 +676,7 @@
     grid-template-columns: 1fr auto;
     grid-template-areas:
         "name actions"
-        "hp actions";
+        "hp hp";
     gap: 0.1rem 0.4rem;
     align-items: center;
     padding: 0.45rem 0.55rem;
@@ -744,7 +744,7 @@
 .hp-tracker-actions {
     grid-area: actions;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     gap: 0.2rem;
 }
@@ -753,15 +753,15 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.6rem;
-    height: 1.6rem;
+    width: 1.4rem;
+    height: 1.4rem;
     padding: 0;
     border: 1px solid #a08b6e;
     border-radius: 50%;
     background: #f3ebe0;
     color: #522;
     cursor: pointer;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     line-height: 1;
 }
 

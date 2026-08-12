@@ -1,5 +1,5 @@
 var data;
-var PAGE_TITLE_SUFFIX = " - D&D 5e Statblock Generator";
+var PAGE_TITLE_SUFFIX = " - Statblock Forge";
 
 var mon = {
     name: "Monster",

@@ -286,15 +286,6 @@ var HpTracker = {
         var actions = document.createElement("div");
         actions.className = "hp-tracker-actions";
 
-        var dmg = document.createElement("button");
-        dmg.type = "button";
-        dmg.className = "hp-tracker-btn";
-        dmg.setAttribute("data-action", "damage");
-        dmg.setAttribute("data-id", entry.id);
-        dmg.setAttribute("aria-label", "Damage");
-        dmg.title = "Damage";
-        dmg.innerHTML = "<i class=\"bi bi-caret-down-fill\" aria-hidden=\"true\"></i>";
-
         var heal = document.createElement("button");
         heal.type = "button";
         heal.className = "hp-tracker-btn";
@@ -302,7 +293,16 @@ var HpTracker = {
         heal.setAttribute("data-id", entry.id);
         heal.setAttribute("aria-label", "Heal");
         heal.title = "Heal";
-        heal.innerHTML = "<i class=\"bi bi-caret-up-fill\" aria-hidden=\"true\"></i>";
+        heal.innerHTML = "<i class=\"bi bi-heart-fill\" aria-hidden=\"true\"></i>";
+
+        var dmg = document.createElement("button");
+        dmg.type = "button";
+        dmg.className = "hp-tracker-btn";
+        dmg.setAttribute("data-action", "damage");
+        dmg.setAttribute("data-id", entry.id);
+        dmg.setAttribute("aria-label", "Damage");
+        dmg.title = "Damage";
+        dmg.innerHTML = "<i class=\"bi bi-sword\" aria-hidden=\"true\"></i>";
 
         var remove = document.createElement("button");
         remove.type = "button";
@@ -313,8 +313,8 @@ var HpTracker = {
         remove.title = "Remove";
         remove.innerHTML = "<i class=\"bi bi-x-lg\" aria-hidden=\"true\"></i>";
 
-        actions.appendChild(dmg);
         actions.appendChild(heal);
+        actions.appendChild(dmg);
         actions.appendChild(remove);
 
         article.appendChild(name);

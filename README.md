@@ -31,7 +31,7 @@ A web-based D&D 5e toolkit for Dungeon Masters and players. The central hub ([in
 
 ### Tetra-cube D&D tools (local copy)
 
-The hub includes a local copy of four D&D 5e tools from [Tetra-cube/Tetra-cube.github.io](https://github.com/Tetra-cube/Tetra-cube.github.io) in [tools/tetra-dnd/](tools/tetra-dnd/): **PC Options Reference** ([dnd-reference.html](tools/tetra-dnd/dnd-reference.html)), **Random Character Generator** ([dnd-char-gen.html](tools/tetra-dnd/dnd-char-gen.html)), **Magic Item Generator** ([dnd-magic-items.html](tools/tetra-dnd/dnd-magic-items.html)), and **Statblock Generator** ([dnd-statblock.html](tools/tetra-dnd/dnd-statblock.html)). They run locally; to update from upstream, replace the contents of `tools/tetra-dnd/` with a fresh copy of the `dnd` folder from the Tetra-cube repo.
+The hub includes a local copy of four D&D 5e tools from [Tetra-cube/Tetra-cube.github.io](https://github.com/Tetra-cube/Tetra-cube.github.io) in [tools/tetra-dnd/](tools/tetra-dnd/): **PC Options Reference** ([dnd-reference.html](tools/tetra-dnd/dnd-reference.html)), **Random Character Generator** ([dnd-char-gen.html](tools/tetra-dnd/dnd-char-gen.html)), **Magic Item Generator** ([dnd-magic-items.html](tools/tetra-dnd/dnd-magic-items.html)), and **Statblock Forge** ([dnd-statblock.html](tools/tetra-dnd/dnd-statblock.html)). They run locally; to update from upstream, replace the contents of `tools/tetra-dnd/` with a fresh copy of the `dnd` folder from the Tetra-cube repo.
 
 ---
 
