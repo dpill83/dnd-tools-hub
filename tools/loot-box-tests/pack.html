@@ -369,26 +369,41 @@
 #card-modal .card-modal-details-btn {
   position: absolute;
   left: 50%;
-  bottom: 5%;
+  bottom: 4.5%;
   transform: translateX(-50%);
   z-index: 2;
   font-family: 'Cinzel', serif;
-  font-size: clamp(0.5rem, 1.15vw, 0.68rem);
-  letter-spacing: 0.18em;
+  font-size: clamp(0.58rem, 1.35vw, 0.78rem);
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(201, 168, 76, 0.65);
-  background: transparent;
-  border: 1px solid rgba(201, 168, 76, 0.28);
-  padding: 0.45rem 1rem;
-  border-radius: 2px;
+  color: #f0d070;
+  background: rgba(12, 8, 4, 0.92);
+  border: 1px solid rgba(240, 208, 112, 0.65);
+  padding: 0.55rem 1.15rem;
+  border-radius: 4px;
   cursor: pointer;
-  transition: color 0.25s, border-color 0.25s, background 0.25s;
   white-space: nowrap;
+  min-height: 2.35rem;
+  box-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.75),
+    0 0 12px rgba(201, 168, 76, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+  transition: color 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 #card-modal .card-modal-details-btn:hover {
-  color: var(--gold-light, #f0d070);
-  border-color: rgba(201, 168, 76, 0.55);
-  background: rgba(201, 168, 76, 0.07);
+  color: #fff4c8;
+  border-color: rgba(255, 220, 120, 0.9);
+  background: rgba(28, 18, 6, 0.96);
+  box-shadow:
+    0 3px 14px rgba(0, 0, 0, 0.8),
+    0 0 18px rgba(201, 168, 76, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+#card-modal .card-modal-details-btn:active {
+  transform: translateX(-50%) scale(0.98);
+  background: rgba(40, 28, 10, 0.98);
 }
 
 /* ── Pack mobile: portrait stack + short-landscape compact ── */
@@ -480,9 +495,10 @@
     height: 2.4rem;
   }
   #card-modal .card-modal-details-btn {
-    font-size: 0.62rem;
-    padding: 0.55rem 0.9rem;
-    min-height: 2.4rem;
+    font-size: 0.68rem;
+    padding: 0.55rem 1rem;
+    min-height: 2.5rem;
+    letter-spacing: 0.1em;
   }
 }
 
