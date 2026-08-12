@@ -1,8 +1,7 @@
 /* ── RESPONSIVE ── */
 
-/* Portrait / phone + tablet */
+/* Narrow / tablet (shared chrome; portrait stacking overrides in pack.html) */
 @media (max-width: 768px) {
-  /* Torches: quieter so they don't fight content */
   .torch {
     top: 8%;
     opacity: 0.55;
@@ -13,14 +12,12 @@
   .torch-right { right: 0; }
   .torch-glow { width: 64px; height: 64px; }
 
-  /* Stage: room for fixed bottom chrome */
   #stage {
     padding: clamp(0.65rem, 2vh, 1.25rem) clamp(0.5rem, 2vw, 1rem);
     padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
     gap: clamp(0.5rem, 1.5vh, 1rem);
   }
 
-  /* Chest sized for portrait open flow */
   #chest-wrap {
     width: min(58vw, 240px);
     height: min(46vw, 190px);
@@ -32,7 +29,6 @@
     color: rgba(201, 168, 76, 0.75);
   }
 
-  /* Cards: smaller, scroll-friendly */
   #slots-row {
     min-height: 0;
     width: 100%;
@@ -44,6 +40,8 @@
     -webkit-overflow-scrolling: touch;
     gap: 0.55rem;
   }
+
+  /* Default narrow cards (landscape tablet / fallback); portrait pack overrides stack */
   .item-slot {
     width: clamp(110px, 34vw, 150px);
     height: clamp(150px, 46vw, 205px);
@@ -59,7 +57,6 @@
     font-size: clamp(0.5rem, 2.6vw, 0.68rem);
   }
 
-  /* Corner chrome: smaller, clear of home indicator */
   #loot-table-btn {
     width: 2.4rem;
     height: 2.4rem;
@@ -83,7 +80,96 @@
   }
 }
 
-@media (max-width: 480px) {
+/* Portrait phones/tablets: stack slots one per line (index + pack base) */
+@media (orientation: portrait) and (max-width: 900px) {
+  #slots-row {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-x: visible;
+    gap: 0.85rem;
+  }
+  .item-slot {
+    width: min(78vw, 210px);
+    height: min(106vw, 286px);
+  }
+  .slot-icon {
+    font-size: clamp(1.6rem, 7vw, 2.4rem);
+  }
+  .card-front-face .slot .slot-icon img {
+    max-width: 4rem !important;
+  }
+  .slot-name {
+    font-size: clamp(0.62rem, 3.2vw, 0.82rem);
+  }
+}
+
+/* Phone landscape: short viewport compact */
+@media (orientation: landscape) and (max-height: 500px) {
+  .torch {
+    opacity: 0.3;
+    transform: scale(0.55);
+  }
+  .torch-glow { width: 40px; height: 40px; }
+
+  #stage {
+    padding: 0.35rem 0.5rem;
+    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.35rem;
+  }
+
+  #chest-wrap {
+    width: min(18vw, 110px);
+    height: min(14vw, 88px);
+  }
+  #chest-hint {
+    font-size: 0.55rem;
+    bottom: -18px;
+  }
+
+  #slots-row {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    justify-content: flex-start;
+    overflow-x: auto;
+    gap: 0.4rem;
+    min-height: 0;
+  }
+  .item-slot {
+    width: clamp(96px, 12vw, 120px);
+    height: clamp(130px, 16vw, 164px);
+  }
+  .slot-icon {
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  }
+  .card-front-face .slot .slot-icon img {
+    max-width: 2.6rem !important;
+  }
+  .slot-name {
+    font-size: clamp(0.45rem, 1.4vw, 0.58rem);
+  }
+
+  #loot-table-btn {
+    width: 2.15rem;
+    height: 2.15rem;
+    bottom: calc(0.45rem + env(safe-area-inset-bottom, 0px));
+    right: 0.45rem;
+  }
+  #dm-link {
+    bottom: calc(0.45rem + env(safe-area-inset-bottom, 0px));
+    right: calc(0.45rem + 2.5rem);
+    font-size: 0.65rem;
+    padding: 0.3rem 0.45rem;
+  }
+  #reset-btn {
+    bottom: calc(0.55rem + env(safe-area-inset-bottom, 0px));
+    font-size: 0.62rem;
+    padding: 0.4rem 0.9rem;
+  }
+}
+
+@media (max-width: 480px) and (orientation: portrait) {
   .torch {
     opacity: 0.35;
     transform: scale(0.6);
@@ -93,11 +179,6 @@
   #chest-wrap {
     width: min(64vw, 210px);
     height: min(50vw, 168px);
-  }
-
-  .item-slot {
-    width: clamp(100px, 38vw, 132px);
-    height: clamp(136px, 52vw, 180px);
   }
 }
 

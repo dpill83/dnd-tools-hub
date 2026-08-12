@@ -391,11 +391,14 @@
   background: rgba(201, 168, 76, 0.07);
 }
 
-/* ── Pack mobile: claimed composition + export bar (after base rules) ── */
-@media (max-width: 768px) {
+/* ── Pack mobile: portrait stack + short-landscape compact ── */
+
+/* Shared solid export bar (portrait phones + short landscape) */
+@media (orientation: portrait) and (max-width: 900px),
+       (orientation: landscape) and (max-height: 500px) {
   #stage.stage--pack-claimed {
     justify-content: flex-start;
-    padding-top: max(0.65rem, env(safe-area-inset-top, 0px));
+    padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
     padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
     gap: 0.55rem;
   }
@@ -414,19 +417,6 @@
     font-size: clamp(0.75rem, 3.2vw, 0.9rem);
   }
 
-  /* Empty chest is decorative once claimed — free vertical space for loot */
-  #chest-wrap.pack-claimed {
-    width: min(28vw, 96px);
-    height: min(22vw, 76px);
-    margin: 0 auto;
-    flex-shrink: 0;
-  }
-
-  #slots-row.slots-row--claimed {
-    gap: 0.85rem;
-    margin-top: 0;
-    overflow-x: visible;
-  }
   .pack-history-block {
     gap: 0.35rem;
   }
@@ -436,18 +426,7 @@
   .pack-history-meta {
     font-size: 0.72rem;
   }
-  .pack-history-open {
-    justify-content: flex-start;
-    gap: 0.5rem;
-    padding-left: 0.15rem;
-    padding-right: 0.15rem;
-    scroll-snap-type: x proximity;
-  }
-  .pack-history-open .item-slot {
-    scroll-snap-align: start;
-  }
 
-  /* Solid readable action bar */
   #pack-export-actions {
     left: 0;
     right: 0;
@@ -481,7 +460,6 @@
     background: rgba(201, 168, 76, 0.22);
   }
 
-  /* Keep DM / loot-table above the export bar when claimed */
   body:has(#pack-export-actions:not([hidden])) #dm-link,
   body:has(#pack-export-actions:not([hidden])) #loot-table-btn {
     bottom: calc(4.85rem + env(safe-area-inset-bottom, 0px));
@@ -501,7 +479,6 @@
     width: 2.4rem;
     height: 2.4rem;
   }
-
   #card-modal .card-modal-details-btn {
     font-size: 0.62rem;
     padding: 0.55rem 0.9rem;
@@ -509,7 +486,159 @@
   }
 }
 
-@media (max-width: 480px) {
+/* Portrait: one card per line */
+@media (orientation: portrait) and (max-width: 900px) {
+  #chest-wrap.pack-claimed {
+    width: min(28vw, 96px);
+    height: min(22vw, 76px);
+    margin: 0 auto;
+    flex-shrink: 0;
+  }
+
+  #slots-row,
+  #slots-row.slots-row--claimed {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.85rem;
+    margin-top: 0;
+    overflow-x: visible;
+    overflow-y: visible;
+    width: 100%;
+    min-height: 0;
+  }
+
+  .pack-history-open {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    overflow-x: visible;
+    scroll-snap-type: none;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  #slots-row .item-slot,
+  .pack-history-open .item-slot {
+    width: min(78vw, 210px);
+    height: min(106vw, 286px);
+    flex-shrink: 0;
+    scroll-snap-align: none;
+  }
+
+  #slots-row .slot-icon,
+  .pack-history-open .slot-icon {
+    font-size: clamp(1.6rem, 7vw, 2.4rem);
+  }
+  #slots-row .card-front-face .slot .slot-icon img,
+  .pack-history-open .card-front-face .slot .slot-icon img {
+    max-width: 4rem !important;
+  }
+  #slots-row .slot-name,
+  .pack-history-open .slot-name {
+    font-size: clamp(0.62rem, 3.2vw, 0.82rem);
+  }
+}
+
+/* Phone landscape (short height): compact row + thinner bar */
+@media (orientation: landscape) and (max-height: 500px) {
+  #stage {
+    padding-top: 0.35rem;
+    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.35rem;
+  }
+  #stage.stage--pack-claimed {
+    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.35rem;
+  }
+
+  .pack-claimed-msg {
+    padding: 0.35rem 0.7rem;
+    font-size: clamp(0.72rem, 2.2vh, 0.9rem);
+  }
+  .pack-jackpot-msg {
+    padding: 0.3rem 0.6rem;
+    font-size: clamp(0.65rem, 2vh, 0.8rem);
+  }
+
+  #chest-wrap {
+    width: min(18vw, 110px);
+    height: min(14vw, 88px);
+  }
+  #chest-wrap.pack-claimed {
+    width: min(12vw, 72px);
+    height: min(10vw, 56px);
+    margin: 0 auto;
+  }
+  #chest-hint {
+    font-size: 0.55rem;
+    bottom: -18px;
+  }
+
+  #slots-row,
+  #slots-row.slots-row--claimed {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    justify-content: flex-start;
+    gap: 0.4rem;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0;
+  }
+
+  .pack-history-open {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: flex-end;
+    gap: 0.4rem;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+  }
+  .pack-history-open .item-slot {
+    scroll-snap-align: start;
+  }
+
+  #slots-row .item-slot,
+  .pack-history-open .item-slot {
+    width: clamp(96px, 12vw, 120px);
+    height: clamp(130px, 16vw, 164px);
+    flex-shrink: 0;
+  }
+  #slots-row .slot-icon,
+  .pack-history-open .slot-icon {
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  }
+  #slots-row .card-front-face .slot .slot-icon img,
+  .pack-history-open .card-front-face .slot .slot-icon img {
+    max-width: 2.6rem !important;
+  }
+  #slots-row .slot-name,
+  .pack-history-open .slot-name {
+    font-size: clamp(0.45rem, 1.4vw, 0.58rem);
+  }
+
+  #pack-export-actions {
+    gap: 0.5rem;
+    padding: 0.45rem 0.75rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
+  }
+  #pack-copy-btn,
+  #pack-download-btn {
+    min-height: 2.5rem;
+    font-size: 0.72rem;
+    padding: 0.45rem 0.75rem;
+  }
+
+  body:has(#pack-export-actions:not([hidden])) #dm-link,
+  body:has(#pack-export-actions:not([hidden])) #loot-table-btn {
+    bottom: calc(3.85rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-width: 480px) and (orientation: portrait) {
   #chest-wrap.pack-claimed {
     display: none;
   }
@@ -518,6 +647,7 @@
     padding: 0.5rem 0.7rem;
   }
 }
+
 </style>
 </head>
 <body>
