@@ -513,6 +513,16 @@ var DiceRoller = {
     },
 
     decorateAttackRolls: function (root) {
+        var attackButtonAttrs = function (mod) {
+            return {
+                "data-roll": "d20",
+                "data-mod": String(mod),
+                "data-label": "Attack",
+                "title": "Roll d20" + (mod >= 0 ? " + " + mod : " - " + (-mod))
+            };
+        };
+
+        // 2014: "+5 to hit"
         var nodes = this.collectTextNodes(root);
         nodes.forEach(function (node) {
             if (this.isInsideDiceRoll(node)) return;
@@ -521,14 +531,28 @@ var DiceRoller = {
                 parts.push({
                     type: "button",
                     text: match[1],
-                    attrs: {
-                        "data-roll": "d20",
-                        "data-mod": String(mod),
-                        "data-label": "Attack",
-                        "title": "Roll d20" + (mod >= 0 ? " + " + mod : " - " + (-mod))
-                    }
+                    attrs: attackButtonAttrs(mod)
                 });
                 parts.push({ type: "text", value: match[2] });
+                return true;
+            });
+        }, this);
+
+        // 2024 / 5.5e: "Melee Attack Roll: +4," / "Melee or Ranged Attack Roll: +9,"
+        nodes = this.collectTextNodes(root);
+        nodes.forEach(function (node) {
+            if (this.isInsideDiceRoll(node)) return;
+            this.wrapRegexMatches(node, /\bAttack Roll:\s*([+-]\d+)/gi, function (match, parts) {
+                var mod = parseInt(match[1], 10);
+                parts.push({
+                    type: "text",
+                    value: match[0].slice(0, match[0].length - match[1].length)
+                });
+                parts.push({
+                    type: "button",
+                    text: match[1],
+                    attrs: attackButtonAttrs(mod)
+                });
                 return true;
             });
         }, this);
