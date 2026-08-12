@@ -1,6 +1,6 @@
-## Loot Chest D1 setup (`LOOT_CHEST_DB`)
+## Loot Forge D1 setup (`LOOT_CHEST_DB`)
 
-The Loot Chest endpoints under `functions/tools/loot-box-tests/api/*` require a Cloudflare D1 binding named `LOOT_CHEST_DB`.
+The Loot Forge endpoints under `functions/tools/loot-box-tests/api/*` require a Cloudflare D1 binding named `LOOT_CHEST_DB`.
 
 ### Binding
 
