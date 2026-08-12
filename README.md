@@ -234,4 +234,4 @@ The **Interactive Map** ([tools/interactive-map/](tools/interactive-map/)) uses 
 | [tools/songbook/](tools/songbook/) | global.css, ambience-sounds.css | theme.js, ambience-sounds.js, presets | YouTube music links, folders, export/import |
 | [tools/wagers-fortunes/](tools/wagers-fortunes/) | global.css, styles.css, wagers-fortunes.css | theme.js, wf-logic.js, seed-data.js, script.js | DM Builder, Run Game, Log, limiter, hint check, export JSON/CSV |
 | [tools/qbasic-editor/](tools/qbasic-editor/) | global.css, qbasic-editor.css | theme.js | Plain-text editor, autosave |
-| [tools/tetra-dnd/](tools/tetra-dnd/) (PC ref, char gen, magic items, statblock) | tetra-dnd/css (bootstrap, dnd-style, etc.) | tetra-dnd/js (jQuery, tool scripts) | Local copy from Tetra-cube; four HTML entry points |
+| [tools/tetra-dnd/](tools/tetra-dnd/) (PC ref, char gen, magic items, Statblock Forge) | tetra-dnd/css (bootstrap, dnd-style, etc.) | tetra-dnd/js (jQuery, tool scripts) | Local copy from Tetra-cube; four HTML entry points |

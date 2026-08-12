@@ -302,7 +302,7 @@ var HpTracker = {
         dmg.setAttribute("data-id", entry.id);
         dmg.setAttribute("aria-label", "Damage");
         dmg.title = "Damage";
-        dmg.innerHTML = "<i class=\"bi bi-sword\" aria-hidden=\"true\"></i>";
+        dmg.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M7.25.75h1.5l.75.75v7.5H12v1.5H4v-1.5h2.5V1.5L7.25.75zm-.5 10.5h2.5v1.25L8.5 15h-1l-.75-2.5V11.25z\"/></svg>";
 
         var remove = document.createElement("button");
         remove.type = "button";
