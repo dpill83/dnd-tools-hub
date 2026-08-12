@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Loot Chest</title>
 <base href="/tools/loot-box-tests/">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
@@ -124,6 +124,7 @@
   max-width: min(98vw, 1600px);
   position: relative;
   z-index: 1;
+  overflow-x: visible;
 }
 .pack-history-block {
   width: 100%;
@@ -173,7 +174,7 @@
   align-items: center;
 }
 #pack-export-actions[hidden] {
-  display: none;
+  display: none !important;
 }
 #pack-copy-btn,
 #pack-download-btn {
@@ -388,6 +389,134 @@
   color: var(--gold-light, #f0d070);
   border-color: rgba(201, 168, 76, 0.55);
   background: rgba(201, 168, 76, 0.07);
+}
+
+/* ── Pack mobile: claimed composition + export bar (after base rules) ── */
+@media (max-width: 768px) {
+  #stage.stage--pack-claimed {
+    justify-content: flex-start;
+    padding-top: max(0.65rem, env(safe-area-inset-top, 0px));
+    padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.55rem;
+  }
+
+  .pack-claimed-msg {
+    max-width: min(96vw, 28rem);
+    padding: 0.55rem 0.85rem;
+    font-size: clamp(0.85rem, 3.8vw, 1.05rem);
+    line-height: 1.3;
+    border-radius: 10px;
+    letter-spacing: 0.01em;
+  }
+  .pack-jackpot-msg {
+    max-width: min(96vw, 28rem);
+    padding: 0.45rem 0.75rem;
+    font-size: clamp(0.75rem, 3.2vw, 0.9rem);
+  }
+
+  /* Empty chest is decorative once claimed — free vertical space for loot */
+  #chest-wrap.pack-claimed {
+    width: min(28vw, 96px);
+    height: min(22vw, 76px);
+    margin: 0 auto;
+    flex-shrink: 0;
+  }
+
+  #slots-row.slots-row--claimed {
+    gap: 0.85rem;
+    margin-top: 0;
+    overflow-x: visible;
+  }
+  .pack-history-block {
+    gap: 0.35rem;
+  }
+  .pack-history-block + .pack-history-block {
+    padding-top: 0.75rem;
+  }
+  .pack-history-meta {
+    font-size: 0.72rem;
+  }
+  .pack-history-open {
+    justify-content: flex-start;
+    gap: 0.5rem;
+    padding-left: 0.15rem;
+    padding-right: 0.15rem;
+    scroll-snap-type: x proximity;
+  }
+  .pack-history-open .item-slot {
+    scroll-snap-align: start;
+  }
+
+  /* Solid readable action bar */
+  #pack-export-actions {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transform: none;
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+    gap: 0.65rem;
+    padding: 0.7rem 0.85rem calc(0.7rem + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, rgba(8, 5, 2, 0.55) 0%, rgba(8, 5, 2, 0.92) 35%, rgba(5, 3, 0, 0.97) 100%);
+    border-top: 1px solid rgba(201, 168, 76, 0.28);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  #pack-copy-btn,
+  #pack-download-btn {
+    flex: 1 1 0;
+    max-width: 11rem;
+    min-height: 2.75rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    color: var(--gold-light, #f0d070);
+    background: rgba(201, 168, 76, 0.12);
+    border: 1px solid rgba(201, 168, 76, 0.45);
+    border-radius: 6px;
+    padding: 0.65rem 0.85rem;
+  }
+  #pack-copy-btn:active,
+  #pack-download-btn:active {
+    background: rgba(201, 168, 76, 0.22);
+  }
+
+  /* Keep DM / loot-table above the export bar when claimed */
+  body:has(#pack-export-actions:not([hidden])) #dm-link,
+  body:has(#pack-export-actions:not([hidden])) #loot-table-btn {
+    bottom: calc(4.85rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  #statblock-panel {
+    width: min(680px, 100%);
+    max-height: min(88vh, calc(100dvh - 2rem));
+    padding: 1.1rem 1rem 1rem;
+    border-radius: 10px;
+  }
+  #statblock-dim {
+    padding: 0.5rem;
+    align-items: flex-end;
+  }
+  #statblock-close {
+    width: 2.4rem;
+    height: 2.4rem;
+  }
+
+  #card-modal .card-modal-details-btn {
+    font-size: 0.62rem;
+    padding: 0.55rem 0.9rem;
+    min-height: 2.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #chest-wrap.pack-claimed {
+    display: none;
+  }
+  .pack-claimed-msg {
+    font-size: clamp(0.8rem, 4vw, 0.98rem);
+    padding: 0.5rem 0.7rem;
+  }
 }
 </style>
 </head>

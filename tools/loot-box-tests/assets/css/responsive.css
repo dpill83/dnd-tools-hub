@@ -1,9 +1,106 @@
 /* ── RESPONSIVE ── */
-@media (max-width: 480px) {
-  .torch-left { left: 1%; }
-  .torch-right { right: 1%; }
-  .torch-glow { width: 80px; height: 80px; }
+
+/* Portrait / phone + tablet */
+@media (max-width: 768px) {
+  /* Torches: quieter so they don't fight content */
+  .torch {
+    top: 8%;
+    opacity: 0.55;
+    transform: scale(0.75);
+    transform-origin: top center;
+  }
+  .torch-left { left: 0; }
+  .torch-right { right: 0; }
+  .torch-glow { width: 64px; height: 64px; }
+
+  /* Stage: room for fixed bottom chrome */
+  #stage {
+    padding: clamp(0.65rem, 2vh, 1.25rem) clamp(0.5rem, 2vw, 1rem);
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+    gap: clamp(0.5rem, 1.5vh, 1rem);
+  }
+
+  /* Chest sized for portrait open flow */
+  #chest-wrap {
+    width: min(58vw, 240px);
+    height: min(46vw, 190px);
+  }
+  #chest-hint {
+    font-size: clamp(0.62rem, 2.8vw, 0.78rem);
+    letter-spacing: 0.12em;
+    bottom: -26px;
+    color: rgba(201, 168, 76, 0.75);
+  }
+
+  /* Cards: smaller, scroll-friendly */
+  #slots-row {
+    min-height: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    justify-content: flex-start;
+    padding: 0 0.25rem 0.35rem;
+    -webkit-overflow-scrolling: touch;
+    gap: 0.55rem;
+  }
+  .item-slot {
+    width: clamp(110px, 34vw, 150px);
+    height: clamp(150px, 46vw, 205px);
+    flex-shrink: 0;
+  }
+  .slot-icon {
+    font-size: clamp(1.35rem, 5vw, 2rem);
+  }
+  .card-front-face .slot .slot-icon img {
+    max-width: 3.2rem !important;
+  }
+  .slot-name {
+    font-size: clamp(0.5rem, 2.6vw, 0.68rem);
+  }
+
+  /* Corner chrome: smaller, clear of home indicator */
+  #loot-table-btn {
+    width: 2.4rem;
+    height: 2.4rem;
+    bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px));
+    right: 0.55rem;
+    font-size: 1.2rem;
+  }
+  #loot-table-btn img {
+    width: 1.25rem;
+  }
+  #dm-link {
+    bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px));
+    right: calc(0.55rem + 2.75rem);
+    font-size: 0.72rem;
+    padding: 0.35rem 0.5rem;
+  }
+  #reset-btn {
+    bottom: calc(0.85rem + env(safe-area-inset-bottom, 0px));
+    font-size: 0.7rem;
+    padding: 0.55rem 1.1rem;
+  }
 }
+
+@media (max-width: 480px) {
+  .torch {
+    opacity: 0.35;
+    transform: scale(0.6);
+  }
+  .torch-glow { width: 48px; height: 48px; }
+
+  #chest-wrap {
+    width: min(64vw, 210px);
+    height: min(50vw, 168px);
+  }
+
+  .item-slot {
+    width: clamp(100px, 38vw, 132px);
+    height: clamp(136px, 52vw, 180px);
+  }
+}
+
 @media (min-width: 1200px) {
   .torch-left { left: 8%; }
   .torch-right { right: 8%; }
