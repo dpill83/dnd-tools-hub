@@ -450,7 +450,8 @@ th.sort-desc::after { content: '▼'; }
             </div>
             <div class="modal-field">
               <label for="add-author">Author</label>
-              <input type="text" id="add-author" autocomplete="off" placeholder="Optional">
+              <input type="text" id="add-author" list="author-suggestions" autocomplete="off" placeholder="Optional">
+              <datalist id="author-suggestions"></datalist>
             </div>
           </div>
           <div class="modal-actions modal-actions--span">
@@ -489,8 +490,50 @@ th.sort-desc::after { content: '▼'; }
   var pageIndex = 0;
   /** null = add new item; number = editing existing row id */
   var addModalEditingId = null;
+  var LAST_AUTHOR_STORAGE_KEY = 'loot-forge-last-author';
 
   var $ = function (id) { return document.getElementById(id); };
+
+  function normalizeAuthor(author) {
+    return String(author == null ? '' : author).trim();
+  }
+
+  function getLastAuthor() {
+    try {
+      return normalizeAuthor(window.localStorage.getItem(LAST_AUTHOR_STORAGE_KEY) || '');
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function setLastAuthor(author) {
+    try {
+      window.localStorage.setItem(LAST_AUTHOR_STORAGE_KEY, normalizeAuthor(author));
+    } catch (e) { /* ignore */ }
+  }
+
+  function collectAuthors() {
+    var set = {};
+    var list = [];
+    (doc.items || []).forEach(function (it) {
+      var a = normalizeAuthor(it && it.author);
+      if (!a || set[a]) return;
+      set[a] = true;
+      list.push(a);
+    });
+    list.sort(function (a, b) {
+      return a.localeCompare(b, undefined, { sensitivity: 'base' });
+    });
+    return list;
+  }
+
+  function refreshAuthorDatalist() {
+    var dl = $('author-suggestions');
+    if (!dl) return;
+    dl.innerHTML = collectAuthors().map(function (a) {
+      return '<option value="' + String(a).replace(/"/g, '&quot;') + '"></option>';
+    }).join('');
+  }
 
   function pageSizeNumber() {
     if (pageSize === 'all') return Infinity;
@@ -782,7 +825,10 @@ th.sort-desc::after { content: '▼'; }
             if (rq) row.requirements = rq;
             else delete row.requirements;
             delete row.requirement;
-          } else if (f === 'author') row.author = inp.value;
+          } else if (f === 'author') {
+            row.author = normalizeAuthor(inp.value);
+            refreshAuthorDatalist();
+          }
           else if (f === 'icon') {
             if (!inp.value.trim()) delete row.icon;
             else row.icon = inp.value;
@@ -797,6 +843,7 @@ th.sort-desc::after { content: '▼'; }
           if (!confirm('Delete this row?')) return;
           var id = Number(delBtn.getAttribute('data-del-id'));
           doc.items = doc.items.filter(function (x) { return Number(x.id) !== id; });
+          refreshAuthorDatalist();
           render();
         });
       }
@@ -852,7 +899,7 @@ th.sort-desc::after { content: '▼'; }
     $('add-description').value = '';
     $('add-properties').value = '';
     $('add-requirements').value = '';
-    $('add-author').value = '';
+    $('add-author').value = getLastAuthor();
     updateAddModalPreview();
     $('add-modal-dim').classList.remove('hidden');
     $('add-name').focus();
@@ -930,6 +977,7 @@ th.sort-desc::after { content: '▼'; }
       }
       setStatus(msg, 'ok');
       pageIndex = Number.MAX_SAFE_INTEGER;
+      refreshAuthorDatalist();
       render();
     };
     reader.onerror = function () {
@@ -986,7 +1034,7 @@ th.sort-desc::after { content: '▼'; }
     var description = $('add-description').value || '';
     var propertiesRaw = $('add-properties').value || '';
     var requirements = ($('add-requirements').value || '').trim();
-    var author = $('add-author').value || '';
+    var author = normalizeAuthor($('add-author').value);
     var wv = String($('add-weight').value || '').trim();
     var ic = ($('add-icon').value || '').trim();
 
@@ -1017,6 +1065,7 @@ th.sort-desc::after { content: '▼'; }
       if (ic) row.icon = ic;
       else delete row.icon;
       closeAddModal();
+      refreshAuthorDatalist();
       render();
       return;
     }
@@ -1039,8 +1088,10 @@ th.sort-desc::after { content: '▼'; }
     }
     if (ic) item.icon = ic;
     doc.items.push(item);
+    setLastAuthor(author);
     closeAddModal();
     pageIndex = Number.MAX_SAFE_INTEGER;
+    refreshAuthorDatalist();
     render();
   });
 
@@ -1122,6 +1173,7 @@ th.sort-desc::after { content: '▼'; }
       $('loading').classList.add('hidden');
       $('app').classList.remove('hidden');
       populateAddModalSelects();
+      refreshAuthorDatalist();
       bindSortHeaders();
       render();
     })

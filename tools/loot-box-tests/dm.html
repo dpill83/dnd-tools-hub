@@ -513,6 +513,15 @@ input[type=range]::-webkit-slider-thumb:hover {
   color: var(--gold-light);
 }
 
+#author-grid {
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+#sources-panel.sources-error .panel-box-title {
+  color: var(--very-rare);
+}
+
 /* ── RIGHT PANEL ── */
 .right-panel {
   display: flex;
@@ -1525,15 +1534,23 @@ input[type=range]::-webkit-slider-thumb:hover {
       <div class="panel-box">
         <div class="panel-box-title">Categories</div>
         <div class="cat-grid" id="cat-grid">
-          <button class="cat-chip on">Adventuring Gear</button>
-          <button class="cat-chip on">Armor</button>
-          <button class="cat-chip on">Book</button>
-          <button class="cat-chip on">Potion</button>
-          <button class="cat-chip on">Quest Hook</button>
-          <button class="cat-chip on">Ring</button>
-          <button class="cat-chip on">Treasure</button>
-          <button class="cat-chip on">Weapon</button>
-          <button class="cat-chip on">Wondrous Item</button>
+          <button type="button" class="cat-chip on">Adventuring Gear</button>
+          <button type="button" class="cat-chip on">Armor</button>
+          <button type="button" class="cat-chip on">Book</button>
+          <button type="button" class="cat-chip on">Potion</button>
+          <button type="button" class="cat-chip on">Quest Hook</button>
+          <button type="button" class="cat-chip on">Ring</button>
+          <button type="button" class="cat-chip on">Treasure</button>
+          <button type="button" class="cat-chip on">Weapon</button>
+          <button type="button" class="cat-chip on">Wondrous Item</button>
+        </div>
+      </div>
+
+      <!-- Sources (item.author) -->
+      <div class="panel-box" id="sources-panel">
+        <div class="panel-box-title">Sources</div>
+        <div class="cat-grid" id="author-grid">
+          <!-- Populated from loot table authors -->
         </div>
       </div>
 
@@ -1776,6 +1793,9 @@ const DM_KEY_STORAGE_KEY = 'lootForgeDmKey';
 const MAX_GAMBLE_PACKS = 100;
 /** Persist DM "handed out" (Reveal) per pack id across modal sessions. */
 const HANDOUT_PACK_STORAGE_PREFIX = 'lootForgeHandout:';
+/** Persist Pack Builder Sources chip selection. */
+const SOURCES_STORAGE_KEY = 'loot-forge-pack-builder-sources';
+const NO_AUTHOR_LABEL = '(No author)';
 
 function isPackHandedOutStored(packId) {
   if (!packId) return false;
@@ -2140,8 +2160,8 @@ document.querySelectorAll('.type-pill').forEach(pill => {
   });
 });
 
-// Category chips
-document.querySelectorAll('.cat-chip').forEach(chip => {
+// Category chips (scoped — do not bind My Packs status chips)
+document.querySelectorAll('#cat-grid .cat-chip').forEach(chip => {
   chip.addEventListener('click', () => chip.classList.toggle('on'));
 });
 
@@ -2161,6 +2181,104 @@ function escapeHtml(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function normalizeAuthor(author) {
+  return String(author ?? '').trim();
+}
+
+function collectUniqueAuthors(items) {
+  const named = new Set();
+  let hasBlank = false;
+  for (const it of items || []) {
+    const a = normalizeAuthor(it?.author);
+    if (!a) hasBlank = true;
+    else named.add(a);
+  }
+  const list = [...named].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  if (hasBlank) list.push('');
+  return list;
+}
+
+function readStoredSources() {
+  try {
+    const raw = window.localStorage.getItem(SOURCES_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      if (parsed.all === true) return { all: true };
+      if (Array.isArray(parsed.authors)) {
+        return { all: false, authors: parsed.authors.map(normalizeAuthor) };
+      }
+    }
+    // Legacy: plain array of author strings = subset
+    if (Array.isArray(parsed)) {
+      return { all: false, authors: parsed.map(normalizeAuthor) };
+    }
+  } catch (_e) { /* ignore */ }
+  return null;
+}
+
+function saveSourcesSelection() {
+  const chips = Array.from(document.querySelectorAll('#author-grid .cat-chip'));
+  if (!chips.length) return;
+  const selected = chips.filter(c => c.classList.contains('on'));
+  try {
+    if (selected.length === chips.length) {
+      window.localStorage.setItem(SOURCES_STORAGE_KEY, JSON.stringify({ all: true }));
+    } else {
+      window.localStorage.setItem(SOURCES_STORAGE_KEY, JSON.stringify({
+        all: false,
+        authors: selected.map(c => c.dataset.author ?? ''),
+      }));
+    }
+  } catch (_e) { /* ignore */ }
+}
+
+function buildAuthorChips() {
+  const grid = document.getElementById('author-grid');
+  if (!grid) return;
+
+  const authors = collectUniqueAuthors(LOOT?.items || []);
+  const stored = readStoredSources();
+  const available = new Set(authors);
+
+  let selectedSet = null; // null = all on
+  if (stored && !stored.all && Array.isArray(stored.authors)) {
+    const restored = stored.authors.filter(a => available.has(a));
+    if (restored.length > 0) selectedSet = new Set(restored);
+  }
+
+  grid.innerHTML = authors.map(a => {
+    const label = a === '' ? NO_AUTHOR_LABEL : a;
+    const on = !selectedSet || selectedSet.has(a);
+    return `<button type="button" class="cat-chip${on ? ' on' : ''}" data-author="${escapeHtml(a)}">${escapeHtml(label)}</button>`;
+  }).join('');
+
+  grid.querySelectorAll('.cat-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      chip.classList.toggle('on');
+      document.getElementById('sources-panel')?.classList.remove('sources-error');
+      saveSourcesSelection();
+    });
+  });
+
+  saveSourcesSelection();
+}
+
+/**
+ * Authors for slot_config.
+ * - [] when all chips on (or no chips yet) = no author filter
+ * - null when zero chips selected = invalid UI state
+ * - string[] for a subset (may include "" for blank authors)
+ */
+function getAuthorsForSlotConfig() {
+  const chips = Array.from(document.querySelectorAll('#author-grid .cat-chip'));
+  if (!chips.length) return [];
+  const selected = chips.filter(c => c.classList.contains('on'));
+  if (selected.length === 0) return null;
+  if (selected.length === chips.length) return [];
+  return selected.map(c => c.dataset.author ?? '');
 }
 
 async function loadLoot() {
@@ -2235,9 +2353,11 @@ function buildPackConfig() {
   const fillerCount  = parseInt(slider.value) || 0;
   const cardsPerPack = fillerCount + 1;
 
-  const categories = Array.from(document.querySelectorAll('.cat-chip.on'))
+  const categories = Array.from(document.querySelectorAll('#cat-grid .cat-chip.on'))
     .map(c => c.textContent.trim())
     .filter(Boolean);
+
+  const authors = getAuthorsForSlotConfig();
 
   const gambleCountInput = document.getElementById('gamble-count');
   let gambleCount = parseInt(gambleCountInput?.value) || 10;
@@ -2256,6 +2376,7 @@ function buildPackConfig() {
     slotRarities: slotRarities.map(sr => ({ ...sr })),
     pinnedItems: { ...pinnedItems },
     categories,
+    authors,
     gambleCount,
     jackpotItem: jackpotItemText || null,
   };
@@ -2303,6 +2424,18 @@ async function onCreatePack() {
     return;
   }
 
+  // Require at least one Sources chip; never treat "none selected" as all.
+  if (config.authors === null) {
+    const panel = document.getElementById('sources-panel');
+    if (panel) {
+      panel.classList.add('sources-error');
+      panel.classList.remove('shake');
+      void panel.offsetWidth;
+      panel.classList.add('shake');
+    }
+    return;
+  }
+
   const fillerCount = config.fillerCount;
   const revealRange = config.slotRarities?.[fillerCount] || { min: 'rare', max: 'legendary' };
 
@@ -2322,6 +2455,7 @@ async function onCreatePack() {
     reveal_tier_min: rarityToTier(revealRange.min),
     reveal_tier_max: rarityToTier(revealRange.max),
     categories: config.categories || [],
+    authors: Array.isArray(config.authors) ? config.authors : [],
   };
 
   // Gamble + jackpot: jackpot appears in exactly one random opening (0-based index).
@@ -2752,9 +2886,12 @@ document.addEventListener('keydown', e => {
   else closeModal();
 });
 
-// Init: load loot + restore DM key pill
+// Init: load loot + Sources chips + restore DM key pill
 (async function initDm() {
-  try { await loadLoot(); } catch {}
+  try {
+    await loadLoot();
+    buildAuthorChips();
+  } catch {}
   if (dmKey) {
     const masked = dmKey.length > 4 ? dmKey.slice(0, 4) + '···' : dmKey;
     document.getElementById('dm-key-display').textContent = masked;

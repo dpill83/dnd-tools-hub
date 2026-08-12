@@ -36,12 +36,17 @@ export async function loadLootTable(env) {
   return BUNDLED_LOOT;
 }
 
-function pickFromTier(loot, tiers, categories) {
+export function normalizeAuthor(author) {
+  return String(author ?? '').trim();
+}
+
+function pickFromTier(loot, tiers, categories, authors) {
   const tierSet = new Set(Array.isArray(tiers) ? tiers : [tiers]);
   const pool = (loot.items || []).filter(
     (item) =>
       tierSet.has(item.tier) &&
-      (!categories?.length || categories.includes(item.category))
+      (!categories?.length || categories.includes(item.category)) &&
+      (!authors?.length || authors.includes(normalizeAuthor(item.author)))
   );
   if (!pool.length) return null;
   return pool[Math.floor(Math.random() * pool.length)];
@@ -71,6 +76,7 @@ export async function rollItems(env, slot_config, guaranteed_item_id) {
     reveal_tier_min,
     reveal_tier_max,
     categories = [],
+    authors = [],
     filler_slots = null,
     pinned_mundane_item_ids = null,
   } = slot_config;
@@ -92,9 +98,10 @@ export async function rollItems(env, slot_config, guaranteed_item_id) {
       : [0, 1];
 
     const tierList = tiers.length ? tiers : [0, 1];
-    let item = pickFromTier(loot, tierList, categories);
-    if (!item) item = pickFromTier(loot, tierList, []);
-    if (!item && tierList[0] !== 0) item = pickFromTier(loot, [0, 1], []);
+    // Categories may relax; authors stay applied through every fallback.
+    let item = pickFromTier(loot, tierList, categories, authors);
+    if (!item) item = pickFromTier(loot, tierList, [], authors);
+    if (!item && tierList[0] !== 0) item = pickFromTier(loot, [0, 1], [], authors);
     if (item) mundane.push(item);
   }
 
@@ -104,10 +111,10 @@ export async function rollItems(env, slot_config, guaranteed_item_id) {
   }
   if (!reveal) {
     const tiers = tiersInclusive(reveal_tier_min, reveal_tier_max);
-    reveal = pickFromTier(loot, tiers.length ? tiers : [2, 3, 4, 5], categories);
+    reveal = pickFromTier(loot, tiers.length ? tiers : [2, 3, 4, 5], categories, authors);
   }
   if (!reveal) {
-    reveal = pickFromTier(loot, [2, 3, 4, 5], []);
+    reveal = pickFromTier(loot, [2, 3, 4, 5], [], authors);
   }
 
   return { mundane, reveal };
