@@ -431,8 +431,8 @@
     display: grid;
     grid-template-columns: 1fr auto auto;
     grid-template-areas:
-        "time time reroll"
-        "label total reroll";
+        "time time actions"
+        "label total actions";
     gap: 0.1rem 0.4rem;
     align-items: center;
     padding: 0.45rem 0.55rem;
@@ -444,8 +444,8 @@
 
 .dice-log-entry--expanded {
     grid-template-areas:
-        "time time reroll"
-        "label total reroll"
+        "time time actions"
+        "label total actions"
         "breakdown breakdown breakdown";
 }
 
@@ -487,8 +487,15 @@
     text-decoration: underline;
 }
 
+.dice-log-actions {
+    grid-area: actions;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
 .dice-log-reroll {
-    grid-area: reroll;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -572,5 +579,261 @@
     .dice-roll {
         text-decoration: none;
         cursor: default;
+    }
+}
+
+/* HP tracker: sit just left of the centered 800px wide card when space allows */
+.hp-tracker {
+    --hp-tracker-width: 13.5rem;
+    position: fixed;
+    z-index: 1030;
+    bottom: 1rem;
+    right: max(0.5rem, min(calc(50% + 410px), calc(100vw - var(--hp-tracker-width) - 0.5rem)));
+    width: var(--hp-tracker-width);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.8rem;
+    color: #522;
+    text-align: left;
+    pointer-events: none;
+}
+
+.hp-tracker > * {
+    pointer-events: auto;
+}
+
+.hp-tracker-tab {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid #a08b6e;
+    border-radius: 0.35rem;
+    background: #e8e0d4;
+    color: #522;
+    box-shadow: 0 0.15rem 0.5rem rgba(82, 34, 34, 0.2);
+    cursor: pointer;
+}
+
+.hp-tracker-tab:hover,
+.hp-tracker-tab:focus-visible {
+    background: #c9a227;
+    color: #fff;
+    outline: none;
+}
+
+.hp-tracker[data-state="hidden"] .hp-tracker-tab {
+    display: inline-flex;
+}
+
+.hp-tracker[data-state="hidden"] .hp-tracker-panel {
+    display: none;
+}
+
+.hp-tracker-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    width: 100%;
+    max-height: min(50vh, 22rem);
+}
+
+.hp-tracker[data-state="expanded"] {
+    --hp-tracker-width: 16rem;
+}
+
+.hp-tracker[data-state="expanded"] .hp-tracker-panel {
+    max-height: min(70vh, 32rem);
+}
+
+.hp-tracker[data-state="expanded"] .hp-tracker-expand {
+    display: none;
+}
+
+.hp-tracker-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.hp-tracker-empty {
+    margin: 0;
+    padding: 0.6rem 0.75rem;
+    background: #e8e0d4;
+    border: 1px solid #a08b6e;
+    border-radius: 0.35rem;
+    color: #866;
+    box-shadow: 0 0.1rem 0.35rem rgba(82, 34, 34, 0.12);
+}
+
+.hp-tracker-entry {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+        "name actions"
+        "hp actions";
+    gap: 0.1rem 0.4rem;
+    align-items: center;
+    padding: 0.45rem 0.55rem;
+    background: #e8e0d4;
+    border: 1px solid #a08b6e;
+    border-radius: 0.35rem;
+    box-shadow: 0 0.1rem 0.35rem rgba(82, 34, 34, 0.15);
+}
+
+.hp-tracker-entry--bloodied {
+    border-color: #a94442;
+    background: #f3e0e0;
+}
+
+.hp-tracker-entry--bloodied .hp-tracker-hp {
+    color: #7a1f1f;
+}
+
+.hp-tracker-entry--dead {
+    opacity: 0.65;
+    background: #ddd6cc;
+}
+
+.hp-tracker-entry--dead .hp-tracker-name,
+.hp-tracker-entry--dead .hp-tracker-hp {
+    text-decoration: line-through;
+    color: #866;
+}
+
+.hp-tracker-name {
+    grid-area: name;
+    font-weight: 600;
+    line-height: 1.25;
+    word-break: break-word;
+}
+
+.hp-tracker-hp {
+    grid-area: hp;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #7a1f1f;
+    line-height: 1.2;
+}
+
+.hp-tracker-max {
+    cursor: text;
+    border-bottom: 1px dotted transparent;
+}
+
+.hp-tracker-max:hover {
+    border-bottom-color: #a08b6e;
+}
+
+.hp-tracker-max-input {
+    width: 3.25rem;
+    padding: 0.05rem 0.2rem;
+    border: 1px solid #a08b6e;
+    border-radius: 0.2rem;
+    background: #fff;
+    color: #522;
+    font: inherit;
+    font-weight: 700;
+}
+
+.hp-tracker-actions {
+    grid-area: actions;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.hp-tracker-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    padding: 0;
+    border: 1px solid #a08b6e;
+    border-radius: 50%;
+    background: #f3ebe0;
+    color: #522;
+    cursor: pointer;
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+.hp-tracker-btn:hover,
+.hp-tracker-btn:focus-visible {
+    background: #c9a227;
+    color: #fff;
+    outline: none;
+}
+
+.hp-tracker-btn-remove {
+    font-size: 0.65rem;
+}
+
+.hp-tracker-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    justify-content: flex-start;
+}
+
+.hp-tracker-ctrl {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-height: 1.85rem;
+    padding: 0.25rem 0.55rem;
+    border: 1px solid #a08b6e;
+    border-radius: 999px;
+    background: #e8e0d4;
+    color: #522;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    box-shadow: 0 0.1rem 0.3rem rgba(82, 34, 34, 0.12);
+}
+
+.hp-tracker-ctrl:hover,
+.hp-tracker-ctrl:focus-visible {
+    background: #c9a227;
+    color: #fff;
+    outline: none;
+}
+
+.hp-tracker-ctrl:disabled {
+    opacity: 0.45;
+    cursor: default;
+    background: #e8e0d4;
+    color: #522;
+}
+
+.hp-tracker-minimize,
+.hp-tracker-expand {
+    width: 1.85rem;
+    padding: 0;
+}
+
+@media (max-width: 1200px) {
+    .hp-tracker {
+        --hp-tracker-width: 12rem;
+        right: auto;
+        left: 0.5rem;
+    }
+}
+
+@media print {
+    .hp-tracker,
+    #hp-adjust-modal {
+        display: none !important;
     }
 }

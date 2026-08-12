@@ -134,6 +134,26 @@ var DiceRoller = {
         return fullName.split(/\s+/)[0];
     },
 
+    getMonsterFullName: function () {
+        if (typeof mon !== "undefined" && mon && mon.name) {
+            var fromMon = String(mon.name).trim();
+            if (fromMon) return fromMon;
+        }
+        var nameEl = document.getElementById("monster-name");
+        if (nameEl) {
+            var fromDom = nameEl.textContent.trim();
+            if (fromDom) return fromDom;
+        }
+        return "";
+    },
+
+    isHpRollButton: function (btn) {
+        if (!btn) return false;
+        if (btn.getAttribute("data-label") === "HP") return true;
+        var hpEl = document.getElementById("hit-points");
+        return !!(hpEl && hpEl.contains(btn));
+    },
+
     buildLabel: function (btn) {
         var label = btn.getAttribute("data-label") || btn.textContent.trim();
         var traitName = this.getTraitLabel(btn);
@@ -335,6 +355,21 @@ var DiceRoller = {
         if (record.note === "fumble") total.className += " dice-log-total--fumble";
         total.textContent = String(record.total);
 
+        var actions = document.createElement("div");
+        actions.className = "dice-log-actions";
+
+        if (record.kind === "hp") {
+            var track = document.createElement("button");
+            track.type = "button";
+            track.className = "dice-log-reroll dice-log-track";
+            track.setAttribute("data-action", "track");
+            track.setAttribute("data-id", record.id);
+            track.setAttribute("aria-label", "Add to HP tracker");
+            track.title = "Add to HP tracker";
+            track.innerHTML = "<i class=\"bi bi-heart-pulse\" aria-hidden=\"true\"></i>";
+            actions.appendChild(track);
+        }
+
         var reroll = document.createElement("button");
         reroll.type = "button";
         reroll.className = "dice-log-reroll";
@@ -343,6 +378,7 @@ var DiceRoller = {
         reroll.setAttribute("aria-label", "Reroll " + record.expression);
         reroll.title = "Reroll " + record.expression;
         reroll.innerHTML = "<i class=\"bi bi-arrow-clockwise\" aria-hidden=\"true\"></i>";
+        actions.appendChild(reroll);
 
         article.appendChild(time);
         article.appendChild(label);
@@ -359,7 +395,7 @@ var DiceRoller = {
         }
 
         article.appendChild(total);
-        article.appendChild(reroll);
+        article.appendChild(actions);
         return article;
     },
 
@@ -376,7 +412,7 @@ var DiceRoller = {
         var result = this.evaluate(expression);
         if (!result) return;
 
-        this.push({
+        var record = {
             id: this.makeId(),
             label: this.buildLabel(btn),
             expression: expression,
@@ -385,7 +421,12 @@ var DiceRoller = {
             total: result.total,
             note: result.note,
             at: Date.now()
-        });
+        };
+        if (this.isHpRollButton(btn)) {
+            record.kind = "hp";
+            record.monsterName = this.getMonsterFullName();
+        }
+        this.push(record);
     },
 
     handleLogClick: function (e) {
@@ -403,6 +444,22 @@ var DiceRoller = {
             this.clearAll();
         } else if (action === "reroll") {
             this.reroll(btn.getAttribute("data-id"));
+        } else if (action === "track") {
+            this.trackHp(btn.getAttribute("data-id"));
+        }
+    },
+
+    trackHp: function (id) {
+        var source = null;
+        for (var i = 0; i < this.entries.length; i++) {
+            if (this.entries[i].id === id) {
+                source = this.entries[i];
+                break;
+            }
+        }
+        if (!source || source.kind !== "hp") return;
+        if (typeof HpTracker !== "undefined" && HpTracker.addFromRoll) {
+            HpTracker.addFromRoll(source);
         }
     },
 
@@ -419,7 +476,7 @@ var DiceRoller = {
         var result = this.evaluate(source.expression);
         if (!result) return;
 
-        this.push({
+        var record = {
             id: this.makeId(),
             label: source.label,
             expression: source.expression,
@@ -428,7 +485,12 @@ var DiceRoller = {
             total: result.total,
             note: result.note,
             at: Date.now()
-        });
+        };
+        if (source.kind === "hp") {
+            record.kind = "hp";
+            record.monsterName = source.monsterName || this.getMonsterFullName();
+        }
+        this.push(record);
     },
 
     getTraitLabel: function (btn) {
