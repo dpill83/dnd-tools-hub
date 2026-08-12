@@ -2,6 +2,8 @@ import { json, getBody } from '../_shared/http.js';
 import { generateId } from '../_shared/ids.js';
 import { ensurePacksBatchIdColumn } from '../_shared/schema.js';
 
+const MAX_PACK_QUANTITY = 100;
+
 async function generateUniquePackId(DB) {
   for (let attempts = 0; attempts < 20; attempts++) {
     const id = generateId();
@@ -39,8 +41,8 @@ export async function onRequestPost(context) {
   }
 
   const quantity = body.quantity != null ? parseInt(body.quantity, 10) : 1;
-  if (isNaN(quantity) || quantity < 1 || quantity > 20) {
-    return json({ error: 'quantity must be 1-20' }, 400);
+  if (isNaN(quantity) || quantity < 1 || quantity > MAX_PACK_QUANTITY) {
+    return json({ error: `quantity must be 1-${MAX_PACK_QUANTITY}` }, 400);
   }
   if (!body.slot_config || typeof body.slot_config !== 'object') {
     return json({ error: 'slot_config is required' }, 400);

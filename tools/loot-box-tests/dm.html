@@ -1576,7 +1576,7 @@ input[type=range]::-webkit-slider-thumb:hover {
           <div class="form-group-stack">
             <span class="field-label">Packs to Generate</span>
             <div class="form-group-inline">
-              <input type="number" class="pack-count-input" id="gamble-count" min="2" max="20" value="10" oninput="updateGambleHint()">
+              <input type="number" class="pack-count-input" id="gamble-count" min="2" value="10" oninput="updateGambleHint()">
               <span class="pack-count-hint" id="gamble-hint">1 jackpot hidden in 10 packs</span>
             </div>
           </div>
@@ -1773,6 +1773,7 @@ const RARITIES = [
 
 const API_BASE = '/tools/loot-box-tests/api';
 const DM_KEY_STORAGE_KEY = 'lootForgeDmKey';
+const MAX_GAMBLE_PACKS = 100;
 /** Persist DM "handed out" (Reveal) per pack id across modal sessions. */
 const HANDOUT_PACK_STORAGE_PREFIX = 'lootForgeHandout:';
 
@@ -2146,6 +2147,8 @@ document.querySelectorAll('.cat-chip').forEach(chip => {
 
 initFillerPresetUI();
 updateSlider();
+const gambleCountEl = document.getElementById('gamble-count');
+if (gambleCountEl) gambleCountEl.max = MAX_GAMBLE_PACKS;
 
 // ══════════════════════════════
 // PACK DATA & HELPERS
@@ -2239,7 +2242,7 @@ function buildPackConfig() {
   const gambleCountInput = document.getElementById('gamble-count');
   let gambleCount = parseInt(gambleCountInput?.value) || 10;
   if (gambleCount < 2) gambleCount = 2;
-  if (gambleCount > 20) gambleCount = 20;
+  if (gambleCount > MAX_GAMBLE_PACKS) gambleCount = MAX_GAMBLE_PACKS;
 
   const jackpotPinnedNameEl = document.getElementById('jackpot-pinned-name');
   const jackpotItemText = (jackpotPinnedNameEl?.textContent || '').trim();
