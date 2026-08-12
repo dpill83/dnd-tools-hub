@@ -353,6 +353,18 @@ th.sort-desc::after { content: '▼'; }
       <label for="q">Search</label><br>
       <input type="search" id="q" placeholder="Filter by name…" autocomplete="off">
     </div>
+    <div>
+      <label for="filter-category">Category</label><br>
+      <select id="filter-category" aria-label="Filter by category">
+        <option value="">All categories</option>
+      </select>
+    </div>
+    <div>
+      <label for="filter-rarity">Rarity</label><br>
+      <select id="filter-rarity" aria-label="Filter by rarity">
+        <option value="">All rarities</option>
+      </select>
+    </div>
     <button type="button" id="btn-add">Add row</button>
     <button type="button" id="btn-import">Import JSON</button>
     <input type="file" id="import-file" accept="application/json,.json" class="hidden" aria-hidden="true">
@@ -479,6 +491,10 @@ th.sort-desc::after { content: '▼'; }
   /** Full document from GET (items + optional by_tier, meta). */
   var doc = { items: [] };
   var filter = '';
+  /** Empty string = all categories */
+  var categoryFilter = '';
+  /** Empty string = all rarities */
+  var rarityFilter = '';
   /** null = preserve document / filter order */
   var sortKey = null;
   /** 1 = ascending, -1 = descending */
@@ -606,10 +622,46 @@ th.sort-desc::after { content: '▼'; }
 
   function visibleItems() {
     var q = filter.trim().toLowerCase();
-    if (!q) return doc.items;
     return doc.items.filter(function (it) {
-      return String(it.name || '').toLowerCase().indexOf(q) !== -1;
+      if (q && String(it.name || '').toLowerCase().indexOf(q) === -1) return false;
+      if (categoryFilter && String(it.category || '') !== categoryFilter) return false;
+      if (rarityFilter && String(it.rarity || '') !== rarityFilter) return false;
+      return true;
     });
+  }
+
+  /** Fixed list first, then any extras from items (sorted). */
+  function unionFilterOptions(fixed, field) {
+    var seen = {};
+    var extras = [];
+    fixed.forEach(function (v) { seen[v] = true; });
+    (doc.items || []).forEach(function (it) {
+      var v = String((it && it[field]) || '').trim();
+      if (!v || seen[v]) return;
+      seen[v] = true;
+      extras.push(v);
+    });
+    extras.sort(function (a, b) {
+      return a.toLowerCase() < b.toLowerCase() ? -1 : a.toLowerCase() > b.toLowerCase() ? 1 : 0;
+    });
+    return fixed.concat(extras);
+  }
+
+  function refreshFilterSelects() {
+    function fill(selId, allLabel, fixed, field, current) {
+      var sel = $(selId);
+      if (!sel) return current;
+      var opts = unionFilterOptions(fixed, field);
+      var html = '<option value="">' + allLabel + '</option>' + opts.map(function (v) {
+        return '<option value="' + String(v).replace(/"/g, '&quot;') + '">' + v + '</option>';
+      }).join('');
+      sel.innerHTML = html;
+      if (current && opts.indexOf(current) === -1) current = '';
+      sel.value = current;
+      return current;
+    }
+    categoryFilter = fill('filter-category', 'All categories', CATEGORIES, 'category', categoryFilter);
+    rarityFilter = fill('filter-rarity', 'All rarities', RARITIES, 'rarity', rarityFilter);
   }
 
   function weightSortNum(it) {
@@ -775,6 +827,7 @@ th.sort-desc::after { content: '▼'; }
   }
 
   function render() {
+    refreshFilterSelects();
     clampPageIndex();
     var tbody = $('tbody');
     var rows = itemsOnCurrentPage();
@@ -1103,6 +1156,18 @@ th.sort-desc::after { content: '▼'; }
 
   $('q').addEventListener('input', function () {
     filter = this.value;
+    pageIndex = 0;
+    render();
+  });
+
+  $('filter-category').addEventListener('change', function () {
+    categoryFilter = this.value;
+    pageIndex = 0;
+    render();
+  });
+
+  $('filter-rarity').addEventListener('change', function () {
+    rarityFilter = this.value;
     pageIndex = 0;
     render();
   });
