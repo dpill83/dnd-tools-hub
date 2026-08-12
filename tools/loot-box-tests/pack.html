@@ -161,13 +161,22 @@
   transform: scale(1);
   animation: none;
 }
-/* Copy loot (pack exhausted): fixed bottom, matches #reset-btn look from scene.css */
-#pack-copy-btn {
+/* Copy / download loot (pack exhausted): fixed bottom, matches #reset-btn look from scene.css */
+#pack-export-actions {
   position: fixed;
   bottom: clamp(1rem, 3vh, 2rem);
   left: 50%;
   transform: translateX(-50%);
   z-index: var(--z-ui, 100);
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+#pack-export-actions[hidden] {
+  display: none;
+}
+#pack-copy-btn,
+#pack-download-btn {
   font-family: 'Cinzel', serif;
   font-size: clamp(0.55rem, 1.2vw, 0.72rem);
   letter-spacing: 0.2em;
@@ -180,13 +189,11 @@
   border-radius: 2px;
   transition: all 0.3s;
 }
-#pack-copy-btn:hover {
+#pack-copy-btn:hover,
+#pack-download-btn:hover {
   color: var(--gold-light, #f0d070);
   border-color: rgba(201,168,76,0.5);
   background: rgba(201,168,76,0.06);
-}
-#pack-copy-btn[hidden] {
-  display: none;
 }
 
 /* Full item statblock overlay (pack page) */
@@ -495,7 +502,10 @@
 
 <!-- Reset button hidden on pack page (no re-open) -->
 <button id="reset-btn" style="display:none">✦ Open Another ✦</button>
-<button type="button" id="pack-copy-btn" hidden aria-label="Copy all loot to clipboard">Copy</button>
+<div id="pack-export-actions" hidden>
+  <button type="button" id="pack-copy-btn" aria-label="Copy all loot to clipboard">Copy</button>
+  <button type="button" id="pack-download-btn" aria-label="Download all loot as pack.txt">Download</button>
+</div>
 <a href="loot-table.html" id="loot-table-btn" title="Loot Table" aria-label="Loot Table"><img src="assets/images/chest-closed.png" alt=""></a>
 <a href="dm" id="dm-link" title="DM Dashboard">DM ↗</a>
 
@@ -533,7 +543,9 @@
   const particlesContainer = document.getElementById('particles');
   const packJackpotMsg = document.getElementById('pack-jackpot-msg');
   const packClaimedMsg = document.getElementById('pack-claimed-msg');
+  const packExportActions = document.getElementById('pack-export-actions');
   const packCopyBtn = document.getElementById('pack-copy-btn');
+  const packDownloadBtn = document.getElementById('pack-download-btn');
   let copyLootOpens = null;
   let copyLootLabel = '';
   let lootTableCache = null;
@@ -633,11 +645,11 @@
   function hidePackCopy() {
     copyLootOpens = null;
     copyLootLabel = '';
-    if (packCopyBtn) packCopyBtn.setAttribute('hidden', '');
+    if (packExportActions) packExportActions.setAttribute('hidden', '');
   }
 
   function setPackCopyAvailable(opens, label) {
-    if (!packCopyBtn) return;
+    if (!packExportActions) return;
     var list = Array.isArray(opens) ? opens : [];
     if (!list.length) {
       hidePackCopy();
@@ -645,7 +657,7 @@
     }
     copyLootOpens = list;
     copyLootLabel = label != null ? String(label) : '';
-    packCopyBtn.removeAttribute('hidden');
+    packExportActions.removeAttribute('hidden');
   }
 
   async function onPackCopyClick() {
@@ -657,6 +669,23 @@
       packCopyBtn.textContent = 'Copied!';
       setTimeout(function() { packCopyBtn.textContent = orig; }, 1500);
     } catch (_e) {}
+  }
+
+  function onPackDownloadClick() {
+    if (!packDownloadBtn || !copyLootOpens || !copyLootOpens.length) return;
+    var text = buildPackLootClipboardText(copyLootLabel, packId, copyLootOpens);
+    var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'pack.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    var orig = packDownloadBtn.textContent;
+    packDownloadBtn.textContent = 'Saved!';
+    setTimeout(function() { packDownloadBtn.textContent = orig; }, 1500);
   }
 
   async function getLootTable() {
@@ -697,22 +726,11 @@
     return 'Item #' + String(gid);
   }
 
-  async function updateJackpotBanner(packData) {
+  async function updateJackpotBanner(_packData) {
+    // Hidden until we have a proper post-win jackpot celebration (don't spoil the item).
     if (!packJackpotMsg) return;
-    var gid = Number(packData && packData.guaranteed_item_id);
-    if (Number.isNaN(gid)) {
-      packJackpotMsg.hidden = true;
-      packJackpotMsg.textContent = '';
-      return;
-    }
-    var name = await resolveJackpotItemName(gid, packData && packData.opens);
-    if (!name) {
-      packJackpotMsg.hidden = true;
-      packJackpotMsg.textContent = '';
-      return;
-    }
-    packJackpotMsg.textContent = 'Jackpot Item: ' + name;
-    packJackpotMsg.hidden = false;
+    packJackpotMsg.hidden = true;
+    packJackpotMsg.textContent = '';
   }
 
   function wireRevealedSlot(slot) {
@@ -1210,6 +1228,7 @@
   })();
 
   if (packCopyBtn) packCopyBtn.addEventListener('click', onPackCopyClick);
+  if (packDownloadBtn) packDownloadBtn.addEventListener('click', onPackDownloadClick);
 
   chestWrap.addEventListener('click', runReveal);
   chestWrap.addEventListener('keydown', function(e) {
