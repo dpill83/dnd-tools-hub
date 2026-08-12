@@ -19,6 +19,8 @@ From the project root (where `schema-loot-chest.sql` lives):
 npx wrangler d1 execute LOOT_CHEST_DB --remote --file=schema-loot-chest.sql
 ```
 
+This creates pack tables plus cleanup workflow tables (`cleanup_buckets`, `cleanup_items`, `cleanup_changes`, `cleanup_reviewer_state`) used by the Cleanup Dashboard. Re-running the file is safe (`IF NOT EXISTS`).
+
 ### Smoke tests
 
 1) **Create a pack (DM dashboard)**
@@ -62,4 +64,10 @@ Upload the canonical file as object key **`loot-table.json`** (include `items`, 
 ### Editor page
 
 - **`/tools/loot-box-tests/loot-editor.html`** — bookmarkable UI; `PUT` has no auth (validate JSON only).
+
+### Cleanup dashboard
+
+- **`/tools/loot-box-tests/cleanup-dashboard.html`** — Category+Rarity review workflow for Dan/Ted/Dani.
+- APIs under `/tools/loot-box-tests/api/cleanup/*` (D1 for assignments/status/flags/history; R2 for item field edits).
+- After applying schema, open the dashboard and click **Sync** (or load overview — it will sync if empty) so buckets are built from the current loot table.
 

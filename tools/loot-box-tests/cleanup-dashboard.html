@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loot Forge — Cleanup Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #c9a84c;
+  --gold-light: #f0d070;
+  --bg: #080502;
+  --surface: rgba(20, 11, 4, 0.95);
+  --surface-2: rgba(30, 16, 6, 0.88);
+  --border: rgba(201, 168, 76, 0.35);
+  --border-dim: rgba(201, 168, 76, 0.18);
+  --text: rgba(240, 215, 140, 0.95);
+  --muted: rgba(160, 130, 80, 0.55);
+  --ok: #6bbf7a;
+  --warn: #e0a040;
+  --danger: #d07060;
+  --info: #6aa8c9;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Crimson Text', Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  padding: 1rem 1rem 3rem;
+}
+h1, h2, h3 {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--gold-light);
+}
+h1 { font-size: 1.25rem; margin: 0; }
+h2 { font-size: 1rem; margin: 0 0 0.75rem; }
+h3 { font-size: 0.9rem; margin: 0 0 0.5rem; }
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+}
+.nav-links { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+a.nav-btn, button.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+}
+a.nav-btn:hover, button.nav-btn:hover { background: rgba(201, 168, 76, 0.12); }
+button.nav-btn.active {
+  border-color: var(--gold);
+  background: rgba(201, 168, 76, 0.18);
+  color: var(--gold-light);
+}
+.sub { font-size: 0.9rem; color: var(--muted); margin: 0 0 1rem; }
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+.toolbar label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 0.2rem; }
+select, input, textarea, button.btn {
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: rgba(10, 6, 2, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.4rem 0.55rem;
+}
+textarea { width: 100%; min-height: 4.5rem; resize: vertical; }
+button.btn {
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+}
+button.btn:hover { background: rgba(201, 168, 76, 0.15); }
+button.btn.primary {
+  background: rgba(201, 168, 76, 0.22);
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+button.btn.danger { border-color: var(--danger); color: #f0b0a0; }
+button.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.status-line {
+  font-size: 0.9rem;
+  color: var(--muted);
+  min-height: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+.status-line.error { color: var(--danger); }
+.status-line.ok { color: var(--ok); }
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0.75rem 0 0;
+}
+.stat {
+  min-width: 6.5rem;
+  padding: 0.55rem 0.7rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border-dim);
+  border-radius: 6px;
+}
+.stat .n { font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--gold-light); }
+.stat .l { font-size: 0.75rem; color: var(--muted); }
+.progress-big {
+  font-family: 'Cinzel', serif;
+  font-size: 1.15rem;
+  color: var(--gold-light);
+  margin: 0.35rem 0;
+}
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+table.data th, table.data td {
+  text-align: left;
+  padding: 0.45rem 0.5rem;
+  border-bottom: 1px solid var(--border-dim);
+  vertical-align: middle;
+}
+table.data th {
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+table.data th.num, table.data td.num { text-align: right; }
+table.data tr:hover td { background: rgba(201, 168, 76, 0.06); }
+.badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 0.12rem 0.4rem;
+  border-radius: 3px;
+  border: 1px solid var(--border-dim);
+  color: var(--muted);
+}
+.badge.ok { color: var(--ok); border-color: rgba(107, 191, 122, 0.4); }
+.badge.warn { color: var(--warn); border-color: rgba(224, 160, 64, 0.45); }
+.badge.danger { color: var(--danger); border-color: rgba(208, 112, 96, 0.45); }
+.hidden { display: none !important; }
+.view { display: none; }
+.view.active { display: block; }
+.resume-card {
+  border-color: rgba(201, 168, 76, 0.5);
+  background: linear-gradient(135deg, rgba(40, 22, 8, 0.95), rgba(20, 11, 4, 0.95));
+}
+.review-layout {
+  display: grid;
+  grid-template-columns: 1fr minmax(220px, 280px);
+  gap: 1rem;
+}
+@media (max-width: 900px) {
+  .review-layout { grid-template-columns: 1fr; }
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem 1rem;
+}
+@media (max-width: 700px) {
+  .form-grid { grid-template-columns: 1fr; }
+}
+.form-grid .full { grid-column: 1 / -1; }
+.field label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 0.2rem;
+}
+.field input, .field select, .field textarea { width: 100%; }
+.checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.checklist li {
+  display: flex;
+  gap: 0.45rem;
+  align-items: flex-start;
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+  color: var(--muted);
+}
+.actions-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.85rem;
+}
+.issues { font-size: 0.85rem; color: var(--warn); margin: 0.5rem 0 0; }
+.issues li { margin-bottom: 0.2rem; }
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.82rem;
+  max-height: 280px;
+  overflow: auto;
+}
+.history-list li {
+  border-bottom: 1px solid var(--border-dim);
+  padding: 0.4rem 0;
+  color: var(--muted);
+}
+.history-list strong { color: var(--text); }
+.item-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+.flag-panel {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(208, 112, 96, 0.35);
+  border-radius: 6px;
+  background: rgba(60, 20, 12, 0.35);
+}
+.flag-panel.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div>
+    <h1>Loot Table Cleanup</h1>
+    <p class="sub" style="margin:0.25rem 0 0">Review by Category + Rarity. Shared progress for Dan, Ted, and Dani.</p>
+  </div>
+  <div class="nav-links">
+    <a class="nav-btn" href="dm.html">Pack Builder</a>
+    <a class="nav-btn" href="loot-editor.html">Loot Editor</a>
+    <button type="button" class="nav-btn active" data-view="dashboard" id="nav-dashboard">Dashboard</button>
+    <button type="button" class="nav-btn" data-view="buckets" id="nav-buckets">Buckets</button>
+    <button type="button" class="nav-btn" data-view="review" id="nav-review">Review</button>
+    <button type="button" class="nav-btn" data-view="flagged" id="nav-flagged">Flagged</button>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div>
+    <label for="reviewer-select">I am</label>
+    <select id="reviewer-select" aria-label="Current reviewer">
+      <option value="Dan">Dan</option>
+      <option value="Ted">Ted</option>
+      <option value="Dani">Dani</option>
+    </select>
+  </div>
+  <button type="button" class="btn" id="btn-sync">Sync from loot table</button>
+  <button type="button" class="btn" id="btn-refresh">Refresh</button>
+</div>
+<p class="status-line" id="status-line" aria-live="polite"></p>
+
+<!-- DASHBOARD -->
+<section class="view active" id="view-dashboard">
+  <div class="panel">
+    <h2>Overall Progress</h2>
+    <p class="progress-big" id="overall-progress">—</p>
+    <div class="stats-row" id="overall-stats"></div>
+  </div>
+
+  <div class="panel resume-card hidden" id="resume-card">
+    <h2>Continue where you left off</h2>
+    <p id="resume-text" class="sub" style="margin:0 0 0.75rem"></p>
+    <button type="button" class="btn primary" id="btn-resume">Continue</button>
+  </div>
+
+  <div class="panel">
+    <h2>Reviewer Progress</h2>
+    <table class="data" id="reviewer-table">
+      <thead>
+        <tr>
+          <th>Reviewer</th>
+          <th class="num">Assigned</th>
+          <th class="num">Reviewed</th>
+          <th class="num">Remaining</th>
+          <th class="num">Flagged</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- BUCKETS -->
+<section class="view" id="view-buckets">
+  <div class="panel">
+    <div class="toolbar" style="margin-bottom:0.75rem">
+      <div>
+        <label for="filter-reviewer">Reviewer</label>
+        <select id="filter-reviewer">
+          <option value="">All</option>
+          <option value="Dan">Dan</option>
+          <option value="Ted">Ted</option>
+          <option value="Dani">Dani</option>
+          <option value="__unassigned">Unassigned</option>
+          <option value="__mine">My assignments</option>
+        </select>
+      </div>
+      <div>
+        <label for="filter-category">Category</label>
+        <select id="filter-category"><option value="">All</option></select>
+      </div>
+      <div>
+        <label for="filter-rarity">Rarity</label>
+        <select id="filter-rarity"><option value="">All</option></select>
+      </div>
+      <div>
+        <label for="filter-complete">Completion</label>
+        <select id="filter-complete">
+          <option value="">All</option>
+          <option value="incomplete">Incomplete review</option>
+          <option value="review_complete">Review complete</option>
+          <option value="cleanup_complete">Cleanup complete</option>
+          <option value="has_flags">Has flags</option>
+        </select>
+      </div>
+      <button type="button" class="btn primary" id="btn-balance">Auto-balance unassigned</button>
+      <button type="button" class="btn" id="btn-rebalance">Rebalance all</button>
+    </div>
+    <table class="data" id="bucket-table">
+      <thead>
+        <tr>
+          <th data-sort="category">Category</th>
+          <th data-sort="rarity">Rarity</th>
+          <th class="num" data-sort="item_count">Items</th>
+          <th data-sort="assigned_to">Assigned To</th>
+          <th data-sort="examined">Progress</th>
+          <th class="num" data-sort="flagged">Flags</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- REVIEW -->
+<section class="view" id="view-review">
+  <div class="panel">
+    <div class="item-nav">
+      <div>
+        <h2 id="review-title" style="margin:0">Select a bucket</h2>
+        <p class="sub" id="review-progress" style="margin:0.25rem 0 0">—</p>
+      </div>
+      <div class="actions-bar" style="margin:0">
+        <button type="button" class="btn" id="btn-prev" disabled>Previous</button>
+        <button type="button" class="btn" id="btn-next" disabled>Next</button>
+        <button type="button" class="btn" id="btn-back-buckets">All buckets</button>
+      </div>
+    </div>
+
+    <div id="review-empty" class="sub">Open a bucket from the Buckets tab to start reviewing.</div>
+
+    <div id="review-body" class="hidden">
+      <div class="review-layout">
+        <div>
+          <form id="item-form" autocomplete="off">
+            <div class="form-grid">
+              <div class="field">
+                <label for="f-id">ID</label>
+                <input type="text" id="f-id" readonly>
+              </div>
+              <div class="field">
+                <label for="f-status">Cleanup status</label>
+                <input type="text" id="f-status" readonly>
+              </div>
+              <div class="field full">
+                <label for="f-name">Name</label>
+                <input type="text" id="f-name" required>
+              </div>
+              <div class="field">
+                <label for="f-category">Category</label>
+                <select id="f-category"></select>
+              </div>
+              <div class="field">
+                <label for="f-rarity">Rarity</label>
+                <select id="f-rarity"></select>
+              </div>
+              <div class="field">
+                <label for="f-tier">Tier</label>
+                <input type="text" id="f-tier" readonly>
+              </div>
+              <div class="field">
+                <label for="f-value">GP value</label>
+                <input type="number" id="f-value" step="any">
+              </div>
+              <div class="field">
+                <label for="f-value-raw">Raw / original value</label>
+                <input type="text" id="f-value-raw">
+              </div>
+              <div class="field">
+                <label for="f-weight">Weight</label>
+                <input type="text" id="f-weight">
+              </div>
+              <div class="field">
+                <label for="f-author">Author / source</label>
+                <input type="text" id="f-author">
+              </div>
+              <div class="field">
+                <label for="f-requirements">Requirements / attunement</label>
+                <input type="text" id="f-requirements">
+              </div>
+              <div class="field">
+                <label for="f-icon">Icon</label>
+                <input type="text" id="f-icon">
+              </div>
+              <div class="field full">
+                <label for="f-description">Description</label>
+                <textarea id="f-description" rows="4"></textarea>
+              </div>
+              <div class="field full">
+                <label for="f-properties">Properties</label>
+                <textarea id="f-properties" rows="4"></textarea>
+              </div>
+            </div>
+          </form>
+
+          <ul class="issues" id="possible-issues"></ul>
+
+          <div class="flag-panel hidden" id="flag-panel">
+            <h3>Flag for group review</h3>
+            <div class="form-grid">
+              <div class="field">
+                <label for="f-flag-reason">Reason</label>
+                <select id="f-flag-reason">
+                  <option value="value">Value</option>
+                  <option value="rarity">Rarity</option>
+                  <option value="mechanics">Mechanics</option>
+                  <option value="source">Source</option>
+                  <option value="duplicate">Duplicate</option>
+                  <option value="missing">Missing information</option>
+                  <option value="category">Category</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="field full">
+                <label for="f-flag-note">Note (required)</label>
+                <textarea id="f-flag-note" rows="3" placeholder="Why this needs a group decision…"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions-bar">
+            <button type="button" class="btn primary" id="btn-reviewed">Reviewed, No Changes</button>
+            <button type="button" class="btn primary" id="btn-save">Save</button>
+            <button type="button" class="btn primary" id="btn-save-next">Save &amp; Next</button>
+            <button type="button" class="btn danger" id="btn-flag-toggle">Flag…</button>
+            <button type="button" class="btn danger hidden" id="btn-flag-next">Flag &amp; Next</button>
+            <button type="button" class="btn" id="btn-needs-source">Needs Source Verification</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="panel" style="margin:0 0 0.75rem; padding:0.75rem">
+            <h3>Checklist</h3>
+            <ul class="checklist" id="checklist">
+              <li><input type="checkbox"> Name/spelling correct</li>
+              <li><input type="checkbox"> Description complete</li>
+              <li><input type="checkbox"> Category correct</li>
+              <li><input type="checkbox"> Rarity correct</li>
+              <li><input type="checkbox"> GP value reasonable/correct</li>
+              <li><input type="checkbox"> Weight present when applicable</li>
+              <li><input type="checkbox"> Properties complete</li>
+              <li><input type="checkbox"> Requirements/attunement correct</li>
+              <li><input type="checkbox"> Author/source present</li>
+              <li><input type="checkbox"> Mechanics appear valid</li>
+              <li><input type="checkbox"> No obvious duplicate or malformed data</li>
+            </ul>
+          </div>
+          <div class="panel" style="margin:0; padding:0.75rem">
+            <h3>History</h3>
+            <ul class="history-list" id="history-list">
+              <li class="sub">No changes yet.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FLAGGED -->
+<section class="view" id="view-flagged">
+  <div class="panel">
+    <div class="toolbar">
+      <div>
+        <label for="filter-flag-reason">Flag reason</label>
+        <select id="filter-flag-reason">
+          <option value="">All</option>
+          <option value="value">Value</option>
+          <option value="rarity">Rarity</option>
+          <option value="mechanics">Mechanics</option>
+          <option value="source">Source</option>
+          <option value="duplicate">Duplicate</option>
+          <option value="missing">Missing information</option>
+          <option value="category">Category</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    <table class="data" id="flagged-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Category</th>
+          <th>Rarity</th>
+          <th>Reviewer</th>
+          <th>Reason</th>
+          <th>Note</th>
+          <th>Flagged</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+<script src="assets/js/cleanup-dashboard.js"></script>
+</body>
+</html>
