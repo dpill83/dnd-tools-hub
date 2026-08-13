@@ -370,16 +370,6 @@ var DiceRoller = {
             actions.appendChild(track);
         }
 
-        var reroll = document.createElement("button");
-        reroll.type = "button";
-        reroll.className = "dice-log-reroll";
-        reroll.setAttribute("data-action", "reroll");
-        reroll.setAttribute("data-id", record.id);
-        reroll.setAttribute("aria-label", "Reroll " + record.expression);
-        reroll.title = "Reroll " + record.expression;
-        reroll.innerHTML = "<i class=\"bi bi-arrow-clockwise\" aria-hidden=\"true\"></i>";
-        actions.appendChild(reroll);
-
         article.appendChild(time);
         article.appendChild(label);
 
@@ -395,7 +385,9 @@ var DiceRoller = {
         }
 
         article.appendChild(total);
-        article.appendChild(actions);
+        if (actions.childNodes.length > 0) {
+            article.appendChild(actions);
+        }
         return article;
     },
 
@@ -442,8 +434,6 @@ var DiceRoller = {
             this.setState("expanded");
         } else if (action === "clear") {
             this.clearAll();
-        } else if (action === "reroll") {
-            this.reroll(btn.getAttribute("data-id"));
         } else if (action === "track") {
             this.trackHp(btn.getAttribute("data-id"));
         }
@@ -461,36 +451,6 @@ var DiceRoller = {
         if (typeof HpTracker !== "undefined" && HpTracker.addFromRoll) {
             HpTracker.addFromRoll(source);
         }
-    },
-
-    reroll: function (id) {
-        var source = null;
-        for (var i = 0; i < this.entries.length; i++) {
-            if (this.entries[i].id === id) {
-                source = this.entries[i];
-                break;
-            }
-        }
-        if (!source) return;
-
-        var result = this.evaluate(source.expression);
-        if (!result) return;
-
-        var record = {
-            id: this.makeId(),
-            label: source.label,
-            expression: source.expression,
-            dice: result.dice,
-            modifier: result.modifier,
-            total: result.total,
-            note: result.note,
-            at: Date.now()
-        };
-        if (source.kind === "hp") {
-            record.kind = "hp";
-            record.monsterName = source.monsterName || this.getMonsterFullName();
-        }
-        this.push(record);
     },
 
     getTraitLabel: function (btn) {

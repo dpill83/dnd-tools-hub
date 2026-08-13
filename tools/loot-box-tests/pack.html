@@ -72,6 +72,7 @@
   padding-top: clamp(1rem, 3vh, 2rem);
   padding-bottom: clamp(1rem, 3vh, 2rem);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   gap: clamp(0.65rem, 2vh, 1.1rem);
 }
 .pack-claimed-msg {
@@ -415,6 +416,8 @@
     justify-content: flex-start;
     padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
     padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     gap: 0.55rem;
   }
 
@@ -567,6 +570,8 @@
   #stage.stage--pack-claimed {
     padding-top: max(0.25rem, env(safe-area-inset-top, 0px));
     padding-bottom: calc(3.6rem + env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     gap: 0.25rem;
   }
 
@@ -1103,6 +1108,11 @@
     stage.appendChild(empty);
   }
 
+  function scrollSlotIntoView(slot) {
+    if (!slot) return;
+    slot.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+  }
+
   function flipSlotFaceUp(slot) {
     const inner = slot.querySelector('.card-inner');
     if (!inner || inner.classList.contains('flipped')) return;
@@ -1347,6 +1357,7 @@
     mysterySlot.style.transform = 'scale(0.8)';
     slotsRow.appendChild(mysterySlot);
 
+    stage.classList.add('stage--pack-claimed');
     slotsRow.offsetHeight;
 
     const allSlots = slotsRow.querySelectorAll('.item-slot');
@@ -1354,6 +1365,7 @@
     for (let i = 0; i < mundaneItems.length; i++) {
       const slot = allSlots[i];
 
+      scrollSlotIntoView(slot);
       await flyItemToSlot(mundaneItems[i], slot, chestWrap);
 
       playPop(pitches[i]);
@@ -1362,6 +1374,7 @@
       slot.style.opacity = '1';
       slot.style.transform = 'scale(1)';
       slot.classList.add('revealed');
+      scrollSlotIntoView(slot);
 
       function handleSlotActivate(s) {
         const inner = s.querySelector('.card-inner');
@@ -1385,6 +1398,7 @@
 
     await wait(300);
 
+    scrollSlotIntoView(mysterySlot);
     await new Promise(resolve => {
       const chestRect = chestWrap.getBoundingClientRect();
       const slotRect  = mysterySlot.getBoundingClientRect();
@@ -1425,6 +1439,7 @@
     mysterySlot.style.opacity = '1';
     mysterySlot.style.transform = 'scale(1)';
     mysterySlot.classList.add('revealed');
+    scrollSlotIntoView(mysterySlot);
 
     function handleMysterySlotActivate() {
       const inner = mysterySlot.querySelector('.card-inner');
@@ -1452,6 +1467,10 @@
           var pj = await pr.json();
           var qAfter = Number(pj.quantity ?? 0);
           if (qAfter < 1 && Array.isArray(pj.opens) && pj.opens.length) {
+            chestWrap.classList.add('pack-claimed');
+            chestWrap.style.pointerEvents = 'none';
+            chestWrap.setAttribute('aria-disabled', 'true');
+            chestWrap.setAttribute('aria-label', 'Chest has been looted');
             setPackCopyAvailable(pj.opens, pj.label != null ? String(pj.label) : '');
           } else {
             hidePackCopy();
