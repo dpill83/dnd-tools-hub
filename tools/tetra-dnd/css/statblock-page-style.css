@@ -691,7 +691,7 @@
     background: #f3e0e0;
 }
 
-.hp-tracker-entry--bloodied .hp-tracker-hp {
+.hp-tracker-entry--bloodied .hp-tracker-hp-values {
     color: #7a1f1f;
 }
 
@@ -701,7 +701,7 @@
 }
 
 .hp-tracker-entry--dead .hp-tracker-name,
-.hp-tracker-entry--dead .hp-tracker-hp {
+.hp-tracker-entry--dead .hp-tracker-hp-values {
     text-decoration: line-through;
     color: #866;
 }
@@ -715,10 +715,22 @@
 
 .hp-tracker-hp {
     grid-area: hp;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
     font-size: 1.05rem;
     font-weight: 700;
     color: #7a1f1f;
     line-height: 1.2;
+}
+
+.hp-tracker-hp-values {
+    flex: 1;
+    min-width: 0;
+}
+
+.hp-tracker-history {
+    flex-shrink: 0;
 }
 
 .hp-tracker-max {
@@ -831,9 +843,47 @@
     }
 }
 
+.hp-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-height: min(50vh, 16rem);
+    overflow-y: auto;
+}
+
+.hp-history-empty {
+    margin: 0;
+    color: #866;
+    font-size: 0.85rem;
+}
+
+.hp-history-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.35rem 0.6rem;
+    align-items: baseline;
+    padding: 0.35rem 0.45rem;
+    background: #e8e0d4;
+    border: 1px solid #a08b6e;
+    border-radius: 0.3rem;
+}
+
+.hp-history-time {
+    font-size: 0.72rem;
+    color: #866;
+    white-space: nowrap;
+}
+
+.hp-history-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #522;
+}
+
 @media print {
     .hp-tracker,
-    #hp-adjust-modal {
+    #hp-adjust-modal,
+    #hp-history-modal {
         display: none !important;
     }
 }

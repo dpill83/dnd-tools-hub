@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<!-- Built with Claude: https://claude.ai/chat/984fe38d-66a2-4ffc-90f0-956e3c58512d -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Deck of Many Things</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a0b14;
+    --table:#141327;
+    --vellum:#efe6d2;
+    --bone:#cfc6b4;
+    --brass:#b8893f;
+    --crimson:#a8323b;
+    --verdigris:#3f7d76;
+    --dim:#7d7a92;
+    --line:rgba(184,137,63,.28);
+    --panel:#12111f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--ink);
+    color:var(--bone);
+    font-family:"IBM Plex Sans",-apple-system,Segoe UI,Roboto,sans-serif;
+    overflow:hidden;
+  }
+  #app{display:grid;grid-template-columns:1fr 380px;height:100dvh}
+  #stage{position:relative;min-width:0}
+  #stage canvas{display:block;width:100%;height:100%}
+
+  #brand{
+    position:absolute;top:22px;left:26px;pointer-events:none;
+  }
+  #brand .eyebrow{
+    font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--brass);
+  }
+  #brand h1{
+    font-family:Cinzel,Georgia,serif;font-weight:800;font-size:26px;
+    letter-spacing:.06em;color:var(--vellum);line-height:1.1;margin-top:6px;
+  }
+  #hint{
+    position:absolute;bottom:20px;left:26px;right:26px;
+    font-size:12px;color:var(--dim);letter-spacing:.02em;pointer-events:none;
+  }
+  #sound{
+    position:absolute;top:22px;right:22px;
+    display:flex;align-items:center;gap:8px;cursor:pointer;
+    background:rgba(18,17,31,.72);border:1px solid var(--line);
+    color:var(--bone);font-family:inherit;
+    font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+    padding:8px 12px;
+  }
+  #sound:hover{background:rgba(184,137,63,.16);color:var(--vellum)}
+  #sound:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  #sound .bars{display:flex;align-items:flex-end;gap:2px;height:12px}
+  #sound .bars i{width:2px;background:var(--brass);display:block}
+  #sound .bars i:nth-child(1){height:5px}
+  #sound .bars i:nth-child(2){height:11px}
+  #sound .bars i:nth-child(3){height:7px}
+  #sound[aria-pressed="true"] .bars i{background:#413d59;height:3px}
+
+  /* ── side panel ────────────────────────────────── */
+  #side{
+    background:var(--panel);
+    border-left:1px solid var(--line);
+    display:flex;flex-direction:column;min-height:0;
+  }
+  .block{padding:20px 22px;border-bottom:1px solid var(--line)}
+  .label{
+    font-size:10px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--brass);margin-bottom:10px;
+  }
+
+  .segbar{display:flex;gap:0;border:1px solid var(--line)}
+  .segbar button{
+    flex:1;background:none;border:0;color:var(--dim);cursor:pointer;
+    font-family:inherit;font-size:12px;letter-spacing:.08em;padding:9px 4px;
+  }
+  .segbar button+button{border-left:1px solid var(--line)}
+  .segbar button[aria-pressed="true"]{background:rgba(184,137,63,.14);color:var(--vellum)}
+  .segbar button:focus-visible{outline:2px solid var(--brass);outline-offset:-2px}
+
+  .stepper{display:flex;align-items:center;gap:12px}
+  .stepper button{
+    width:36px;height:36px;background:none;border:1px solid var(--line);
+    color:var(--vellum);font-size:18px;cursor:pointer;line-height:1;
+  }
+  .stepper button:hover:not(:disabled){background:rgba(184,137,63,.14)}
+  .stepper button:disabled{opacity:.3;cursor:not-allowed}
+  .stepper output{
+    font-family:Cinzel,Georgia,serif;font-size:34px;font-weight:600;
+    color:var(--vellum);min-width:52px;text-align:center;
+  }
+  .stepper .note{font-size:11px;color:var(--dim);line-height:1.5}
+
+  .act{
+    width:100%;padding:13px;margin-top:14px;cursor:pointer;
+    font-family:Cinzel,Georgia,serif;font-size:13px;font-weight:600;
+    letter-spacing:.16em;text-transform:uppercase;
+    background:var(--brass);color:#141327;border:0;
+  }
+  .act:hover:not(:disabled){background:#d3a154}
+  .act:disabled{background:#2a2740;color:#5d5a72;cursor:not-allowed}
+  .act.ghost{background:none;border:1px solid var(--line);color:var(--bone);margin-top:8px}
+  .act.ghost:hover:not(:disabled){background:rgba(184,137,63,.1);color:var(--vellum)}
+  .act:focus-visible{outline:2px solid var(--vellum);outline-offset:2px}
+
+  #tally{display:flex;gap:22px;margin-top:14px}
+  #tally div{flex:1}
+  #tally .n{font-family:Cinzel,Georgia,serif;font-size:24px;color:var(--vellum)}
+  #tally .k{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+
+  /* ── reading ───────────────────────────────────── */
+  #reading{flex:1;overflow-y:auto;padding:20px 22px;min-height:0}
+  #reading h2{
+    font-family:Cinzel,Georgia,serif;font-size:30px;font-weight:800;
+    letter-spacing:.05em;color:var(--vellum);margin:4px 0 2px;
+  }
+  .kind{font-size:10px;letter-spacing:.28em;text-transform:uppercase}
+  .kind.boon{color:var(--brass)}
+  .kind.bane{color:var(--crimson)}
+  .kind.mixed{color:var(--verdigris)}
+  #reading p.body{font-size:14px;line-height:1.65;color:var(--bone);margin-top:12px}
+  #reading .roll{font-size:11px;color:var(--dim);letter-spacing:.1em;margin-top:10px}
+  .aside{
+    border-left:2px solid var(--line);padding:10px 0 10px 12px;margin-top:16px;
+    font-size:12.5px;line-height:1.6;color:var(--dim);
+  }
+  .aside b{color:var(--bone);font-weight:600;display:block;margin-bottom:4px;
+    font-size:10px;letter-spacing:.2em;text-transform:uppercase}
+  .choice{display:flex;gap:8px;margin-top:16px}
+  .choice button{
+    flex:1;padding:10px 8px;background:none;border:1px solid var(--brass);
+    color:var(--vellum);font-family:inherit;font-size:12px;cursor:pointer;line-height:1.4;
+  }
+  .choice button:hover{background:rgba(184,137,63,.16)}
+  .empty{color:var(--dim);font-size:13px;line-height:1.7}
+  .empty em{color:var(--bone);font-style:normal}
+
+  #ledger{border-top:1px solid var(--line);padding:14px 22px 18px;max-height:26vh;overflow-y:auto}
+  #ledger ol{list-style:none;font-size:12.5px}
+  #ledger li{
+    display:flex;justify-content:space-between;gap:10px;padding:5px 0;
+    border-bottom:1px dotted rgba(207,198,180,.12);
+  }
+  #ledger li span:first-child{color:var(--vellum)}
+  #ledger li span:last-child{color:var(--dim);font-size:11px;white-space:nowrap}
+  #ledger li.free span:first-child::after{content:" · free";color:var(--verdigris);font-size:11px}
+
+  @media (max-width:880px){
+    #app{grid-template-columns:1fr;grid-template-rows:44dvh 1fr}
+    #side{border-left:0;border-top:1px solid var(--line);overflow-y:auto}
+    #brand h1{font-size:20px}
+    #hint{display:none}
+    #ledger{max-height:none}
+  }
+  @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <div id="brand">
+      <div class="eyebrow">Artifact · Wondrous Item</div>
+      <h1>The Deck of<br>Many Things</h1>
+    </div>
+    <button id="sound" aria-pressed="false" aria-label="Mute sound"><span class="bars"><i></i><i></i><i></i></span>Sound</button>
+    <div id="hint">Declare your draws before you touch the deck. Cards drawn past your declaration have no effect.</div>
+  </div>
+
+  <aside id="side">
+    <div class="block">
+      <div class="label">The deck</div>
+      <div class="segbar" role="group" aria-label="Deck size">
+        <button id="d13" aria-pressed="true">13 cards</button>
+        <button id="d22" aria-pressed="false">22 cards</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="label">Declare your draws</div>
+      <div class="stepper">
+        <button id="minus" aria-label="Fewer draws">−</button>
+        <output id="declared">1</output>
+        <button id="plus" aria-label="More draws">+</button>
+        <div class="note">You cannot change this once the first card leaves the deck.</div>
+      </div>
+      <button class="act" id="drawBtn">Draw a card</button>
+      <button class="act ghost" id="restBtn">Let fate take the rest</button>
+      <button class="act ghost" id="resetBtn">Box the deck</button>
+      <div id="tally">
+        <div><div class="n" id="tDrawn">0</div><div class="k">Drawn</div></div>
+        <div><div class="n" id="tLeft">1</div><div class="k">Owed</div></div>
+      </div>
+    </div>
+
+    <div id="reading">
+      <p class="empty"><em>The box is closed.</em><br>Name a number, then open it. Each card must follow the last within the hour, or the deck finishes the job itself.</p>
+    </div>
+
+    <div id="ledger"><div class="label">Fate ledger</div><ol id="ledgerList"></ol></div>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ══════════════════════════════════════════════════
+   CARD DATA
+   Effects are condensed summaries for table use.
+   ══════════════════════════════════════════════════ */
+const CARDS = {
+  Balance:{kind:'mixed',text:"Raise one ability score by 2, to a maximum of 22, but only if you lower another by 2. You can't lower a score of 5 or less. Decline the trade and the card does nothing."},
+  Comet:{kind:'boon',text:"The next time you roll initiative against hostile creatures, name one of them as your foe. Drop that foe to 0 hit points yourself and you gain advantage on death saving throws for a year. If anyone else finishes it, nothing happens."},
+  Donjon:{kind:'bane',text:"You vanish into an extradimensional sphere in suspended animation, along with everything you carry except artifacts, which stay behind. Divination cannot find you, though a wish reveals the prison. You must be found and released.",stop:true,note:"Draws end here. The rest of the declaration is void."},
+  Euryale:{kind:'bane',text:"The medusa-like face curses you: −2 to all saving throws. Only a god or the Fates card lifts it."},
+  Fates:{kind:'boon',text:"Reality unravels and respins. Avoid or erase one event as though it never happened. Use it the moment you draw, or any time before you die."},
+  Flames:{kind:'bane',text:"A powerful devil takes you as its enemy. It torments you and savors your suffering before it tries to kill you. The enmity ends only when you or the devil dies.",note:"A question of enmity: the devil's hatred is overt and recurring. The party should clash with its allies and followers several times before ever reaching the fiend."},
+  Fool:{kind:'bane',text:"Disadvantage on D20 tests for the next 72 hours. Draw again immediately; that draw does not count against your declaration.",free:1,burn:true},
+  Gem:{kind:'boon',text:"Twenty-five pieces of jewelry worth 2,000 gp each, or fifty gems worth 1,000 gp each, land at your feet."},
+  Jester:{kind:'boon',text:"Advantage on D20 tests for 72 hours, or two extra draws beyond your declaration. Choose one.",choice:true,burn:true},
+  Key:{kind:'boon',text:"A rare or rarer magic weapon you are proficient with appears on your person. The DM chooses the weapon."},
+  Knight:{kind:'boon',text:"A knight of your alignment appears in an unoccupied space within 30 feet and serves you loyally until death, certain that fate drew you together. Build the NPC with your DM."},
+  Moon:{kind:'boon',text:"You gain the ability to cast wish 1d3 times."},
+  Puzzle:{kind:'bane',text:"Permanently reduce your Intelligence or Wisdom by 1d4 + 1, to a minimum of 1. You may draw one additional card beyond your declaration.",free:1},
+  Rogue:{kind:'bane',text:"An NPC of the DM's choice turns hostile toward you, and you do not learn who until someone reveals it. Nothing short of a wish or divine intervention ends the hostility.",note:"A question of enmity: this betrayal should come from someone believed to be a friend, revealed at a dramatically appropriate moment."},
+  Ruin:{kind:'bane',text:"Every form of wealth you carry or own, other than magic items, is lost. Portable property vanishes; businesses, buildings and land slip away in whatever manner alters reality least. A bastion is destroyed by calamity. Even the documents proving ownership disappear."},
+  Sage:{kind:'boon',text:"At any point within one year, meditate on a single question and receive a truthful answer."},
+  Skull:{kind:'bane',text:"An Avatar of Death appears as close to you as possible and attacks only you: a ghostly skeleton in a tattered black robe with a spectral scythe. It leaves when it drops to 0 hit points or you die. Any ally who damages it summons their own avatar. Anyone slain by one cannot be restored to life.",note:"Avatar of Death · AC 20, initiative +3, HP equal to half its summoner's maximum, speed 60 ft. and fly 60 ft. (hover). All abilities 16 (+3). Immune to necrotic and poison damage and to the charmed, exhaustion, frightened, paralyzed, petrified, poisoned and unconscious conditions. Truesight 60 ft. Proficiency bonus equals its summoner's. Incorporeal movement, taking 5 (1d10) force damage if it ends its turn inside an object. It makes scythe attacks equal to half the summoner's proficiency bonus, rounded up; each automatically hits for 7 (1d8 + 3) slashing plus 4 (1d8) necrotic."},
+  Star:{kind:'boon',text:"Increase one ability score by 2, to a maximum of 24."},
+  Sun:{kind:'boon',text:"A magic item chosen by the DM appears on your person, and you gain 10 temporary hit points at every dawn until you die."},
+  Talons:{kind:'bane',text:"Every magic item you wear or carry disintegrates. Artifacts merely vanish."},
+  Throne:{kind:'boon',text:"You gain proficiency and expertise in History, Insight, Intimidation or Persuasion, and the rightful ownership of a small keep. Monsters hold it now, and you must clear them out before it is yours."},
+  Void:{kind:'bane',text:"Your soul is torn from your body and sealed in an object in a place of the DM's choosing, guarded by powerful beings. Your body lies inert, ageless, needing no food, air or water. A wish cannot bring you back, but it will reveal where the object lies.",stop:true,note:"Draws end here. The rest of the declaration is void."}
+};
+
+const TABLE13 = [[1,8,'Euryale'],[9,16,'Flames'],[17,24,'Jester'],[25,32,'Key'],[33,40,'Knight'],[41,48,'Moon'],[49,56,'Rogue'],[57,64,'Ruin'],[65,72,'Skull'],[73,80,'Star'],[81,88,'Sun'],[89,96,'Throne'],[97,100,'Void']];
+const TABLE22 = [[1,5,'Balance'],[6,10,'Comet'],[11,14,'Donjon'],[15,18,'Euryale'],[19,23,'Fates'],[24,27,'Flames'],[28,31,'Fool'],[32,36,'Gem'],[37,41,'Jester'],[42,46,'Key'],[47,51,'Knight'],[52,56,'Moon'],[57,60,'Puzzle'],[61,64,'Rogue'],[65,68,'Ruin'],[69,73,'Sage'],[74,77,'Skull'],[78,82,'Star'],[83,87,'Sun'],[88,91,'Talons'],[92,96,'Throne'],[97,100,'Void']];
+
+const ACCENT = {boon:'#b8893f', bane:'#a8323b', mixed:'#3f7d76'};
+
+/* ══════════════════════════════════════════════════
+   TEXTURES  (canvas — no external art)
+   ══════════════════════════════════════════════════ */
+function seeded(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return()=>{h+=0x6D2B79F5;let t=h;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+
+function vellum(g,w,h){
+  const grd=g.createRadialGradient(w*.5,h*.42,40,w*.5,h*.5,h*.78);
+  grd.addColorStop(0,'#f6efdd');grd.addColorStop(1,'#ddd2b8');
+  g.fillStyle=grd;g.fillRect(0,0,w,h);
+  const r=seeded('fibre');
+  g.globalAlpha=.05;
+  for(let i=0;i<900;i++){g.fillStyle=r()>.5?'#8a7c5c':'#fffdf5';g.fillRect(r()*w,r()*h,r()*3+1,r()*2+1)}
+  g.globalAlpha=1;
+}
+
+function sigil(g,cx,cy,R,name,accent){
+  const r=seeded(name);
+  g.save();g.translate(cx,cy);
+  g.strokeStyle=accent;g.lineWidth=2.5;
+  g.beginPath();g.arc(0,0,R,0,Math.PI*2);g.stroke();
+  g.lineWidth=1;
+  g.beginPath();g.arc(0,0,R*.86,0,Math.PI*2);g.stroke();
+  const spokes=6+Math.floor(r()*7);
+  g.lineWidth=1.5;
+  for(let i=0;i<spokes;i++){
+    const a=i/spokes*Math.PI*2, inner=R*(.28+r()*.24), outer=R*(.7+r()*.14);
+    g.beginPath();g.moveTo(Math.cos(a)*inner,Math.sin(a)*inner);g.lineTo(Math.cos(a)*outer,Math.sin(a)*outer);g.stroke();
+    g.beginPath();g.arc(Math.cos(a)*outer,Math.sin(a)*outer,3.2,0,Math.PI*2);g.fillStyle=accent;g.fill();
+  }
+  const sides=3+Math.floor(r()*5), rot=r()*Math.PI, pr=R*(.42+r()*.16);
+  g.lineWidth=2.2;g.beginPath();
+  for(let i=0;i<=sides;i++){const a=rot+i/sides*Math.PI*2;const x=Math.cos(a)*pr,y=Math.sin(a)*pr;i?g.lineTo(x,y):g.moveTo(x,y)}
+  g.closePath();g.stroke();
+  g.beginPath();g.arc(0,0,R*(.1+r()*.1),0,Math.PI*2);g.fillStyle=accent;g.globalAlpha=.85;g.fill();g.globalAlpha=1;
+  g.restore();
+}
+
+function faceTexture(name){
+  const w=640,h=960,c=document.createElement('canvas');c.width=w;c.height=h;
+  const g=c.getContext('2d');
+  const accent=ACCENT[CARDS[name].kind];
+  vellum(g,w,h);
+  g.strokeStyle=accent;
+  g.globalAlpha=.9;g.lineWidth=6;g.strokeRect(26,26,w-52,h-52);
+  g.lineWidth=1.5;g.strokeRect(42,42,w-84,h-84);g.globalAlpha=1;
+  [[42,42],[w-42,42],[42,h-42],[w-42,h-42]].forEach(([x,y])=>{
+    g.beginPath();g.arc(x,y,9,0,Math.PI*2);g.fillStyle=accent;g.fill();
+  });
+  sigil(g,w/2,h*.42,190,name,accent);
+  g.textAlign='center';
+  g.fillStyle='#241f19';
+  g.font='800 62px Cinzel, Georgia, serif';
+  g.fillText(name.toUpperCase(),w/2,h*.79);
+  g.fillStyle=accent;
+  g.fillRect(w/2-90,h*.815,180,2);
+  g.font='500 22px "IBM Plex Sans", sans-serif';
+  g.fillStyle='#6a604c';
+  g.fillText(CARDS[name].kind==='mixed'?'A BARGAIN':CARDS[name].kind.toUpperCase(),w/2,h*.868);
+  const t=new THREE.CanvasTexture(c);t.anisotropy=8;return t;
+}
+
+function backTexture(){
+  const w=640,h=960,c=document.createElement('canvas');c.width=w;c.height=h;
+  const g=c.getContext('2d');
+  const grd=g.createRadialGradient(w*.5,h*.5,20,w*.5,h*.5,h*.7);
+  grd.addColorStop(0,'#28243f');grd.addColorStop(1,'#15132a');
+  g.fillStyle=grd;g.fillRect(0,0,w,h);
+  g.strokeStyle='#b8893f';g.globalAlpha=.75;g.lineWidth=5;g.strokeRect(26,26,w-52,h-52);
+  g.lineWidth=1;g.globalAlpha=.5;g.strokeRect(44,44,w-88,h-88);
+  g.globalAlpha=.55;
+  const cx=w/2,cy=h/2;
+  for(let ring=1;ring<=5;ring++){
+    g.beginPath();g.arc(cx,cy,ring*46,0,Math.PI*2);g.lineWidth=ring%2?1:2;g.stroke();
+  }
+  for(let i=0;i<24;i++){
+    const a=i/24*Math.PI*2;
+    g.beginPath();g.moveTo(cx+Math.cos(a)*46,cy+Math.sin(a)*46);
+    g.lineTo(cx+Math.cos(a)*230,cy+Math.sin(a)*230);g.lineWidth=1;g.stroke();
+  }
+  g.globalAlpha=1;g.fillStyle='#b8893f';
+  g.beginPath();g.arc(cx,cy,26,0,Math.PI*2);g.fill();
+  g.fillStyle='#15132a';g.beginPath();g.arc(cx,cy,11,0,Math.PI*2);g.fill();
+  const t=new THREE.CanvasTexture(c);t.anisotropy=8;return t;
+}
+
+/* ══════════════════════════════════════════════════
+   SOUND  (synthesized — no audio files)
+   ══════════════════════════════════════════════════ */
+const SFX=(()=>{
+  let ctx=null,bus=null,master=null,noise=null,muted=false;
+
+  function impulse(sec,decay){
+    const n=Math.floor(ctx.sampleRate*sec),b=ctx.createBuffer(2,n,ctx.sampleRate);
+    for(let ch=0;ch<2;ch++){
+      const d=b.getChannelData(ch);
+      for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,decay);
+    }
+    return b;
+  }
+  function init(){
+    if(ctx)return true;
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return false;
+    ctx=new AC();
+    master=ctx.createGain();master.gain.value=muted?0:.9;master.connect(ctx.destination);
+    bus=ctx.createGain();bus.gain.value=1;
+    const dry=ctx.createGain();dry.gain.value=.82;
+    const conv=ctx.createConvolver();conv.buffer=impulse(2.4,2.8);
+    const wet=ctx.createGain();wet.gain.value=.3;
+    bus.connect(dry).connect(master);
+    bus.connect(conv).connect(wet).connect(master);
+    const n=Math.floor(ctx.sampleRate*2);
+    noise=ctx.createBuffer(1,n,ctx.sampleRate);
+    const d=noise.getChannelData(0);
+    for(let i=0;i<n;i++)d[i]=Math.random()*2-1;
+    return true;
+  }
+  function wake(){
+    if(!init())return false;
+    if(ctx.state==='suspended')ctx.resume();
+    return true;
+  }
+  function burst({type='bandpass',freq=1500,q=.9,vol=.12,attack=.01,decay=.25,rate=1}){
+    if(!wake()||muted)return;
+    const t=ctx.currentTime;
+    const src=ctx.createBufferSource();src.buffer=noise;src.playbackRate.value=rate;
+    const f=ctx.createBiquadFilter();f.type=type;f.frequency.value=freq;f.Q.value=q;
+    const g=ctx.createGain();
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(vol,t+attack);
+    g.gain.exponentialRampToValueAtTime(.0001,t+attack+decay);
+    src.connect(f).connect(g).connect(bus);
+    src.start(t);src.stop(t+attack+decay+.05);
+  }
+  function tone(freq,{wave='sine',vol=.1,attack=.06,decay=1.6,detune=0,delay=0}={}){
+    if(!wake()||muted)return;
+    const t=ctx.currentTime+delay;
+    const o=ctx.createOscillator();o.type=wave;o.frequency.value=freq;o.detune.value=detune;
+    const g=ctx.createGain();
+    g.gain.setValueAtTime(.0001,t);
+    g.gain.exponentialRampToValueAtTime(vol,t+attack);
+    g.gain.exponentialRampToValueAtTime(.0001,t+attack+decay);
+    o.connect(g).connect(bus);
+    o.start(t);o.stop(t+attack+decay+.1);
+  }
+
+  return{
+    enable:wake,
+    get muted(){return muted},
+    toggle(){
+      muted=!muted;
+      if(ctx)master.gain.setTargetAtTime(muted?0:.9,ctx.currentTime,.02);
+      else if(!muted)wake();
+      return muted;
+    },
+    /* card sliding off the top of the deck */
+    slide(){burst({freq:1700,q:.7,vol:.13,attack:.02,decay:.3,rate:.9})},
+    /* the snap as it turns face up */
+    flip(){
+      burst({type:'highpass',freq:2600,q:.5,vol:.2,attack:.003,decay:.09,rate:1.3});
+      tone(320,{wave:'triangle',vol:.05,attack:.004,decay:.12});
+    },
+    /* soft landing on the discard pile */
+    land(){
+      burst({type:'lowpass',freq:520,q:.6,vol:.09,attack:.004,decay:.16,rate:.8});
+      tone(88,{wave:'sine',vol:.06,attack:.005,decay:.22});
+    },
+    /* the chord under the reveal, colored by what you drew */
+    reveal(kind,stop){
+      if(stop){ // Donjon, Void — hollow and wrong
+        tone(61.74,{wave:'triangle',vol:.13,attack:.12,decay:4.2});
+        tone(61.74,{wave:'triangle',vol:.09,attack:.14,decay:4.0,detune:-28});
+        tone(65.41,{wave:'sine',vol:.06,attack:.3,decay:3.4});
+        tone(123.47,{wave:'sine',vol:.04,attack:.5,decay:2.6,delay:.2});
+        return;
+      }
+      if(kind==='boon'){
+        tone(146.83,{wave:'triangle',vol:.11,attack:.05,decay:2.0});
+        tone(220.00,{wave:'sine',vol:.08,attack:.08,decay:2.2});
+        tone(293.66,{wave:'sine',vol:.06,attack:.12,decay:2.4});
+        tone(1174.66,{wave:'sine',vol:.035,attack:.01,decay:1.1,delay:.06});
+      }else if(kind==='bane'){
+        tone(116.54,{wave:'triangle',vol:.12,attack:.04,decay:2.4});
+        tone(164.81,{wave:'triangle',vol:.08,attack:.06,decay:2.2,detune:-14});
+        tone(233.08,{wave:'sine',vol:.05,attack:.2,decay:1.8,detune:16});
+      }else{ // Balance — open fifth, undecided
+        tone(130.81,{wave:'triangle',vol:.11,attack:.05,decay:2.1});
+        tone(196.00,{wave:'sine',vol:.08,attack:.09,decay:2.3});
+        tone(392.00,{wave:'sine',vol:.04,attack:.25,decay:1.6});
+      }
+    }
+  };
+})();
+
+/* ══════════════════════════════════════════════════
+   SCENE
+   ══════════════════════════════════════════════════ */
+const stage=document.getElementById('stage');
+const scene=new THREE.Scene();
+scene.fog=new THREE.Fog(0x0a0b14,12,30);
+const camera=new THREE.PerspectiveCamera(42,1,.1,100);
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+stage.appendChild(renderer.domElement);
+
+const felt=new THREE.Mesh(
+  new THREE.PlaneGeometry(60,60),
+  new THREE.MeshStandardMaterial({color:0x141327,roughness:.95,metalness:0})
+);
+felt.rotation.x=-Math.PI/2;felt.receiveShadow=true;scene.add(felt);
+
+scene.add(new THREE.AmbientLight(0x5a5f8a,.55));
+const key=new THREE.DirectionalLight(0xffe8c0,1.15);
+key.position.set(-4,10,5);key.castShadow=true;
+key.shadow.mapSize.set(1024,1024);
+key.shadow.camera.left=-10;key.shadow.camera.right=10;
+key.shadow.camera.top=10;key.shadow.camera.bottom=-10;
+scene.add(key);
+const rim=new THREE.PointLight(0xb8893f,.9,18);rim.position.set(3,4,3);scene.add(rim);
+
+// drifting motes
+const dust=new THREE.BufferGeometry();
+const dpos=new Float32Array(400*3);
+for(let i=0;i<400;i++){dpos[i*3]=(Math.random()-.5)*22;dpos[i*3+1]=Math.random()*7;dpos[i*3+2]=(Math.random()-.5)*16}
+dust.setAttribute('position',new THREE.BufferAttribute(dpos,3));
+const motes=new THREE.Points(dust,new THREE.PointsMaterial({color:0xb8893f,size:.045,transparent:true,opacity:.55}));
+scene.add(motes);
+
+const CW=1.5,CH=2.25,CT=.022;
+const cardGeo=new THREE.BoxGeometry(CW,CT,CH);
+const BACK=backTexture();
+const EDGE=new THREE.MeshStandardMaterial({color:0xd8cdb3,roughness:.8});
+const faceCache={};
+function face(n){return faceCache[n]||(faceCache[n]=faceTexture(n))}
+
+const DECK_POS=new THREE.Vector3(-2.75,0,.3);
+const SLOT=new THREE.Vector3(.85,.75,.55);
+const PILE=new THREE.Vector3(3.35,0,-.9);
+
+let deckMeshes=[],pileCount=0;
+const deckGroup=new THREE.Group();scene.add(deckGroup);
+const loose=new THREE.Group();scene.add(loose);
+
+function newCardMesh(){
+  const back=new THREE.MeshStandardMaterial({map:BACK,roughness:.62});
+  const m=new THREE.Mesh(cardGeo,[EDGE,EDGE,back,back.clone(),EDGE,EDGE]);
+  m.castShadow=true;m.receiveShadow=true;
+  return m;
+}
+function buildDeck(n){
+  deckMeshes.forEach(m=>deckGroup.remove(m));
+  loose.children.slice().forEach(m=>loose.remove(m));
+  deckMeshes=[];pileCount=0;
+  for(let i=0;i<n;i++){
+    const m=newCardMesh();
+    m.position.set(DECK_POS.x+(Math.random()-.5)*.012,i*CT*1.05+CT,DECK_POS.z+(Math.random()-.5)*.012);
+    m.rotation.y=(Math.random()-.5)*.03;
+    deckGroup.add(m);deckMeshes.push(m);
+  }
+}
+
+/* ── tweening ── */
+const tweens=[];
+const easeOut=t=>1-Math.pow(1-t,3);
+const easeInOut=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+function tw(dur,onUpdate,ease=easeOut){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){onUpdate(1);return Promise.resolve()}
+  return new Promise(res=>tweens.push({t0:performance.now(),dur,onUpdate,ease,res}));
+}
+function pump(now){
+  for(let i=tweens.length-1;i>=0;i--){
+    const a=tweens[i],k=Math.min(1,(now-a.t0)/a.dur);
+    a.onUpdate(a.ease(k));
+    if(k>=1){tweens.splice(i,1);a.res()}
+  }
+}
+
+function resize(){
+  const w=stage.clientWidth,h=stage.clientHeight;
+  renderer.setSize(w,h);
+  camera.aspect=w/h;
+  const tight=w/h<1.15;
+  camera.position.set(tight?.2:0,tight?11:8.6,tight?7.4:6.4);
+  camera.fov=tight?46:42;
+  camera.lookAt(0,0,.2);
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize',resize);
+
+let clock=0;
+function loop(now){
+  requestAnimationFrame(loop);
+  pump(now);
+  clock=now*.0004;
+  motes.rotation.y=clock*.35;
+  motes.position.y=Math.sin(clock)*.12;
+  if(deckMeshes.length){
+    const top=deckMeshes[deckMeshes.length-1];
+    if(state.armed&&!state.busy)top.position.y=deckMeshes.length*CT*1.05+CT+Math.sin(now*.003)*.03;
+  }
+  renderer.render(scene,camera);
+}
+
+/* ══════════════════════════════════════════════════
+   GAME STATE
+   ══════════════════════════════════════════════════ */
+const state={size:13,declared:1,drawn:0,free:0,burned:new Set(),started:false,over:false,busy:false,armed:true,current:null};
+
+const $=id=>document.getElementById(id);
+const reading=$('reading'),ledgerList=$('ledgerList');
+
+function tableFor(){return state.size===13?TABLE13:TABLE22}
+function rollCard(){
+  for(let guard=0;guard<200;guard++){
+    const r=1+Math.floor(Math.random()*100);
+    const row=tableFor().find(([lo,hi])=>r>=lo&&r<=hi);
+    if(state.burned.has(row[2]))continue;
+    return{roll:r,name:row[2]};
+  }
+  return{roll:100,name:'Void'};
+}
+function owed(){return state.over?0:Math.max(0,state.declared-state.drawn)+state.free}
+
+function syncUI(){
+  $('tDrawn').textContent=state.drawn;
+  $('tLeft').textContent=owed();
+  $('declared').textContent=state.declared;
+  $('minus').disabled=state.started||state.declared<=1;
+  $('plus').disabled=state.started||state.declared>=state.size;
+  $('drawBtn').disabled=state.busy||state.over||owed()===0||!!state.current?.pending;
+  $('restBtn').disabled=state.busy||state.over||owed()<2||!!state.current?.pending;
+  $('d13').setAttribute('aria-pressed',state.size===13);
+  $('d22').setAttribute('aria-pressed',state.size===22);
+  $('drawBtn').textContent=state.over?'The deck is done':(state.started?'Draw again':'Draw a card');
+}
+
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+function render(name,roll,freeDraw){
+  const c=CARDS[name];
+  let html=`<div class="kind ${c.kind}">${c.kind==='mixed'?'A bargain':c.kind}</div>`;
+  html+=`<h2>${name}</h2>`;
+  html+=`<div class="roll">d100 · ${roll} · ${state.size}-card column${freeDraw?' · free draw':''}</div>`;
+  html+=`<p class="body">${esc(c.text)}</p>`;
+  if(c.note)html+=`<div class="aside"><b>For the DM</b>${esc(c.note)}</div>`;
+  if(c.choice)html+=`<div class="choice"><button data-pick="adv">Take advantage<br>for 72 hours</button><button data-pick="draws">Take two<br>extra draws</button></div>`;
+  reading.innerHTML=html;
+  reading.scrollTop=0;
+  if(c.choice){
+    state.current={pending:true};
+    reading.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{
+      if(b.dataset.pick==='draws')state.free+=2;
+      state.current=null;
+      reading.querySelector('.choice').outerHTML=
+        `<div class="aside"><b>Chosen</b>${b.dataset.pick==='draws'?'Two extra draws, added to what the deck owes you.':'Advantage on D20 tests for the next 72 hours.'}</div>`;
+      syncUI();
+    });
+  }else state.current=null;
+}
+
+function logCard(name,roll,freeDraw){
+  const li=document.createElement('li');
+  if(freeDraw)li.className='free';
+  li.innerHTML=`<span>${name}</span><span>${roll}</span>`;
+  ledgerList.appendChild(li);
+  $('ledger').scrollTop=$('ledger').scrollHeight;
+}
+
+async function flyToPile(mesh){
+  const from=mesh.position.clone(),rot=mesh.rotation.y,spin=(Math.random()-.5)*1.4;
+  const target=PILE.clone();target.y=pileCount*CT*1.1+CT;
+  const n=pileCount++;
+  await tw(520,k=>{
+    mesh.position.lerpVectors(from,target,k);
+    mesh.position.y+=Math.sin(k*Math.PI)*.5;
+    mesh.rotation.y=rot+spin*k;
+    const s=1.5-.5*k;mesh.scale.set(s,1,s);
+  },easeInOut);
+  SFX.land();
+  mesh.position.x+=(Math.random()-.5)*.06;
+  mesh.position.z+=(Math.random()-.5)*.06;
+  void n;
+}
+
+async function drawOne(){
+  if(state.busy||state.over||owed()===0)return;
+  state.busy=true;syncUI();
+
+  const freeDraw=state.free>0;
+  if(freeDraw)state.free--;else state.drawn++;
+
+  const{roll,name}=rollCard();
+  const card=CARDS[name];
+  if(card.burn)state.burned.add(name);
+  state.started=true;
+
+  // clear the previous card off the slot
+  const prev=loose.children[loose.children.length-1];
+  if(prev)flyToPile(prev);
+
+  let mesh=deckMeshes.pop();
+  if(!mesh){mesh=newCardMesh();mesh.position.copy(DECK_POS);mesh.position.y=CT}
+  else deckGroup.remove(mesh);
+  loose.add(mesh);
+  mesh.material[3]=new THREE.MeshStandardMaterial({map:face(name),roughness:.55});
+
+  SFX.slide();
+  const p0=mesh.position.clone();
+  await tw(300,k=>{mesh.position.y=p0.y+1.5*k;mesh.position.x=p0.x-.25*k});
+  const p1=mesh.position.clone();
+  let snapped=false;
+  await tw(820,k=>{
+    mesh.position.lerpVectors(p1,SLOT,k);
+    mesh.position.y+=Math.sin(k*Math.PI)*.55;
+    mesh.rotation.x=Math.PI*k;
+    mesh.rotation.y=Math.sin(k*Math.PI)*.25;
+    const s=1+.5*k;mesh.scale.set(s,1,s);
+    if(!snapped&&k>=.5){snapped=true;SFX.flip()}
+  },easeInOut);
+  if(!snapped)SFX.flip();
+  await tw(200,k=>{mesh.position.y=SLOT.y-.12*k});
+
+  SFX.reveal(card.kind,!!card.stop);
+  render(name,roll,freeDraw);
+  logCard(name,roll,freeDraw);
+  if(card.free)state.free+=card.free;
+  if(card.stop){state.over=true;state.free=0}
+
+  state.busy=false;syncUI();
+
+  if(card.free&&!card.stop&&!card.choice){/* Fool draws again on its own */
+    if(name==='Fool'){await new Promise(r=>setTimeout(r,700));drawOne()}
+  }
+}
+
+async function drawRest(){
+  while(!state.over&&owed()>0&&!state.busy&&!state.current?.pending){
+    await drawOne();
+    await new Promise(r=>setTimeout(r,520));
+  }
+}
+
+function reset(size){
+  state.size=size??state.size;
+  state.declared=Math.min(state.declared,state.size);
+  state.drawn=0;state.free=0;state.burned=new Set();
+  state.started=false;state.over=false;state.busy=false;state.current=null;
+  ledgerList.innerHTML='';
+  reading.innerHTML='<p class="empty"><em>The box is closed.</em><br>Name a number, then open it. Each card must follow the last within the hour, or the deck finishes the job itself.</p>';
+  buildDeck(state.size);
+  syncUI();
+}
+
+/* ── wiring ── */
+$('plus').onclick=()=>{if(state.declared<state.size){state.declared++;syncUI()}};
+$('minus').onclick=()=>{if(state.declared>1){state.declared--;syncUI()}};
+$('drawBtn').onclick=()=>{SFX.enable();drawOne()};
+$('restBtn').onclick=()=>{SFX.enable();drawRest()};
+$('sound').onclick=e=>{
+  const m=SFX.toggle();
+  const b=e.currentTarget;
+  b.setAttribute('aria-pressed',m);
+  b.setAttribute('aria-label',m?'Unmute sound':'Mute sound');
+  b.lastChild.textContent=m?'Muted':'Sound';
+};
+$('resetBtn').onclick=()=>reset();
+$('d13').onclick=()=>reset(13);
+$('d22').onclick=()=>reset(22);
+
+// click the deck itself
+const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();
+renderer.domElement.addEventListener('pointerdown',e=>{
+  const r=renderer.domElement.getBoundingClientRect();
+  ptr.x=((e.clientX-r.left)/r.width)*2-1;
+  ptr.y=-((e.clientY-r.top)/r.height)*2+1;
+  ray.setFromCamera(ptr,camera);
+  if(ray.intersectObjects(deckMeshes).length){SFX.enable();drawOne()}
+});
+
+(async()=>{
+  if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+  reset(13);
+  resize();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

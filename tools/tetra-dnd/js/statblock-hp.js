@@ -2,6 +2,7 @@ var HpTracker = {
     STORAGE_ENTRIES: "tetra-hp-tracker-v1",
     STORAGE_UI: "tetra-hp-tracker-ui-v1",
     MAX_ENTRIES: 50,
+    MAX_HISTORY: 20,
     COLLAPSED_COUNT: 3,
 
     root: null,
@@ -16,11 +17,17 @@ var HpTracker = {
     modalTitle: null,
     modalAmount: null,
     modalAdjust: null,
+    historyModal: null,
+    historyTitle: null,
+    historyList: null,
+    historyEmpty: null,
+    historyUndo: null,
 
     entries: [],
     uiState: "hidden",
     adjustId: null,
     adjustMode: "damage",
+    historyId: null,
     initialized: false,
 
     init: function () {
@@ -38,6 +45,11 @@ var HpTracker = {
         this.modalTitle = document.getElementById("hp-adjust-title");
         this.modalAmount = document.getElementById("hp-adjust-amount");
         this.modalAdjust = document.getElementById("hp-adjust-confirm");
+        this.historyModal = document.getElementById("hp-history-modal");
+        this.historyTitle = document.getElementById("hp-history-title");
+        this.historyList = document.getElementById("hp-history-list");
+        this.historyEmpty = document.getElementById("hp-history-empty");
+        this.historyUndo = document.getElementById("hp-history-undo");
 
         this.rehydrate();
 
@@ -48,6 +60,9 @@ var HpTracker = {
 
         if (this.modalAdjust) {
             this.modalAdjust.addEventListener("click", this.applyAdjust.bind(this));
+        }
+        if (this.historyUndo) {
+            this.historyUndo.addEventListener("click", this.undoLast.bind(this));
         }
         if (this.modalAmount) {
             this.modalAmount.addEventListener("keydown", this.handleAmountKeydown.bind(this));
@@ -108,6 +123,77 @@ var HpTracker = {
         return entry.current === 0;
     },
 
+    normalizeHistory: function (raw) {
+        if (!Array.isArray(raw)) return [];
+        var self = this;
+        return raw.slice(-this.MAX_HISTORY).map(function (h) {
+            var kind = h && (h.kind === "damage" || h.kind === "heal" || h.kind === "max" || h.kind === "track")
+                ? h.kind
+                : "track";
+            return {
+                id: (h && h.id) || self.makeId(),
+                kind: kind,
+                amount: Math.max(0, parseInt(h && h.amount, 10) || 0),
+                from: Math.max(0, parseInt(h && h.from, 10) || 0),
+                to: Math.max(0, parseInt(h && h.to, 10) || 0),
+                maxFrom: Math.max(1, parseInt(h && h.maxFrom, 10) || 1),
+                maxTo: Math.max(1, parseInt(h && h.maxTo, 10) || 1),
+                at: (h && h.at) || Date.now()
+            };
+        });
+    },
+
+    pushHistory: function (entry, event) {
+        if (!entry.history) entry.history = [];
+        entry.history.push({
+            id: this.makeId(),
+            kind: event.kind,
+            amount: event.amount,
+            from: event.from,
+            to: event.to,
+            maxFrom: event.maxFrom,
+            maxTo: event.maxTo,
+            at: Date.now()
+        });
+        while (entry.history.length > this.MAX_HISTORY) {
+            entry.history.shift();
+        }
+    },
+
+    formatRelativeTime: function (at) {
+        var diff = Math.max(0, Date.now() - at);
+        var sec = Math.floor(diff / 1000);
+        if (sec < 45) return "just now";
+        var min = Math.floor(sec / 60);
+        if (min < 60) return min + "m ago";
+        var hr = Math.floor(min / 60);
+        if (hr < 24) return hr + "h ago";
+        var day = Math.floor(hr / 24);
+        return day + "d ago";
+    },
+
+    formatHistoryLine: function (ev) {
+        var arrow = " \u2192 ";
+        var dot = " \u00b7 ";
+        if (ev.kind === "damage") {
+            return "\u2212" + ev.amount + dot + ev.from + arrow + ev.to;
+        }
+        if (ev.kind === "heal") {
+            return "+" + ev.amount + dot + ev.from + arrow + ev.to;
+        }
+        if (ev.kind === "max") {
+            var text = "Max " + ev.maxFrom + arrow + ev.maxTo;
+            if (ev.from !== ev.to) text += dot + ev.from + arrow + ev.to;
+            return text;
+        }
+        return "Tracked " + ev.to + " / " + ev.maxTo;
+    },
+
+    canUndo: function (entry) {
+        if (!entry || !entry.history || entry.history.length === 0) return false;
+        return entry.history[entry.history.length - 1].kind !== "track";
+    },
+
     addFromRoll: function (record) {
         this.init();
         if (!record) return;
@@ -121,8 +207,17 @@ var HpTracker = {
             name: this.nextDisplayName(this.getMonsterName(record)),
             current: hp,
             max: hp,
-            at: Date.now()
+            at: Date.now(),
+            history: []
         };
+        this.pushHistory(entry, {
+            kind: "track",
+            amount: hp,
+            from: hp,
+            to: hp,
+            maxFrom: hp,
+            maxTo: hp
+        });
 
         this.entries.push(entry);
         while (this.entries.length > this.MAX_ENTRIES) {
@@ -181,13 +276,15 @@ var HpTracker = {
             if (raw) {
                 var data = JSON.parse(raw);
                 if (data && data.v === 1 && Array.isArray(data.entries)) {
+                    var self = this;
                     this.entries = data.entries.slice(-this.MAX_ENTRIES).map(function (e) {
                         return {
                             id: e.id,
                             name: String(e.name || "Creature"),
                             current: Math.max(0, parseInt(e.current, 10) || 0),
                             max: Math.max(1, parseInt(e.max, 10) || 1),
-                            at: e.at || Date.now()
+                            at: e.at || Date.now(),
+                            history: self.normalizeHistory(e.history)
                         };
                     });
                 }
@@ -279,9 +376,23 @@ var HpTracker = {
         max.setAttribute("title", "Double-click to set max HP");
         max.textContent = String(entry.max);
 
-        hp.appendChild(current);
-        hp.appendChild(sep);
-        hp.appendChild(max);
+        var values = document.createElement("span");
+        values.className = "hp-tracker-hp-values";
+        values.appendChild(current);
+        values.appendChild(sep);
+        values.appendChild(max);
+
+        var history = document.createElement("button");
+        history.type = "button";
+        history.className = "hp-tracker-btn hp-tracker-history";
+        history.setAttribute("data-action", "history");
+        history.setAttribute("data-id", entry.id);
+        history.setAttribute("aria-label", "HP history");
+        history.title = "HP history";
+        history.innerHTML = "<i class=\"bi bi-clock-history\" aria-hidden=\"true\"></i>";
+
+        hp.appendChild(values);
+        hp.appendChild(history);
 
         var actions = document.createElement("div");
         actions.className = "hp-tracker-actions";
@@ -340,6 +451,8 @@ var HpTracker = {
             this.clearAll();
         } else if (action === "damage" || action === "heal") {
             this.openAdjust(id, action);
+        } else if (action === "history") {
+            this.openHistory(id);
         } else if (action === "remove") {
             this.remove(id);
         }
@@ -375,8 +488,20 @@ var HpTracker = {
             committed = true;
             var val = parseInt(input.value, 10);
             if (!isNaN(val) && val >= 1) {
+                var maxFrom = entry.max;
+                var from = entry.current;
                 entry.max = val;
                 entry.current = self.clamp(entry.current, 0, entry.max);
+                if (entry.max !== maxFrom || entry.current !== from) {
+                    self.pushHistory(entry, {
+                        kind: "max",
+                        amount: entry.max,
+                        from: from,
+                        to: entry.current,
+                        maxFrom: maxFrom,
+                        maxTo: entry.max
+                    });
+                }
                 self.persistEntries();
             }
             self.render();
@@ -438,10 +563,23 @@ var HpTracker = {
         var amount = parseInt(this.modalAmount && this.modalAmount.value, 10);
         if (isNaN(amount) || amount < 1) return;
 
+        var from = entry.current;
+        var maxFrom = entry.max;
         if (this.adjustMode === "heal") {
             entry.current = this.clamp(entry.current + amount, 0, entry.max);
         } else {
             entry.current = this.clamp(entry.current - amount, 0, entry.max);
+        }
+
+        if (entry.current !== from) {
+            this.pushHistory(entry, {
+                kind: this.adjustMode === "heal" ? "heal" : "damage",
+                amount: amount,
+                from: from,
+                to: entry.current,
+                maxFrom: maxFrom,
+                maxTo: entry.max
+            });
         }
 
         this.persistEntries();
@@ -450,6 +588,70 @@ var HpTracker = {
         if (typeof $ !== "undefined" && this.modal) {
             $(this.modal).modal("hide");
         }
+    },
+
+    openHistory: function (id) {
+        var entry = this.findEntry(id);
+        if (!entry || !this.historyModal) return;
+
+        this.historyId = id;
+        this.renderHistory(entry);
+
+        if (typeof $ !== "undefined") {
+            $(this.historyModal).modal("show");
+        }
+    },
+
+    createHistoryEl: function (ev) {
+        var row = document.createElement("div");
+        row.className = "hp-history-row";
+
+        var time = document.createElement("div");
+        time.className = "hp-history-time";
+        time.textContent = this.formatRelativeTime(ev.at);
+
+        var text = document.createElement("div");
+        text.className = "hp-history-text";
+        text.textContent = this.formatHistoryLine(ev);
+
+        row.appendChild(time);
+        row.appendChild(text);
+        return row;
+    },
+
+    renderHistory: function (entry) {
+        if (this.historyTitle) {
+            this.historyTitle.textContent = entry.name + " \u2014 History";
+        }
+        if (!this.historyList) return;
+
+        var events = (entry.history || []).slice().reverse();
+        this.historyList.innerHTML = "";
+
+        if (this.historyEmpty) {
+            this.historyEmpty.hidden = events.length > 0;
+        }
+
+        for (var i = 0; i < events.length; i++) {
+            this.historyList.appendChild(this.createHistoryEl(events[i]));
+        }
+
+        if (this.historyUndo) {
+            this.historyUndo.disabled = !this.canUndo(entry);
+        }
+    },
+
+    undoLast: function () {
+        var entry = this.findEntry(this.historyId);
+        if (!entry || !this.canUndo(entry)) return;
+
+        var ev = entry.history.pop();
+        entry.current = this.clamp(ev.from, 0, ev.maxFrom);
+        entry.max = Math.max(1, ev.maxFrom);
+
+        this.persistEntries();
+        this.render();
+        this.renderHistory(entry);
     }
 };
 
