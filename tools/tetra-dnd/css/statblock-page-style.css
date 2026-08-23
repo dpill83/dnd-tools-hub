@@ -326,6 +326,68 @@
     outline-offset: 2px;
 }
 
+/* Clickable SRD spell names in Spellcasting traits */
+.spell-link {
+    display: inline;
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.spell-link:hover,
+.spell-link:focus {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    outline: none;
+}
+
+.spell-link:focus-visible {
+    outline: 1px dotted #7a1f1f;
+    outline-offset: 2px;
+}
+
+#spell-detail-modal .spell-detail-meta {
+    margin: 0 0 0.75rem;
+    font-style: italic;
+    color: #522;
+}
+
+#spell-detail-modal .spell-detail-stats {
+    display: grid;
+    gap: 0.35rem 1rem;
+    margin: 0 0 1rem;
+}
+
+#spell-detail-modal .spell-detail-stats > div {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr;
+    gap: 0.5rem;
+}
+
+#spell-detail-modal .spell-detail-stats dt {
+    margin: 0;
+    font-weight: 700;
+    color: #58180d;
+}
+
+#spell-detail-modal .spell-detail-stats dd {
+    margin: 0;
+}
+
+#spell-detail-modal .spell-detail-description {
+    line-height: 1.45;
+}
+
+#spell-detail-modal .spell-detail-extra {
+    margin: 0.85rem 0 0;
+    line-height: 1.45;
+}
+
 /* Dice roll log: sit just right of the centered 800px wide card when space allows */
 .dice-log {
     --dice-log-width: 13.5rem;
@@ -577,6 +639,11 @@
     }
 
     .dice-roll {
+        text-decoration: none;
+        cursor: default;
+    }
+
+    .spell-link {
         text-decoration: none;
         cursor: default;
     }

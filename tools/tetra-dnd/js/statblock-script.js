@@ -368,6 +368,9 @@ function UpdateStatblock(moveSeparationPoint) {
     if (typeof DiceRoller !== "undefined") {
         DiceRoller.decorate(document.getElementById("stat-block"));
     }
+    if (typeof SpellLinker !== "undefined") {
+        SpellLinker.decorate(document.getElementById("stat-block"));
+    }
 }
 
 // Function used by UpdateStatblock for abilities
