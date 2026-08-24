@@ -40,6 +40,11 @@ var DiceRoller = {
             statBlock.addEventListener("click", this.handleClick.bind(this));
         }
 
+        var spellModal = document.getElementById("spell-detail-modal");
+        if (spellModal) {
+            spellModal.addEventListener("click", this.handleClick.bind(this));
+        }
+
         if (this.root) {
             this.root.addEventListener("click", this.handleLogClick.bind(this));
         }
@@ -627,6 +632,39 @@ var DiceRoller = {
                 return true;
             });
         }, this);
+    },
+
+    /** Bare NdM / NdM±K (e.g. "3d8 Radiant damage") — used in spell popups. */
+    decorateBareDiceExpressions: function (root, label) {
+        var labelText = label || "Damage";
+        var nodes = this.collectTextNodes(root);
+        nodes.forEach(function (node) {
+            if (this.isInsideDiceRoll(node)) return;
+            this.wrapRegexMatches(node, /\b(\d+d\d+(?:\s*[+-]\s*\d+)?)\b/gi, function (match, parts) {
+                var parsed = this.parseDiceExpr(match[1]);
+                if (!parsed) return false;
+                parts.push({
+                    type: "button",
+                    text: match[1],
+                    attrs: {
+                        "data-roll": "dice",
+                        "data-count": String(parsed.count),
+                        "data-sides": String(parsed.sides),
+                        "data-mod": String(parsed.mod),
+                        "data-label": labelText,
+                        "title": "Roll " + match[1].replace(/\s+/g, "")
+                    }
+                });
+                return true;
+            });
+        }, this);
+    },
+
+    decorateSpellText: function (root, spellName) {
+        if (!root) return;
+        this.init();
+        var label = spellName ? (String(spellName).trim() + " \u00b7 Damage") : "Damage";
+        this.decorateBareDiceExpressions(root, label);
     },
 
     decorateAbilityModifiers: function (root) {
