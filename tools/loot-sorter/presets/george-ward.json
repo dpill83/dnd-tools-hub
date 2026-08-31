@@ -1,0 +1,222 @@
+{
+  "name": "George Ward (Cleric)",
+  "characterName": "George",
+  "sellRate": 0.5,
+  "destinations": [
+    "Unassigned",
+    "{character}'s Equipment",
+    "{character}'s Backpack",
+    "Party Equipment",
+    "Party Inventory",
+    "Sell",
+    "Discard",
+    "Hold / Review"
+  ],
+  "pricing": {
+    "regular": {
+      "Mundane": 5,
+      "Common": 80,
+      "Uncommon": 400,
+      "Rare": 2000,
+      "Very Rare": 8000,
+      "Legendary": 30000,
+      "Artifact": 50000
+    },
+    "consumable": {
+      "Mundane": 2,
+      "Common": 40,
+      "Uncommon": 200,
+      "Rare": 1000,
+      "Very Rare": 4000,
+      "Legendary": 15000,
+      "Artifact": 25000
+    }
+  },
+  "rules": [
+    {
+      "rarity": "Any",
+      "categoryContains": "",
+      "textContains": "wooden spike|wooden stake|vampire",
+      "consumable": "any",
+      "attunement": "any",
+      "action": "{character}'s Backpack",
+      "label": "Keep",
+      "reason": "Nearly worthless to sell and potentially decisive against a vampire."
+    },
+    {
+      "rarity": "Mundane",
+      "categoryContains": "",
+      "textContains": "",
+      "consumable": "any",
+      "attunement": "any",
+      "action": "Sell",
+      "label": "Sell",
+      "reason": "Primarily treasure or mundane clutter with no reliable adventuring benefit."
+    },
+    {
+      "rarity": "Any",
+      "categoryContains": "treasure",
+      "textContains": "",
+      "consumable": "any",
+      "attunement": "any",
+      "action": "Sell",
+      "label": "Sell",
+      "reason": "Primarily treasure or mundane clutter with no reliable adventuring benefit."
+    },
+    {
+      "rarity": "Any",
+      "categoryContains": "",
+      "textContains": "missing an arm|missing a hand|missing a forearm",
+      "consumable": "any",
+      "attunement": "any",
+      "action": "Party Inventory",
+      "label": "Offer to party",
+      "reason": "George cannot meet this item's attunement requirement."
+    },
+    {
+      "rarity": "Any",
+      "categoryContains": "ring",
+      "textContains": "resistance",
+      "consumable": "any",
+      "attunement": "no",
+      "action": "{character}'s Equipment",
+      "label": "Equip",
+      "reason": "Passive resistance without an attunement cost is excellent protection."
+    },
+    {
+      "rarity": "Any",
+      "categoryContains": "wondrous",
+      "textContains": "resistance",
+      "consumable": "any",
+      "attunement": "no",
+      "action": "{character}'s Equipment",
+      "label": "Equip",
+      "reason": "Passive resistance without an attunement cost is excellent protection."
+    },
+    {
+      "rarity": "Any",
+      "categoryContains": "",
+      "textContains": "healing|restore |regains extra hit|cleric|paladin|holy|verdict|mercy",
+      "consumable": "any",
+      "attunement": "yes",
+      "action": "Hold / Review",
+      "label": "Consider equipping",
+      "reason": "Fits George's healer-support role, but must justify one of his limited attunement slots."
+    },
+    {
+      "rarity": "Any",
+      "categoryContains": "",
+      "textContains": "healing|restore |regains extra hit|cleric|paladin|holy|verdict|mercy",
+      "consumable": "any",
+      "attunement": "no",
+      "action": "{character}'s Backpack",
+      "label": "Keep",
+      "reason": "Supports George's healing and utility role without consuming attunement."
+    },
+    {
+      "rarity": "Any",
+      "categoryContains": "",
+      "textContains": "damage|saving throw|explodes|grenade|bomb|healing|restore",
+      "consumable": "yes",
+      "attunement": "any",
+      "action": "{character}'s Backpack",
+      "label": "Keep",
+      "reason": "A useful one-use combat option is usually worth more in the field than its sale price."
+    },
+    {
+      "rarity": "Any",
+      "categoryContains": "",
+      "textContains": "speak to beasts|speak with|secret door|trap|short rest|invisibility|utility",
+      "consumable": "any",
+      "attunement": "no",
+      "action": "{character}'s Backpack",
+      "label": "Keep",
+      "reason": "Useful adventuring utility with no attunement cost."
+    },
+    {
+      "rarity": "Any",
+      "categoryContains": "armor",
+      "textContains": "plate|resistance|mithral|adamantine|+",
+      "consumable": "any",
+      "attunement": "any",
+      "action": "Party Inventory",
+      "label": "Offer to party",
+      "reason": "Potentially useful armor, but George's fitted plate remains his baseline."
+    },
+    {
+      "rarity": "Any",
+      "categoryContains": "armor",
+      "textContains": "",
+      "consumable": "any",
+      "attunement": "any",
+      "action": "Sell",
+      "label": "Sell",
+      "reason": "George's plate armor is substantially better, so this mainly occupies inventory."
+    },
+    {
+      "rarity": "Rare",
+      "categoryContains": "weapon",
+      "textContains": "",
+      "consumable": "any",
+      "attunement": "any",
+      "action": "Sell",
+      "label": "Sell unless clarified",
+      "reason": "The entry is Rare but may not describe a meaningful special ability; take the high sale value unless the DM supplies missing rules."
+    },
+    {
+      "rarity": "Any",
+      "categoryContains": "weapon",
+      "textContains": "heavy|two-handed|longbow|shortbow|crossbow|greatsword|halberd",
+      "consumable": "any",
+      "attunement": "any",
+      "action": "Party Equipment",
+      "label": "Offer to party",
+      "reason": "This conflicts with George's shield or relies on an attack style he does not favor."
+    },
+    {
+      "rarity": "Any",
+      "categoryContains": "weapon",
+      "textContains": "critical hit|adamantine",
+      "consumable": "any",
+      "attunement": "any",
+      "action": "Party Equipment",
+      "label": "Party equipment",
+      "reason": "Useful for breaking objects, though it is not central to George's spell-first combat style."
+    },
+    {
+      "rarity": "Any",
+      "categoryContains": "weapon",
+      "textContains": "",
+      "consumable": "any",
+      "attunement": "any",
+      "action": "Party Inventory",
+      "label": "Offer to party",
+      "reason": "George's spells usually outperform routine weapon attacks; check whether another party member benefits more."
+    },
+    {
+      "rarity": "Any",
+      "categoryContains": "",
+      "textContains": "kit|satchel|piton|tinderbox|chalk|whistle",
+      "consumable": "any",
+      "attunement": "any",
+      "action": "{character}'s Backpack",
+      "label": "Keep",
+      "reason": "Practical adventuring supplies are worth more than the small sale return."
+    },
+    {
+      "rarity": "Any",
+      "categoryContains": "",
+      "textContains": "",
+      "consumable": "any",
+      "attunement": "yes",
+      "action": "Hold / Review",
+      "label": "Review attunement",
+      "reason": "The effect may be useful, but George's three attunement slots carry a high opportunity cost."
+    }
+  ],
+  "fallbackRule": {
+    "action": "Party Inventory",
+    "label": "Hold for party",
+    "reason": "No clear George-specific upgrade; retain it until the party confirms a user."
+  }
+}

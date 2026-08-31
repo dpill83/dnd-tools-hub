@@ -178,7 +178,8 @@
   display: none !important;
 }
 #pack-copy-btn,
-#pack-download-btn {
+#pack-download-btn,
+#pack-sort-btn {
   font-family: 'Cinzel', serif;
   font-size: clamp(0.55rem, 1.2vw, 0.72rem);
   letter-spacing: 0.2em;
@@ -192,7 +193,8 @@
   transition: all 0.3s;
 }
 #pack-copy-btn:hover,
-#pack-download-btn:hover {
+#pack-download-btn:hover,
+#pack-sort-btn:hover {
   color: var(--gold-light, #f0d070);
   border-color: rgba(201,168,76,0.5);
   background: rgba(201,168,76,0.06);
@@ -461,7 +463,8 @@
     -webkit-backdrop-filter: blur(6px);
   }
   #pack-copy-btn,
-  #pack-download-btn {
+  #pack-download-btn,
+  #pack-sort-btn {
     flex: 1 1 0;
     max-width: 11rem;
     min-height: 2.75rem;
@@ -474,7 +477,8 @@
     padding: 0.65rem 0.85rem;
   }
   #pack-copy-btn:active,
-  #pack-download-btn:active {
+  #pack-download-btn:active,
+  #pack-sort-btn:active {
     background: rgba(201, 168, 76, 0.22);
   }
 
@@ -654,7 +658,8 @@
     padding: 0.35rem 0.75rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
   }
   #pack-copy-btn,
-  #pack-download-btn {
+  #pack-download-btn,
+  #pack-sort-btn {
     flex: 0 0 auto;
     width: 8.25rem;
     max-width: 38vw;
@@ -796,6 +801,7 @@
 <div id="pack-export-actions" hidden>
   <button type="button" id="pack-copy-btn" aria-label="Copy all loot to clipboard">Copy</button>
   <button type="button" id="pack-download-btn" aria-label="Download all loot as pack.txt">Download</button>
+  <button type="button" id="pack-sort-btn" aria-label="Open Loot Sorter with this pack">Sort loot</button>
 </div>
 <a href="loot-table.html" id="loot-table-btn" title="Loot Table" aria-label="Loot Table"><img src="assets/images/chest-closed.png" alt=""></a>
 <a href="dm" id="dm-link" title="DM Dashboard">DM ↗</a>
@@ -837,6 +843,8 @@
   const packExportActions = document.getElementById('pack-export-actions');
   const packCopyBtn = document.getElementById('pack-copy-btn');
   const packDownloadBtn = document.getElementById('pack-download-btn');
+  const packSortBtn = document.getElementById('pack-sort-btn');
+  const LOOT_SORTER_HANDOFF_KEY = 'loot-forge-sorter-handoff';
   let copyLootOpens = null;
   let copyLootLabel = '';
   let lootTableCache = null;
@@ -977,6 +985,19 @@
     var orig = packDownloadBtn.textContent;
     packDownloadBtn.textContent = 'Saved!';
     setTimeout(function() { packDownloadBtn.textContent = orig; }, 1500);
+  }
+
+  function onPackSortClick() {
+    if (!packSortBtn || !copyLootOpens || !copyLootOpens.length) return;
+    var text = buildPackLootClipboardText(copyLootLabel, packId, copyLootOpens);
+    try {
+      sessionStorage.setItem(LOOT_SORTER_HANDOFF_KEY, JSON.stringify({
+        text: text,
+        packId: packId,
+        at: new Date().toISOString()
+      }));
+    } catch (_e) {}
+    window.location.href = '../loot-sorter/loot-sorter.html';
   }
 
   async function getLootTable() {
@@ -1534,6 +1555,7 @@
 
   if (packCopyBtn) packCopyBtn.addEventListener('click', onPackCopyClick);
   if (packDownloadBtn) packDownloadBtn.addEventListener('click', onPackDownloadClick);
+  if (packSortBtn) packSortBtn.addEventListener('click', onPackSortClick);
 
   chestWrap.addEventListener('click', runReveal);
   chestWrap.addEventListener('keydown', function(e) {

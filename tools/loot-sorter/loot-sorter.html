@@ -1,0 +1,1266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Parse Loot Forge pack exports, price loot, apply sorting rules, assign destinations, and export for your party.">
+  <title>Loot Sorter</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f4eedf;
+      --muted: #aaa89d;
+      --dim: #77796f;
+      --bg: #090b0a;
+      --panel: #111411;
+      --line: #30362e;
+      --gold: #d9ac55;
+      --gold-bright: #f1cf82;
+      --green: #73b88a;
+      --red: #e27d72;
+      --shadow: 0 18px 55px rgba(0,0,0,.38);
+      --radius: 14px;
+      --common: #c4c7c1;
+      --uncommon: #63c98a;
+      --rare: #6da6ff;
+      --very-rare: #bd77f4;
+      --legendary: #f29b54;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-width: 320px; background: var(--bg); }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(217,172,85,.10), transparent 30rem),
+        radial-gradient(circle at 92% 18%, rgba(81,116,83,.11), transparent 33rem),
+        linear-gradient(180deg, #0d100d 0, var(--bg) 30rem);
+      font: 15px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button, select, input[type="checkbox"] { cursor: pointer; }
+    button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible,
+    summary:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+
+    .shell { width: min(1540px, calc(100% - 32px)); margin: 0 auto; padding: 26px 0 56px; }
+    .topbar { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 22px; }
+    .eyebrow { color: var(--gold); text-transform: uppercase; letter-spacing: .18em; font-size: 11px; font-weight: 800; }
+    h1 { margin: 4px 0 0; font: 700 clamp(30px, 4vw, 48px)/1.05 Georgia, "Times New Roman", serif; letter-spacing: -.025em; }
+    .subtitle { margin: 8px 0 0; color: var(--muted); max-width: 760px; }
+    .autosave { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); white-space: nowrap; font-size: 13px; }
+    .autosave::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px rgba(115,184,138,.12); }
+
+    .panel { background: linear-gradient(180deg, rgba(26,30,25,.96), rgba(16,19,16,.98)); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .intake { display: grid; grid-template-columns: minmax(0, 1fr) 310px; overflow: hidden; }
+    .paste-pane { padding: 20px; }
+    .intake h2, .results-title { margin: 0; font: 700 21px/1.2 Georgia, "Times New Roman", serif; }
+    .helper { color: var(--muted); font-size: 13px; margin: 5px 0 12px; }
+    textarea {
+      width: 100%; min-height: 190px; resize: vertical; padding: 14px 15px;
+      color: #e8e8df; background: #090b09; border: 1px solid #383e35; border-radius: 10px;
+      font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    textarea::placeholder { color: #666b62; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 12px; }
+    .btn { border: 1px solid #3b4138; border-radius: 9px; padding: 9px 13px; color: var(--ink); background: #20251f; font-weight: 720; transition: border-color .15s, background .15s, transform .15s; }
+    .btn:hover { border-color: #596353; background: #292f28; }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary { color: #1c170c; border-color: var(--gold); background: linear-gradient(180deg, #edc977, #c99a43); }
+    .btn.primary:hover { background: linear-gradient(180deg, #f3d489, #d7a94f); }
+    .btn.danger { color: #ffc1bb; }
+    .btn.small { padding: 6px 9px; font-size: 12px; }
+
+    .pricing { padding: 20px; border-left: 1px solid var(--line); background: rgba(8,10,8,.32); }
+    .pricing h3 { margin: 0 0 5px; font-size: 14px; }
+    .pricing-note { margin: 0 0 13px; color: var(--muted); font-size: 12px; }
+    .price-head, .price-row { display: grid; grid-template-columns: 1fr 76px 76px; gap: 7px; align-items: center; }
+    .price-head { color: var(--dim); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; margin-bottom: 5px; }
+    .price-row { margin-bottom: 7px; }
+    .price-row label { font-size: 12px; color: #d7d7ce; }
+    .price-input { width: 100%; padding: 6px 7px; border-radius: 7px; border: 1px solid #373d35; color: var(--ink); background: #0b0d0b; text-align: right; }
+
+    .settings-panel { margin-top: 14px; padding: 0 20px 20px; }
+    .settings-panel > summary { cursor: pointer; font-weight: 720; color: var(--gold-bright); padding: 14px 0 8px; list-style: none; }
+    .settings-panel > summary::-webkit-details-marker { display: none; }
+    .settings-panel > summary::before { content: "▸ "; }
+    .settings-panel[open] > summary::before { content: "▾ "; }
+    .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .field label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; font-weight: 700; }
+    .field input, .field select { width: 100%; padding: 8px 9px; border-radius: 7px; border: 1px solid #373d35; color: var(--ink); background: #0b0d0b; }
+    .section-label { margin: 16px 0 8px; color: var(--gold); font-size: 10px; font-weight: 850; text-transform: uppercase; letter-spacing: .12em; }
+    .dest-row { display: flex; gap: 6px; margin-bottom: 6px; align-items: center; }
+    .dest-row input { flex: 1; padding: 7px 8px; border-radius: 7px; border: 1px solid #373d35; color: var(--ink); background: #0b0d0b; }
+    .dest-row .btn { padding: 6px 8px; min-width: 32px; }
+    .rules-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 10px; margin-top: 8px; }
+    .rules-table { width: 100%; min-width: 900px; border-collapse: collapse; font-size: 12px; }
+    .rules-table th { padding: 8px; background: #161a16; color: var(--dim); text-align: left; font-size: 10px; text-transform: uppercase; }
+    .rules-table td { padding: 6px; border-top: 1px solid #282d27; vertical-align: middle; }
+    .rules-table input, .rules-table select { width: 100%; padding: 5px 6px; border-radius: 6px; border: 1px solid #373d35; color: var(--ink); background: #0b0d0b; font-size: 11px; }
+    .rules-table .rule-actions { white-space: nowrap; }
+    .fallback-row { background: rgba(217,172,85,.06); }
+
+    .status-line { min-height: 22px; margin: 10px 1px 0; color: var(--muted); font-size: 13px; }
+    .status-line.error { color: #ffaaa0; }
+    .status-line.success { color: #9bd4ad; }
+
+    .summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 18px 0 14px; }
+    .metric { position: relative; overflow: hidden; padding: 15px 17px; border: 1px solid var(--line); border-radius: 12px; background: rgba(21,25,21,.86); }
+    .metric::after { content: ""; position: absolute; inset: auto 0 0; height: 2px; background: linear-gradient(90deg, var(--gold), transparent 78%); opacity: .65; }
+    .metric-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; font-weight: 800; }
+    .metric-value { margin-top: 3px; font: 700 25px/1.2 Georgia, "Times New Roman", serif; }
+    .metric-value.gold { color: var(--gold-bright); }
+
+    .results { display: none; }
+    .results.has-items { display: block; }
+    .results-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 4px 1px 10px; }
+    .results-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 13px; background: rgba(13,15,13,.92); box-shadow: var(--shadow); }
+    table { width: 100%; min-width: 1160px; border-collapse: collapse; }
+    th { position: sticky; top: 0; z-index: 3; padding: 10px 11px; color: #9ea298; background: #161a16; border-bottom: 1px solid #3a4037; text-align: left; text-transform: uppercase; letter-spacing: .08em; font-size: 10px; }
+    td { padding: 11px; border-bottom: 1px solid #282d27; vertical-align: top; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: rgba(255,255,255,.018); }
+    tbody tr.is-sold { background: rgba(217,172,85,.055); }
+    tbody tr.is-deleted { opacity: .48; }
+
+    .item-name { font-weight: 780; color: #f3f0e8; max-width: 260px; }
+    .item-meta { margin-top: 3px; color: var(--dim); font-size: 11px; }
+    .rarity { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 12px; font-weight: 760; }
+    .rarity::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+    .rarity.mundane { color: #8d9189; }
+    .rarity.common { color: var(--common); }
+    .rarity.uncommon { color: var(--uncommon); }
+    .rarity.rare { color: var(--rare); }
+    .rarity.very-rare { color: var(--very-rare); }
+    .rarity.legendary, .rarity.artifact { color: var(--legendary); }
+    .type { color: #c4c5bd; font-size: 12px; white-space: nowrap; }
+    .check-wrap { display: inline-flex; align-items: center; gap: 7px; color: #c5c7be; font-size: 12px; }
+    input[type="checkbox"] { accent-color: var(--gold); width: 16px; height: 16px; }
+
+    .money-edit { width: 96px; padding: 7px 8px; color: var(--ink); background: #0b0d0b; border: 1px solid #343a32; border-radius: 7px; text-align: right; }
+    .money { white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .source-badge { display: block; width: fit-content; margin-top: 5px; padding: 2px 5px; border-radius: 4px; color: #8f9388; background: #252a24; font-size: 9px; font-weight: 850; letter-spacing: .07em; }
+    .recommendation { max-width: 280px; }
+    .rec-title { color: var(--gold-bright); font-size: 12px; font-weight: 820; }
+    .rec-reason { margin-top: 3px; color: #a8aaa1; font-size: 11px; line-height: 1.38; }
+    .apply-link { margin-top: 5px; padding: 0; border: 0; color: #91bfe2; background: none; font-size: 11px; text-decoration: underline; text-underline-offset: 2px; }
+    .action-select { min-width: 175px; max-width: 210px; padding: 8px 27px 8px 9px; color: var(--ink); background: #111511; border: 1px solid #3a4037; border-radius: 8px; }
+    .action-select[data-tone="sell"] { border-color: #8b7443; color: #f3d58f; }
+    .action-select[data-tone="keep"] { border-color: #477354; color: #a8ddb8; }
+    .action-select[data-tone="delete"] { border-color: #74413c; color: #eaa49d; }
+    details.item-details { max-width: 290px; color: #a7aaa0; font-size: 11px; }
+    details.item-details summary { color: #c8cabf; cursor: pointer; }
+    details.item-details p { margin: 7px 0 0; white-space: pre-wrap; }
+    .empty { display: none; margin-top: 18px; padding: 32px; text-align: center; color: var(--muted); }
+    .footer-note { margin: 14px 2px 0; color: var(--dim); font-size: 11px; }
+    .hidden-input { display: none; }
+
+    .toast { position: fixed; right: 20px; bottom: 20px; z-index: 20; max-width: 360px; padding: 11px 14px; color: var(--ink); background: #252b24; border: 1px solid #495145; border-radius: 10px; box-shadow: var(--shadow); opacity: 0; transform: translateY(12px); pointer-events: none; transition: .18s ease; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 980px) {
+      .intake { grid-template-columns: 1fr; }
+      .pricing { border-left: 0; border-top: 1px solid var(--line); }
+      .summary { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 620px) {
+      .shell { width: min(100% - 20px, 1540px); padding-top: 18px; }
+      .topbar { align-items: flex-start; flex-direction: column; gap: 10px; }
+      .autosave { white-space: normal; }
+      .paste-pane, .pricing { padding: 15px; }
+      .summary { gap: 8px; }
+      .metric { padding: 12px; }
+      .metric-value { font-size: 21px; }
+      .results-head { align-items: flex-start; flex-direction: column; }
+      .results-actions { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">Loot Forge · Chests of Chance</div>
+        <h1>Loot Sorter</h1>
+        <p class="subtitle">Paste one or more Loot Forge pack exports. The sorter reads the items, applies your pricing and sorting rules, recommends destinations, and tracks where everything went.</p>
+      </div>
+      <div class="autosave">Saved automatically on this device</div>
+    </header>
+
+    <section class="panel intake" aria-labelledby="paste-title">
+      <div class="paste-pane">
+        <h2 id="paste-title">Paste pack information</h2>
+        <p class="helper">Paste the full text exactly as Loot Forge provides it. Multiple packs can be pasted together.</p>
+        <textarea id="packInput" spellcheck="false" placeholder="Pack: The Chests of Chance!&#10;Pack ID: abc123&#10;URL: https://...&#10;&#10;Mundane:&#10;- Item Name — Common — Wondrous Item [id 123]&#10;  Value: — gp&#10;  Description...&#10;Reveal:&#10;- Another Item — Rare — Ring [id 456]"></textarea>
+        <div class="button-row">
+          <button class="btn primary" id="replaceBtn" type="button">Parse new batch</button>
+          <button class="btn" id="addBtn" type="button">Add to current batch</button>
+          <button class="btn" id="exportBtn" type="button">Export JSON</button>
+          <button class="btn" id="importBtn" type="button">Import JSON</button>
+          <button class="btn" id="copyMdBtn" type="button">Copy markdown</button>
+          <button class="btn" id="downloadMdBtn" type="button">Download .md</button>
+          <button class="btn danger" id="clearBtn" type="button">Clear everything</button>
+        </div>
+        <div class="status-line" id="statusLine" role="status" aria-live="polite"></div>
+
+        <details class="settings-panel" id="settingsPanel">
+          <summary>Settings &amp; sorting rules</summary>
+          <div class="settings-grid">
+            <div class="field">
+              <label for="characterName">Character name</label>
+              <input id="characterName" type="text" placeholder="My Character">
+            </div>
+            <div class="field">
+              <label for="sellRate">Sell rate (%)</label>
+              <input id="sellRate" type="number" min="0" max="100" step="1" value="50">
+            </div>
+            <div class="field">
+              <label for="presetSelect">Load preset</label>
+              <select id="presetSelect">
+                <option value="">— Choose preset —</option>
+                <option value="presets/george-ward.json">George Ward (Cleric)</option>
+              </select>
+            </div>
+          </div>
+          <div class="button-row">
+            <button class="btn small" id="exportProfileBtn" type="button">Export profile</button>
+            <button class="btn small" id="importProfileBtn" type="button">Import profile</button>
+            <button class="btn small" id="resetDestBtn" type="button">Reset destinations</button>
+            <button class="btn small" id="addDestBtn" type="button">Add destination</button>
+            <button class="btn small" id="addRuleBtn" type="button">Add rule</button>
+          </div>
+          <div class="section-label">Destinations</div>
+          <p class="helper">Use <code>{character}</code> for your character name. First entry should stay Unassigned.</p>
+          <div id="destinationsList"></div>
+          <div class="section-label">Sorting rules (first match wins)</div>
+          <div class="rules-wrap">
+            <table class="rules-table">
+              <thead>
+                <tr>
+                  <th>Rarity</th>
+                  <th>Category contains</th>
+                  <th>Text contains</th>
+                  <th>Consumable</th>
+                  <th>Attunement</th>
+                  <th>Action</th>
+                  <th>Label</th>
+                  <th>Reason</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="rulesRows"></tbody>
+              <tbody id="fallbackRow"></tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+
+      <aside class="pricing" aria-labelledby="pricing-title">
+        <h3 id="pricing-title">Default pricing</h3>
+        <p class="pricing-note" id="pricingNote">Listed item values always override these defaults.</p>
+        <div class="price-head"><span>Rarity</span><span>Item</span><span>Consumable</span></div>
+        <div id="pricingRows"></div>
+        <button class="btn small" id="resetPricingBtn" type="button">Reset pricing</button>
+      </aside>
+    </section>
+
+    <section class="results" id="results" aria-labelledby="results-title">
+      <div class="summary" aria-label="Loot summary">
+        <article class="metric"><div class="metric-label">Items</div><div class="metric-value" id="itemCount">0</div></article>
+        <article class="metric"><div class="metric-label">Total full value</div><div class="metric-value" id="totalValue">0 gp</div></article>
+        <article class="metric"><div class="metric-label">Planned sales</div><div class="metric-value gold" id="salesValue">0 gp</div></article>
+        <article class="metric"><div class="metric-label">Still unassigned</div><div class="metric-value" id="unassignedCount">0</div></article>
+      </div>
+
+      <div class="results-head">
+        <div>
+          <h2 class="results-title" id="results-title">Review the haul</h2>
+          <div class="helper" id="batchMeta"></div>
+        </div>
+        <div class="results-actions">
+          <button class="btn small" id="applyAllBtn" type="button">Apply all recommendations</button>
+          <button class="btn small" id="showDeletedBtn" type="button">Hide discarded</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Rarity</th>
+              <th>Type</th>
+              <th>Consumable</th>
+              <th>Full value</th>
+              <th>Sell value</th>
+              <th>Recommendation</th>
+              <th>What to do</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody id="itemRows"></tbody>
+        </table>
+      </div>
+      <p class="footer-note">Recommendations follow your rules, not live AI advice. You can override the consumable flag, value, and destination for every item.</p>
+    </section>
+    <section class="panel empty" id="emptyState">Paste a pack above to begin sorting.</section>
+  </main>
+  <input type="file" id="importSessionInput" class="hidden-input" accept="application/json,.json">
+  <input type="file" id="importProfileInput" class="hidden-input" accept="application/json,.json">
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const STORAGE_KEY = "party-loot-sorter-v2";
+      const STORAGE_KEY_V1 = "georges-loot-sorter-v1";
+      const HANDOFF_KEY = "loot-forge-sorter-handoff";
+      const RARITIES = ["Mundane", "Common", "Uncommon", "Rare", "Very Rare", "Legendary", "Artifact"];
+      const RARITY_OPTIONS = ["Any", ...RARITIES];
+      const TRI_OPTIONS = ["any", "yes", "no"];
+      const DISCARD_LABEL = "Discard";
+
+      const DEFAULT_PRICING = {
+        regular: { Mundane: 5, Common: 80, Uncommon: 400, Rare: 2000, "Very Rare": 8000, Legendary: 30000, Artifact: 50000 },
+        consumable: { Mundane: 2, Common: 40, Uncommon: 200, Rare: 1000, "Very Rare": 4000, Legendary: 15000, Artifact: 25000 }
+      };
+
+      const DEFAULT_DESTINATIONS = [
+        "Unassigned",
+        "{character}'s Equipment",
+        "{character}'s Backpack",
+        "Party Equipment",
+        "Party Inventory",
+        "Sell",
+        DISCARD_LABEL,
+        "Hold / Review"
+      ];
+
+      function defaultRules() {
+        return [
+          { rarity: "Mundane", categoryContains: "", textContains: "", consumable: "any", attunement: "any", action: "Sell", label: "Sell", reason: "Mundane items are usually clutter or coin-equivalent." },
+          { rarity: "Any", categoryContains: "treasure", textContains: "", consumable: "any", attunement: "any", action: "Sell", label: "Sell", reason: "Treasure is typically liquidated." },
+          { rarity: "Any", categoryContains: "", textContains: "damage|healing|restore|grenade|bomb|explodes", consumable: "yes", attunement: "any", action: "{character}'s Backpack", label: "Keep", reason: "Useful one-use options are often worth more in the field than their sale price." },
+          { rarity: "Any", categoryContains: "", textContains: "", consumable: "any", attunement: "yes", action: "Hold / Review", label: "Review attunement", reason: "Attunement slots are limited; decide if this beats what you already wear." }
+        ];
+      }
+
+      function defaultFallback() {
+        return { action: "Party Inventory", label: "Hold for party", reason: "No matching rule; keep until someone claims it." };
+      }
+
+      function defaultProfile() {
+        return {
+          characterName: "My Character",
+          sellRate: 0.5,
+          destinations: clone(DEFAULT_DESTINATIONS),
+          rules: defaultRules(),
+          fallbackRule: defaultFallback()
+        };
+      }
+
+      const state = {
+        items: [],
+        pricing: structuredClone(DEFAULT_PRICING),
+        profile: defaultProfile(),
+        showDeleted: true,
+        batches: []
+      };
+
+      const $ = (id) => document.getElementById(id);
+      const clone = (value) => JSON.parse(JSON.stringify(value));
+      const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+
+      function normalizeApostrophe(value) {
+        return String(value ?? "").replace(/\u2019/g, "'");
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "").replace(/[&<>'"]/g, (char) => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+        })[char]);
+      }
+
+      function normalizeRarity(raw) {
+        const value = String(raw || "").trim().replace(/\s+/g, " ");
+        const match = RARITIES.concat(["Mundane", "Artifact"])
+          .filter((r, i, a) => a.indexOf(r) === i)
+          .find((rarity) => rarity.toLowerCase() === value.toLowerCase());
+        return match || value || "Mundane";
+      }
+
+      function parseGp(raw) {
+        const text = String(raw || "").trim();
+        if (!text || /^[—–-]\s*gp$/i.test(text) || text === "—" || text === "–" || text === "-") return null;
+        const match = text.replace(/,/g, "").match(/-?\d+(?:\.\d+)?/);
+        return match ? Number(match[0]) : null;
+      }
+
+      function isLikelyConsumable(item) {
+        const haystack = `${item.name} ${item.category} ${item.description || ""}`.toLowerCase();
+        return /\b(potion|elixir|scroll|grenade|bomb|paint|candle|oil|poison|ammunition|arrow|bolt|bead|dust|powder|single[- ]use|one[- ]use)\b/.test(haystack);
+      }
+
+      function isAttunement(item) {
+        return /attunement/i.test(`${item.requirements || ""} ${item.description || ""}`);
+      }
+
+      function resolveDestination(template) {
+        const name = state.profile.characterName || "My Character";
+        return normalizeApostrophe(String(template || "").replace(/\{character\}/gi, name));
+      }
+
+      function resolvedDestinations() {
+        const seen = new Set();
+        const list = [];
+        for (const dest of state.profile.destinations || []) {
+          const resolved = resolveDestination(dest);
+          if (!seen.has(resolved)) {
+            seen.add(resolved);
+            list.push(resolved);
+          }
+        }
+        if (!list.includes("Unassigned")) list.unshift("Unassigned");
+        return list;
+      }
+
+      function migrateAction(action) {
+        const normalized = normalizeApostrophe(action);
+        if (normalized === "Delete from Database") return DISCARD_LABEL;
+        return normalized;
+      }
+
+      function isDiscardAction(action) {
+        const n = migrateAction(action);
+        return n === DISCARD_LABEL;
+      }
+
+      function itemHaystack(item) {
+        return `${item.name} ${item.category} ${item.description || ""} ${item.requirements || ""}`.toLowerCase();
+      }
+
+      function matchesRule(item, rule) {
+        if (rule.rarity && rule.rarity !== "Any" && item.rarity !== rule.rarity) return false;
+        if (rule.categoryContains && !item.category.toLowerCase().includes(rule.categoryContains.toLowerCase())) return false;
+        if (rule.textContains) {
+          const patterns = rule.textContains.split("|").map((p) => p.trim().toLowerCase()).filter(Boolean);
+          const hay = itemHaystack(item);
+          if (patterns.length && !patterns.some((p) => hay.includes(p))) return false;
+        }
+        const attunes = isAttunement(item);
+        if (rule.consumable === "yes" && !item.consumable) return false;
+        if (rule.consumable === "no" && item.consumable) return false;
+        if (rule.attunement === "yes" && !attunes) return false;
+        if (rule.attunement === "no" && attunes) return false;
+        return true;
+      }
+
+      function evaluateRules(item) {
+        for (const rule of state.profile.rules || []) {
+          if (!matchesRule(item, rule)) continue;
+          return {
+            action: resolveDestination(rule.action),
+            label: rule.label || "Suggest",
+            reason: rule.reason || ""
+          };
+        }
+        const fb = state.profile.fallbackRule || defaultFallback();
+        return {
+          action: resolveDestination(fb.action),
+          label: fb.label || "Suggest",
+          reason: fb.reason || ""
+        };
+      }
+
+      function sellValueFor(item) {
+        return effectiveFullValue(item) * (state.profile.sellRate ?? 0.5);
+      }
+
+      function defaultValueFor(item) {
+        const table = item.consumable ? state.pricing.consumable : state.pricing.regular;
+        return Number(table[item.rarity] ?? 0);
+      }
+
+      function effectiveFullValue(item) {
+        if (item.valueMode === "override") return Number(item.overrideValue || 0);
+        if (item.listedValue != null) return Number(item.listedValue);
+        return defaultValueFor(item);
+      }
+
+      function valueSource(item) {
+        if (item.valueMode === "override") return "Override";
+        return item.listedValue != null ? "Listed" : "Default";
+      }
+
+      function formatGp(value) {
+        const number = Number(value || 0);
+        const decimals = Number.isInteger(number) ? 0 : Math.min(3, Math.max(1, (String(number).split(".")[1] || "").length));
+        return `${number.toLocaleString("en-US", { maximumFractionDigits: decimals })} gp`;
+      }
+
+      function normalizeItemLine(line) {
+        return line.replace(/\s+[—–]\s+/g, " — ").replace(/\s+-\s+/g, " — ");
+      }
+
+      function parseItemLine(line) {
+        const normalized = normalizeItemLine(line.trim());
+        let match = normalized.match(/^-\s+(.+?)\s+—\s+(.+?)\s+—\s+(.+?)(?:\s+\[id\s+([^\]]+)\])?\s*$/);
+        if (match) {
+          return { name: match[1].trim(), rarity: normalizeRarity(match[2]), category: match[3].trim(), itemId: (match[4] || "").trim() };
+        }
+        if (!normalized.startsWith("-")) return null;
+        const body = normalized.slice(1).trim();
+        const parts = body.split(/\s+—\s+/);
+        if (parts.length >= 3) {
+          const last = parts[parts.length - 1];
+          const idMatch = last.match(/^(.+?)\s+\[id\s+([^\]]+)\]$/);
+          if (idMatch) {
+            parts[parts.length - 1] = idMatch[1].trim();
+            return {
+              name: parts[0].trim(),
+              rarity: normalizeRarity(parts[1]),
+              category: parts.slice(2).join(" — ").trim(),
+              itemId: idMatch[2].trim()
+            };
+          }
+          return {
+            name: parts[0].trim(),
+            rarity: normalizeRarity(parts[1]),
+            category: parts.slice(2).join(" — ").trim(),
+            itemId: ""
+          };
+        }
+        return null;
+      }
+
+      function itemDedupKey(item) {
+        return `${item.packId}|${item.itemId}|${item.name}|${item.openLabel || item.opened || ""}`;
+      }
+
+      function parsePackText(text) {
+        const lines = String(text || "").replace(/\r/g, "").split("\n");
+        const items = [];
+        const batches = [];
+        let pack = { name: "Unknown pack", id: "", url: "", opened: "" };
+        let section = "Mundane";
+        let openLabel = "";
+        let current = null;
+
+        const finishItem = () => {
+          if (!current) return;
+          current.description = current.descriptionLines.join(" ").replace(/\s+/g, " ").trim();
+          delete current.descriptionLines;
+          current.consumable = isLikelyConsumable(current);
+          current.valueMode = "auto";
+          current.overrideValue = null;
+          current.action = migrateAction(current.action || "Unassigned");
+          if (!current.action || current.action === "Unassigned") current.action = "Unassigned";
+          current.recommendation = evaluateRules(current);
+          items.push(current);
+          current = null;
+        };
+
+        const finishPack = () => {
+          const batchKey = `${pack.id}|${pack.opened}|${openLabel}`;
+          if (pack.id || pack.url || pack.opened || openLabel || pack.name !== "Unknown pack") {
+            if (!batches.some((b) => `${b.id}|${b.opened}|${b.openLabel || ""}` === batchKey)) {
+              batches.push({ ...pack, openLabel });
+            }
+          }
+        };
+
+        for (const rawLine of lines) {
+          const line = rawLine.trim();
+          if (/^Pack:\s*/i.test(line)) {
+            finishItem();
+            finishPack();
+            pack = { name: line.replace(/^Pack:\s*/i, "").trim(), id: "", url: "", opened: "" };
+            openLabel = "";
+            section = "Mundane";
+            continue;
+          }
+          if (/^Pack ID:\s*/i.test(line)) { pack.id = line.replace(/^Pack ID:\s*/i, "").trim(); continue; }
+          if (/^URL:\s*/i.test(line)) { pack.url = line.replace(/^URL:\s*/i, "").trim(); continue; }
+          if (/^Opened:\s*/i.test(line)) {
+            pack.opened = line.replace(/^Opened:\s*/i, "").trim();
+            openLabel = pack.opened;
+            continue;
+          }
+          const openMatch = line.match(/^---\s*Open\s+(\d+)(?:\s+[—–-]\s*(.+))?\s*---\s*$/i);
+          if (openMatch) {
+            finishItem();
+            openLabel = openMatch[2] ? `Open ${openMatch[1]} — ${openMatch[2]}` : `Open ${openMatch[1]}`;
+            pack.opened = openMatch[2] || openLabel;
+            section = "Mundane";
+            continue;
+          }
+          if (/^(Mundane|Reveal):\s*$/i.test(line)) {
+            finishItem();
+            section = /^Reveal/i.test(line) ? "Reveal" : "Mundane";
+            continue;
+          }
+
+          const parsed = parseItemLine(line);
+          if (parsed) {
+            finishItem();
+            current = {
+              key: uid(),
+              name: parsed.name,
+              rarity: parsed.rarity,
+              category: parsed.category,
+              itemId: parsed.itemId,
+              packId: pack.id,
+              packName: pack.name,
+              packUrl: pack.url,
+              opened: pack.opened,
+              openLabel,
+              section,
+              listedValue: null,
+              requirements: "",
+              author: "",
+              descriptionLines: []
+            };
+            continue;
+          }
+          if (!current || !line) continue;
+          if (/^Value:\s*/i.test(line)) { current.listedValue = parseGp(line.replace(/^Value:\s*/i, "")); continue; }
+          if (/^Requirements:\s*/i.test(line)) { current.requirements = line.replace(/^Requirements:\s*/i, "").trim(); continue; }
+          if (/^Author:\s*/i.test(line)) { current.author = line.replace(/^Author:\s*/i, "").trim(); continue; }
+          current.descriptionLines.push(line);
+        }
+        finishItem();
+        finishPack();
+        return { items, batches };
+      }
+
+      function ensurePricingComplete() {
+        for (const rarity of RARITIES) {
+          if (state.pricing.regular[rarity] == null) state.pricing.regular[rarity] = DEFAULT_PRICING.regular[rarity] ?? 0;
+          if (state.pricing.consumable[rarity] == null) state.pricing.consumable[rarity] = DEFAULT_PRICING.consumable[rarity] ?? 0;
+        }
+      }
+
+      function migrateItems(items) {
+        for (const item of items) {
+          item.action = migrateAction(item.action);
+          if (!resolvedDestinations().includes(item.action) && item.action !== "Unassigned") {
+            /* keep custom legacy values in dropdown via union at render */
+          }
+        }
+      }
+
+      function save() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            version: 2,
+            items: state.items,
+            pricing: state.pricing,
+            profile: state.profile,
+            batches: state.batches,
+            showDeleted: state.showDeleted
+          }));
+        } catch (_) { /* local files can block storage */ }
+      }
+
+      function loadFromPayload(saved) {
+        state.items = Array.isArray(saved.items) ? saved.items : [];
+        state.pricing = saved.pricing || clone(DEFAULT_PRICING);
+        ensurePricingComplete();
+        if (saved.profile) {
+          state.profile = { ...defaultProfile(), ...saved.profile };
+          if (!Array.isArray(state.profile.destinations)) state.profile.destinations = clone(DEFAULT_DESTINATIONS);
+          if (!Array.isArray(state.profile.rules)) state.profile.rules = defaultRules();
+          if (!state.profile.fallbackRule) state.profile.fallbackRule = defaultFallback();
+        }
+        state.batches = Array.isArray(saved.batches) ? saved.batches : [];
+        state.showDeleted = saved.showDeleted !== false;
+        migrateItems(state.items);
+        refreshRecommendations();
+      }
+
+      function hydrate() {
+        try {
+          let saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (!saved) {
+            const v1 = JSON.parse(localStorage.getItem(STORAGE_KEY_V1));
+            if (v1 && v1.version === 1) {
+              saved = { ...v1, version: 2, profile: defaultProfile() };
+            }
+          }
+          if (!saved) return;
+          loadFromPayload(saved);
+          save();
+        } catch (_) { /* ignore malformed saved state */ }
+      }
+
+      function setStatus(message, type = "") {
+        const el = $("statusLine");
+        el.textContent = message;
+        el.className = `status-line ${type}`.trim();
+      }
+
+      let toastTimer;
+      function toast(message) {
+        const el = $("toast");
+        el.textContent = message;
+        el.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.remove("show"), 2100);
+      }
+
+      function actionTone(action) {
+        const n = migrateAction(action).toLowerCase();
+        if (n === "sell") return "sell";
+        if (n === "discard" || n.includes("delete")) return "delete";
+        if (n.includes("equipment") || n.includes("backpack") || n.includes("inventory")) return "keep";
+        return "";
+      }
+
+      function destinationOptionsForItem(currentAction) {
+        const dests = resolvedDestinations();
+        const action = migrateAction(currentAction);
+        if (action && !dests.includes(action)) dests.push(action);
+        return dests;
+      }
+
+      function updatePricingNote() {
+        const pct = Math.round((state.profile.sellRate ?? 0.5) * 100);
+        $("pricingNote").textContent = `Listed item values always override these defaults. Sale value is ${pct}%.`;
+      }
+
+      function renderPricing() {
+        ensurePricingComplete();
+        $("pricingRows").innerHTML = RARITIES.map((rarity) => `
+          <div class="price-row">
+            <label>${escapeHtml(rarity)}</label>
+            <input class="price-input" type="number" min="0" step="1" aria-label="${escapeHtml(rarity)} regular item full value" data-price-kind="regular" data-rarity="${escapeHtml(rarity)}" value="${state.pricing.regular[rarity]}">
+            <input class="price-input" type="number" min="0" step="1" aria-label="${escapeHtml(rarity)} consumable full value" data-price-kind="consumable" data-rarity="${escapeHtml(rarity)}" value="${state.pricing.consumable[rarity]}">
+          </div>`).join("");
+        updatePricingNote();
+      }
+
+      function renderDestinations() {
+        const list = $("destinationsList");
+        list.innerHTML = (state.profile.destinations || []).map((dest, index) => `
+          <div class="dest-row" data-dest-index="${index}">
+            <input type="text" data-dest-field="value" value="${escapeHtml(dest)}" aria-label="Destination ${index + 1}">
+            <button class="btn small" type="button" data-dest-cmd="up" aria-label="Move up">↑</button>
+            <button class="btn small" type="button" data-dest-cmd="down" aria-label="Move down">↓</button>
+            <button class="btn small danger" type="button" data-dest-cmd="remove" aria-label="Remove">×</button>
+          </div>`).join("");
+      }
+
+      function ruleActionOptions(selected) {
+        const templates = [...new Set([...(state.profile.destinations || []), selected].filter(Boolean))];
+        return templates.map((t) => {
+          const resolved = resolveDestination(t);
+          const sel = resolved === migrateAction(selected) || t === selected ? "selected" : "";
+          return `<option value="${escapeHtml(t)}" ${sel}>${escapeHtml(resolved)}</option>`;
+        }).join("");
+      }
+
+      function renderRules() {
+        const tbody = $("rulesRows");
+        tbody.innerHTML = (state.profile.rules || []).map((rule, index) => `
+          <tr data-rule-index="${index}">
+            <td><select data-rule-field="rarity">${RARITY_OPTIONS.map((r) => `<option ${rule.rarity === r ? "selected" : ""}>${escapeHtml(r)}</option>`).join("")}</select></td>
+            <td><input data-rule-field="categoryContains" value="${escapeHtml(rule.categoryContains || "")}" placeholder="weapon"></td>
+            <td><input data-rule-field="textContains" value="${escapeHtml(rule.textContains || "")}" placeholder="healing|resistance"></td>
+            <td><select data-rule-field="consumable">${TRI_OPTIONS.map((o) => `<option value="${o}" ${rule.consumable === o ? "selected" : ""}>${o}</option>`).join("")}</select></td>
+            <td><select data-rule-field="attunement">${TRI_OPTIONS.map((o) => `<option value="${o}" ${rule.attunement === o ? "selected" : ""}>${o}</option>`).join("")}</select></td>
+            <td><select data-rule-field="action">${ruleActionOptions(rule.action)}</select></td>
+            <td><input data-rule-field="label" value="${escapeHtml(rule.label || "")}"></td>
+            <td><input data-rule-field="reason" value="${escapeHtml(rule.reason || "")}"></td>
+            <td class="rule-actions">
+              <button class="btn small" type="button" data-rule-cmd="up">↑</button>
+              <button class="btn small" type="button" data-rule-cmd="down">↓</button>
+              <button class="btn small danger" type="button" data-rule-cmd="remove">×</button>
+            </td>
+          </tr>`).join("");
+
+        const fb = state.profile.fallbackRule || defaultFallback();
+        $("fallbackRow").innerHTML = `
+          <tr class="fallback-row">
+            <td colspan="5"><em>Fallback (if no rule matches)</em></td>
+            <td><select id="fallbackAction">${ruleActionOptions(fb.action)}</select></td>
+            <td><input id="fallbackLabel" value="${escapeHtml(fb.label || "")}"></td>
+            <td><input id="fallbackReason" value="${escapeHtml(fb.reason || "")}"></td>
+            <td></td>
+          </tr>`;
+      }
+
+      function renderSettings() {
+        $("characterName").value = state.profile.characterName || "";
+        $("sellRate").value = Math.round((state.profile.sellRate ?? 0.5) * 100);
+        renderDestinations();
+        renderRules();
+      }
+
+      function render() {
+        renderPricing();
+        renderSettings();
+        const hasItems = state.items.length > 0;
+        $("results").classList.toggle("has-items", hasItems);
+        $("emptyState").style.display = hasItems ? "none" : "block";
+        $("showDeletedBtn").textContent = state.showDeleted ? "Hide discarded" : "Show discarded";
+
+        const visible = state.items.filter((item) => state.showDeleted || !isDiscardAction(item.action));
+        $("itemRows").innerHTML = visible.map((item) => {
+          const full = effectiveFullValue(item);
+          const sell = sellValueFor(item);
+          const rarityClass = item.rarity.toLowerCase().replace(/\s+/g, "-");
+          const action = migrateAction(item.action);
+          const rowClass = action === "Sell" ? "is-sold" : isDiscardAction(action) ? "is-deleted" : "";
+          const recommendation = item.recommendation || evaluateRules(item);
+          const meta = [item.section, item.openLabel, item.itemId ? `ID ${item.itemId}` : "", item.packId ? `Pack ${item.packId}` : ""].filter(Boolean).join(" · ");
+          const details = [item.description, item.requirements ? `Requirements: ${item.requirements}` : "", item.author ? `Author: ${item.author}` : ""].filter(Boolean).join("\n\n");
+          const destOptions = destinationOptionsForItem(action);
+          return `<tr class="${rowClass}" data-key="${escapeHtml(item.key)}">
+            <td><div class="item-name">${escapeHtml(item.name)}</div><div class="item-meta">${escapeHtml(meta)}</div></td>
+            <td><span class="rarity ${rarityClass}">${escapeHtml(item.rarity)}</span></td>
+            <td><span class="type">${escapeHtml(item.category)}</span></td>
+            <td><label class="check-wrap"><input type="checkbox" data-field="consumable" ${item.consumable ? "checked" : ""}> Yes</label></td>
+            <td><input class="money-edit" type="number" min="0" step="0.01" data-field="value" aria-label="Full value for ${escapeHtml(item.name)}" value="${full}"><span class="source-badge">${escapeHtml(valueSource(item))}</span></td>
+            <td class="money">${formatGp(sell)}</td>
+            <td class="recommendation"><div class="rec-title">${escapeHtml(recommendation.label)}</div><div class="rec-reason">${escapeHtml(recommendation.reason)}</div><button class="apply-link" type="button" data-command="apply">Apply recommendation</button></td>
+            <td><select class="action-select" data-field="action" data-tone="${actionTone(action)}" aria-label="Action for ${escapeHtml(item.name)}">${destOptions.map((d) => `<option ${d === action ? "selected" : ""}>${escapeHtml(d)}</option>`).join("")}</select></td>
+            <td><details class="item-details"><summary>View description</summary><p>${escapeHtml(details || "No description supplied.")}</p></details></td>
+          </tr>`;
+        }).join("");
+
+        const active = state.items.filter((item) => !isDiscardAction(item.action));
+        const totalFull = active.reduce((sum, item) => sum + effectiveFullValue(item), 0);
+        const plannedSales = state.items.filter((item) => migrateAction(item.action) === "Sell").reduce((sum, item) => sum + sellValueFor(item), 0);
+        const unassigned = state.items.filter((item) => migrateAction(item.action) === "Unassigned").length;
+        $("itemCount").textContent = state.items.length;
+        $("totalValue").textContent = formatGp(totalFull);
+        $("salesValue").textContent = formatGp(plannedSales);
+        $("unassignedCount").textContent = unassigned;
+        $("batchMeta").textContent = state.batches.length ? `${state.batches.length} pack${state.batches.length === 1 ? "" : "s"} loaded` : "";
+      }
+
+      function refreshRecommendations() {
+        state.items.forEach((item) => { item.recommendation = evaluateRules(item); });
+      }
+
+      function mergeParsedItems(parsed, mode) {
+        if (mode === "replace") {
+          state.items = parsed.items;
+          state.batches = parsed.batches;
+          return parsed.items.length;
+        }
+        const existing = new Set(state.items.map(itemDedupKey));
+        const newItems = parsed.items.filter((item) => !existing.has(itemDedupKey(item)));
+        state.items.push(...newItems);
+        parsed.batches.forEach((batch) => {
+          const key = `${batch.id}|${batch.opened}|${batch.openLabel || ""}`;
+          if (!state.batches.some((b) => `${b.id}|${b.opened}|${b.openLabel || ""}` === key)) state.batches.push(batch);
+        });
+        return newItems.length;
+      }
+
+      function parseInput(mode) {
+        const text = $("packInput").value.trim();
+        if (!text) { setStatus("Paste pack information first.", "error"); return false; }
+        const parsed = parsePackText(text);
+        if (!parsed.items.length) {
+          setStatus("Couldn't find any item lines. Each item should begin with a hyphen and use the exported dash format.", "error");
+          return false;
+        }
+        if (mode === "replace" && state.items.length && !confirm("Replace the current batch and its assignments with these parsed items?")) return false;
+
+        const added = mergeParsedItems(parsed, mode);
+        if (mode === "add" && added === 0) {
+          setStatus("Those items are already in the current batch.", "error");
+          return false;
+        }
+        $("packInput").value = "";
+        refreshRecommendations();
+        save();
+        render();
+        setStatus(`${parsed.items.length} item${parsed.items.length === 1 ? "" : "s"} parsed successfully.`, "success");
+        return true;
+      }
+
+      function buildSessionExport() {
+        return {
+          version: 2,
+          exportedAt: new Date().toISOString(),
+          profile: state.profile,
+          pricing: state.pricing,
+          batches: state.batches,
+          showDeleted: state.showDeleted,
+          items: state.items.map((item) => ({
+            ...item,
+            fullValue: effectiveFullValue(item),
+            sellValue: sellValueFor(item)
+          }))
+        };
+      }
+
+      function exportResults() {
+        if (!state.items.length) { toast("There is nothing to export yet."); return; }
+        const blob = new Blob([JSON.stringify(buildSessionExport(), null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `loot-sorter-${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        toast("Session exported.");
+      }
+
+      function exportProfile() {
+        const payload = { version: 2, exportedAt: new Date().toISOString(), profile: state.profile, pricing: state.pricing };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `loot-sorter-profile-${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        toast("Profile exported.");
+      }
+
+      function importSessionFromObject(data, mode) {
+        const items = Array.isArray(data.items) ? data.items : [];
+        if (!items.length && mode !== "replace") {
+          toast("No items found in file.");
+          return;
+        }
+        if (mode === "replace") {
+          loadFromPayload({
+            items,
+            pricing: data.pricing,
+            profile: data.profile,
+            batches: data.batches || [],
+            showDeleted: data.showDeleted
+          });
+          save();
+          render();
+          toast("Session imported.");
+          return;
+        }
+        const existing = new Set(state.items.map(itemDedupKey));
+        const incoming = items.map((item) => {
+          const copy = { ...item, key: item.key || uid(), action: migrateAction(item.action) };
+          copy.recommendation = evaluateRules(copy);
+          return copy;
+        });
+        const newItems = incoming.filter((item) => !existing.has(itemDedupKey(item)));
+        state.items.push(...newItems);
+        (data.batches || []).forEach((batch) => {
+          const key = `${batch.id}|${batch.opened}|${batch.openLabel || ""}`;
+          if (!state.batches.some((b) => `${b.id}|${b.opened}|${b.openLabel || ""}` === key)) state.batches.push(batch);
+        });
+        if (data.profile) state.profile = { ...defaultProfile(), ...data.profile };
+        if (data.pricing) { state.pricing = data.pricing; ensurePricingComplete(); }
+        refreshRecommendations();
+        save();
+        render();
+        toast(`Merged ${newItems.length} new item(s).`);
+      }
+
+      function applyProfileFromObject(data) {
+        if (data.profile) {
+          state.profile = { ...defaultProfile(), ...data.profile };
+        } else {
+          const next = { ...state.profile };
+          if (data.characterName != null) next.characterName = data.characterName;
+          if (data.sellRate != null) next.sellRate = data.sellRate;
+          if (Array.isArray(data.destinations)) next.destinations = data.destinations;
+          if (Array.isArray(data.rules)) next.rules = data.rules;
+          if (data.fallbackRule) next.fallbackRule = data.fallbackRule;
+          state.profile = { ...defaultProfile(), ...next };
+        }
+        if (data.pricing) { state.pricing = data.pricing; ensurePricingComplete(); }
+        migrateItems(state.items);
+        refreshRecommendations();
+        save();
+        render();
+        toast(data.name ? `Loaded preset: ${data.name}` : "Profile loaded.");
+      }
+
+      async function loadPreset(path) {
+        try {
+          const res = await fetch(path);
+          if (!res.ok) throw new Error("fetch failed");
+          const data = await res.json();
+          applyProfileFromObject(data);
+        } catch (_) {
+          toast("Could not load preset.");
+        }
+      }
+
+      function buildMarkdown() {
+        if (!state.items.length) return "";
+        const lines = [`# Loot Sorter export`, `_${new Date().toLocaleString()}_`, ""];
+        const grouped = new Map();
+        for (const item of state.items) {
+          const action = migrateAction(item.action) || "Unassigned";
+          if (!grouped.has(action)) grouped.set(action, []);
+          grouped.get(action).push(item);
+        }
+        const order = [...resolvedDestinations(), ...[...grouped.keys()].filter((k) => !resolvedDestinations().includes(k))];
+        const seen = new Set();
+        for (const action of order) {
+          if (seen.has(action) || !grouped.has(action)) continue;
+          seen.add(action);
+          const items = grouped.get(action);
+          const total = items.reduce((s, i) => s + effectiveFullValue(i), 0);
+          const sellTotal = action === "Sell" ? items.reduce((s, i) => s + sellValueFor(i), 0) : 0;
+          const headerExtra = action === "Sell" ? `, ${formatGp(sellTotal)} planned` : `, ${formatGp(total)} total`;
+          lines.push(`## ${action} (${items.length} item${items.length === 1 ? "" : "s"}${headerExtra})`);
+          lines.push("");
+          const byPack = new Map();
+          for (const item of items) {
+            const pack = item.packName || item.packId || "Unknown pack";
+            if (!byPack.has(pack)) byPack.set(pack, []);
+            byPack.get(pack).push(item);
+          }
+          for (const [pack, packItems] of byPack) {
+            lines.push(`### ${pack}`);
+            for (const item of packItems) {
+              const full = effectiveFullValue(item);
+              const sell = sellValueFor(item);
+              const rec = item.recommendation;
+              const recNote = rec && migrateAction(item.action) === "Unassigned" ? ` — _${rec.label}: ${rec.reason}_` : "";
+              lines.push(`- **${item.name}** (${item.rarity}, ${item.category}) — ${formatGp(full)} full / ${formatGp(sell)} sell${recNote}`);
+            }
+            lines.push("");
+          }
+        }
+        return lines.join("\n").trim() + "\n";
+      }
+
+      function copyMarkdown() {
+        const md = buildMarkdown();
+        if (!md) { toast("Nothing to copy yet."); return; }
+        const copy = navigator.clipboard?.writeText(md);
+        if (copy) copy.then(() => toast("Markdown copied.")).catch(() => toast("Copy failed."));
+        else toast("Clipboard unavailable.");
+      }
+
+      function downloadMarkdown() {
+        const md = buildMarkdown();
+        if (!md) { toast("Nothing to download yet."); return; }
+        const blob = new Blob([md], { type: "text/markdown" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `loot-sorter-${new Date().toISOString().slice(0, 10)}.md`;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        toast("Markdown downloaded.");
+      }
+
+      function loadHandoff() {
+        try {
+          const raw = sessionStorage.getItem(HANDOFF_KEY);
+          if (!raw) return;
+          sessionStorage.removeItem(HANDOFF_KEY);
+          const handoff = JSON.parse(raw);
+          if (!handoff?.text) return;
+          $("packInput").value = handoff.text;
+          toast("Loot loaded from pack.");
+          parseInput("add");
+        } catch (_) { /* ignore */ }
+      }
+
+      function syncProfileFromSettings() {
+        state.profile.characterName = $("characterName").value.trim() || "My Character";
+        state.profile.sellRate = Math.max(0, Math.min(1, Number($("sellRate").value || 50) / 100));
+      }
+
+      function bindEvents() {
+        $("replaceBtn").addEventListener("click", () => parseInput("replace"));
+        $("addBtn").addEventListener("click", () => parseInput("add"));
+        $("exportBtn").addEventListener("click", exportResults);
+        $("importBtn").addEventListener("click", () => $("importSessionInput").click());
+        $("copyMdBtn").addEventListener("click", copyMarkdown);
+        $("downloadMdBtn").addEventListener("click", downloadMarkdown);
+        $("exportProfileBtn").addEventListener("click", exportProfile);
+        $("importProfileBtn").addEventListener("click", () => $("importProfileInput").click());
+
+        $("importSessionInput").addEventListener("change", (event) => {
+          const file = event.target.files?.[0];
+          event.target.value = "";
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              const data = JSON.parse(reader.result);
+              const mode = !state.items.length || confirm("Replace current session with imported file? Click Cancel to merge items instead.") ? "replace" : "merge";
+              importSessionFromObject(data, mode);
+            } catch (_) { toast("Invalid JSON file."); }
+          };
+          reader.readAsText(file);
+        });
+
+        $("importProfileInput").addEventListener("change", (event) => {
+          const file = event.target.files?.[0];
+          event.target.value = "";
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            try { applyProfileFromObject(JSON.parse(reader.result)); }
+            catch (_) { toast("Invalid profile JSON."); }
+          };
+          reader.readAsText(file);
+        });
+
+        $("clearBtn").addEventListener("click", () => {
+          if (!state.items.length || confirm("Clear every item, assignment, and saved batch?")) {
+            state.items = [];
+            state.batches = [];
+            save(); render(); setStatus("Everything has been cleared.", "success");
+          }
+        });
+
+        $("resetPricingBtn").addEventListener("click", () => {
+          state.pricing = clone(DEFAULT_PRICING);
+          refreshRecommendations(); save(); render(); toast("Default pricing restored.");
+        });
+
+        $("applyAllBtn").addEventListener("click", () => {
+          state.items.forEach((item) => { item.action = item.recommendation.action; });
+          save(); render(); toast("Recommendations applied.");
+        });
+
+        $("showDeletedBtn").addEventListener("click", () => {
+          state.showDeleted = !state.showDeleted;
+          save(); render();
+        });
+
+        $("characterName").addEventListener("change", () => { syncProfileFromSettings(); refreshRecommendations(); save(); render(); });
+        $("sellRate").addEventListener("change", () => { syncProfileFromSettings(); save(); render(); });
+
+        $("presetSelect").addEventListener("change", (event) => {
+          const path = event.target.value;
+          event.target.value = "";
+          if (path) loadPreset(path);
+        });
+
+        $("resetDestBtn").addEventListener("click", () => {
+          state.profile.destinations = clone(DEFAULT_DESTINATIONS);
+          save(); render(); toast("Destinations reset.");
+        });
+
+        $("addDestBtn").addEventListener("click", () => {
+          state.profile.destinations.push("New destination");
+          save(); render();
+        });
+
+        $("addRuleBtn").addEventListener("click", () => {
+          state.profile.rules.push({ rarity: "Any", categoryContains: "", textContains: "", consumable: "any", attunement: "any", action: "Party Inventory", label: "Suggest", reason: "" });
+          save(); render();
+        });
+
+        $("destinationsList").addEventListener("input", (event) => {
+          const row = event.target.closest("[data-dest-index]");
+          if (!row || event.target.dataset.destField !== "value") return;
+          state.profile.destinations[Number(row.dataset.destIndex)] = event.target.value;
+          save();
+        });
+
+        $("destinationsList").addEventListener("click", (event) => {
+          const row = event.target.closest("[data-dest-index]");
+          if (!row) return;
+          const index = Number(row.dataset.destIndex);
+          const cmd = event.target.dataset.destCmd;
+          if (cmd === "remove") {
+            if (state.profile.destinations.length <= 1) return;
+            state.profile.destinations.splice(index, 1);
+          } else if (cmd === "up" && index > 0) {
+            [state.profile.destinations[index - 1], state.profile.destinations[index]] = [state.profile.destinations[index], state.profile.destinations[index - 1]];
+          } else if (cmd === "down" && index < state.profile.destinations.length - 1) {
+            [state.profile.destinations[index + 1], state.profile.destinations[index]] = [state.profile.destinations[index], state.profile.destinations[index + 1]];
+          } else return;
+          refreshRecommendations(); save(); render();
+        });
+
+        $("rulesRows").addEventListener("input", (event) => {
+          const row = event.target.closest("[data-rule-index]");
+          if (!row || !event.target.dataset.ruleField) return;
+          state.profile.rules[Number(row.dataset.ruleIndex)][event.target.dataset.ruleField] = event.target.value;
+          save();
+        });
+
+        $("rulesRows").addEventListener("change", (event) => {
+          const row = event.target.closest("[data-rule-index]");
+          if (!row || !event.target.dataset.ruleField) return;
+          state.profile.rules[Number(row.dataset.ruleIndex)][event.target.dataset.ruleField] = event.target.value;
+          refreshRecommendations(); save(); render();
+        });
+
+        $("rulesRows").addEventListener("click", (event) => {
+          const row = event.target.closest("[data-rule-index]");
+          if (!row) return;
+          const index = Number(row.dataset.ruleIndex);
+          const cmd = event.target.dataset.ruleCmd;
+          if (cmd === "remove") state.profile.rules.splice(index, 1);
+          else if (cmd === "up" && index > 0) [state.profile.rules[index - 1], state.profile.rules[index]] = [state.profile.rules[index], state.profile.rules[index - 1]];
+          else if (cmd === "down" && index < state.profile.rules.length - 1) [state.profile.rules[index + 1], state.profile.rules[index]] = [state.profile.rules[index], state.profile.rules[index + 1]];
+          else return;
+          refreshRecommendations(); save(); render();
+        });
+
+        $("fallbackRow").addEventListener("change", () => {
+          state.profile.fallbackRule = {
+            action: $("fallbackAction").value,
+            label: $("fallbackLabel").value,
+            reason: $("fallbackReason").value
+          };
+          refreshRecommendations(); save(); render();
+        });
+
+        $("pricingRows").addEventListener("change", (event) => {
+          const input = event.target.closest("[data-price-kind]");
+          if (!input) return;
+          state.pricing[input.dataset.priceKind][input.dataset.rarity] = Math.max(0, Number(input.value || 0));
+          save(); render();
+        });
+
+        $("itemRows").addEventListener("change", (event) => {
+          const row = event.target.closest("tr[data-key]");
+          if (!row) return;
+          const item = state.items.find((entry) => entry.key === row.dataset.key);
+          if (!item) return;
+          const field = event.target.dataset.field;
+          if (field === "consumable") {
+            item.consumable = event.target.checked;
+            item.recommendation = evaluateRules(item);
+          } else if (field === "value") {
+            item.valueMode = "override";
+            item.overrideValue = Math.max(0, Number(event.target.value || 0));
+          } else if (field === "action") {
+            item.action = migrateAction(event.target.value);
+          }
+          save(); render();
+        });
+
+        $("itemRows").addEventListener("click", (event) => {
+          const button = event.target.closest('[data-command="apply"]');
+          if (!button) return;
+          const row = button.closest("tr[data-key]");
+          const item = state.items.find((entry) => entry.key === row.dataset.key);
+          if (!item) return;
+          item.action = item.recommendation.action;
+          save(); render();
+        });
+      }
+
+      hydrate();
+      render();
+      bindEvents();
+      loadHandoff();
+
+      window.LootSorter = { parsePackText, evaluateRules, formatGp, buildMarkdown };
+    })();
+  </script>
+</body>
+</html>
