@@ -340,6 +340,10 @@
         "Hold / Review"
       ];
 
+      const $ = (id) => document.getElementById(id);
+      const clone = (value) => JSON.parse(JSON.stringify(value));
+      const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+
       function defaultRules() {
         return [
           { rarity: "Mundane", categoryContains: "", textContains: "", consumable: "any", attunement: "any", action: "Sell", label: "Sell", reason: "Mundane items are usually clutter or coin-equivalent." },
@@ -370,10 +374,6 @@
         showDeleted: true,
         batches: []
       };
-
-      const $ = (id) => document.getElementById(id);
-      const clone = (value) => JSON.parse(JSON.stringify(value));
-      const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
 
       function normalizeApostrophe(value) {
         return String(value ?? "").replace(/\u2019/g, "'");
