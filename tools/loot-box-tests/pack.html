@@ -1236,14 +1236,41 @@
     var rarityStyle = rm && rarityRaw ? ' style="color:' + rm.color + '"' : '';
     var rarityHtml = rarityRaw ? escapeHtml(rarityRaw) : noData(null);
 
-    var rawDesc = (window.LootGsbImport && window.LootGsbImport.itemBodyText)
-      ? window.LootGsbImport.itemBodyText(item)
-      : (item.properties || item.description || '');
-    var descStr = rawDesc != null ? String(rawDesc) : '';
-    var descTrim = descStr.trim();
-    var descBody = descTrim
-      ? escapeHtml(descStr).replace(/\n/g, '<br>')
-      : noData(null);
+    var Imp = window.LootGsbImport;
+    var descTrim = Imp && Imp.itemDescriptionText
+      ? Imp.itemDescriptionText(item)
+      : String(item.description || '').trim();
+    var propsTrim = Imp && Imp.itemPropertiesText
+      ? Imp.itemPropertiesText(item)
+      : String(
+          Array.isArray(item.properties)
+            ? item.properties.join('\n')
+            : (item.properties != null ? item.properties : '')
+        ).trim();
+
+    var bodySections = '';
+    if (descTrim) {
+      bodySections +=
+        '<div class="statblock-section">' +
+        '<div class="statblock-section-title">Description</div>' +
+        '<div class="statblock-section-body">' + escapeHtml(descTrim).replace(/\n/g, '<br>') + '</div>' +
+        '</div>';
+    }
+    if (propsTrim) {
+      if (bodySections) bodySections += '<hr class="statblock-rule">';
+      bodySections +=
+        '<div class="statblock-section">' +
+        '<div class="statblock-section-title">Properties</div>' +
+        '<div class="statblock-section-body">' + escapeHtml(propsTrim).replace(/\n/g, '<br>') + '</div>' +
+        '</div>';
+    }
+    if (!bodySections) {
+      bodySections =
+        '<div class="statblock-section">' +
+        '<div class="statblock-section-title">Description</div>' +
+        '<div class="statblock-section-body">' + noData(null) + '</div>' +
+        '</div>';
+    }
 
     var reqRaw = item.requirements;
     var reqStr = reqRaw != null ? String(reqRaw) : '';
@@ -1278,10 +1305,7 @@
         '<div class="statblock-stat-body">' + formatWeight(item) + '</div></div>' +
       '</div>' +
       '<hr class="statblock-rule">' +
-      '<div class="statblock-section">' +
-        '<div class="statblock-section-title">Description</div>' +
-        '<div class="statblock-section-body">' + descBody + '</div>' +
-      '</div>' +
+      bodySections +
       reqSection +
       '<hr class="statblock-rule">' +
       '<div class="statblock-footer">' +

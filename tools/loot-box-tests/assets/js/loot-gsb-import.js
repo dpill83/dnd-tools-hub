@@ -368,22 +368,30 @@
     };
   }
 
-  /** Body text for cards: string properties stay preferred; arrays are descriptors only. */
-  function itemBodyText(item) {
-    if (!item) return '';
-    if (Array.isArray(item.properties)) {
-      return item.description || '';
-    }
-    if (item.properties != null && item.properties !== '') {
-      return String(item.properties);
-    }
-    return item.description || '';
-  }
-
   function formatPropertiesForEditor(properties) {
     if (Array.isArray(properties)) return properties.join('\n');
     if (properties == null) return '';
     return String(properties);
+  }
+
+  /** Trimmed description string for display; empty when missing. */
+  function itemDescriptionText(item) {
+    if (!item || item.description == null) return '';
+    return String(item.description).trim();
+  }
+
+  /** Properties as display text (arrays joined with newlines); empty when missing. */
+  function itemPropertiesText(item) {
+    if (!item) return '';
+    return String(formatPropertiesForEditor(item.properties) || '').trim();
+  }
+
+  /** Combined body for cards/clipboard: description and/or properties, blank line between. */
+  function itemBodyText(item) {
+    var desc = itemDescriptionText(item);
+    var props = itemPropertiesText(item);
+    if (desc && props) return desc + '\n\n' + props;
+    return desc || props || '';
   }
 
   /**
@@ -449,6 +457,8 @@
     rebuildMeta: rebuildMeta,
     mergeImportIntoDoc: mergeImportIntoDoc,
     repairMissingValues: repairMissingValues,
+    itemDescriptionText: itemDescriptionText,
+    itemPropertiesText: itemPropertiesText,
     itemBodyText: itemBodyText,
     formatPropertiesForEditor: formatPropertiesForEditor,
   };
