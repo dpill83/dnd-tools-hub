@@ -520,6 +520,10 @@ th.sort-desc::after { content: '▼'; }
   var pageIndex = 0;
   /** null = add new item; number = editing existing row id */
   var addModalEditingId = null;
+  /** JSON snapshot of add/edit form when the modal opened */
+  var addModalSnapshot = null;
+  /** true if pointerdown landed on the dim (outside the panel) */
+  var addModalBackdropDown = false;
   var LAST_AUTHOR_STORAGE_KEY = 'loot-forge-last-author';
 
   var $ = function (id) { return document.getElementById(id); };
@@ -969,6 +973,7 @@ th.sort-desc::after { content: '▼'; }
     $('add-author').value = getLastAuthor();
     updateAddModalPreview();
     $('add-modal-dim').classList.remove('hidden');
+    captureAddModalSnapshot();
     $('add-name').focus();
   }
 
@@ -995,11 +1000,45 @@ th.sort-desc::after { content: '▼'; }
     $('add-author').value = it.author || '';
     updateAddModalPreview();
     $('add-modal-dim').classList.remove('hidden');
+    captureAddModalSnapshot();
     $('add-name').focus();
+  }
+
+  function addModalFormState() {
+    var fileInput = $('add-icon-file');
+    return JSON.stringify({
+      name: $('add-name').value,
+      icon: $('add-icon').value,
+      rarity: $('add-rarity').value,
+      category: $('add-category').value,
+      value: $('add-value').value,
+      weight: $('add-weight').value,
+      description: $('add-description').value,
+      properties: $('add-properties').value,
+      requirements: $('add-requirements').value,
+      author: $('add-author').value,
+      hasFile: !!(fileInput.files && fileInput.files.length)
+    });
+  }
+
+  function captureAddModalSnapshot() {
+    addModalSnapshot = addModalFormState();
+  }
+
+  function isAddModalDirty() {
+    return addModalSnapshot != null && addModalFormState() !== addModalSnapshot;
   }
 
   function closeAddModal() {
     $('add-modal-dim').classList.add('hidden');
+    addModalSnapshot = null;
+    addModalBackdropDown = false;
+  }
+
+  function requestCloseAddModal() {
+    if ($('add-modal-dim').classList.contains('hidden')) return;
+    if (isAddModalDirty() && !confirm('Discard unsaved changes?')) return;
+    closeAddModal();
   }
 
   $('btn-add').addEventListener('click', function () {
@@ -1054,11 +1093,23 @@ th.sort-desc::after { content: '▼'; }
   });
 
   $('add-modal-cancel').addEventListener('click', function () {
-    closeAddModal();
+    requestCloseAddModal();
   });
 
-  $('add-modal-dim').addEventListener('click', function (e) {
-    if (e.target === this) closeAddModal();
+  $('add-modal-dim').addEventListener('pointerdown', function (e) {
+    addModalBackdropDown = e.button === 0 && e.target === this;
+  });
+
+  document.addEventListener('pointerup', function (e) {
+    if (!addModalBackdropDown) return;
+    var dim = $('add-modal-dim');
+    var shouldClose = e.target === dim && !dim.classList.contains('hidden');
+    addModalBackdropDown = false;
+    if (shouldClose) requestCloseAddModal();
+  });
+
+  document.addEventListener('pointercancel', function () {
+    addModalBackdropDown = false;
   });
 
   $('add-icon').addEventListener('input', function () {
@@ -1165,7 +1216,7 @@ th.sort-desc::after { content: '▼'; }
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;
     if ($('add-modal-dim').classList.contains('hidden')) return;
-    closeAddModal();
+    requestCloseAddModal();
   });
 
   $('q').addEventListener('input', function () {
