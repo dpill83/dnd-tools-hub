@@ -163,6 +163,22 @@ td.actions { width: 5rem; white-space: nowrap; }
   color: #ffab91;
   border-color: rgba(255, 138, 101, 0.4);
 }
+tr.row-archived {
+  opacity: 0.45;
+}
+.modal-field--checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-transform: none;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.modal-field--checkbox input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  accent-color: var(--gold);
+}
 .loading { padding: 2rem; text-align: center; color: var(--muted); }
 .hidden { display: none !important; }
 th[data-sort] {
@@ -379,6 +395,14 @@ th.sort-desc::after { content: '▼'; }
         <option value="">All rarities</option>
       </select>
     </div>
+    <div>
+      <label for="filter-status">Status</label><br>
+      <select id="filter-status" aria-label="Filter by archive status">
+        <option value="active" selected>Active</option>
+        <option value="archived">Archived</option>
+        <option value="all">All</option>
+      </select>
+    </div>
     <button type="button" id="btn-add">Add row</button>
     <button type="button" id="btn-import">Import JSON</button>
     <input type="file" id="import-file" accept="application/json,.json" class="hidden" aria-hidden="true">
@@ -479,6 +503,13 @@ th.sort-desc::after { content: '▼'; }
               <input type="text" id="add-author" list="author-suggestions" autocomplete="off" placeholder="Optional">
               <datalist id="author-suggestions"></datalist>
             </div>
+            <div class="modal-field modal-field--checkbox">
+              <label for="add-archived">
+                <input type="checkbox" id="add-archived">
+                Archived (hidden from rolls and pack search)
+              </label>
+              <p class="modal-hint">Keep the item in the table for later, but exclude it from random loot and DM item search.</p>
+            </div>
           </div>
           <div class="modal-actions modal-actions--span">
             <button type="button" id="add-modal-cancel">Cancel</button>
@@ -509,6 +540,8 @@ th.sort-desc::after { content: '▼'; }
   var categoryFilter = '';
   /** Empty string = all rarities */
   var rarityFilter = '';
+  /** 'active' | 'archived' | 'all' */
+  var statusFilter = 'active';
   /** null = preserve document / filter order */
   var sortKey = null;
   /** 1 = ascending, -1 = descending */
@@ -638,9 +671,15 @@ th.sort-desc::after { content: '▼'; }
     return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
+  function isArchived(it) {
+    return !!(it && it.archived);
+  }
+
   function visibleItems() {
     var q = filter.trim().toLowerCase();
     return doc.items.filter(function (it) {
+      if (statusFilter === 'active' && isArchived(it)) return false;
+      if (statusFilter === 'archived' && !isArchived(it)) return false;
       if (q && String(it.name || '').toLowerCase().indexOf(q) === -1) return false;
       if (categoryFilter && String(it.category || '') !== categoryFilter) return false;
       if (rarityFilter && String(it.rarity || '') !== rarityFilter) return false;
@@ -851,8 +890,9 @@ th.sort-desc::after { content: '▼'; }
     var rows = itemsOnCurrentPage();
     tbody.innerHTML = rows.map(function (it) {
       var rid = Number(it.id);
+      var archivedClass = isArchived(it) ? ' class="row-archived"' : '';
       return (
-        '<tr data-item-id="' + rid + '">' +
+        '<tr data-item-id="' + rid + '"' + archivedClass + '>' +
         '<td class="narrow"><button type="button" class="btn-id-edit" data-edit-id="' + rid + '" title="Open editor (picture and fields)">' + rid + '</button></td>' +
         '<td><input type="text" data-f="name" value="' + String(it.name || '').replace(/"/g, '&quot;') + '"></td>' +
         '<td><input type="text" data-f="icon" placeholder="Image URL" value="' + String(it.icon || '').replace(/"/g, '&quot;') + '"></td>' +
@@ -971,6 +1011,7 @@ th.sort-desc::after { content: '▼'; }
     $('add-properties').value = '';
     $('add-requirements').value = '';
     $('add-author').value = getLastAuthor();
+    $('add-archived').checked = false;
     updateAddModalPreview();
     $('add-modal-dim').classList.remove('hidden');
     captureAddModalSnapshot();
@@ -998,6 +1039,7 @@ th.sort-desc::after { content: '▼'; }
     $('add-properties').value = propsDisplay(it.properties);
     $('add-requirements').value = it.requirements || '';
     $('add-author').value = it.author || '';
+    $('add-archived').checked = isArchived(it);
     updateAddModalPreview();
     $('add-modal-dim').classList.remove('hidden');
     captureAddModalSnapshot();
@@ -1017,6 +1059,7 @@ th.sort-desc::after { content: '▼'; }
       properties: $('add-properties').value,
       requirements: $('add-requirements').value,
       author: $('add-author').value,
+      archived: $('add-archived').checked,
       hasFile: !!(fileInput.files && fileInput.files.length)
     });
   }
@@ -1153,6 +1196,7 @@ th.sort-desc::after { content: '▼'; }
     var propertiesRaw = $('add-properties').value || '';
     var requirements = ($('add-requirements').value || '').trim();
     var author = normalizeAuthor($('add-author').value);
+    var archived = $('add-archived').checked;
     var wv = String($('add-weight').value || '').trim();
     var ic = ($('add-icon').value || '').trim();
 
@@ -1174,6 +1218,8 @@ th.sort-desc::after { content: '▼'; }
       else delete row.requirements;
       delete row.requirement;
       row.author = author;
+      if (archived) row.archived = true;
+      else delete row.archived;
       if (wv !== '') {
         var nw = Number(wv);
         if (!Number.isNaN(nw)) row.weight = nw;
@@ -1200,6 +1246,7 @@ th.sort-desc::after { content: '▼'; }
     };
     if (propertiesRaw.trim()) item.properties = propertiesRaw;
     if (requirements) item.requirements = requirements;
+    if (archived) item.archived = true;
     if (wv !== '') {
       var nw2 = Number(wv);
       if (!Number.isNaN(nw2)) item.weight = nw2;
@@ -1233,6 +1280,13 @@ th.sort-desc::after { content: '▼'; }
 
   $('filter-rarity').addEventListener('change', function () {
     rarityFilter = this.value;
+    pageIndex = 0;
+    render();
+  });
+
+  $('filter-status').addEventListener('change', function () {
+    var v = this.value;
+    statusFilter = v === 'archived' || v === 'all' ? v : 'active';
     pageIndex = 0;
     render();
   });

@@ -44,6 +44,7 @@ function pickFromTier(loot, tiers, categories, authors) {
   const tierSet = new Set(Array.isArray(tiers) ? tiers : [tiers]);
   const pool = (loot.items || []).filter(
     (item) =>
+      !item.archived &&
       tierSet.has(item.tier) &&
       (!categories?.length || categories.includes(item.category)) &&
       (!authors?.length || authors.includes(normalizeAuthor(item.author)))

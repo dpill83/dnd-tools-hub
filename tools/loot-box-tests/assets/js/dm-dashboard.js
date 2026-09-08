@@ -284,7 +284,10 @@
       });
 
       function doSearch(q) {
-        var items = (lootTable.items || []).filter(function(it) { return (it.name || '').toLowerCase().includes(q); }).slice(0, 8);
+        var items = (lootTable.items || []).filter(function(it) {
+          if (it.archived) return false;
+          return (it.name || '').toLowerCase().includes(q);
+        }).slice(0, 8);
         searchResults.innerHTML = items.map(function(it) {
           return '<div class="search-item" data-id="' + it.id + '" data-name="' + escapeHtml(it.name) + '">' + escapeHtml(it.name) + ' <span class="search-rarity">' + escapeHtml(it.rarity || '') + '</span></div>';
         }).join('');

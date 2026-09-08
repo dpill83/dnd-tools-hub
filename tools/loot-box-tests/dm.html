@@ -2295,7 +2295,7 @@ function findLootMatches(q, limit = 8) {
   if (!query) return [];
   const out = [];
   for (const it of LOOT.items) {
-    if (!it?.name) continue;
+    if (!it?.name || it.archived) continue;
     if (String(it.name).toLowerCase().includes(query)) {
       out.push({ id: it.id, name: it.name });
       if (out.length >= limit) break;

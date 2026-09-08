@@ -402,7 +402,7 @@ body {
         LOOT = getEmbeddedLoot();
       }
     }
-    allItems = LOOT.items || [];
+    allItems = (LOOT.items || []).filter(function (it) { return !it.archived; });
     loadingMsg.style.display = 'none';
     populateFilters();
     renderCards();

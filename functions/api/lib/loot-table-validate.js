@@ -95,7 +95,7 @@ export function validateAndNormalizeLootTable(body) {
     const category = String(raw.category).trim();
     const value = Number(raw.value);
     const tier = RARITY_TO_TIER[rarity];
-    return {
+    const item = {
       ...raw,
       id,
       name,
@@ -104,6 +104,9 @@ export function validateAndNormalizeLootTable(body) {
       value,
       tier,
     };
+    if (raw.archived) item.archived = true;
+    else delete item.archived;
+    return item;
   });
 
   const data = { items: normalized };
