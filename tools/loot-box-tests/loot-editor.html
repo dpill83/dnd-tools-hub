@@ -406,6 +406,8 @@ th.sort-desc::after { content: '▼'; }
     <button type="button" id="btn-add">Add row</button>
     <button type="button" id="btn-import">Import JSON</button>
     <input type="file" id="import-file" accept="application/json,.json" class="hidden" aria-hidden="true">
+    <button type="button" id="btn-export-json">Export JSON</button>
+    <button type="button" id="btn-export-csv">Export CSV</button>
     <button type="button" id="btn-save" class="primary">Save</button>
   </div>
   <p id="status" class="status" aria-live="polite"></p>
@@ -863,6 +865,84 @@ th.sort-desc::after { content: '▼'; }
     el.className = 'status' + (kind ? ' ' + kind : '');
   }
 
+  function pad2(n) {
+    return n < 10 ? '0' + n : String(n);
+  }
+
+  function exportDateStamp() {
+    var d = new Date();
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+
+  function downloadBlob(filename, mime, text) {
+    var blob = new Blob([text], { type: mime });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function csvEscape(value) {
+    var s = value == null ? '' : String(value);
+    if (/[",\r\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  function flattenProperties(properties) {
+    if (Array.isArray(properties)) return properties.join('; ');
+    if (properties == null) return '';
+    return String(properties);
+  }
+
+  function itemsToCsv(items) {
+    var headers = [
+      'id', 'name', 'icon', 'rarity', 'category', 'value',
+      'description', 'weight', 'properties', 'requirements', 'author', 'archived'
+    ];
+    var lines = [headers.join(',')];
+    items.forEach(function (it) {
+      lines.push([
+        it.id,
+        it.name,
+        it.icon,
+        it.rarity,
+        it.category,
+        it.value,
+        it.description,
+        it.weight,
+        flattenProperties(it.properties),
+        it.requirements,
+        it.author,
+        isArchived(it) ? 'true' : 'false'
+      ].map(csvEscape).join(','));
+    });
+    return lines.join('\r\n');
+  }
+
+  function exportShownItems(format) {
+    var items = displayedItems();
+    if (!items.length) {
+      setStatus('Nothing to export: no rows match the current filters', 'err');
+      return;
+    }
+    var stamp = exportDateStamp();
+    if (format === 'csv') {
+      downloadBlob('loot-export-' + stamp + '.csv', 'text/csv;charset=utf-8', itemsToCsv(items));
+      setStatus('Exported ' + items.length + ' item(s) as CSV', 'ok');
+      return;
+    }
+    downloadBlob(
+      'loot-export-' + stamp + '.json',
+      'application/json',
+      JSON.stringify({ items: items }, null, 2)
+    );
+    setStatus('Exported ' + items.length + ' item(s) as JSON', 'ok');
+  }
+
   function rarityOptions(selected) {
     return RARITIES.map(function (r) {
       return '<option value="' + r + '"' + (r === selected ? ' selected' : '') + '>' + r + '</option>';
@@ -1089,6 +1169,14 @@ th.sort-desc::after { content: '▼'; }
 
   $('btn-import').addEventListener('click', function () {
     $('import-file').click();
+  });
+
+  $('btn-export-json').addEventListener('click', function () {
+    exportShownItems('json');
+  });
+
+  $('btn-export-csv').addEventListener('click', function () {
+    exportShownItems('csv');
   });
 
   $('import-file').addEventListener('change', function () {
