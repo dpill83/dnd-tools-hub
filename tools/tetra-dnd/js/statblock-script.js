@@ -164,6 +164,45 @@ function ResetSeparationPoint() {
 // Tracks whether the current mon was loaded from a .monster file / pasted JSON
 var loadedFromFile = false;
 
+function showIdentityNote(text) {
+    var el = document.getElementById("identity-expand-note");
+    if (!el) return;
+    el.textContent = text || "";
+    el.hidden = !text;
+}
+
+function hideIdentityNote() {
+    showIdentityNote("");
+}
+
+function openIdentityPicker(members) {
+    var list = document.getElementById("identity-picker-list");
+    var modal = document.getElementById("identity-picker-modal");
+    if (!list || !modal) {
+        SavedData.LoadIdentity(CastIdentity.pickDefaultMember(members));
+        return;
+    }
+    list.innerHTML = "";
+    var preferred = CastIdentity.pickDefaultMember(members);
+    members.forEach(function (member, index) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn btn-outline-secondary btn-block text-left mb-2 identity-picker-item";
+        if (member === preferred) btn.classList.add("btn-outline-primary");
+        var label = (member.name || "Unnamed") + (member.rank ? " · " + member.rank : "");
+        if (member.role) label += " — " + member.role;
+        if (!CastIdentity.isCombatCapable(member)) label += " (non-combat)";
+        btn.textContent = label;
+        btn.addEventListener("click", function () {
+            if (typeof $ !== "undefined") $("#identity-picker-modal").modal("hide");
+            SavedData.LoadIdentity(member);
+        });
+        list.appendChild(btn);
+        if (index === 0 && !preferred) preferred = member;
+    });
+    if (typeof $ !== "undefined") $("#identity-picker-modal").modal("show");
+}
+
 function updateAddButtonVisibility() {
     var el = document.getElementById("monster-add-to-list");
     if (!el) return;
@@ -214,13 +253,7 @@ var SavedData = {
         }
     },
 
-    LoadFromText: function (text) {
-        let parsed;
-        try {
-            parsed = JSON.parse(text);
-        } catch (e) {
-            throw new Error("Invalid JSON: " + (e.message || "could not parse"));
-        }
+    ApplyMonster: function (parsed) {
         loadedFromFile = true;
         mon = parsed;
         if (mon.cr != null && mon.cr !== "*" && typeof data !== "undefined" && data.crs && data.crs[mon.cr] == null) {
@@ -231,12 +264,111 @@ var SavedData = {
         updateAddButtonVisibility();
     },
 
+    presetToMonster: function (preset) {
+        var saved = JSON.parse(JSON.stringify(mon));
+        try {
+            GetVariablesFunctions.SetPreset(preset);
+            return JSON.parse(JSON.stringify(mon));
+        } catch (e) {
+            return null;
+        } finally {
+            mon = saved;
+        }
+    },
+
+    resolveClone: function (identity) {
+        return new Promise(function (resolve) {
+            if (typeof CastIdentity === "undefined") {
+                resolve(null);
+                return;
+            }
+            var info = null;
+            if (identity.clone && identity.clone.slug) {
+                info = { slug: String(identity.clone.slug), source: identity.clone.source || "srd" };
+            } else if (!CastIdentity.isNoClone(identity.base) && typeof MonsterPresets !== "undefined") {
+                info = MonsterPresets.findPresetByName(identity.base);
+            }
+            if (!info) {
+                resolve(null);
+                return;
+            }
+            var custom = MonsterPresets.getCustomPreset(info.slug);
+            if (custom) {
+                resolve(JSON.parse(JSON.stringify(custom)));
+                return;
+            }
+            var source = info.source || MonsterPresets.getPresetSource(info.slug) || "srd";
+            var cacheKey = monsterPresetCache.cacheId(source, info.slug);
+            var cached = monsterPresetCache.get(cacheKey);
+            if (cached) {
+                resolve(SavedData.presetToMonster(cached));
+                return;
+            }
+            var url = source === "tob"
+                ? "https://api.open5e.com/v1/monsters/" + encodeURIComponent(info.slug)
+                : "https://api.open5e.com/v2/creatures/" + encodeURIComponent(info.slug) + "/";
+            $.getJSON(url, function (jsonArr) {
+                var preset = source === "tob" ? jsonArr : normalizeOpen5eV2Creature(jsonArr);
+                monsterPresetCache.set(cacheKey, preset);
+                resolve(SavedData.presetToMonster(preset));
+            }).fail(function () {
+                resolve(null);
+            });
+        });
+    },
+
+    LoadIdentity: function (identity) {
+        if (identity.edition === "2014" || identity.edition === "2024") {
+            if (typeof MonsterPresets !== "undefined" && MonsterPresets.getEdition() !== identity.edition)
+                MonsterPresets.setEdition(identity.edition);
+        }
+        setPresetLoading(true);
+        SavedData.resolveClone(identity).then(function (clone) {
+            var result = CastIdentity.expand(identity, { clone: clone, data: data });
+            setPresetLoading(false);
+            SavedData.ApplyMonster(result);
+            showIdentityNote(CastIdentity.noteText(identity, !!clone));
+        }).catch(function () {
+            var result = CastIdentity.expand(identity, { clone: null, data: data });
+            setPresetLoading(false);
+            SavedData.ApplyMonster(result);
+            showIdentityNote(CastIdentity.noteText(identity, false));
+        });
+    },
+
+    LoadFromText: function (text) {
+        let parsed;
+        var raw = typeof CastIdentity !== "undefined" ? CastIdentity.unwrapJsonText(text) : String(text || "").trim();
+        try {
+            parsed = JSON.parse(raw);
+        } catch (e) {
+            throw new Error("Invalid JSON: " + (e.message || "could not parse"));
+        }
+        hideIdentityNote();
+        if (typeof CastIdentity !== "undefined") {
+            var members = CastIdentity.collectMembers(parsed);
+            if (members.length > 1) {
+                openIdentityPicker(members);
+                return;
+            }
+            if (members.length === 1) {
+                SavedData.LoadIdentity(members[0]);
+                return;
+            }
+        }
+        SavedData.ApplyMonster(parsed);
+    },
+
     RetrieveFromFile: function () {
         let file = $("#file-upload").prop("files")[0],
             reader = new FileReader();
 
         reader.onload = function (e) {
-            SavedData.LoadFromText(reader.result);
+            try {
+                SavedData.LoadFromText(reader.result);
+            } catch (err) {
+                window.alert(err.message || "Invalid JSON.");
+            }
         };
 
         reader.readAsText(file);
@@ -1227,6 +1359,7 @@ var InputFunctions = {
         var slug = document.getElementById("monster-select-slug") ? document.getElementById("monster-select-slug").value : "";
         if (slug === "") return;
         loadedFromFile = false;
+        hideIdentityNote();
         if (slug === "default") {
             GetVariablesFunctions.SetPreset(data.defaultPreset);
             FormFunctions.SetForms();
@@ -1277,6 +1410,7 @@ var InputFunctions = {
 
     RestoreDefaultPreset: function () {
         loadedFromFile = false;
+        hideIdentityNote();
         var slugEl = document.getElementById("monster-select-slug");
         if (slugEl) slugEl.value = "default";
         if (typeof MonsterPresets !== "undefined" && MonsterPresets.getSelectInstance()) {
@@ -2742,6 +2876,36 @@ var MonsterPresets = (function () {
         return slugToSourceMap[slug] || "";
     }
 
+    function findPresetByName(name) {
+        var trimmed = String(name || "").trim();
+        if (!trimmed) return null;
+        var lower = trimmed.toLowerCase();
+        var slug = nameToSlugMap[trimmed];
+        if (!slug) {
+            for (var n in nameToSlugMap) {
+                if (Object.prototype.hasOwnProperty.call(nameToSlugMap, n) && n.toLowerCase() === lower) {
+                    slug = nameToSlugMap[n];
+                    break;
+                }
+            }
+        }
+        if (!slug) {
+            var slugified = slugFromName(trimmed);
+            if (slugToSourceMap[slugified]) slug = slugified;
+            else {
+                for (var s in slugToSourceMap) {
+                    if (!Object.prototype.hasOwnProperty.call(slugToSourceMap, s)) continue;
+                    if (s === slugified || s.slice(-(slugified.length + 1)) === "-" + slugified) {
+                        slug = s;
+                        break;
+                    }
+                }
+            }
+        }
+        if (!slug) return null;
+        return { slug: slug, source: slugToSourceMap[slug] || "srd" };
+    }
+
     function getCustomPreset(slug) {
         var m = getCustomMonsters();
         return m[slug] || null;
@@ -2875,6 +3039,7 @@ var MonsterPresets = (function () {
         refreshList: refreshList,
         bindMonsterInput: bindMonsterInput,
         getPresetSource: getPresetSource,
+        findPresetByName: findPresetByName,
         getCustomPreset: getCustomPreset,
         getCustomMonsters: getCustomMonsters,
         getCustomFromStorage: getCustomFromStorage,

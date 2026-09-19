@@ -19,6 +19,7 @@
     <script src="js/bootstrap.min.js"></script>
     <script src="js/FileSaver.min.js"></script>
     <script src="js/dom-to-image.min.js"></script>
+    <script src="js/statblock-identity.js"></script>
     <script src="js/statblock-script.js"></script>
     <script src="js/statblock-dice.js"></script>
     <script src="js/statblock-spells.js"></script>
@@ -32,7 +33,7 @@
             <h1>Statblock Forge</h1>
             <br>
             <div class="toolbar">
-                <input id="file-upload" type="file" hidden onchange="TryLoadFile();" aria-hidden="true" />
+                <input id="file-upload" type="file" hidden accept=".monster,.json,application/json" onchange="TryLoadFile();" aria-hidden="true" />
                 <div class="toolbar-row toolbar-actions">
                     <button type="button" class="toolbar-btn-icon" onclick="TrySaveFile()" title="Save current statblock" aria-label="Save"><i class="bi bi-floppy"></i></button>
                     <button type="button" class="toolbar-btn-icon" onclick="document.getElementById('file-upload').click()" title="Load saved statblock" aria-label="Load"><i class="bi bi-upload"></i></button>
@@ -58,6 +59,7 @@
                     <button type="button" id="monster-add-to-list" class="toolbar-btn toolbar-btn-secondary" onclick="InputFunctions.AddCurrentAsPreset()" title="Save current statblock as a custom preset" style="display: none;">Save preset</button>
                     <span id="monster-preset-loading" class="monster-loading" style="display: none;" aria-live="polite"><span class="monster-spinner" aria-hidden="true"></span> Loading preset…</span>
                 </div>
+                <p id="identity-expand-note" class="identity-expand-note" hidden></p>
             </div>
             <br>
 
@@ -660,7 +662,7 @@
             <div class="footer">
                 <a href="https://github.com/Tetra-cube/Tetra-cube.github.io">Original Project</a>
                 <span style="margin: 0 0.5rem;">|</span>
-                <button type="button" class="btn btn-link p-0 border-0 align-baseline" data-toggle="modal" data-target="#ai-monster-instructions-modal">AI: Convert image or markdown to .monster file</button>
+                <button type="button" class="btn btn-link p-0 border-0 align-baseline" data-toggle="modal" data-target="#ai-monster-instructions-modal">AI: Convert image, markdown, or identity JSON to .monster file</button>
             </div>
         </div>
     </div>
@@ -690,11 +692,11 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="paste-json-title">Paste JSON to load .monster file</h5>
+                    <h5 class="modal-title" id="paste-json-title">Paste JSON to load</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-muted small mb-2">Paste a .monster JSON block below and click Load.</p>
+                    <p class="text-muted small mb-2">Paste a .monster JSON block or a Cast Viewer <code>cast-identity/v1</code> object, then click Load.</p>
                     <textarea id="paste-json-input" class="form-control font-monospace small" rows="18" style="font-size: 0.8rem;" aria-label="Monster JSON"></textarea>
                     <div id="paste-json-error" class="text-danger small mt-2" role="alert" style="display: none;"></div>
                 </div>
@@ -706,16 +708,35 @@
         </div>
     </div>
 
+    <!-- Pick a cast member when a whole cast file is pasted -->
+    <div class="modal fade" id="identity-picker-modal" tabindex="-1" aria-labelledby="identity-picker-title" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="identity-picker-title">Load which cast member?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-2">This file has more than one identity. Combat-capable entries are listed first when possible.</p>
+                    <div id="identity-picker-list"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- AI instructions: image/markdown to .monster file -->
     <div class="modal fade" id="ai-monster-instructions-modal" tabindex="-1" aria-labelledby="ai-monster-instructions-title" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="ai-monster-instructions-title">Instructions for AI: Image or markdown to .monster file</h5>
+                    <h5 class="modal-title" id="ai-monster-instructions-title">Instructions for AI: Image, markdown, or identity JSON to .monster file</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-muted small mb-2">Copy the prompt below and paste it into your favorite AI (e.g. ChatGPT, Claude). Then upload your stat block as a PNG image or a .md file so the AI can convert it to a .monster file.</p>
+                    <p class="text-muted small mb-2">Copy the prompt below into your AI chat. Then paste a Cast Viewer identity JSON, upload a stat-block image, or a .md file so the AI can emit a .monster file.</p>
                     <textarea id="ai-monster-instructions-text" readonly class="form-control font-monospace small" rows="18" style="font-size: 0.8rem; white-space: pre;"></textarea>
                     <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="var t=document.getElementById('ai-monster-instructions-text'); t.select(); t.setSelectionRange(0,99999); navigator.clipboard.writeText(t.value);">Copy prompt</button>
                 </div>
@@ -823,12 +844,12 @@
 
     <script>
         (function () {
-            var instructions = "TASK: Given an image of a D&D 5e stat block OR a markdown/text representation of one, produce a single JSON object that is a valid .monster file for Statblock Forge.\n\nOUTPUT: Emit only valid JSON (no markdown code fence, no extra prose). The user will save it with a .monster extension and load it in the generator.\n\nSCHEMA: The JSON must match this shape. All keys must be present.\n\nTop-level (strings unless noted): name, size, type, tag, alignment, armorName, otherArmorDesc, hpText, speedDesc, customCr, legendariesDescription, lairDescription, lairDescriptionEnd, mythicDescription, regionalDescription, regionalDescriptionEnd, understandsBut, shortName, pluralName.\nNumbers: hitDice, shieldBonus, natArmorBonus, speed, burrowSpeed, climbSpeed, flySpeed, swimSpeed, strPoints, dexPoints, conPoints, intPoints, wisPoints, chaPoints, blindsight, darkvision, tremorsense, truesight, telepathy, cr, customProf, separationPoint (or null).\nBooleans: hover, customHP, customSpeed, blind, isLegendary, isLair, isMythic, isRegional, doubleColumns.\n\nArrays (each element is an object):\n- properties, abilities, actions, bonusActions, reactions, legendaries, mythics, lairs, regionals: { \"name\": \"...\", \"desc\": \"...\" } (optional: \"note\")\n- languages: { \"name\": \"...\" } (optional: \"speaks\" boolean)\n- sthrows: { \"name\": \"str\"|\"dex\"|\"con\"|\"int\"|\"wis\"|\"cha\", \"order\": 0..5 }\n- skills: { \"name\": \"skill name\", \"stat\": \"str\"|\"dex\"|\"con\"|\"int\"|\"wis\"|\"cha\" } (optional: \"note\")\n- damagetypes, specialdamage: { \"name\": \"damage type\", \"note\": \"\", \"type\": \"v\"|\"r\"|\"i\" } (v=vulnerable, r=resistant, i=immune)\n- conditions: { \"name\": \"condition name\" }\n\nALLOWED VALUES:\n- size: tiny, small, medium, large, huge, gargantuan\n- type: aberration, beast, celestial, construct, dragon, elemental, fey, fiend, giant, humanoid, monstrosity, ooze, plant, undead\n- armorName (required; never empty): none, natural armor, mage armor, padded armor, leather armor, studded leather, hide armor, chain shirt, scale mail, breastplate, half plate, ring mail, chain mail, splint, plate, other\n\nARMOR CLASS (important):\n- armorName must always be one of the allowed values above. Never use \"\" or omit it.\n- Use a named armor type when the stat block parenthetical matches (e.g. \"leather armor\", not \"leather\").\n- shieldBonus: 1 if the stat block lists a shield, otherwise 0.\n- natArmorBonus: bonus beyond 10 + DEX mod + shield when armorName is \"natural armor\" (e.g. AC 15 with DEX +2 and no shield → natArmorBonus 3).\n- otherArmorDesc is only read when armorName is \"other\". Set it to the full Armor Class line as printed (e.g. \"13\", \"15 (natural armor)\", \"17 (half plate, shield)\"). Do not put AC only in otherArmorDesc with armorName empty.\n- AC with no parenthetical and equal to 10 + DEX modifier: armorName \"none\", otherArmorDesc \"10 (armor)\".\n- AC with no parenthetical but not equal to 10 + DEX (unusual fixed AC): armorName \"other\", otherArmorDesc set to the number only (e.g. \"13\").\n- AC with a parenthetical that is not a standard armor type: armorName \"other\", otherArmorDesc set to the full line (e.g. \"15 (natural armor)\").\n\nCOLUMNS (important):\n- doubleColumns: true if the source layout is two columns OR the creature is long (many traits/actions, legendary, lair, mythic, or regional). Otherwise false.\n- separationPoint: how many trait/action blocks go in the LEFT column before the rest go RIGHT. Do NOT default this to 1 — that leaves the left column nearly empty and the right overloaded.\n- Prefer \"separationPoint\": null so the generator auto-balances columns on load.\n- If you must set a number, use roughly half the trait count: floor((abilities + actions + bonusActions + reactions - 1 + legendaryItems + mythicItems + lairItems + regionalItems) / 2), where each *Items count is included only when that section is enabled (isLegendary / isMythic / isLair / isRegional), using array length or 1 if the array is empty but the section is on.\n\nEXAMPLE (minimal):\n{\"name\":\"Goblin\",\"size\":\"small\",\"type\":\"humanoid\",\"tag\":\"\",\"alignment\":\"neutral evil\",\"hitDice\":2,\"armorName\":\"leather armor\",\"shieldBonus\":1,\"natArmorBonus\":0,\"otherArmorDesc\":\"10 (armor)\",\"speed\":30,\"burrowSpeed\":0,\"climbSpeed\":0,\"flySpeed\":0,\"hover\":false,\"swimSpeed\":0,\"customHP\":false,\"customSpeed\":false,\"hpText\":\"7 (2d6)\",\"speedDesc\":\"30 ft.\",\"strPoints\":8,\"dexPoints\":14,\"conPoints\":10,\"intPoints\":10,\"wisPoints\":8,\"chaPoints\":8,\"blindsight\":0,\"blind\":false,\"darkvision\":60,\"tremorsense\":0,\"truesight\":0,\"telepathy\":0,\"cr\":0.25,\"customCr\":\"\",\"customProf\":2,\"isLegendary\":false,\"legendariesDescription\":\"\",\"isLair\":false,\"lairDescription\":\"\",\"lairDescriptionEnd\":\"\",\"isMythic\":false,\"mythicDescription\":\"\",\"isRegional\":false,\"regionalDescription\":\"\",\"regionalDescriptionEnd\":\"\",\"properties\":[],\"abilities\":[{\"name\":\"Nimble Escape\",\"desc\":\"The goblin can take the Disengage or Hide action as a bonus action on each of its turns.\"}],\"actions\":[{\"name\":\"Scimitar\",\"desc\":\"Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) slashing damage.\"}],\"bonusActions\":[],\"reactions\":[],\"legendaries\":[],\"mythics\":[],\"lairs\":[],\"regionals\":[],\"sthrows\":[],\"skills\":[{\"name\":\"stealth\",\"stat\":\"dex\"}],\"damagetypes\":[],\"specialdamage\":[],\"conditions\":[],\"languages\":[{\"name\":\"Common\"},{\"name\":\"Goblin\"}],\"understandsBut\":\"\",\"shortName\":\"\",\"pluralName\":\"\",\"doubleColumns\":false,\"separationPoint\":null}";
+            var instructions = "TASK: Produce a single JSON object that is a valid .monster file for Statblock Forge.\n\nINPUT (one of):\n1) An image or markdown/text of a finished stat block → transcribe it.\n2) A cast-identity/v1 JSON object (from Adventure Forge Cast Viewer) → invent missing mechanics to fit rank/cr. Never contradict fixed, fixedText, or flags. Do not copy identity keys (schema, kind, rank, role, combatRole, look, base, ref, clone, fixed, fixedText, flags, edition) onto the output. Story role is flavor only — use combatRole if set, otherwise invent from kind + rank + base/cr. look may theme attacks and gear; do not add an Appearance trait. ref is a human pointer, never a monster id. base \"custom\" or \"none\" means invent, do not clone. flags no-legendary forbids legendary actions. rank is minion|standard|lieutenant|boss (lieutenant uses elite action-economy). Output .monster only.\n\nOUTPUT: Emit only valid JSON (no markdown code fence, no extra prose). The user will save it with a .monster extension and load it in the generator.\n\nSCHEMA: The JSON must match this shape. All keys must be present.\n\nTop-level (strings unless noted): name, size, type, tag, alignment, armorName, otherArmorDesc, hpText, speedDesc, customCr, legendariesDescription, lairDescription, lairDescriptionEnd, mythicDescription, regionalDescription, regionalDescriptionEnd, understandsBut, shortName, pluralName.\nNumbers: hitDice, shieldBonus, natArmorBonus, speed, burrowSpeed, climbSpeed, flySpeed, swimSpeed, strPoints, dexPoints, conPoints, intPoints, wisPoints, chaPoints, blindsight, darkvision, tremorsense, truesight, telepathy, cr, customProf, separationPoint (or null).\nBooleans: hover, customHP, customSpeed, blind, isLegendary, isLair, isMythic, isRegional, doubleColumns.\n\nArrays (each element is an object):\n- properties, abilities, actions, bonusActions, reactions, legendaries, mythics, lairs, regionals: { \"name\": \"...\", \"desc\": \"...\" } (optional: \"note\")\n- languages: { \"name\": \"...\" } (optional: \"speaks\" boolean)\n- sthrows: { \"name\": \"str\"|\"dex\"|\"con\"|\"int\"|\"wis\"|\"cha\", \"order\": 0..5 }\n- skills: { \"name\": \"skill name\", \"stat\": \"str\"|\"dex\"|\"con\"|\"int\"|\"wis\"|\"cha\" } (optional: \"note\")\n- damagetypes, specialdamage: { \"name\": \"damage type\", \"note\": \"\", \"type\": \"v\"|\"r\"|\"i\" } (v=vulnerable, r=resistant, i=immune)\n- conditions: { \"name\": \"condition name\" }\n\nALLOWED VALUES:\n- size: tiny, small, medium, large, huge, gargantuan\n- type: aberration, beast, celestial, construct, dragon, elemental, fey, fiend, giant, humanoid, monstrosity, ooze, plant, undead\n- armorName (required; never empty): none, natural armor, mage armor, padded armor, leather armor, studded leather, hide armor, chain shirt, scale mail, breastplate, half plate, ring mail, chain mail, splint, plate, other\n\nARMOR CLASS (important):\n- armorName must always be one of the allowed values above. Never use \"\" or omit it.\n- Use a named armor type when the stat block parenthetical matches (e.g. \"leather armor\", not \"leather\").\n- shieldBonus: 1 if the stat block lists a shield, otherwise 0.\n- natArmorBonus: bonus beyond 10 + DEX mod + shield when armorName is \"natural armor\" (e.g. AC 15 with DEX +2 and no shield → natArmorBonus 3).\n- otherArmorDesc is only read when armorName is \"other\". Set it to the full Armor Class line as printed (e.g. \"13\", \"15 (natural armor)\", \"17 (half plate, shield)\"). Do not put AC only in otherArmorDesc with armorName empty.\n- AC with no parenthetical and equal to 10 + DEX modifier: armorName \"none\", otherArmorDesc \"10 (armor)\".\n- AC with no parenthetical but not equal to 10 + DEX (unusual fixed AC): armorName \"other\", otherArmorDesc set to the number only (e.g. \"13\").\n- AC with a parenthetical that is not a standard armor type: armorName \"other\", otherArmorDesc set to the full line (e.g. \"15 (natural armor)\").\n\nCOLUMNS (important):\n- doubleColumns: true if the source layout is two columns OR the creature is long (many traits/actions, legendary, lair, mythic, or regional). Otherwise false.\n- separationPoint: how many trait/action blocks go in the LEFT column before the rest go RIGHT. Do NOT default this to 1 — that leaves the left column nearly empty and the right overloaded.\n- Prefer \"separationPoint\": null so the generator auto-balances columns on load.\n- If you must set a number, use roughly half the trait count: floor((abilities + actions + bonusActions + reactions - 1 + legendaryItems + mythicItems + lairItems + regionalItems) / 2), where each *Items count is included only when that section is enabled (isLegendary / isMythic / isLair / isRegional), using array length or 1 if the array is empty but the section is on.\n\nEXAMPLE (minimal):\n{\"name\":\"Goblin\",\"size\":\"small\",\"type\":\"humanoid\",\"tag\":\"\",\"alignment\":\"neutral evil\",\"hitDice\":2,\"armorName\":\"leather armor\",\"shieldBonus\":1,\"natArmorBonus\":0,\"otherArmorDesc\":\"10 (armor)\",\"speed\":30,\"burrowSpeed\":0,\"climbSpeed\":0,\"flySpeed\":0,\"hover\":false,\"swimSpeed\":0,\"customHP\":false,\"customSpeed\":false,\"hpText\":\"7 (2d6)\",\"speedDesc\":\"30 ft.\",\"strPoints\":8,\"dexPoints\":14,\"conPoints\":10,\"intPoints\":10,\"wisPoints\":8,\"chaPoints\":8,\"blindsight\":0,\"blind\":false,\"darkvision\":60,\"tremorsense\":0,\"truesight\":0,\"telepathy\":0,\"cr\":0.25,\"customCr\":\"\",\"customProf\":2,\"isLegendary\":false,\"legendariesDescription\":\"\",\"isLair\":false,\"lairDescription\":\"\",\"lairDescriptionEnd\":\"\",\"isMythic\":false,\"mythicDescription\":\"\",\"isRegional\":false,\"regionalDescription\":\"\",\"regionalDescriptionEnd\":\"\",\"properties\":[],\"abilities\":[{\"name\":\"Nimble Escape\",\"desc\":\"The goblin can take the Disengage or Hide action as a bonus action on each of its turns.\"}],\"actions\":[{\"name\":\"Scimitar\",\"desc\":\"Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) slashing damage.\"}],\"bonusActions\":[],\"reactions\":[],\"legendaries\":[],\"mythics\":[],\"lairs\":[],\"regionals\":[],\"sthrows\":[],\"skills\":[{\"name\":\"stealth\",\"stat\":\"dex\"}],\"damagetypes\":[],\"specialdamage\":[],\"conditions\":[],\"languages\":[{\"name\":\"Common\"},{\"name\":\"Goblin\"}],\"understandsBut\":\"\",\"shortName\":\"\",\"pluralName\":\"\",\"doubleColumns\":false,\"separationPoint\":null}";
             document.getElementById("ai-monster-instructions-text").value = instructions;
         })();
         // Sync aria-hidden with modal visibility so focused modal content is not hidden from assistive tech
         (function () {
-            var $modals = $("#paste-json-modal, #ai-monster-instructions-modal, #manage-presets-modal, #hp-adjust-modal, #hp-history-modal, #spell-detail-modal");
+            var $modals = $("#paste-json-modal, #ai-monster-instructions-modal, #manage-presets-modal, #hp-adjust-modal, #hp-history-modal, #spell-detail-modal, #identity-picker-modal");
             $modals.on("show.bs.modal", function () { this.setAttribute("aria-hidden", "false"); });
             $modals.on("hidden.bs.modal", function () { this.setAttribute("aria-hidden", "true"); });
         })();
