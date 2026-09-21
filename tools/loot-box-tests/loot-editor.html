@@ -562,6 +562,22 @@ th.sort-desc::after { content: '▼'; }
 
   var $ = function (id) { return document.getElementById(id); };
 
+  var RARITY_TO_TIER_FALLBACK = {
+    Unknown: 0,
+    Mundane: 0,
+    Common: 1,
+    Uncommon: 2,
+    Rare: 3,
+    'Very Rare': 4,
+    Legendary: 5
+  };
+
+  function rarityToTier(rarity) {
+    var map = (Imp && Imp.RARITY_TO_TIER) || RARITY_TO_TIER_FALLBACK;
+    var t = map[rarity];
+    return typeof t === 'number' ? t : 1;
+  }
+
   function normalizeAuthor(author) {
     return String(author == null ? '' : author).trim();
   }
@@ -997,7 +1013,10 @@ th.sort-desc::after { content: '▼'; }
           if (!row) return;
           if (f === 'value') row.value = Number(inp.value);
           else if (f === 'name') row.name = inp.value;
-          else if (f === 'rarity') row.rarity = inp.value;
+          else if (f === 'rarity') {
+            row.rarity = inp.value;
+            row.tier = rarityToTier(inp.value);
+          }
           else if (f === 'category') row.category = inp.value;
           else if (f === 'description') row.description = inp.value;
           else if (f === 'weight') {
@@ -1295,6 +1314,7 @@ th.sort-desc::after { content: '▼'; }
       }
       row.name = name;
       row.rarity = rarity;
+      row.tier = rarityToTier(rarity);
       row.category = category;
       row.value = value;
       row.description = description;
@@ -1329,7 +1349,7 @@ th.sort-desc::after { content: '▼'; }
       value: value,
       description: description,
       author: author,
-      tier: 1
+      tier: rarityToTier(rarity)
     };
     if (propertiesRaw.trim()) item.properties = propertiesRaw;
     if (requirements) item.requirements = requirements;
