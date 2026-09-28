@@ -1021,6 +1021,32 @@
       </div>
 
       <div class="panel-section">
+        <div class="section-label">Frame</div>
+        <div class="slider-row">
+          <div class="slider-label">
+            <span>Size</span>
+            <span class="slider-value" id="border-scale-val">1.00x</span>
+          </div>
+          <input type="range" id="border-scale" min="0.5" max="2" step="0.01" value="1" aria-label="Border size">
+        </div>
+        <div class="slider-row">
+          <div class="slider-label">
+            <span>X</span>
+            <span class="slider-value" id="border-offset-x-val">0 px</span>
+          </div>
+          <input type="range" id="border-offset-x" min="-80" max="80" step="1" value="0" aria-label="Border horizontal position">
+        </div>
+        <div class="slider-row">
+          <div class="slider-label">
+            <span>Y</span>
+            <span class="slider-value" id="border-offset-y-val">0 px</span>
+          </div>
+          <input type="range" id="border-offset-y" min="-80" max="80" step="1" value="0" aria-label="Border vertical position">
+        </div>
+        <button class="btn" id="reset-frame">Reset frame</button>
+      </div>
+
+      <div class="panel-section">
         <div class="section-label">Appearance</div>
         <button type="button" class="btn btn-drawer" id="drawer-open" aria-expanded="false" aria-controls="drawer-panel">Theme</button>
       </div>
@@ -1277,6 +1303,9 @@
     offsetX: 0,
     offsetY: 0,
     scale: 1.0,
+    borderScale: 1,
+    borderOffsetX: 0,
+    borderOffsetY: 0,
     rotation: 0,      // degrees
     /** Basename (no extension) of last loaded portrait file — used for export filename */
     portraitStem: 'token',
@@ -1396,7 +1425,19 @@
   /** Alpha below this counts as transparent for flood + mask (same as flood pass-through). */
   const BORDER_TRANSPARENT_ALPHA = 8;
 
-  /** @type {WeakMap<object, Map<number, HTMLCanvasElement>>} */
+  function borderDrawRect(size) {
+    const sf = size / CANVAS_SIZE;
+    const drawSize = size * state.borderScale;
+    const x = (size - drawSize) / 2 + state.borderOffsetX * sf;
+    const y = (size - drawSize) / 2 + state.borderOffsetY * sf;
+    return { x, y, drawSize };
+  }
+
+  function borderMaskCacheKey() {
+    return `${Math.round(state.borderScale * 100)}|${state.borderOffsetX}|${state.borderOffsetY}`;
+  }
+
+  /** @type {WeakMap<object, Map<number, {key: string, canvas: HTMLCanvasElement}>>} */
   const portraitMaskCache = new WeakMap();
 
   /**
@@ -1406,10 +1447,11 @@
    * @param {number} size
    */
   function getPortraitMaskCanvas(borderSource, size) {
+    const cacheKey = borderMaskCacheKey();
     let bySize = portraitMaskCache.get(borderSource);
     if (bySize) {
       const hit = bySize.get(size);
-      if (hit) return hit;
+      if (hit && hit.key === cacheKey) return hit.canvas;
     } else {
       bySize = new Map();
       portraitMaskCache.set(borderSource, bySize);
@@ -1417,11 +1459,12 @@
 
     const w = size;
     const h = size;
+    const { x, y, drawSize } = borderDrawRect(size);
     const temp = document.createElement('canvas');
     temp.width = w;
     temp.height = h;
     const tctx = temp.getContext('2d');
-    tctx.drawImage(borderSource, 0, 0, w, h);
+    tctx.drawImage(borderSource, x, y, drawSize, drawSize);
     const { data } = tctx.getImageData(0, 0, w, h);
     const n = w * h;
     const visited = new Uint8Array(n);
@@ -1469,7 +1512,7 @@
       md[p + 3] = a;
     }
     mctx.putImageData(maskImg, 0, 0);
-    bySize.set(size, mask);
+    bySize.set(size, { key: cacheKey, canvas: mask });
     return mask;
   }
 
@@ -1517,7 +1560,8 @@
 
     // border drawn on top — its own alpha controls cutouts
     if (state.border) {
-      targetCtx.drawImage(state.border, 0, 0, size, size);
+      const { x, y, drawSize } = borderDrawRect(size);
+      targetCtx.drawImage(state.border, x, y, drawSize, drawSize);
     }
   }
 
@@ -1919,6 +1963,12 @@
   const rotationSlider = document.getElementById('rotation');
   const scaleVal = document.getElementById('scale-val');
   const rotationVal = document.getElementById('rotation-val');
+  const borderScaleSlider = document.getElementById('border-scale');
+  const borderOffsetXSlider = document.getElementById('border-offset-x');
+  const borderOffsetYSlider = document.getElementById('border-offset-y');
+  const borderScaleVal = document.getElementById('border-scale-val');
+  const borderOffsetXVal = document.getElementById('border-offset-x-val');
+  const borderOffsetYVal = document.getElementById('border-offset-y-val');
 
   scaleSlider.addEventListener('input', () => {
     state.scale = parseFloat(scaleSlider.value);
@@ -1932,6 +1982,24 @@
     render();
   });
 
+  borderScaleSlider.addEventListener('input', () => {
+    state.borderScale = parseFloat(borderScaleSlider.value);
+    borderScaleVal.textContent = state.borderScale.toFixed(2) + 'x';
+    render();
+  });
+
+  borderOffsetXSlider.addEventListener('input', () => {
+    state.borderOffsetX = parseInt(borderOffsetXSlider.value, 10);
+    borderOffsetXVal.textContent = state.borderOffsetX + ' px';
+    render();
+  });
+
+  borderOffsetYSlider.addEventListener('input', () => {
+    state.borderOffsetY = parseInt(borderOffsetYSlider.value, 10);
+    borderOffsetYVal.textContent = state.borderOffsetY + ' px';
+    render();
+  });
+
   document.getElementById('reset-transform').addEventListener('click', () => {
     state.offsetX = 0;
     state.offsetY = 0;
@@ -1941,6 +2009,19 @@
     rotationSlider.value = 0;
     scaleVal.textContent = '1.00x';
     rotationVal.textContent = '0°';
+    render();
+  });
+
+  document.getElementById('reset-frame').addEventListener('click', () => {
+    state.borderScale = 1;
+    state.borderOffsetX = 0;
+    state.borderOffsetY = 0;
+    borderScaleSlider.value = 1;
+    borderOffsetXSlider.value = 0;
+    borderOffsetYSlider.value = 0;
+    borderScaleVal.textContent = '1.00x';
+    borderOffsetXVal.textContent = '0 px';
+    borderOffsetYVal.textContent = '0 px';
     render();
   });
 
