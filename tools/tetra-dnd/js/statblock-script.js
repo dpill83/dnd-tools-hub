@@ -2600,6 +2600,10 @@ var MonsterPresets = (function () {
             bundledMonsterCatalog, getCustomFromStorage());
     }
 
+    function catalogDisplayName(filename) {
+        return String(filename).trim().replace(/\.json$/i, "");
+    }
+
     function validateCatalog(catalog) {
         if (!catalog || catalog.format !== "statblock-forge/5etools-catalog/v1" ||
             !catalog.monsters || typeof catalog.monsters !== "object" || Array.isArray(catalog.monsters))
@@ -2649,7 +2653,9 @@ var MonsterPresets = (function () {
             }
             Object.keys(result.value).forEach(function (slug) {
                 if (combined[slug]) bundledCatalogErrors.push("Duplicate monster key " + slug + " in " + files[index] + ".");
-                else combined[slug] = result.value[slug];
+                else combined[slug] = Object.assign({}, result.value[slug], {
+                    listLabel: result.value[slug].name + " (" + catalogDisplayName(files[index]) + ")"
+                });
             });
         });
         bundledMonsterCatalog = combined;
@@ -2700,6 +2706,13 @@ var MonsterPresets = (function () {
             var catalog = JSON.parse(await file.text());
             var validated = validateCatalog(catalog);
             var count = Object.keys(validated).length;
+            if (typeof file.name === "string" && file.name.trim()) {
+                Object.keys(validated).forEach(function (slug) {
+                    validated[slug] = Object.assign({}, validated[slug], {
+                        listLabel: validated[slug].name + " (" + catalogDisplayName(file.name) + ")"
+                    });
+                });
+            }
             await saveImportedCatalog(validated);
             importedMonsterCatalog = validated;
             importedCatalogLoad = Promise.resolve(validated);

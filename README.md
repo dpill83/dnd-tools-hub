@@ -43,7 +43,7 @@ The file includes both Forge-ready presets and the original 5etools monster reco
 
 ### Shared monster catalogs
 
-Statblock Forge also loads the shared catalogs listed in [monster-catalogs/index.json](tools/tetra-dnd/js/JSON/monster-catalogs/index.json). The MM'25 catalog is stored in [monster-catalogs/MM25.json](tools/tetra-dnd/js/JSON/monster-catalogs/MM25.json), so anyone opening the same hosted copy of Forge can select those monsters without importing the file. The original [custom-monsters.json](tools/tetra-dnd/js/JSON/custom-monsters.json) still loads alongside these catalogs. Browser-imported presets and browser-created custom presets remain available as well.
+Statblock Forge also loads the shared catalogs listed in [monster-catalogs/index.json](tools/tetra-dnd/js/JSON/monster-catalogs/index.json). The MM'25 catalog is stored in [monster-catalogs/MM25.json](tools/tetra-dnd/js/JSON/monster-catalogs/MM25.json), so anyone opening the same hosted copy of Forge can select those monsters without importing the file. Preset search labels show the catalog filename without `.json`, such as `Sahuagin Baron (MM25)`; the stat block name remains `Sahuagin Baron`. The original [custom-monsters.json](tools/tetra-dnd/js/JSON/custom-monsters.json) still loads alongside these catalogs. Browser-imported presets and browser-created custom presets remain available as well.
 
 To add another shared catalog, put a Statblock Forge catalog JSON file in `tools/tetra-dnd/js/JSON/monster-catalogs/` and add its filename to the `files` array in `index.json`. A static website cannot discover folder contents on its own, so the index is what tells Forge which files to load. The shared catalog files are served to every visitor who can access the hosted site.
 

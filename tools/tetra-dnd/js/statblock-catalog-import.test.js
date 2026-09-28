@@ -68,10 +68,11 @@ const catalog = {
 };
 
 (async () => {
-    await context.MonsterPresets.importCatalogFile({text: async () => JSON.stringify(catalog)});
+    await context.MonsterPresets.importCatalogFile({name: "MM25.json", text: async () => JSON.stringify(catalog)});
     assert.equal(alerts.length, 1);
     assert.match(alerts[0], /Imported 1 monsters/);
     assert.equal(context.MonsterPresets.getCustomPreset("xmm-aarakocra-aeromancer").name, monster.name);
+    assert.equal(context.MonsterPresets.getCustomPreset("xmm-aarakocra-aeromancer").listLabel, "Aarakocra Aeromancer (MM25)");
     assert.equal(saved.get("5etools")["xmm-aarakocra-aeromancer"].name, monster.name);
 
     await context.MonsterPresets.importCatalogFile({text: async () => JSON.stringify({...catalog, count: 2})});
@@ -94,5 +95,7 @@ const catalog = {
     assert.ok(reopened.MonsterPresets.getCustomPreset("xmm-aarakocra-aeromancer").actions.length > 0);
     const cachedList = JSON.parse(storage.get("open5e-monster-list-2024")).list;
     assert.ok(cachedList.some(item => item.slug === "xmm-animated-broom"));
-    console.log("Statblock Forge catalog import: 9 checks passed");
+    assert.equal(cachedList.find(item => item.slug === "xmm-sahuagin-baron").name, "Sahuagin Baron (MM25)");
+    assert.equal(reopened.MonsterPresets.getCustomPreset("xmm-sahuagin-baron").name, "Sahuagin Baron");
+    console.log("Statblock Forge catalog import: 12 checks passed");
 })().catch(error => { console.error(error); process.exitCode = 1; });
