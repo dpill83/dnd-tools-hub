@@ -141,7 +141,14 @@ var separationPointManual = false;
 // Update the main stat block from form variables
 function UpdateBlockFromVariables(moveSeparationPoint) {
     let prevColumns = mon.doubleColumns;
+    let previousScores = [mon.strPoints, mon.dexPoints, mon.conPoints, mon.intPoints, mon.wisPoints, mon.chaPoints, mon.customProf];
     GetVariablesFunctions.GetAllVariables();
+    let currentScores = [mon.strPoints, mon.dexPoints, mon.conPoints, mon.intPoints, mon.wisPoints, mon.chaPoints, mon.customProf];
+    if (previousScores.some((value, index) => value !== currentScores[index])) {
+        mon.sourceSaveBonuses = {};
+        mon.sourceSkillBonuses = {};
+        mon.sourcePassivePerception = null;
+    }
 
     if (moveSeparationPoint !== undefined && moveSeparationPoint !== 0)
         separationPointManual = true;
@@ -2206,7 +2213,7 @@ var StringFunctions = {
             pp = 10 + MathFunctions.PointsToBonus(mon.wisPoints);
         if (ppData != null)
             pp += CrFunctions.GetProf() * (ppData.hasOwnProperty("note") ? 2 : 1);
-        sensesDisplayArr.push("passive Perception " + pp);
+        sensesDisplayArr.push("passive Perception " + (mon.sourcePassivePerception != null ? mon.sourcePassivePerception : pp));
         return sensesDisplayArr.join(", ");
     },
 
@@ -2222,15 +2229,21 @@ var StringFunctions = {
             immuneDisplayString = "";
 
         // Saving Throws
-        for (let index = 0; index < mon.sthrows.length; index++)
-            sthrowsDisplayArr.push(StringFunctions.StringCapitalize(mon.sthrows[index].name) + " " +
-                StringFunctions.BonusFormat((MathFunctions.PointsToBonus(mon[mon.sthrows[index].name + "Points"]) + CrFunctions.GetProf())));
+        for (let index = 0; index < mon.sthrows.length; index++) {
+            let name = mon.sthrows[index].name;
+            let imported = mon.sourceSaveBonuses && mon.sourceSaveBonuses[name];
+            sthrowsDisplayArr.push(StringFunctions.StringCapitalize(name) + " " +
+                StringFunctions.BonusFormat(imported != null ? imported :
+                    MathFunctions.PointsToBonus(mon[name + "Points"]) + CrFunctions.GetProf()));
+        }
 
         // Skills
         for (let index = 0; index < mon.skills.length; index++) {
             let skillData = mon.skills[index];
+            let imported = mon.sourceSkillBonuses && mon.sourceSkillBonuses[skillData.name];
             skillsDisplayArr.push(StringFunctions.StringCapitalize(skillData.name) + " " +
-                StringFunctions.BonusFormat(MathFunctions.PointsToBonus(mon[skillData.stat + "Points"]) + CrFunctions.GetProf() * (skillData.hasOwnProperty("note") ? 2 : 1)));
+                StringFunctions.BonusFormat(imported != null ? imported :
+                    MathFunctions.PointsToBonus(mon[skillData.stat + "Points"]) + CrFunctions.GetProf() * (skillData.hasOwnProperty("note") ? 2 : 1)));
         }
 
         // Damage Types (It's not pretty but it does its job)
@@ -2505,6 +2518,10 @@ var MonsterPresets = (function () {
 
     var customMonsterCatalog = {};
     var customMonsterCatalogLoaded = false;
+    var bundledMonsterCatalog = {};
+    var bundledCatalogErrors = [];
+    var importedMonsterCatalog = {};
+    var importedCatalogLoad = null;
     var slugToSourceMap = {};
 
     function getEdition() {
@@ -2579,7 +2596,118 @@ var MonsterPresets = (function () {
     }
 
     function getCustomMonsters() {
-        return Object.assign({}, customMonsterCatalog, getCustomFromStorage());
+        return Object.assign(Object.create(null), customMonsterCatalog, importedMonsterCatalog,
+            bundledMonsterCatalog, getCustomFromStorage());
+    }
+
+    function validateCatalog(catalog) {
+        if (!catalog || catalog.format !== "statblock-forge/5etools-catalog/v1" ||
+            !catalog.monsters || typeof catalog.monsters !== "object" || Array.isArray(catalog.monsters))
+            throw new Error("Expected a Statblock Forge catalog exported by the 5etools userscript.");
+        var entries = Object.entries(catalog.monsters);
+        if (!entries.length || (catalog.count != null && catalog.count !== entries.length))
+            throw new Error("Catalog count does not match its monster records.");
+        var validated = Object.create(null);
+        entries.forEach(function (pair) {
+            var slug = pair[0], monster = pair[1];
+            if (!/^[a-z0-9-]+$/.test(slug) || !monster || typeof monster.name !== "string" ||
+                !Array.isArray(monster.actions) || !Array.isArray(monster.abilities) ||
+                !monster.hpText || !monster.otherArmorDesc)
+                throw new Error("Invalid monster preset: " + slug);
+            validated[slug] = monster;
+        });
+        return validated;
+    }
+
+    async function loadBundledCatalogs() {
+        bundledCatalogErrors = [];
+        var index;
+        try {
+            index = await $.getJSON("js/JSON/monster-catalogs/index.json");
+            if (!index || !Array.isArray(index.files)) throw new Error("The catalog index needs a files array.");
+        } catch (error) {
+            bundledCatalogErrors.push("Cannot read shared monster catalog index.");
+            console.warn("Statblock Forge catalog index:", error);
+            return;
+        }
+        var files = index.files;
+        if (files.some(function (file) {
+            return typeof file !== "string" || !/^[a-z0-9][a-z0-9._-]*\.json$/i.test(file) || file.toLowerCase() === "index.json";
+        }) || new Set(files.map(function (file) { return file.toLowerCase(); })).size !== files.length) {
+            bundledCatalogErrors.push("Shared monster catalog index has invalid or duplicate filenames.");
+            return;
+        }
+        var results = await Promise.allSettled(files.map(function (file) {
+            return $.getJSON("js/JSON/monster-catalogs/" + encodeURIComponent(file)).then(validateCatalog);
+        }));
+        var combined = Object.create(null);
+        results.forEach(function (result, index) {
+            if (result.status === "rejected") {
+                bundledCatalogErrors.push("Could not load " + files[index] + ".");
+                console.warn("Statblock Forge catalog " + files[index] + ":", result.reason);
+                return;
+            }
+            Object.keys(result.value).forEach(function (slug) {
+                if (combined[slug]) bundledCatalogErrors.push("Duplicate monster key " + slug + " in " + files[index] + ".");
+                else combined[slug] = result.value[slug];
+            });
+        });
+        bundledMonsterCatalog = combined;
+    }
+
+    function openCatalogDb() {
+        return new Promise(function (resolve, reject) {
+            var request = indexedDB.open("statblock-forge-catalogs", 1);
+            request.onupgradeneeded = function () { request.result.createObjectStore("catalogs"); };
+            request.onsuccess = function () { resolve(request.result); };
+            request.onerror = function () { reject(request.error || new Error("Could not open catalog storage.")); };
+        });
+    }
+
+    function readImportedCatalog() {
+        if (importedCatalogLoad) return importedCatalogLoad;
+        importedCatalogLoad = openCatalogDb().then(function (db) {
+            return new Promise(function (resolve, reject) {
+                var request = db.transaction("catalogs", "readonly").objectStore("catalogs").get("5etools");
+                request.onsuccess = function () { resolve(request.result || {}); };
+                request.onerror = function () { reject(request.error); };
+            }).finally(function () { db.close(); });
+        }).then(function (stored) {
+            importedMonsterCatalog = stored;
+            return stored;
+        }).catch(function (error) {
+            console.warn("Could not read imported monster catalog:", error);
+            return {};
+        });
+        return importedCatalogLoad;
+    }
+
+    function saveImportedCatalog(monsters) {
+        return openCatalogDb().then(function (db) {
+            return new Promise(function (resolve, reject) {
+                var tx = db.transaction("catalogs", "readwrite");
+                tx.objectStore("catalogs").put(monsters, "5etools");
+                tx.oncomplete = resolve;
+                tx.onerror = function () { reject(tx.error || new Error("Could not save catalog.")); };
+                tx.onabort = function () { reject(tx.error || new Error("Catalog save was aborted.")); };
+            }).finally(function () { db.close(); });
+        });
+    }
+
+    async function importCatalogFile(file) {
+        if (!file) return;
+        try {
+            var catalog = JSON.parse(await file.text());
+            var validated = validateCatalog(catalog);
+            var count = Object.keys(validated).length;
+            await saveImportedCatalog(validated);
+            importedMonsterCatalog = validated;
+            importedCatalogLoad = Promise.resolve(validated);
+            refreshList();
+            window.alert("Imported " + count + " monsters. Search the Preset list to load one.");
+        } catch (error) {
+            window.alert("Catalog import failed: " + (error.message || String(error)));
+        }
     }
 
     function getCustomList() {
@@ -2710,6 +2838,7 @@ var MonsterPresets = (function () {
 
     // Load custom catalog once, then merge Open5e + custom list with section headers.
     async function fetchMonsterList() {
+        await readImportedCatalog();
         if (!customMonsterCatalogLoaded) {
             try {
                 var customJson = await $.getJSON("js/JSON/custom-monsters.json");
@@ -2719,11 +2848,12 @@ var MonsterPresets = (function () {
                 customMonsterCatalog = {};
                 customMonsterCatalogLoaded = true;
             }
+            await loadBundledCatalogs();
         }
         var edition = getEdition();
-        var pair = await Promise.all([fetchAllOpen5ePages(srdListUrl(edition)), fetchAllOpen5ePages(TOB_URL)]);
-        var srdResults = pair[0] || [];
-        var tobResults = pair[1] || [];
+        var pair = await Promise.allSettled([fetchAllOpen5ePages(srdListUrl(edition)), fetchAllOpen5ePages(TOB_URL)]);
+        var srdResults = pair[0].status === "fulfilled" ? pair[0].value : [];
+        var tobResults = pair[1].status === "fulfilled" ? pair[1].value : [];
         var list = [];
         list.push({ slug: "", name: srdSectionLabel(edition), source: "srd" });
         srdResults.forEach(function (m) {
@@ -2840,18 +2970,20 @@ var MonsterPresets = (function () {
             populateDatalistFromList(list);
             setCachedList(list);
             setLoading(false);
+            if (bundledCatalogErrors.length) setError(bundledCatalogErrors.join(" "));
         }
         function onError() {
             if (cached && cached.list.length) {
                 populateDatalistFromList(cached.list);
+                setLoading(false);
                 setError("Using cached list.");
             } else {
                 populateDatalistFromList(MONSTER_LIST_FALLBACK);
+                setLoading(false);
                 setError("Offline: showing limited list.");
             }
-            setLoading(false);
         }
-        fetchMonsterList().then(onFetched).catch(onError);
+        return fetchMonsterList().then(onFetched).catch(onError);
     }
 
     function bindMonsterInput() {
@@ -3043,6 +3175,7 @@ var MonsterPresets = (function () {
         getCustomPreset: getCustomPreset,
         getCustomMonsters: getCustomMonsters,
         getCustomFromStorage: getCustomFromStorage,
+        importCatalogFile: importCatalogFile,
         slugFromName: slugFromName,
         addCustomPreset: addCustomPreset,
         removeCustomPreset: removeCustomPreset,

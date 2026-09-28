@@ -34,9 +34,11 @@
             <br>
             <div class="toolbar">
                 <input id="file-upload" type="file" hidden accept=".monster,.json,application/json" onchange="TryLoadFile();" aria-hidden="true" />
+                <input id="catalog-upload" type="file" hidden accept=".json,application/json" onchange="MonsterPresets.importCatalogFile(this.files[0]); this.value='';" aria-hidden="true" />
                 <div class="toolbar-row toolbar-actions">
                     <button type="button" class="toolbar-btn-icon" onclick="TrySaveFile()" title="Save current statblock" aria-label="Save"><i class="bi bi-floppy"></i></button>
                     <button type="button" class="toolbar-btn-icon" onclick="document.getElementById('file-upload').click()" title="Load saved statblock" aria-label="Load"><i class="bi bi-upload"></i></button>
+                    <button type="button" class="toolbar-btn-icon" onclick="document.getElementById('catalog-upload').click()" title="Import a filtered 5etools Bestiary catalog" aria-label="Import monster catalog"><i class="bi bi-collection"></i></button>
                     <button type="button" class="toolbar-btn-icon" onclick="OpenPasteJsonModal()" title="Paste JSON to load" aria-label="Paste JSON"><i class="bi bi-clipboard"></i></button>
                     <button type="button" class="toolbar-btn-icon" onclick="TryPrint()" title="Print" aria-label="Print"><i class="bi bi-printer"></i></button>
                     <button type="button" class="toolbar-btn-icon" onclick="TryImage()" title="Export as PNG" aria-label="PNG"><i class="bi bi-image"></i></button>

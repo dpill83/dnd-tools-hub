@@ -33,6 +33,20 @@ A web-based D&D 5e toolkit for Dungeon Masters and players. The central hub ([in
 
 The hub includes a local copy of four D&D 5e tools from [Tetra-cube/Tetra-cube.github.io](https://github.com/Tetra-cube/Tetra-cube.github.io) in [tools/tetra-dnd/](tools/tetra-dnd/): **PC Options Reference** ([dnd-reference.html](tools/tetra-dnd/dnd-reference.html)), **Random Character Generator** ([dnd-char-gen.html](tools/tetra-dnd/dnd-char-gen.html)), **Magic Item Generator** ([dnd-magic-items.html](tools/tetra-dnd/dnd-magic-items.html)), and **Statblock Forge** ([dnd-statblock.html](tools/tetra-dnd/dnd-statblock.html)). They run locally; to update from upstream, replace the contents of `tools/tetra-dnd/` with a fresh copy of the `dnd` folder from the Tetra-cube repo.
 
+### Import the current 5etools Bestiary filter into Statblock Forge
+
+1. Install [the Violentmonkey userscript](tools/tetra-dnd/5etools-to-statblock-forge.user.js) in Violentmonkey.
+2. Open `https://5e.tools/bestiary.html`, set the desired filters and search, and wait for the monster list to finish loading. Click **Export to Statblock Forge** beside the filter/search controls. The script exports all current search results, not only the rows in the viewport. When all results are from Monster Manual (2025), the file is named `MM25.json`.
+3. Open [Statblock Forge](tools/tetra-dnd/dnd-statblock.html), click **Import monster catalog** (the collection icon in its toolbar), and choose the downloaded JSON file. Imported monsters appear in the **Preset** search and persist in that browser. Importing a new catalog replaces the previous imported 5etools catalog; browser-created custom presets remain separate.
+
+The file includes both Forge-ready presets and the original 5etools monster records so unusual source details remain available for review. Forge's display format does not cover every Bestiary field; compare a converted stat block with its original before using it in play.
+
+### Shared monster catalogs
+
+Statblock Forge also loads the shared catalogs listed in [monster-catalogs/index.json](tools/tetra-dnd/js/JSON/monster-catalogs/index.json). The MM'25 catalog is stored in [monster-catalogs/MM25.json](tools/tetra-dnd/js/JSON/monster-catalogs/MM25.json), so anyone opening the same hosted copy of Forge can select those monsters without importing the file. The original [custom-monsters.json](tools/tetra-dnd/js/JSON/custom-monsters.json) still loads alongside these catalogs. Browser-imported presets and browser-created custom presets remain available as well.
+
+To add another shared catalog, put a Statblock Forge catalog JSON file in `tools/tetra-dnd/js/JSON/monster-catalogs/` and add its filename to the `files` array in `index.json`. A static website cannot discover folder contents on its own, so the index is what tells Forge which files to load. The shared catalog files are served to every visitor who can access the hosted site.
+
 ---
 
 ## Tools (per page)
