@@ -207,6 +207,7 @@ var HpTracker = {
             name: this.nextDisplayName(this.getMonsterName(record)),
             current: hp,
             max: hp,
+            temp: 0,
             at: Date.now(),
             history: []
         };
@@ -283,6 +284,7 @@ var HpTracker = {
                             name: String(e.name || "Creature"),
                             current: Math.max(0, parseInt(e.current, 10) || 0),
                             max: Math.max(1, parseInt(e.max, 10) || 1),
+                            temp: Math.max(0, parseInt(e.temp, 10) || 0),
                             at: e.at || Date.now(),
                             history: self.normalizeHistory(e.history)
                         };
@@ -392,6 +394,13 @@ var HpTracker = {
         history.innerHTML = "<i class=\"bi bi-clock-history\" aria-hidden=\"true\"></i>";
 
         hp.appendChild(values);
+        if ((entry.temp || 0) > 0) {
+            var temp = document.createElement("span");
+            temp.className = "hp-tracker-temp";
+            temp.textContent = "+" + entry.temp + " temp";
+            temp.title = "Temporary hit points";
+            hp.appendChild(temp);
+        }
         hp.appendChild(history);
 
         var actions = document.createElement("div");
@@ -415,6 +424,15 @@ var HpTracker = {
         dmg.title = "Damage";
         dmg.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M7.25.75h1.5l.75.75v7.5H12v1.5H4v-1.5h2.5V1.5L7.25.75zm-.5 10.5h2.5v1.25L8.5 15h-1l-.75-2.5V11.25z\"/></svg>";
 
+        var tempBtn = document.createElement("button");
+        tempBtn.type = "button";
+        tempBtn.className = "hp-tracker-btn";
+        tempBtn.setAttribute("data-action", "temp");
+        tempBtn.setAttribute("data-id", entry.id);
+        tempBtn.setAttribute("aria-label", "Temporary HP");
+        tempBtn.title = "Temporary HP";
+        tempBtn.innerHTML = "<i class=\"bi bi-shield-plus\" aria-hidden=\"true\"></i>";
+
         var remove = document.createElement("button");
         remove.type = "button";
         remove.className = "hp-tracker-btn hp-tracker-btn-remove";
@@ -426,6 +444,7 @@ var HpTracker = {
 
         actions.appendChild(heal);
         actions.appendChild(dmg);
+        actions.appendChild(tempBtn);
         actions.appendChild(remove);
 
         article.appendChild(name);
@@ -449,7 +468,7 @@ var HpTracker = {
             this.setState("expanded");
         } else if (action === "clear") {
             this.clearAll();
-        } else if (action === "damage" || action === "heal") {
+        } else if (action === "damage" || action === "heal" || action === "temp") {
             this.openAdjust(id, action);
         } else if (action === "history") {
             this.openHistory(id);
@@ -535,13 +554,14 @@ var HpTracker = {
         if (!entry || !this.modal) return;
 
         this.adjustId = id;
-        this.adjustMode = mode === "heal" ? "heal" : "damage";
+        this.adjustMode = mode === "heal" ? "heal" : (mode === "temp" ? "temp" : "damage");
 
         if (this.modalTitle) {
-            this.modalTitle.textContent = this.adjustMode === "heal" ? "Heal" : "Damage";
+            this.modalTitle.textContent = this.adjustMode === "heal" ? "Heal" : (this.adjustMode === "temp" ? "Temp HP" : "Damage");
         }
         if (this.modalAmount) {
-            this.modalAmount.value = "1";
+            this.modalAmount.min = this.adjustMode === "temp" ? "0" : "1";
+            this.modalAmount.value = this.adjustMode === "temp" ? String(entry.temp || 0) : "1";
         }
 
         if (typeof $ !== "undefined") {
@@ -561,25 +581,30 @@ var HpTracker = {
         if (!entry) return;
 
         var amount = parseInt(this.modalAmount && this.modalAmount.value, 10);
-        if (isNaN(amount) || amount < 1) return;
+        if (isNaN(amount) || amount < 0) return;
+        if (this.adjustMode !== "temp" && amount < 1) return;
 
-        var from = entry.current;
-        var maxFrom = entry.max;
-        if (this.adjustMode === "heal") {
-            entry.current = this.clamp(entry.current + amount, 0, entry.max);
+        if (this.adjustMode === "temp") {
+            entry.temp = amount;
         } else {
-            entry.current = this.clamp(entry.current - amount, 0, entry.max);
-        }
+            var from = entry.current;
+            var maxFrom = entry.max;
+            if (this.adjustMode === "heal") {
+                entry.current = this.clamp(entry.current + amount, 0, entry.max);
+            } else {
+                entry.current = this.clamp(entry.current - amount, 0, entry.max);
+            }
 
-        if (entry.current !== from) {
-            this.pushHistory(entry, {
-                kind: this.adjustMode === "heal" ? "heal" : "damage",
-                amount: amount,
-                from: from,
-                to: entry.current,
-                maxFrom: maxFrom,
-                maxTo: entry.max
-            });
+            if (entry.current !== from) {
+                this.pushHistory(entry, {
+                    kind: this.adjustMode === "heal" ? "heal" : "damage",
+                    amount: amount,
+                    from: from,
+                    to: entry.current,
+                    maxFrom: maxFrom,
+                    maxTo: entry.max
+                });
+            }
         }
 
         this.persistEntries();

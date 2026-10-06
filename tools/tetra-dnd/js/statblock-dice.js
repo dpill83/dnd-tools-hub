@@ -92,6 +92,9 @@ var DiceRoller = {
                 btn.getAttribute("data-mod")
             );
         }
+        if (rollType === "recharge") {
+            return this.formatExpression(1, 6, 0);
+        }
         return null;
     },
 
@@ -238,6 +241,8 @@ var DiceRoller = {
     formatNote: function (note) {
         if (note === "crit") return "Natural 20";
         if (note === "fumble") return "Natural 1";
+        if (note === "recharged") return "Recharged";
+        if (note === "no-recharge") return "No recharge";
         return "";
     },
 
@@ -257,6 +262,26 @@ var DiceRoller = {
         if (mod > 0) return " + " + mod;
         if (mod < 0) return " \u2212 " + (-mod);
         return "";
+    },
+
+    formatBreakdown: function (record) {
+        if (record.groups && record.groups.length) {
+            var self = this;
+            var parts = record.groups.map(function (g) {
+                var line = g.expression + " \u2192 [" + g.dice.join(", ") + "]" +
+                    self.formatMod(g.modifier) + " = " + g.total;
+                if (g.type) line += " " + g.type;
+                return line;
+            });
+            parts.push("total " + record.total);
+            return parts.join(" \u00b7 ");
+        }
+        var noteText = this.formatNote(record.note);
+        var dice = Array.isArray(record.dice) ? record.dice : [];
+        var parts = record.expression + " \u2192 [" + dice.join(", ") + "]" +
+            this.formatMod(record.modifier) + " = " + record.total;
+        if (noteText) parts += " \u00b7 " + noteText;
+        return parts;
     },
 
     announce: function (record) {
@@ -356,8 +381,8 @@ var DiceRoller = {
 
         var total = document.createElement("div");
         total.className = "dice-log-total";
-        if (record.note === "crit") total.className += " dice-log-total--crit";
-        if (record.note === "fumble") total.className += " dice-log-total--fumble";
+        if (record.note === "crit" || record.note === "recharged") total.className += " dice-log-total--crit";
+        if (record.note === "fumble" || record.note === "no-recharge") total.className += " dice-log-total--fumble";
         total.textContent = String(record.total);
 
         var actions = document.createElement("div");
@@ -381,11 +406,7 @@ var DiceRoller = {
         if (expanded) {
             var breakdown = document.createElement("div");
             breakdown.className = "dice-log-breakdown";
-            var noteText = this.formatNote(record.note);
-            var parts = record.expression + " \u2192 [" + record.dice.join(", ") + "]" +
-                this.formatMod(record.modifier) + " = " + record.total;
-            if (noteText) parts += " \u00b7 " + noteText;
-            breakdown.textContent = parts;
+            breakdown.textContent = this.formatBreakdown(record);
             article.appendChild(breakdown);
         }
 
@@ -403,11 +424,25 @@ var DiceRoller = {
         if (!btn) return;
         e.preventDefault();
 
+        if (btn.getAttribute("data-roll") === "total") {
+            this.rollDamageTotal(btn);
+            return;
+        }
+
         var expression = this.expressionFromButton(btn);
         if (!expression) return;
 
         var result = this.evaluate(expression);
         if (!result) return;
+
+        if (btn.getAttribute("data-roll") === "recharge") {
+            var min = parseInt(btn.getAttribute("data-min"), 10);
+            var max = parseInt(btn.getAttribute("data-max"), 10);
+            if (isNaN(min)) min = 5;
+            if (isNaN(max)) max = 6;
+            var face = result.dice[0];
+            result.note = (face >= min && face <= max) ? "recharged" : "no-recharge";
+        }
 
         var record = {
             id: this.makeId(),
@@ -424,6 +459,42 @@ var DiceRoller = {
             record.monsterName = this.getMonsterFullName();
         }
         this.push(record);
+    },
+
+    rollDamageTotal: function (btn) {
+        var exprs = (btn.getAttribute("data-exprs") || "").split("|").filter(Boolean);
+        var types = (btn.getAttribute("data-types") || "").split("|");
+        if (exprs.length < 2) return;
+
+        var groups = [];
+        var total = 0;
+        var allDice = [];
+        for (var i = 0; i < exprs.length; i++) {
+            var result = this.evaluate(exprs[i]);
+            if (!result) return;
+            groups.push({
+                expression: exprs[i],
+                dice: result.dice,
+                modifier: result.modifier,
+                total: result.total,
+                type: types[i] || ""
+            });
+            total += result.total;
+            allDice = allDice.concat(result.dice);
+        }
+
+        this.push({
+            id: this.makeId(),
+            label: this.buildLabel(btn),
+            expression: exprs.join(" + "),
+            dice: allDice,
+            modifier: 0,
+            total: total,
+            note: "",
+            groups: groups,
+            kind: "total",
+            at: Date.now()
+        });
     },
 
     handleLogClick: function (e) {
@@ -667,6 +738,136 @@ var DiceRoller = {
         this.decorateBareDiceExpressions(root, label);
     },
 
+    decorateRecharge: function (root) {
+        var headings = root.querySelectorAll(".property-block h4");
+        for (var i = 0; i < headings.length; i++) {
+            var nodes = this.collectTextNodes(headings[i]);
+            for (var n = 0; n < nodes.length; n++) {
+                var node = nodes[n];
+                if (this.isInsideDiceRoll(node)) continue;
+                this.wrapRegexMatches(node, /Recharge\s+(\d+)(?:\s*[-–—]\s*(\d+))?/gi, function (match, parts) {
+                    var min = parseInt(match[1], 10);
+                    var max = match[2] ? parseInt(match[2], 10) : min;
+                    if (isNaN(min) || isNaN(max) || min < 1 || max > 6 || min > max) return false;
+                    var range = min === max ? String(min) : (min + "\u2013" + max);
+                    parts.push({
+                        type: "button",
+                        text: match[0],
+                        attrs: {
+                            "data-roll": "recharge",
+                            "data-min": String(min),
+                            "data-max": String(max),
+                            "data-label": "Recharge",
+                            "title": "Roll 1d6, recharge on " + range
+                        }
+                    });
+                    return true;
+                });
+            }
+        }
+    },
+
+    textBetweenButtons: function (a, b) {
+        var parts = [];
+        var node = a.nextSibling;
+        while (node && node !== b) {
+            if (node.nodeType === Node.TEXT_NODE) parts.push(node.nodeValue);
+            else if (node.nodeType === Node.ELEMENT_NODE && !node.contains(b)) parts.push(node.textContent);
+            node = node.nextSibling;
+        }
+        return parts.join("");
+    },
+
+    canJoinPlusDamage: function (between) {
+        if (!between) return false;
+        if (/\./.test(between)) return false;
+        if (/\bor\b/i.test(between)) return false;
+        return /\bplus\b/i.test(between);
+    },
+
+    damageTypeAfter: function (btn) {
+        var text = "";
+        var node = btn.nextSibling;
+        while (node && node.nodeType === Node.TEXT_NODE) {
+            text += node.nodeValue;
+            if (text.length > 48) break;
+            node = node.nextSibling;
+        }
+        var match = text.match(/^\)\s*([a-z]+)/i);
+        return match ? match[1].toLowerCase() : "";
+    },
+
+    insertTotalAfterChain: function (chain) {
+        if (!chain || chain.length < 2) return;
+        var last = chain[chain.length - 1];
+        var parent = last.parentNode;
+        if (!parent) return;
+
+        var sibling = last.nextSibling;
+        while (sibling) {
+            if (sibling.nodeType === Node.ELEMENT_NODE && sibling.classList &&
+                sibling.classList.contains("dice-roll") && sibling.getAttribute("data-roll") === "total") {
+                return;
+            }
+            sibling = sibling.nextSibling;
+        }
+
+        var exprs = [];
+        var types = [];
+        for (var i = 0; i < chain.length; i++) {
+            exprs.push(this.formatExpression(
+                chain[i].getAttribute("data-count"),
+                chain[i].getAttribute("data-sides"),
+                chain[i].getAttribute("data-mod")
+            ));
+            types.push(this.damageTypeAfter(chain[i]));
+        }
+
+        var totalBtn = this.createDiceButton("total", {
+            "data-roll": "total",
+            "data-exprs": exprs.join("|"),
+            "data-types": types.join("|"),
+            "data-label": "Damage",
+            "title": "Roll " + exprs.join(" + ")
+        });
+
+        var node = last.nextSibling;
+        while (node) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                var idx = node.nodeValue.search(/[.!?]/);
+                if (idx >= 0) {
+                    var after = node.splitText(idx + 1);
+                    parent.insertBefore(document.createTextNode(" "), after);
+                    parent.insertBefore(totalBtn, after);
+                    return;
+                }
+            }
+            node = node.nextSibling;
+        }
+        parent.appendChild(document.createTextNode(" "));
+        parent.appendChild(totalBtn);
+    },
+
+    decorateDamageTotals: function (root) {
+        var blocks = root.querySelectorAll(".property-block");
+        for (var i = 0; i < blocks.length; i++) {
+            var buttons = blocks[i].querySelectorAll(".dice-roll[data-roll=\"dice\"]");
+            if (buttons.length < 2) continue;
+
+            var chain = [buttons[0]];
+            for (var j = 1; j < buttons.length; j++) {
+                var between = this.textBetweenButtons(chain[chain.length - 1], buttons[j]);
+                if (this.canJoinPlusDamage(between)) {
+                    chain.push(buttons[j]);
+                } else {
+                    this.insertTotalAfterChain(chain);
+                    chain = [buttons[j]];
+                }
+            }
+            this.insertTotalAfterChain(chain);
+        }
+    },
+
     decorateAbilityModifiers: function (root) {
         var scoreNodes = root.querySelectorAll(".scores p");
         scoreNodes.forEach(function (scoreEl) {
@@ -722,6 +923,8 @@ var DiceRoller = {
         this.decorateDiceExpressions(root);
         this.decorateAbilityModifiers(root);
         this.labelHpDice(root);
+        this.decorateRecharge(root);
+        this.decorateDamageTotals(root);
     }
 };
 

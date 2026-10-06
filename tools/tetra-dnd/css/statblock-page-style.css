@@ -728,7 +728,7 @@
 
 /* HP tracker: sit just left of the centered 800px wide card when space allows */
 .hp-tracker {
-    --hp-tracker-width: 13.5rem;
+    --hp-tracker-width: 15rem;
     position: fixed;
     z-index: 1030;
     bottom: 1rem;
@@ -869,12 +869,20 @@
 }
 
 .hp-tracker-hp-values {
-    flex: 1;
     min-width: 0;
+}
+
+.hp-tracker-temp {
+    flex-shrink: 0;
+    color: #1d4e89;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 .hp-tracker-history {
     flex-shrink: 0;
+    margin-left: auto;
 }
 
 .hp-tracker-max {
